@@ -11355,7 +11355,7 @@ function AimbotRefresh() {
       if (äã === âÃ) {
         åâA = áÅ.ÄÁã(650, 312, "img/logo-homepage-mobile2.png");
       } else {
-        åâA = áÅ.ÄÁã(650, 312, "https://github.com/sjajsajsjams1l2/numero/blob/main/logo-homepage4%208.png?raw=true");
+        åâA = áÅ.ÄÁã(650, 312, "https://github.com/sjajsajsjams1l2/devast-open-dist/blob/main/logo-homepage4%208.png?raw=true");
       }
       if (äã === âá) {
         ÀÅå = áÅ.åá(0, ãÁ);
