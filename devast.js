@@ -1,6 +1,6 @@
-function SendWSmsg(j) {
+function SendWSmsg(message) {
   if (window.ws != null && window.ws.readyState == WebSocket.OPEN) {
-    window.ws.send(JSON.stringify(j));
+    window.ws.send(JSON.stringify(message));
   }
 }
 class HackCon {
@@ -112,10 +112,10 @@ class GetAllTargetsCon {
   constructor() {
     this.ÂÅ = Array.from({
       length: 121
-    }, (j, k) => new GetTarget(k));
+    }, (_, i) => new GetTarget(i));
     this.ghouls = Array.from({
       length: 999
-    }, (j, k) => new GetTarget(k));
+    }, (_, i) => new GetTarget(i));
     this.obstacles = [];
     this.lines = [new LinesCon(0.6, 1, "#EEEEEE"), new LinesCon(0.8, 3, "#FF0000"), new LinesCon(0.8, 3, "#00FF00"), new LinesCon(0.8, 2, "#0000FF")];
     this.mousePosition = {
@@ -136,19 +136,19 @@ class GetAllTargetsCon {
     this.lastId = 0;
     this.myLastMoveDirection = 0;
   }
-  getPlayerById(j) {
-    return this.ÂÅ[j];
+  getPlayerById(pID) {
+    return this.ÂÅ[pID];
   }
-  getGhoulByUid(j) {
-    return this.ghouls[j];
+  getGhoulByUid(uID) {
+    return this.ghouls[uID];
   }
   resetLines() {
-    this.lines.forEach(j => j.reset());
+    this.lines.forEach(line => line.reset());
   }
 }
 class GetTarget {
-  constructor(j) {
-    this.id = j;
+  constructor(id) {
+    this.id = id;
     this.x = -1;
     this.y = -1;
     this.prevX = Array(3).fill(-1);
@@ -157,12 +157,12 @@ class GetTarget {
     this.weapon = -1;
     this.gear = -1;
   }
-  update(j, k) {
+  update(ux, uy) {
     this.active = true;
     this.prevX = [this.x, ...this.prevX.slice(0, 2)];
     this.prevY = [this.y, ...this.prevY.slice(0, 2)];
-    this.x = j;
-    this.y = k;
+    this.x = ux;
+    this.y = uy;
   }
   setInactive() {
     this.x = -1;
@@ -178,262 +178,262 @@ class AimbotCon {
     this.lastAngle = 0;
     this.targetPlayer = null;
     this.getSmoothingFactor = () => cfg.smoothingFactor;
-    this.setSmoothingFactor = j => {
-      cfg.smoothingFactor = j;
+    this.setSmoothingFactor = factor => {
+      cfg.smoothingFactor = factor;
     };
     this.maxPositions = 10;
     this.previousTargetPositions = [];
   }
-  wannaFire(j = this.targetPlayer) {
-    if (j === null) {
+  wannaFire(watarget = this.targetPlayer) {
+    if (watarget === null) {
       return false;
     }
-    const k = j.x - j.prevX[0] > 0;
-    const l = j.prevX[0] - j.prevX[1] > 0;
-    const m = j.y - j.prevY[0] > 0;
-    const n = j.prevY[0] - j.prevY[1] > 0;
-    return k !== l || m !== n;
+    const isXIncreasing = watarget.x - watarget.prevX[0] > 0;
+    const isXDecreasing = watarget.prevX[0] - watarget.prevX[1] > 0;
+    const isYIncreasing = watarget.y - watarget.prevY[0] > 0;
+    const isYDecreasing = watarget.prevY[0] - watarget.prevY[1] > 0;
+    return isXIncreasing !== isXDecreasing || isYIncreasing !== isYDecreasing;
   }
   resolve() {
     switch (cfg.resolverType) {
       case 1:
-        const j = GetAllTargets.getPlayerById(Aá.â.id);
-        const k = this.findNearestPlayerTo(j, 2500);
-        if (k === null) {
+        const myPlayerResolverType1 = GetAllTargets.getPlayerById(Aá.â.id);
+        const targetResolverType1 = this.findNearestPlayerTo(myPlayerResolverType1, 2500);
+        if (targetResolverType1 === null) {
           return this.lastAngle;
         }
-        let l;
-        let m;
-        if (k.prevX[0] === -1) {
-          l = k.x;
-          m = k.y;
+        let targetXResolverType1;
+        let targetYResolverType1;
+        if (targetResolverType1.prevX[0] === -1) {
+          targetXResolverType1 = targetResolverType1.x;
+          targetYResolverType1 = targetResolverType1.y;
         } else {
-          const I = Math.sqrt((j.x - k.x) ** 2 + (j.y - k.y) ** 2);
-          const J = I / cfg.distanceCoefficient;
-          l = k.x + J * (k.x - k.prevX[0]);
-          m = k.y + J * (k.y - k.prevY[0]);
+          const distance = Math.sqrt((myPlayerResolverType1.x - targetResolverType1.x) ** 2 + (myPlayerResolverType1.y - targetResolverType1.y) ** 2);
+          const coefficient = distance / cfg.distanceCoefficient;
+          targetXResolverType1 = targetResolverType1.x + coefficient * (targetResolverType1.x - targetResolverType1.prevX[0]);
+          targetYResolverType1 = targetResolverType1.y + coefficient * (targetResolverType1.y - targetResolverType1.prevY[0]);
         }
-        const n = Math.atan2(m - j.y, l - j.x) * (180 / Math.PI);
-        this.lastAngle = n;
-        console.log(n);
-        return n;
+        const angleResolverType1 = Math.atan2(targetYResolverType1 - myPlayerResolverType1.y, targetXResolverType1 - myPlayerResolverType1.x) * (180 / Math.PI);
+        this.lastAngle = angleResolverType1;
+        console.log(angleResolverType1);
+        return angleResolverType1;
       case "linear":
-        const o = GetAllTargets.getPlayerById(Aá.â.id);
-        let p;
+        const myPlayerResolverLinear = GetAllTargets.getPlayerById(Aá.â.id);
+        let targetLinear;
         if (cfg.lockId > -1) {
-          p = GetAllTargets.getPlayerById(cfg.lockId);
+          targetLinear = GetAllTargets.getPlayerById(cfg.lockId);
         } else if (cfg.mouseFovEnable) {
-          p = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
+          targetLinear = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
         } else {
-          p = this.findNearestPlayerTo(o, 2500);
+          targetLinear = this.findNearestPlayerTo(myPlayerResolverLinear, 2500);
         }
-        this.targetPlayer = p;
-        if (p === null) {
+        this.targetPlayer = targetLinear;
+        if (targetLinear === null) {
           return this.lastAngle;
         }
-        let q;
-        let r;
-        if (p.prevX[0] === -1) {
-          q = p.x;
-          r = p.y;
+        let targetXResolverLinear;
+        let targetYResolverLinear;
+        if (targetLinear.prevX[0] === -1) {
+          targetXResolverLinear = targetLinear.x;
+          targetYResolverLinear = targetLinear.y;
         } else {
-          const Q = Math.sqrt((o.x - p.x) ** 2 + (o.y - p.y) ** 2);
-          const R = Q / cfg.distanceCoefficient + cfg.offsetCoefficient;
-          q = p.x + R * (p.x - p.prevX[0]);
-          r = p.y + R * (p.y - p.prevY[0]);
+          const distance = Math.sqrt((myPlayerResolverLinear.x - targetLinear.x) ** 2 + (myPlayerResolverLinear.y - targetLinear.y) ** 2);
+          const coefficient = distance / cfg.distanceCoefficient + cfg.offsetCoefficient;
+          targetXResolverLinear = targetLinear.x + coefficient * (targetLinear.x - targetLinear.prevX[0]);
+          targetYResolverLinear = targetLinear.y + coefficient * (targetLinear.y - targetLinear.prevY[0]);
         }
-        const s = Math.atan2(r - o.y, q - o.x) * (180 / Math.PI);
-        this.lastAngle = s;
+        const angleResolverLinear = Math.atan2(targetYResolverLinear - myPlayerResolverLinear.y, targetXResolverLinear - myPlayerResolverLinear.x) * (180 / Math.PI);
+        this.lastAngle = angleResolverLinear;
         if (cfg.visualizeResolving) {
-          GetAllTargets.lines[0].reset(o.x, o.y, q, r);
+          GetAllTargets.lines[0].reset(myPlayerResolverLinear.x, myPlayerResolverLinear.y, targetXResolverLinear, targetYResolverLinear);
         }
-        return s;
+        return angleResolverLinear;
       case "smooth":
-        const t = GetAllTargets.getPlayerById(Aá.â.id);
-        let u;
+        const myPlayerResolverSmooth = GetAllTargets.getPlayerById(Aá.â.id);
+        let targetResolverSmooth;
         if (cfg.lockId > -1) {
-          u = GetAllTargets.getPlayerById(cfg.lockId);
+          targetResolverSmooth = GetAllTargets.getPlayerById(cfg.lockId);
         } else if (cfg.mouseFovEnable) {
-          u = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
+          targetResolverSmooth = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
         } else {
-          u = this.findNearestPlayerTo(t, 2500);
+          targetResolverSmooth = this.findNearestPlayerTo(myPlayerResolverSmooth, 2500);
         }
-        this.targetPlayer = u;
-        if (u === null) {
+        this.targetPlayer = targetResolverSmooth;
+        if (targetResolverSmooth === null) {
           return this.lastAngle;
         }
-        const v = this.smoothAim(t, u);
-        this.lastAngle = v;
+        const angleResolverSmooth = this.smoothAim(myPlayerResolverSmooth, targetResolverSmooth);
+        this.lastAngle = angleResolverSmooth;
         if (cfg.visualizeResolving) {
-          GetAllTargets.lines[0].reset(t.x, t.y, u.x, u.y);
+          GetAllTargets.lines[0].reset(myPlayerResolverSmooth.x, myPlayerResolverSmooth.y, targetResolverSmooth.x, targetResolverSmooth.y);
         }
-        return v;
+        return angleResolverSmooth;
       case "snap":
-        const w = GetAllTargets.getPlayerById(Aá.â.id);
-        let x;
+        const myPlayerResolverSnap = GetAllTargets.getPlayerById(Aá.â.id);
+        let targetResolverSnap;
         if (cfg.lockId > -1) {
-          x = GetAllTargets.getPlayerById(cfg.lockId);
+          targetResolverSnap = GetAllTargets.getPlayerById(cfg.lockId);
         } else if (cfg.mouseFovEnable) {
-          x = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
+          targetResolverSnap = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
         } else {
-          x = this.findNearestPlayerTo(w, 2500);
+          targetResolverSnap = this.findNearestPlayerTo(myPlayerResolverSnap, 2500);
         }
-        this.targetPlayer = x;
-        if (x === null) {
+        this.targetPlayer = targetResolverSnap;
+        if (targetResolverSnap === null) {
           return this.lastAngle;
         }
-        const y = Math.atan2(x.y - w.y, x.x - w.x) * (180 / Math.PI);
-        this.lastAngle = y;
+        const angleResolverSnap = Math.atan2(targetResolverSnap.y - myPlayerResolverSnap.y, targetResolverSnap.x - myPlayerResolverSnap.x) * (180 / Math.PI);
+        this.lastAngle = angleResolverSnap;
         if (cfg.visualizeResolving) {
-          GetAllTargets.lines[0].reset(w.x, w.y, x.x, x.y);
+          GetAllTargets.lines[0].reset(myPlayerResolverSnap.x, myPlayerResolverSnap.y, targetResolverSnap.x, targetResolverSnap.y);
         }
-        return y;
+        return angleResolverSnap;
       case "random":
-        const z = GetAllTargets.getPlayerById(Aá.â.id);
-        let A;
+        const myPlayerResolverRandom = GetAllTargets.getPlayerById(Aá.â.id);
+        let targetResolverRandom;
         if (cfg.lockId > -1) {
-          A = GetAllTargets.getPlayerById(cfg.lockId);
+          targetResolverRandom = GetAllTargets.getPlayerById(cfg.lockId);
         } else if (cfg.mouseFovEnable) {
-          A = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
+          targetResolverRandom = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
         } else {
-          A = this.findNearestPlayerTo(z, 2500);
+          targetResolverRandom = this.findNearestPlayerTo(myPlayerResolverRandom, 2500);
         }
-        this.targetPlayer = A;
-        if (A === null) {
+        this.targetPlayer = targetResolverRandom;
+        if (targetResolverRandom === null) {
           return this.lastAngle;
         }
-        const B = this.randomAim(z, A);
-        this.lastAngle = B;
+        const angleResolverRandom = this.randomAim(myPlayerResolverRandom, targetResolverRandom);
+        this.lastAngle = angleResolverRandom;
         if (cfg.visualizeResolving) {
-          GetAllTargets.lines[0].reset(z.x, z.y, A.x, A.y);
+          GetAllTargets.lines[0].reset(myPlayerResolverRandom.x, myPlayerResolverRandom.y, targetResolverRandom.x, targetResolverRandom.y);
         }
-        return B;
+        return angleResolverRandom;
       case "reactive":
-        const C = GetAllTargets.getPlayerById(Aá.â.id);
-        let D;
+        const myPlayerResolverReactive = GetAllTargets.getPlayerById(Aá.â.id);
+        let targetResolverReactive;
         if (cfg.lockId > -1) {
-          D = GetAllTargets.getPlayerById(cfg.lockId);
+          targetResolverReactive = GetAllTargets.getPlayerById(cfg.lockId);
         } else if (cfg.mouseFovEnable) {
-          D = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
+          targetResolverReactive = this.findNearestPlayerTo(GetAllTargets.mouseMapCords, cfg.mouseFov);
         } else {
-          D = this.findNearestPlayerTo(C, 2500);
+          targetResolverReactive = this.findNearestPlayerTo(myPlayerResolverReactive, 2500);
         }
-        this.targetPlayer = D;
-        if (D === null) {
+        this.targetPlayer = targetResolverReactive;
+        if (targetResolverReactive === null) {
           return this.lastAngle;
         }
-        const E = this.reactiveAim(C, D);
-        this.lastAngle = E;
+        const angleResolverReactive = this.reactiveAim(myPlayerResolverReactive, targetResolverReactive);
+        this.lastAngle = angleResolverReactive;
         if (cfg.visualizeResolving) {
-          const ac = D.x + (this.previousTargetPositions.length > 1 ? (this.previousTargetPositions[this.previousTargetPositions.length - 1].x - this.previousTargetPositions[0].x) / (this.previousTargetPositions.length - 1) * cfg.reactionFactor : 0);
-          const ad = D.y + (this.previousTargetPositions.length > 1 ? (this.previousTargetPositions[this.previousTargetPositions.length - 1].y - this.previousTargetPositions[0].y) / (this.previousTargetPositions.length - 1) * cfg.reactionFactor : 0);
-          GetAllTargets.lines[0].reset(C.x, C.y, ac, ad);
+          const predictedX = targetResolverReactive.x + (this.previousTargetPositions.length > 1 ? (this.previousTargetPositions[this.previousTargetPositions.length - 1].x - this.previousTargetPositions[0].x) / (this.previousTargetPositions.length - 1) * cfg.reactionFactor : 0);
+          const predictedY = targetResolverReactive.y + (this.previousTargetPositions.length > 1 ? (this.previousTargetPositions[this.previousTargetPositions.length - 1].y - this.previousTargetPositions[0].y) / (this.previousTargetPositions.length - 1) * cfg.reactionFactor : 0);
+          GetAllTargets.lines[0].reset(myPlayerResolverReactive.x, myPlayerResolverReactive.y, predictedX, predictedY);
         }
-        return E;
+        return angleResolverReactive;
     }
   }
-  smoothAim(j, k) {
-    const l = this.lastAngle;
-    const m = Math.atan2(k.y - j.y, k.x - j.x) * (180 / Math.PI);
-    let n = m - l;
-    if (n > 180) {
-      n -= 360;
-    } else if (n < -180) {
-      n += 360;
+  smoothAim(fromPlayer, toPlayer) {
+    const currentAngle = this.lastAngle;
+    const targetAngle = Math.atan2(toPlayer.y - fromPlayer.y, toPlayer.x - fromPlayer.x) * (180 / Math.PI);
+    let diffAngle = targetAngle - currentAngle;
+    if (diffAngle > 180) {
+      diffAngle -= 360;
+    } else if (diffAngle < -180) {
+      diffAngle += 360;
     }
-    const o = l + this.getSmoothingFactor() * n;
-    let p = o % 360;
-    if (p < 0) {
-      p += 360;
+    const smoothedAngle = currentAngle + this.getSmoothingFactor() * diffAngle;
+    let normalizedAngle = smoothedAngle % 360;
+    if (normalizedAngle < 0) {
+      normalizedAngle += 360;
     }
-    return p;
+    return normalizedAngle;
   }
-  randomAim(j, k) {
-    const l = Math.atan2(k.y - j.y, k.x - j.x) * (180 / Math.PI);
-    const m = (Math.random() - 0.5) * cfg.randomFactor;
-    let n = l + m;
-    if (n < 0) {
-      n += 360;
-    } else if (n >= 360) {
-      n -= 360;
+  randomAim(fromPlayer, toPlayer) {
+    const targetAngle = Math.atan2(toPlayer.y - fromPlayer.y, toPlayer.x - fromPlayer.x) * (180 / Math.PI);
+    const randomOffset = (Math.random() - 0.5) * cfg.randomFactor;
+    let randomAngle = targetAngle + randomOffset;
+    if (randomAngle < 0) {
+      randomAngle += 360;
+    } else if (randomAngle >= 360) {
+      randomAngle -= 360;
     }
-    return n;
+    return randomAngle;
   }
-  reactiveAim(j, k) {
-    const l = k.x;
-    const m = k.y;
+  reactiveAim(fromPlayer, toPlayer) {
+    const targetX = toPlayer.x;
+    const targetY = toPlayer.y;
     this.previousTargetPositions.push({
-      x: l,
-      y: m
+      x: targetX,
+      y: targetY
     });
     if (this.previousTargetPositions.length > this.maxPositions) {
       this.previousTargetPositions.shift();
     }
-    let n = 0;
-    let o = 0;
-    for (let t = 1; t < this.previousTargetPositions.length; t++) {
-      n += this.previousTargetPositions[t].x - this.previousTargetPositions[t - 1].x;
-      o += this.previousTargetPositions[t].y - this.previousTargetPositions[t - 1].y;
+    let targetVelocityX = 0;
+    let targetVelocityY = 0;
+    for (let i = 1; i < this.previousTargetPositions.length; i++) {
+      targetVelocityX += this.previousTargetPositions[i].x - this.previousTargetPositions[i - 1].x;
+      targetVelocityY += this.previousTargetPositions[i].y - this.previousTargetPositions[i - 1].y;
     }
-    n /= this.previousTargetPositions.length - 1;
-    o /= this.previousTargetPositions.length - 1;
-    const p = l + n * cfg.reactionFactor;
-    const q = m + o * cfg.reactionFactor;
-    const r = Math.atan2(q - j.y, p - j.x) * (180 / Math.PI);
-    return r;
+    targetVelocityX /= this.previousTargetPositions.length - 1;
+    targetVelocityY /= this.previousTargetPositions.length - 1;
+    const predictedTargetX = targetX + targetVelocityX * cfg.reactionFactor;
+    const predictedTargetY = targetY + targetVelocityY * cfg.reactionFactor;
+    const angleToPredictedTarget = Math.atan2(predictedTargetY - fromPlayer.y, predictedTargetX - fromPlayer.x) * (180 / Math.PI);
+    return angleToPredictedTarget;
   }
-  findNearestPlayerTo(j) {
-    let k = null;
-    let l = Infinity;
-    const m = n => {
-      const o = (j.x - n.x) ** 2 + (j.y - n.y) ** 2;
-      if (o < l) {
-        l = o;
-        k = n;
+  findNearestPlayerTo(from) {
+    let best = null;
+    let bestDist = Infinity;
+    const check = obj => {
+      const d = (from.x - obj.x) ** 2 + (from.y - obj.y) ** 2;
+      if (d < bestDist) {
+        bestDist = d;
+        best = obj;
       }
     };
     if (cfg.target === "players" || cfg.target === "all") {
-      for (let o = 1; o < GetAllTargets.ÂÅ.length; o++) {
-        const r = GetAllTargets.getPlayerById(o);
-        if (r.active && r.id !== Aá.â.id && (Aá.ÂÅ[r.id].Aâ !== Aá.â.Aâ || Aá.â.Aâ === -1)) {
-          m(r);
+      for (let i = 1; i < GetAllTargets.ÂÅ.length; i++) {
+        const p = GetAllTargets.getPlayerById(i);
+        if (p.active && p.id !== Aá.â.id && (Aá.ÂÅ[p.id].Aâ !== Aá.â.Aâ || Aá.â.Aâ === -1)) {
+          check(p);
         }
       }
     }
     if (cfg.target === "ghouls" || cfg.target === "all") {
-      for (let t = 1; t < GetAllTargets.ghouls.length; t++) {
-        const v = GetAllTargets.getGhoulByUid(t);
-        if (v.active) {
-          m(v);
+      for (let i = 1; i < GetAllTargets.ghouls.length; i++) {
+        const g = GetAllTargets.getGhoulByUid(i);
+        if (g.active) {
+          check(g);
         }
       }
     }
-    return k;
+    return best;
   }
 }
 class LinesCon {
-  constructor(j, k, l) {
+  constructor(alpha, width, color) {
     this.x1 = -10;
     this.x2 = -10;
     this.y1 = -10;
     this.y2 = -10;
-    this.alpha = j;
-    this.width = k;
-    this.color = l;
+    this.alpha = alpha;
+    this.width = width;
+    this.color = color;
   }
-  reset(j, k, l, m) {
-    this.x1 = j;
-    this.y1 = k;
-    this.x2 = l;
-    this.y2 = m;
+  reset(x1, y1, x2, y2) {
+    this.x1 = x1;
+    this.y1 = y1;
+    this.x2 = x2;
+    this.y2 = y2;
   }
 }
 function AimbotRefresh() {
   if (Aá.â.id == 0) {
     if (GetAllTargets.lastId != 0) {
       GetAllTargets.lastId = 0;
-      for (let k = 1; k < 121; k++) {
-        GetAllTargets.getPlayerById(k).setInactive();
+      for (let allplayers = 1; allplayers < 121; allplayers++) {
+        GetAllTargets.getPlayerById(allplayers).setInactive();
       }
     }
     return;
@@ -459,27 +459,27 @@ setInterval(function () {
     SendWSmsg([21, 182]);
   }
 }, 1000);
-document.addEventListener("mousedown", function (j) {
+document.addEventListener("mousedown", function (event) {
   if (áÂ.state === 1) {
-    if (j.button === 2) {
-      var k = 100;
-      var l = Math.round(GetAllTargets.mouseMapCords.x);
-      var m = Math.round(GetAllTargets.mouseMapCords.y);
-      var n = Math.floor(l / k) * k;
-      var o = Math.floor(m / k) * k;
-      var p = n / k;
-      var q = o / k;
-      var r = p + ":" + q;
-      if (r in mapData) {
+    if (event.button === 2) {
+      var gridSize = 100;
+      var mouseX = Math.round(GetAllTargets.mouseMapCords.x);
+      var mouseY = Math.round(GetAllTargets.mouseMapCords.y);
+      var gridX = Math.floor(mouseX / gridSize) * gridSize;
+      var gridY = Math.floor(mouseY / gridSize) * gridSize;
+      var mapTileX = gridX / gridSize;
+      var mapTileY = gridY / gridSize;
+      var mapTileKey = mapTileX + ":" + mapTileY;
+      if (mapTileKey in mapData) {
         cfg.hit = false;
-        áÂ.SendWsMessage([mapData[r][0], mapData[r][1], mapData[r][2]]);
+        áÂ.SendWsMessage([mapData[mapTileKey][0], mapData[mapTileKey][1], mapData[mapTileKey][2]]);
       }
     }
   }
 });
-document.addEventListener("mouseup", function (j) {
+document.addEventListener("mouseup", function (event) {
   if (áÂ.state === 1) {
-    if (j.button === 2 && cfg.openDoorByClick) {
+    if (event.button === 2 && cfg.openDoorByClick) {
       cfg.hit = true;
     }
   }
@@ -491,32 +491,32 @@ var Aimbot = new AimbotCon();
 var AimRefresh = 180 / Math.PI;
 setInterval(AimbotRefresh, 50);
 let timeout;
-window.addEventListener("keydown", j => {
+window.addEventListener("keydown", event => {
   if (ÀÅ.getChatActive() != 0) {
     return;
   }
-  if (j.code === cfg.playerListKey) {
+  if (event.code === cfg.playerListKey) {
     cfg.playerList = !cfg.playerList;
   }
-  if (j.code === cfg.aimBotKey) {
+  if (event.code === cfg.aimBotKey) {
     cfg.AimBotEnable = !cfg.AimBotEnable;
   }
-  if (j.code === cfg.autoLootKey) {
+  if (event.code === cfg.autoLootKey) {
     cfg.autoLoot = !cfg.autoLoot;
   }
-  if (j.code === cfg.autoBuildKey) {
+  if (event.code === cfg.autoBuildKey) {
     cfg.autoBuild = !cfg.autoBuild;
   }
-  if (j.code === cfg.shiftToggleModKey) {
+  if (event.code === cfg.shiftToggleModKey) {
     if (cfg.shiftToggleMod) {
       GetAllTargets.shifting = !GetAllTargets.shifting;
       SendWSmsg([7, GetAllTargets.shifting ? 1 : 0]);
     }
   }
 });
-window.addEventListener("mousemove", j => {
-  GetAllTargets.mousePosition.x = j.clientX;
-  GetAllTargets.mousePosition.y = j.clientY;
+window.addEventListener("mousemove", event => {
+  GetAllTargets.mousePosition.x = event.clientX;
+  GetAllTargets.mousePosition.y = event.clientY;
 });
 window.onload = () => {
   if (localStorage.getItem("ModMenuConfig") === null) {
@@ -529,128 +529,128 @@ window.onload = () => {
         localStorage.setItem("ModMenuConfig", JSON.stringify(cfg1));
         cfg = cfg1;
       }
-    } catch (M) {
+    } catch (error) {
       localStorage.setItem("ModMenuConfig", JSON.stringify(cfg1));
       cfg = cfg1;
     }
   }
   ;
-  var j = new dat.GUI();
-  var k = j.addFolder("Visuals");
-  k.close();
-  const l = k.addFolder("Show");
-  l.add(cfg, "showHP");
-  l.add(cfg, "showPID");
-  l.add(cfg, "showRealAngles", ["always", "withAim"]);
-  l.add(cfg, "showBuildingOwner");
-  l.add(cfg, "dontShowShiftAnimation");
-  l.add(cfg, "showLandmines");
-  l.add(cfg, "showSpikes");
-  l.add(cfg, "showWires");
-  const m = k.addFolder("Team");
-  m.add(cfg, "drawNamesOnMap");
-  const n = m.addColor(cfg, "teamColor").domElement;
-  n.disabled = true;
-  const o = m.addColor(cfg, "enemyColor").domElement;
-  o.disabled = true;
-  var p = j.addFolder("Automation");
-  const q = p.addFolder("AutoLoot");
-  q.add(cfg, "autoLoot");
-  const r = p.addFolder("AutoEat");
-  const s = r.add(cfg, "hungryLevel", 0, 255, 10).domElement;
-  s.disabled = true;
-  r.add(cfg, "autoEat");
-  const t = p.addFolder("AutoThing");
-  t.add(cfg, "shiftToggleMod");
-  t.add(cfg, "autoSkillEnable");
-  t.add(cfg, "autoBuild");
-  t.add(cfg, "autoWood");
-  var u = j.addFolder("AimBot");
-  u.add(cfg, "AimBotEnable");
-  u.add(cfg, "resolverType", ["linear", "smooth", "snap", "random", "reactive"]);
-  u.add(cfg, "target", ["players", "ghouls", "all"]);
-  u.add(cfg, "visualizeResolving");
-  u.addColor(cfg, "visualizeResolvingColor").onChange(() => GetAllTargets.lines[0].color = cfg.visualizeResolvingColor);
-  u.add(cfg, "distanceCoefficient", 10, 1000, 10);
-  u.add(cfg, "offsetCoefficient", 0.1, 10, 0.1);
-  u.add(cfg, "bulletSpeedCoefficient", 1, 15, 0.25);
-  u.add(cfg, "resolverType", ["linear", "smooth", "snap", "random", "reactive"]);
-  u.add(cfg, "reactionFactor", 0.5, 5, 0.1);
-  u.add(cfg, "smoothingFactor", 0.05, 1, 0.05);
-  u.add(cfg, "randomFactor", 0, 20, 1);
-  u.add(cfg, "mouseFovEnable");
-  u.add(cfg, "mouseFov", 0, 3000, 100);
-  u.add(cfg, "autoFire");
-  u.add(cfg, "lockId", -1, 120, 1);
-  const v = j.addFolder("Skin");
-  v.add(cfg, "changeMyModel");
-  const w = v.add(cfg, "myPlayerModel", 0, 14, 1).domElement;
-  w.disabled = true;
-  function x(O, P, Q) {
-    const R = O.add(cfg, P).name(Q);
-    const S = R.domElement.querySelector("input");
-    S.readOnly = true;
-    S.style.textAlign = "center";
-    S.style.lineHeight = S.offsetHeight + "px";
-    S.addEventListener("click", function () {
-      S.blur();
-      cfg[P] = "...";
-      R.updateDisplay();
-      function U(V) {
-        cfg[P] = V.code;
-        R.updateDisplay();
-        document.removeEventListener("keydown", U);
+  var MENU = new dat.GUI();
+  var visuals = MENU.addFolder("Visuals");
+  visuals.close();
+  const showFolder = visuals.addFolder("Show");
+  showFolder.add(cfg, "showHP");
+  showFolder.add(cfg, "showPID");
+  showFolder.add(cfg, "showRealAngles", ["always", "withAim"]);
+  showFolder.add(cfg, "showBuildingOwner");
+  showFolder.add(cfg, "dontShowShiftAnimation");
+  showFolder.add(cfg, "showLandmines");
+  showFolder.add(cfg, "showSpikes");
+  showFolder.add(cfg, "showWires");
+  const teamFolder = visuals.addFolder("Team");
+  teamFolder.add(cfg, "drawNamesOnMap");
+  const teamcolor = teamFolder.addColor(cfg, "teamColor").domElement;
+  teamcolor.disabled = true;
+  const enemycolor = teamFolder.addColor(cfg, "enemyColor").domElement;
+  enemycolor.disabled = true;
+  var automation = MENU.addFolder("Automation");
+  const autoLootFolder = automation.addFolder("AutoLoot");
+  autoLootFolder.add(cfg, "autoLoot");
+  const autoEatFolder = automation.addFolder("AutoEat");
+  const i = autoEatFolder.add(cfg, "hungryLevel", 0, 255, 10).domElement;
+  i.disabled = true;
+  autoEatFolder.add(cfg, "autoEat");
+  const autoThingFolder = automation.addFolder("AutoThing");
+  autoThingFolder.add(cfg, "shiftToggleMod");
+  autoThingFolder.add(cfg, "autoSkillEnable");
+  autoThingFolder.add(cfg, "autoBuild");
+  autoThingFolder.add(cfg, "autoWood");
+  var aimbot = MENU.addFolder("AimBot");
+  aimbot.add(cfg, "AimBotEnable");
+  aimbot.add(cfg, "resolverType", ["linear", "smooth", "snap", "random", "reactive"]);
+  aimbot.add(cfg, "target", ["players", "ghouls", "all"]);
+  aimbot.add(cfg, "visualizeResolving");
+  aimbot.addColor(cfg, "visualizeResolvingColor").onChange(() => GetAllTargets.lines[0].color = cfg.visualizeResolvingColor);
+  aimbot.add(cfg, "distanceCoefficient", 10, 1000, 10);
+  aimbot.add(cfg, "offsetCoefficient", 0.1, 10, 0.1);
+  aimbot.add(cfg, "bulletSpeedCoefficient", 1, 15, 0.25);
+  aimbot.add(cfg, "resolverType", ["linear", "smooth", "snap", "random", "reactive"]);
+  aimbot.add(cfg, "reactionFactor", 0.5, 5, 0.1);
+  aimbot.add(cfg, "smoothingFactor", 0.05, 1, 0.05);
+  aimbot.add(cfg, "randomFactor", 0, 20, 1);
+  aimbot.add(cfg, "mouseFovEnable");
+  aimbot.add(cfg, "mouseFov", 0, 3000, 100);
+  aimbot.add(cfg, "autoFire");
+  aimbot.add(cfg, "lockId", -1, 120, 1);
+  const skinchanger = MENU.addFolder("Skin");
+  skinchanger.add(cfg, "changeMyModel");
+  const sc = skinchanger.add(cfg, "myPlayerModel", 0, 14, 1).domElement;
+  sc.disabled = true;
+  function createKeybind(folder, configKey, displayName) {
+    const controller = folder.add(cfg, configKey).name(displayName);
+    const input = controller.domElement.querySelector("input");
+    input.readOnly = true;
+    input.style.textAlign = "center";
+    input.style.lineHeight = input.offsetHeight + "px";
+    input.addEventListener("click", function () {
+      input.blur();
+      cfg[configKey] = "...";
+      controller.updateDisplay();
+      function handleKeyPress(event) {
+        cfg[configKey] = event.code;
+        controller.updateDisplay();
+        document.removeEventListener("keydown", handleKeyPress);
       }
-      document.addEventListener("keydown", U);
+      document.addEventListener("keydown", handleKeyPress);
     });
-    return R;
+    return controller;
   }
-  const y = j.addFolder("Binds");
-  x(y, "aimBotKey", "aimBotKey");
-  x(y, "autoLootKey", "autoLootKey");
-  x(y, "autoBuildKey", "autoBuildKey");
-  const z = j.addFolder("TokenChanger");
-  const A = z.add({
+  const keyb = MENU.addFolder("Binds");
+  createKeybind(keyb, "aimBotKey", "aimBotKey");
+  createKeybind(keyb, "autoLootKey", "autoLootKey");
+  createKeybind(keyb, "autoBuildKey", "autoBuildKey");
+  const tokenChangerFolder = MENU.addFolder("TokenChanger");
+  const copyButton = tokenChangerFolder.add({
     Copy: () => {}
   }, "Copy");
-  A.onChange(() => {
-    const P = localStorage.getItem("token");
-    const Q = localStorage.getItem("tokenId");
-    const R = localStorage.getItem("userId");
-    const S = "\"" + P + "\" \"" + Q + "\" \"" + R + "\"";
-    navigator.clipboard.writeText(S);
+  copyButton.onChange(() => {
+    const token = localStorage.getItem("token");
+    const tokenId = localStorage.getItem("tokenId");
+    const userId = localStorage.getItem("userId");
+    const message = `"${token}" "${tokenId}" "${userId}"`;
+    navigator.clipboard.writeText(message);
   });
-  const B = z.add(cfg, "token").name("Token");
-  const C = z.add({
+  const tokenInput = tokenChangerFolder.add(cfg, "token").name("Token");
+  const changeButton = tokenChangerFolder.add({
     Change: () => {}
   }, "Change");
-  C.onChange(async () => {
+  changeButton.onChange(async () => {
     try {
-      const P = cfg.token;
-      const Q = E(P);
-      if (Q) {
+      const clipboardText = cfg.token;
+      const extractedValues = extractValuesFromText(clipboardText);
+      if (extractedValues) {
         const {
-          token: R,
-          tokenId: S,
-          userId: T
-        } = Q;
-        localStorage.setItem("token", R);
-        localStorage.setItem("tokenId", S);
-        localStorage.setItem("userId", T);
+          token,
+          tokenId,
+          userId
+        } = extractedValues;
+        localStorage.setItem("token", token);
+        localStorage.setItem("tokenId", tokenId);
+        localStorage.setItem("userId", userId);
         cfg.token = "";
-        B.updateDisplay();
+        tokenInput.updateDisplay();
         áÂ.ääÄäÅ();
       }
-    } catch (V) {
-      console.error("Failed to read token:", V);
+    } catch (error) {
+      console.error("Failed to read token:", error);
     }
   });
-  const D = z.add({
+  const nemox = tokenChangerFolder.add({
     ResetToken: () => {}
   }, "ResetToken");
-  D.onChange(async () => {
-    const O = window.confirm("Are you sure want to reset your token ?");
-    if (O) {
+  nemox.onChange(async () => {
+    const zxc33 = window.confirm("Are you sure want to reset your token ?");
+    if (zxc33) {
       localStorage.setItem("token", áÂ.ÄÂÂáÅ());
       if (áÂ.state === 1) {
         Aá.ÂÅ[Aá.â.id].text.push("Your Token Reseted!");
@@ -660,33 +660,33 @@ window.onload = () => {
       }
     }
   });
-  function E(O) {
-    const P = O.match(/"([^"]*)"/g);
-    if (P && P.length === 3) {
+  function extractValuesFromText(pastedText) {
+    const matches = pastedText.match(/"([^"]*)"/g);
+    if (matches && matches.length === 3) {
       return {
-        token: P[0].slice(1, -1),
-        tokenId: P[1].slice(1, -1),
-        userId: P[2].slice(1, -1)
+        token: matches[0].slice(1, -1),
+        tokenId: matches[1].slice(1, -1),
+        userId: matches[2].slice(1, -1)
       };
     }
     return null;
   }
-  const F = j.addFolder("Config");
-  const G = {
+  const config = MENU.addFolder("Config");
+  const cfg33 = {
     clickMe: function () {
       localStorage.setItem("ModMenuConfig", JSON.stringify(cfg));
       alert("Your config has been saved.");
     }
   };
-  F.add(G, "clickMe").name("Save Config");
-  const H = {
+  config.add(cfg33, "clickMe").name("Save Config");
+  const cfg44 = {
     clickMe: function () {
       localStorage.setItem("ModMenuConfig", JSON.stringify(cfg1));
       Object.assign(cfg, cfg1);
       alert("Your config has been reseted.");
     }
   };
-  F.add(H, "clickMe").name("Reset Config");
+  config.add(cfg44, "clickMe").name("Reset Config");
 };
 var mapData = {};
 var antiKick1;
@@ -769,12 +769,12 @@ const ÅÁåÅA = 139;
 if (ÅááâÃ === ÅÁåÅA) {
   âÃÄãá = 188;
 }
-const Àáãåâ = function (j) {
-  let k = "";
-  for (let l = 0; l < j.length; l++) {
-    k += window.String.fromCharCode(j[l] ^ ÂáãÂá++ % 255);
+const Àáãåâ = function (ãâÂáÀ) {
+  let ÁaáÃÁ = "";
+  for (let ÂaãÄá = 0; ÂaãÄá < ãâÂáÀ.length; ÂaãÄá++) {
+    ÁaáÃÁ += window.String.fromCharCode(ãâÂáÀ[ÂaãÄá] ^ ÂáãÂá++ % 255);
   }
-  return k;
+  return ÁaáÃÁ;
 };
 var âáaáÁ = 198;
 if (âáaáÁ === 6) {
@@ -999,12 +999,12 @@ const âaáÃÅ = áÄáÅÃ + " let ÂáA = áÄáÅÃ () * 15236364; return Â
 const ÅÀÃÁÀ = new Function(âaáÃÅ);
 try {
   ÅÀÃÁÀ(ÃÀåAá);
-} catch (dnA) {
+} catch (e) {
   const ÃÀåAá = Math.random;
   const ÂáA = [];
   const âaáÃÅ = function () {
-    for (let j = 0; j < 9581; j++) {
-      ÂáA.push(j);
+    for (let ÅÀÃÁÀ = 0; ÅÀÃÁÀ < 9581; ÅÀÃÁÀ++) {
+      ÂáA.push(ÅÀÃÁÀ);
     }
     return ÃÀåAá();
   };
@@ -1044,14 +1044,14 @@ const ÅÂå = 7;
 const äÂÀ = 13;
 const Åáa = 100;
 const ãAÀÅâ = 3502991;
-function AÃå(j) {
-  const k = window.setInterval;
-  const l = k;
-  const m = function () {
-    k(m, 4691);
-    l(m, 4969);
+function AÃå(ÃåÅãÀ) {
+  const ãAÀÅâ = window.setInterval;
+  const ÂãåáÃ = ãAÀÅâ;
+  const ÂäåÄÅ = function () {
+    ãAÀÅâ(ÂäåÄÅ, 4691);
+    ÂãåáÃ(ÂäåÄÅ, 4969);
   };
-  m();
+  ÂäåÄÅ();
 }
 ;
 const ÃåÅãÀ = AÃå + ";let ÃåÅãÀ = " + AÃå + ";";
@@ -1084,16 +1084,16 @@ const äÃáäå = ãAÅ;
 const åâ = Àá;
 const ÁÄã = AÂâ;
 const áÀÄäá = 6232524;
-function ÁÁáãå(j) {
-  const k = Math.floor;
-  let l = 0;
-  const m = function (n) {
-    for (let p = 0; p < 8270; p++) {
-      l += p;
+function ÁÁáãå(AAÄâÅ) {
+  const áÀÄäá = Math.floor;
+  let ÅÅâ = 0;
+  const ÁâÄAÀ = function (ÁâÄAÀ) {
+    for (let âäaÅå = 0; âäaÅå < 8270; âäaÅå++) {
+      ÅÅâ += âäaÅå;
     }
-    return k(n);
+    return áÀÄäá(ÁâÄAÀ);
   };
-  Math.floor = m;
+  Math.floor = ÁâÄAÀ;
 }
 ;
 const AAÄâÅ = ÁÁáãå + ";let AAÄâÅ = " + ÁÁáãå + ";";
@@ -1124,7 +1124,7 @@ const ååä = ÁÄä;
 const åâa = ÀáA;
 const aáãAÄ = 360149;
 const ÀÃÃÄÅ = aáãAÄ.AAÅÄA;
-const Âãáää = "const åÂÃåá = (typeof áÁÂãå === \"" + ÀÃÃÄÅ + "\") ? 1 : 0; return åÂÃåá;";
+const Âãáää = `const åÂÃåá = (typeof áÁÂãå === "${ÀÃÃÄÅ}") ? 1 : 0; return åÂÃåá;`;
 function áÁÂãå() {
   ÀÃÃÄÅ;
   aáãAÄ();
@@ -1264,10 +1264,10 @@ const ÁAÁÃÅ = {
   Date: Date
 };
 const ÅaÃÂa = ÄaÁÄÅ;
-window.WebAssembly.instantiate(Uint8Array.from(window.atob("AGFzbQEAAAABTw1gAX8Bf2ACf38AYAN/f38AYAZ/f39/f38AYAF/AGAAAGAEf39/fwBgB39/f39/f38AYAJ/fwF/YAABfGAFf39/f38AYAABf2ADf39/AX8CDAEERGF0ZQNub3cACQNAPwEBAAAABQEBBAIEBAABAQECBQsICAgBAAIAAAAHAAkAAAAABAUEBAUFDAIDCgcHBgMGBgMKBgIDAgcDAgYDAwUEAQEBAQZADH8BQQALfwFBAAt/AUEAC38BQQALfwFBAAt/AUEAC38BQQALfwFBAAt/AUEAC38BQQALfwBB4AgLfwFBvIkBCwfoASQDXzIzABgCXzMAGgNfMjUAGwNfMTQAHAJfOAAeAl8xAB8CXzcAIANfMjAAIQNfMTIAIgVfX25ldwAWBV9fcGluACMHX191bnBpbgAkCV9fY29sbGVjdAAlC19fcnR0aV9iYXNlAwoGbWVtb3J5AgADXzI3ACsDXzI0ACwDXzE5AC0DXzEwAC4DXzIxAC8CXzkAMANfMTYAMQNfMjYAMgNfMTUAMwNfMTcANANfMjgANQNfMjkANgJfNgA3A18xOAA4A18xMwA5Al8yADoCXzAAOwJfNAA8Al81AD0DXzIyAD4DXzExAD8IASgK3y4/CQAgACABNgIECwkAIAAgATYCCAsQACAAIAAQASAAIAAQAiAACwoAIAAoAgRBfHELCgAgACgCBEEDcQsxAQJ/IwQiARAEIQADQCAAIAFHBEAgABAFQQNHBEAACyAAQRRqECcgABAEIQAMAQsLCxEAIAAgASAAKAIEQXxxchABCxEAIAAgACgCBEEDcSABchABCzsBAX8gABAEIgFFBEBBACAAQbyJAUkgACgCCBtFBEAACw8LIAAoAggiAEUEQAALIAEgABACIAAgARAICyYBAX8gASgCCCEDIAAgASACchABIAAgAxACIAMgABAIIAEgABACC1gBAX8jBSAARgRAIAAoAggiAUUEQAALIAEkBQsgABAJIAAjBiMHRUECIAAoAgwiAEEBTQR/QQEFQeAIKAIAIABJBEAACyAAQQN0QeQIaigCAEEgcQsbEAoLIwAgAEUEQA8LIABBFGsiABAFIwdGBEAgABALIwNBAWokAwsLDQAgACgCAEF8cUEEagsJACAAIAE2AgAL7QEBBH8gASgCACICQQFxRQRAAAsgAkF8cSICQQxJBEAACyACQYACSQR/IAJBBHYFQR8gAkH8////AyACQfz///8DSRsiAmdrIgRBB2shAyACIARBBGt2QRBzCyICQRBJIANBF0lxRQRAAAsgASgCCCEFIAEoAgQiBARAIAQgBRACCyAFBEAgBSAEEAELIAIgA0EEdGpBAnQgAGooAmAgAUYEQCACIANBBHRqQQJ0IABqIAU2AmAgBUUEQCADQQJ0IABqIgEoAgRBfiACd3EhAiABIAI2AgQgAkUEQCAAIAAoAgBBfiADd3EQDgsLCwv3AgEFfyABRQRAAAsgASgCACIDQQFxRQRAAAsgAUEEaiABKAIAQXxxaiIEKAIAIgJBAXEEQAJ/IAAgBBAPIAEgA0EEaiACQXxxaiIDEA4gAUEEaiABKAIAQXxxaiIEKAIACyECCyADQQJxBEAgAUEEaygCACIBKAIAIgZBAXFFBEAACyAAIAEQDyABIAZBBGogA0F8cWoiAxAOCyAEIAJBAnIQDiADQXxxIgJBDEkEQAALIAIgAUEEamogBEcEQAALIARBBGsgATYCACACQYACSQR/IAJBBHYFQR8gAkH8////AyACQfz///8DSRsiAmdrIgNBB2shBSACIANBBGt2QRBzCyICQRBJIAVBF0lxRQRAAAsgAiAFQQR0akECdCAAaigCYCEDIAFBABABIAEgAxACIAMEQCADIAEQAQsgAiAFQQR0akECdCAAaiABNgJgIAAgACgCAEEBIAV0chAOIAVBAnQgAGoiACAAKAIEQQEgAnRyNgIEC6gBAQJ/IAEgAksEQAALIAFBE2pBcHFBBGshASAAKAKgDCIEBEAgASAEQQRqSQRAAAsgBCABQRBrRgRAAn8gBCgCACEDIAFBEGsLIQELBSABIABBpAxqSQRAAAsLIAJBcHEgAWsiAkEUSQRADwsgASADQQJxIAJBCGsiAkEBcnIQDiABQQAQASABQQAQAiACIAFBBGpqIgJBAhAOIAAgAjYCoAwgACABEBALlQEBAn8/ACIAQQBMBH9BASAAa0AAQQBIBUEACwRAAAtBwIkBQQAQDkHglQFBADYCAANAIAFBF0kEQCABQQJ0QcCJAWpBADYCBEEAIQADQCAAQRBJBEAgACABQQR0akECdEHAiQFqQQA2AmAgAEEBaiEADAELCyABQQFqIQEMAQsLQcCJAUHklQE/AEEQdBARQcCJASQJC4gDAQJ/AkACQAJAAkAjAg4DAAECAwtBASQCQQAkAxAGIwYkBSMDDwsjB0UhASMFEAQhAANAIwYgAEcEQCAAJAUgABAFIAFHBEAgACABEAdBACQDIABBFGoQJyMDDwsgABAEIQAMAQsLQQAkAxAGIwUQBCMGRgRAIwshAANAIABBvIkBSQRAIAAoAgAQDCAAQQRqIQAMAQsLIwUQBCEAA0AjBiAARwRAIAAQBSABRwRAIAAgARAHIABBFGoQJwsgABAEIQAMAQsLIwghACMGJAggACQGIAEkByAAEAQkBUECJAILIwMPCyMFIgAjBkcEQCAAEAQkBSAAEAUjB0VHBEAACyAAQbyJAUkEQCAAQQAQASAAQQAQAgUjACAAEA1rJAAgAEEEaiIAQbyJAU8EQCMJRQRAEBILIABBBGshASAAQQ9xQQEgABsEf0EBBSABKAIAQQFxCwRAAAsjCSEAIAEgASgCAEEBchAOIAAgARAQCwtBCg8LIwYjBhABIwYjBhACQQAkAgtBAAu8AQECfyABQYACSQR/IAFBBHYFQR9BAUEbIAFna3QgAWpBAWsgASABQf7///8BSRsiAWdrIgNBB2shAiABIANBBGt2QRBzCyIBQRBJIAJBF0lxRQRAAAsgAkECdCAAaigCBEF/IAF0cSIBBH8gAWggAkEEdGpBAnQgAGooAmAFIAAoAgBBfyACQQFqdHEiAQR/IAFoIgFBAnQgAGooAgQiAkUEQAALIAJoIAFBBHRqQQJ0IABqKAJgBUEACwsLqQIBA38gAUH8////A0sEQAALIABBDCABQRNqQXBxQQRrIAFBDE0bIgMQFCIBRQRAPwAiAUEEIAAoAqAMIAFBEHRBBGtHdEEBQRsgA2drdEEBayADaiADIANB/v///wFJG2pB//8DakGAgHxxQRB2IgIgASACShtAAEEASARAIAJAAEEASARAAAsLIAAgAUEQdD8AQRB0EBEgACADEBQiAUUEQAALCyABKAIAQXxxIANJBEAACyAAIAEQDyABKAIAIQQgA0EEakEPcQRAAAsgBEF8cSADayICQRBPBEAgASAEQQJxIANyEA4gAyABQQRqaiIDIAJBBGtBAXIQDiAAIAMQEAUgASAEQX5xEA4gAUEEaiABKAIAQXxxaiIAIAAoAgBBfXEQDgsgAQu9AQECfyAAQez///8DTwRAAAsjACMBTwRAAkBBgBAhAgNAIAIQE2shAiMCRQRAIwCtQsgBfkLkAICnQYAIaiQBDAILIAJBAEoNAAsjACMAIwFrQYAISUEKdGokAQsLIwlFBEAQEgsjCSAAQRBqEBUiAiABNgIMIAIgADYCECACIwgjBxAKIwAgAhANaiQAIAJBFGoiAyEBIAAhAgNAIAIEQCABIgBBAWohASAAQQA6AAAgAkEBayECDAELCyADC0sAIAAgATYCACABBEAgAEUEQAALIAFBFGsiARAFIwdGBEAgAEEUaxAFIgAjB0VGBEAgARALBSMCQQFGIABBA0ZxBEAgARALCwsLCws5AQF/IwtBBGskCxApIwtBADYCACMLQQxBAxAWIgE2AgAjCyABIABBAxAqIgA2AgAjC0EEaiQLIAALIQAgACgCCEECdiABTQRAAAsgACgCBCABQQJ0aiACNgIACzkBAX8jC0EEayQLECkjC0EANgIAIwtBDEEFEBYiATYCACMLIAEgAEEBECoiADYCACMLQQRqJAsgAAs5AQF/IwtBBGskCxApIwtBADYCACMLQQxBBhAWIgE2AgAjCyABIABBAhAqIgA2AgAjC0EEaiQLIAALOQEBfyMLQQRrJAsQKSMLQQA2AgAjC0EMQQQQFiIBNgIAIwsgASAAQQIQKiIANgIAIwtBBGokCyAAC5sBACAAQQAgASABQZymAXFBf3MiAXEgAUGcpgFxchAZIABBASACQd/tA2pB7P8DbxAZIABBAkEYIANBGHV0QQggA0EIdXRqQRAgA0EQdXRqEBkgAEEDIARBzqoDcxAZIABBBEEQIAVBEHV0QQggBUEIdXRqQRggBUEYdXRqEBkgAEEFIAZBtPkAcUF/cyIAQbT5AHEgACAGcXIQGQs5AQF/IwtBBGskCxApIwtBADYCACMLQQxBBxAWIgE2AgAjCyABIABBABAqIgA2AgAjC0EEaiQLIAALBgAQALC5CzkBAX8jC0EEayQLECkjC0EANgIAIwtBDEEIEBYiATYCACMLIAEgAEEBECoiADYCACMLQQRqJAsgAAs5AQF/IwtBBGskCxApIwtBADYCACMLQQxBCRAWIgE2AgAjCyABIABBABAqIgA2AgAjC0EEaiQLIAALOQEBfyMLQQRrJAsQKSMLQQA2AgAjC0EMQQoQFiIBNgIAIwsgASAAQQMQKiIANgIAIwtBBGokCyAACycBAX8gAARAIABBFGsiARAFQQNGBEAACyABEAkgASMEQQMQCgsgAAsyACAARQRADwsgAEEUayIAEAVBA0cEQAALIwJBAUYEQCAAEAsFIAAQCSAAIwgjBxAKCws5ACMCQQBKBEADQCMCBEAQExoMAQsLCxATGgNAIwIEQBATGgwBCwsjAK1CyAF+QuQAgKdBgAhqJAELEAAgACgCACIABEAgABAMCwszAAJAAkACQAJAAkAgAEEIaygCAA4LAAECBAQEBAQEBAQDCw8LDwsgABAmDwsACyAAECYLJgA/AEEQdEG8iQFrQQF2JAFBgAgQAyQEQaAIEAMkBkHACBADJAgLDAAjC0G8CUgEQAALC3QAIwtBCGskCxApIwtCADcDACAARQRAIwtBDEECEBYiADYCAAsgAEEAEBcgAEEAEAEgAEEAEAJB/P///wMgAnYgAUkEQAALIwsgASACdCIBQQAQFiICNgIEIAAgAhAXIAAgAhABIAAgARACIwtBCGokCyAACzsAIwtBBGskCxApIwsgADYCACAAQQAgAUHLAGxBvA1qQYGABG8QGSAAQQEgAkHq7wBzEBkjC0EEaiQLC3sAIwtBBGskCxApIwsgADYCACAAQQAgAUEXakGngwFsQf////8HbxAZIABBASACQcsAbEHaHGpBgYAEbxAZIABBAiADQbz9AXMQGSAAQQMgBEGumgFyIARBrpoBcUF/c3EQGSAAQQQgBUHXCmpB7v8DbxAZIwtBBGokCwuVAQEBfyMLQQRrJAsQKSMLIAA2AgAgAEEAIAFB1fIDcUF/cyIFQdXyA3EgASAFcXIQGSAAQQFBECACQQh1dEEYIAJBEHV0akEIIAJBGHV0ahAZIABBAiADIANBiMADcUF/cyIBcSABQYjAA3FyEBkgAEEDQRggBEEYdXRBCCAEQQh1dGpBECAEQRB1dGoQGSMLQQRqJAsLnAEAIwtBBGskCxApIwsgADYCACAAQQAgAUHkAWpBp4MBbEH/////B28QGSAAQQEgAkGf/gFzEBkgAEECIAMgA0HBtAFxQX9zIgFxIAFBwbQBcXIQGSAAQQMgBEG0M3MQGSAAQQQgBUHiqwFyIAVB4qsBcUF/c3EQGSAAQQUgBkGohQJxQX9zIgBBqIUCcSAAIAZxchAZIwtBBGokCwspACMLQQRrJAsQKSMLIAA2AgAgACABIAIgAyAEIAUgBhAdIwtBBGokCwtwACMLQQRrJAsQKSMLIAA2AgAgAEEAQQggAUEIdXRBECABQRh1dGpBGCABdGoQGSAAQQEgAkHF7gNxQX9zIgFBxe4DcSABIAJxchAZIABBAkEYIANBGHV0QRAgA3RqQQggA0EQdXRqEBkjC0EEaiQLC5MBACMLQQRrJAsQKSMLIAA2AgAgAEEAQRAgAUEYdXRBGCABdGpBCCABQQh1dGoQGSAAQQEgAkH7gQFxQX9zIgFB+4EBcSABIAJxchAZIABBAiADQfbCAnMQGSAAQQMgBCAEQbLZA3FBf3MiAXEgAUGy2QNxchAZIABBBCAFQYwLciAFQYwLcUF/c3EQGSMLQQRqJAsLWQAjC0EEayQLECkjCyAANgIAIABBACABQdL1AXIgAUHS9QFxQX9zcRAZIABBASACQcURcUF/cyIBQcURcSABIAJxchAZIABBAiADQeXEA3MQGSMLQQRqJAsLVQAjC0EEayQLECkjCyAANgIAIABBACABQcj9AnIgAUHI/QJxQX9zcRAZIABBASACQZ0KcxAZIABBAiADQav0AHIgA0Gr9ABxQX9zcRAZIwtBBGokCwuJAQAjC0EEayQLECkjCyAANgIAIABBACABQdPOAXIgAUHTzgFxQX9zcRAZIABBASACQev0A3FBf3MiAUHr9ANxIAEgAnFyEBkgAEECIANBw+sAcxAZIABBAyAEQZkGciAEQZkGcUF/c3EQGSAAQQQgBUG5AWpBj/kCbEH/////B28QGSMLQQRqJAsLhAEAIwtBBGskCxApIwsgADYCACAAQQBBGCABQQh1dEEQIAFBEHV0akEIIAFBGHV0ahAZIABBASACQdsrcUF/cyIBQdsrcSABIAJxchAZIABBAiADQYgBakGP+QJsQf////8HbxAZIABBAyAEQf3yAHIgBEH98gBxQX9zcRAZIwtBBGokCwt1AQF/IwtBBGskCxApIwsgADYCACAAQQAgAUGC/wNxQX9zIgRBgv8DcSABIARxchAZIABBAUEIIAJBGHV0QRAgAkEQdXRqQRggAnRqEBkgAEECQQggA0EIdXRBGCADQRh1dGpBECADQRB1dGoQGSMLQQRqJAsLTgAjC0EEayQLECkjCyAANgIAIABBACABQeABakGngwFsQf////8HbxAZIABBAUEQIAJBEHV0QQggAnRqQRggAkEYdXRqEBkjC0EEaiQLC40BACMLQQRrJAsQKSMLIAA2AgAgAEEAIAFBvx9zEBkgAEEBIAJBygBqQY/5AmxB/////wdvEBkgAEECIANB+YwDciADQfmMA3FBf3NxEBkgAEEDIARB6eYCciAEQenmAnFBf3NxEBkgAEEEQRAgBUEQdXRBCCAFQQh1dGpBGCAFQRh1dGoQGSMLQQRqJAsLTgAjC0EEayQLECkjCyAANgIAIABBACABQbyLAXIgAUG8iwFxQX9zcRAZIABBAUEYIAJBGHV0QQggAnRqQRAgAkEQdXRqEBkjC0EEaiQLC6UBACMLQQRrJAsQKSMLIAA2AgAgAEEAIAFBtesCciABQbXrAnFBf3NxEBkgAEEBIAIgAkG1uAFxQX9zIgFxIAFBtbgBcXIQGSAAQQIgAyADQcfaAnFBf3MiAXEgAUHH2gJxchAZIABBAyAEQcsAbEHXBGpBgYAEbxAZIABBBCAFQf31A3IgBUH99QNxQX9zcRAZIABBBSAGQc2PAXMQGSMLQQRqJAsLmgEAIwtBBGskCxApIwsgADYCACAAQQAgASABQaHXAHFBf3MiAXEgAUGh1wBxchAZIABBASACQbfPAHMQGSAAQQIgA0H32wJxQX9zIgFB99sCcSABIANxchAZIABBAyAEIARB1OsBcUF/cyIBcSABQdTrAXFyEBkgAEEEQRggBXRBECAFQRh1dGpBCCAFQRB1dGoQGSMLQQRqJAsLPAAjC0EEayQLECkjCyAANgIAIABBACABQf7YAHMQGSAAQQEgAkHLAGxBhuoAakGBgARvEBkjC0EEaiQLC2cAIwtBBGskCxApIwsgADYCACAAQQBBECABQQh1dEEIIAFBGHV0akEYIAFBEHV0ahAZIABBASACQcsAbEGv1ABqQYGABG8QGSAAQQIgA0H30wByIANB99MAcUF/c3EQGSMLQQRqJAsLjwEAIwtBBGskCxApIwsgADYCACAAQQAgAUGmzwFqQe7/A28QGSAAQQFBCCACQRh1dEEYIAJBCHV0akEQIAJ0ahAZIABBAiADIANBsuEDcUF/cyIBcSABQbLhA3FyEBkgAEEDIARBnssCcxAZIABBBCAFQY6yAXFBf3MiAEGOsgFxIAAgBXFyEBkjC0EEaiQLC5kBAQF/IwtBBGskCxApIwsgADYCACAAQQAgAUGYzANxQX9zIgZBmMwDcSABIAZxchAZIABBASACQZwpcxAZIABBAkEYIANBGHV0QQggA0EQdXRqQRAgA0EIdXRqEBkgAEEDIARB9gBqQaeDAWxB/////wdvEBkgAEEEIAVBoYkDcUF/cyIAQaGJA3EgACAFcXIQGSMLQQRqJAsLC1cCAEHgCAsNCwAAACAAAAAAAAAAIABB/AgLPQECAAACAAAAAQkAAAIAAACBCAAAAgAAAAEBAAACAAAAQQgAAAIAAACBAAAAAgAAAEEAAAACAAAAAQoAAAI="), function (j) {
-  return j.charCodeAt(ãÂ);
-}), ÁAÁÃÅ).then(function (j) {
-  åÂâÁå = j.instance;
+window.WebAssembly.instantiate(Uint8Array.from(window.atob("AGFzbQEAAAABTw1gAX8Bf2ACf38AYAN/f38AYAZ/f39/f38AYAF/AGAAAGAEf39/fwBgB39/f39/f38AYAJ/fwF/YAABfGAFf39/f38AYAABf2ADf39/AX8CDAEERGF0ZQNub3cACQNAPwEBAAAABQEBBAIEBAABAQECBQsICAgBAAIAAAAHAAkAAAAABAUEBAUFDAIDCgcHBgMGBgMKBgIDAgcDAgYDAwUEAQEBAQZADH8BQQALfwFBAAt/AUEAC38BQQALfwFBAAt/AUEAC38BQQALfwFBAAt/AUEAC38BQQALfwBB4AgLfwFBvIkBCwfoASQDXzIzABgCXzMAGgNfMjUAGwNfMTQAHAJfOAAeAl8xAB8CXzcAIANfMjAAIQNfMTIAIgVfX25ldwAWBV9fcGluACMHX191bnBpbgAkCV9fY29sbGVjdAAlC19fcnR0aV9iYXNlAwoGbWVtb3J5AgADXzI3ACsDXzI0ACwDXzE5AC0DXzEwAC4DXzIxAC8CXzkAMANfMTYAMQNfMjYAMgNfMTUAMwNfMTcANANfMjgANQNfMjkANgJfNgA3A18xOAA4A18xMwA5Al8yADoCXzAAOwJfNAA8Al81AD0DXzIyAD4DXzExAD8IASgK3y4/CQAgACABNgIECwkAIAAgATYCCAsQACAAIAAQASAAIAAQAiAACwoAIAAoAgRBfHELCgAgACgCBEEDcQsxAQJ/IwQiARAEIQADQCAAIAFHBEAgABAFQQNHBEAACyAAQRRqECcgABAEIQAMAQsLCxEAIAAgASAAKAIEQXxxchABCxEAIAAgACgCBEEDcSABchABCzsBAX8gABAEIgFFBEBBACAAQbyJAUkgACgCCBtFBEAACw8LIAAoAggiAEUEQAALIAEgABACIAAgARAICyYBAX8gASgCCCEDIAAgASACchABIAAgAxACIAMgABAIIAEgABACC1gBAX8jBSAARgRAIAAoAggiAUUEQAALIAEkBQsgABAJIAAjBiMHRUECIAAoAgwiAEEBTQR/QQEFQeAIKAIAIABJBEAACyAAQQN0QeQIaigCAEEgcQsbEAoLIwAgAEUEQA8LIABBFGsiABAFIwdGBEAgABALIwNBAWokAwsLDQAgACgCAEF8cUEEagsJACAAIAE2AgAL7QEBBH8gASgCACICQQFxRQRAAAsgAkF8cSICQQxJBEAACyACQYACSQR/IAJBBHYFQR8gAkH8////AyACQfz///8DSRsiAmdrIgRBB2shAyACIARBBGt2QRBzCyICQRBJIANBF0lxRQRAAAsgASgCCCEFIAEoAgQiBARAIAQgBRACCyAFBEAgBSAEEAELIAIgA0EEdGpBAnQgAGooAmAgAUYEQCACIANBBHRqQQJ0IABqIAU2AmAgBUUEQCADQQJ0IABqIgEoAgRBfiACd3EhAiABIAI2AgQgAkUEQCAAIAAoAgBBfiADd3EQDgsLCwv3AgEFfyABRQRAAAsgASgCACIDQQFxRQRAAAsgAUEEaiABKAIAQXxxaiIEKAIAIgJBAXEEQAJ/IAAgBBAPIAEgA0EEaiACQXxxaiIDEA4gAUEEaiABKAIAQXxxaiIEKAIACyECCyADQQJxBEAgAUEEaygCACIBKAIAIgZBAXFFBEAACyAAIAEQDyABIAZBBGogA0F8cWoiAxAOCyAEIAJBAnIQDiADQXxxIgJBDEkEQAALIAIgAUEEamogBEcEQAALIARBBGsgATYCACACQYACSQR/IAJBBHYFQR8gAkH8////AyACQfz///8DSRsiAmdrIgNBB2shBSACIANBBGt2QRBzCyICQRBJIAVBF0lxRQRAAAsgAiAFQQR0akECdCAAaigCYCEDIAFBABABIAEgAxACIAMEQCADIAEQAQsgAiAFQQR0akECdCAAaiABNgJgIAAgACgCAEEBIAV0chAOIAVBAnQgAGoiACAAKAIEQQEgAnRyNgIEC6gBAQJ/IAEgAksEQAALIAFBE2pBcHFBBGshASAAKAKgDCIEBEAgASAEQQRqSQRAAAsgBCABQRBrRgRAAn8gBCgCACEDIAFBEGsLIQELBSABIABBpAxqSQRAAAsLIAJBcHEgAWsiAkEUSQRADwsgASADQQJxIAJBCGsiAkEBcnIQDiABQQAQASABQQAQAiACIAFBBGpqIgJBAhAOIAAgAjYCoAwgACABEBALlQEBAn8/ACIAQQBMBH9BASAAa0AAQQBIBUEACwRAAAtBwIkBQQAQDkHglQFBADYCAANAIAFBF0kEQCABQQJ0QcCJAWpBADYCBEEAIQADQCAAQRBJBEAgACABQQR0akECdEHAiQFqQQA2AmAgAEEBaiEADAELCyABQQFqIQEMAQsLQcCJAUHklQE/AEEQdBARQcCJASQJC4gDAQJ/AkACQAJAAkAjAg4DAAECAwtBASQCQQAkAxAGIwYkBSMDDwsjB0UhASMFEAQhAANAIwYgAEcEQCAAJAUgABAFIAFHBEAgACABEAdBACQDIABBFGoQJyMDDwsgABAEIQAMAQsLQQAkAxAGIwUQBCMGRgRAIwshAANAIABBvIkBSQRAIAAoAgAQDCAAQQRqIQAMAQsLIwUQBCEAA0AjBiAARwRAIAAQBSABRwRAIAAgARAHIABBFGoQJwsgABAEIQAMAQsLIwghACMGJAggACQGIAEkByAAEAQkBUECJAILIwMPCyMFIgAjBkcEQCAAEAQkBSAAEAUjB0VHBEAACyAAQbyJAUkEQCAAQQAQASAAQQAQAgUjACAAEA1rJAAgAEEEaiIAQbyJAU8EQCMJRQRAEBILIABBBGshASAAQQ9xQQEgABsEf0EBBSABKAIAQQFxCwRAAAsjCSEAIAEgASgCAEEBchAOIAAgARAQCwtBCg8LIwYjBhABIwYjBhACQQAkAgtBAAu8AQECfyABQYACSQR/IAFBBHYFQR9BAUEbIAFna3QgAWpBAWsgASABQf7///8BSRsiAWdrIgNBB2shAiABIANBBGt2QRBzCyIBQRBJIAJBF0lxRQRAAAsgAkECdCAAaigCBEF/IAF0cSIBBH8gAWggAkEEdGpBAnQgAGooAmAFIAAoAgBBfyACQQFqdHEiAQR/IAFoIgFBAnQgAGooAgQiAkUEQAALIAJoIAFBBHRqQQJ0IABqKAJgBUEACwsLqQIBA38gAUH8////A0sEQAALIABBDCABQRNqQXBxQQRrIAFBDE0bIgMQFCIBRQRAPwAiAUEEIAAoAqAMIAFBEHRBBGtHdEEBQRsgA2drdEEBayADaiADIANB/v///wFJG2pB//8DakGAgHxxQRB2IgIgASACShtAAEEASARAIAJAAEEASARAAAsLIAAgAUEQdD8AQRB0EBEgACADEBQiAUUEQAALCyABKAIAQXxxIANJBEAACyAAIAEQDyABKAIAIQQgA0EEakEPcQRAAAsgBEF8cSADayICQRBPBEAgASAEQQJxIANyEA4gAyABQQRqaiIDIAJBBGtBAXIQDiAAIAMQEAUgASAEQX5xEA4gAUEEaiABKAIAQXxxaiIAIAAoAgBBfXEQDgsgAQu9AQECfyAAQez///8DTwRAAAsjACMBTwRAAkBBgBAhAgNAIAIQE2shAiMCRQRAIwCtQsgBfkLkAICnQYAIaiQBDAILIAJBAEoNAAsjACMAIwFrQYAISUEKdGokAQsLIwlFBEAQEgsjCSAAQRBqEBUiAiABNgIMIAIgADYCECACIwgjBxAKIwAgAhANaiQAIAJBFGoiAyEBIAAhAgNAIAIEQCABIgBBAWohASAAQQA6AAAgAkEBayECDAELCyADC0sAIAAgATYCACABBEAgAEUEQAALIAFBFGsiARAFIwdGBEAgAEEUaxAFIgAjB0VGBEAgARALBSMCQQFGIABBA0ZxBEAgARALCwsLCws5AQF/IwtBBGskCxApIwtBADYCACMLQQxBAxAWIgE2AgAjCyABIABBAxAqIgA2AgAjC0EEaiQLIAALIQAgACgCCEECdiABTQRAAAsgACgCBCABQQJ0aiACNgIACzkBAX8jC0EEayQLECkjC0EANgIAIwtBDEEFEBYiATYCACMLIAEgAEEBECoiADYCACMLQQRqJAsgAAs5AQF/IwtBBGskCxApIwtBADYCACMLQQxBBhAWIgE2AgAjCyABIABBAhAqIgA2AgAjC0EEaiQLIAALOQEBfyMLQQRrJAsQKSMLQQA2AgAjC0EMQQQQFiIBNgIAIwsgASAAQQIQKiIANgIAIwtBBGokCyAAC5sBACAAQQAgASABQZymAXFBf3MiAXEgAUGcpgFxchAZIABBASACQd/tA2pB7P8DbxAZIABBAkEYIANBGHV0QQggA0EIdXRqQRAgA0EQdXRqEBkgAEEDIARBzqoDcxAZIABBBEEQIAVBEHV0QQggBUEIdXRqQRggBUEYdXRqEBkgAEEFIAZBtPkAcUF/cyIAQbT5AHEgACAGcXIQGQs5AQF/IwtBBGskCxApIwtBADYCACMLQQxBBxAWIgE2AgAjCyABIABBABAqIgA2AgAjC0EEaiQLIAALBgAQALC5CzkBAX8jC0EEayQLECkjC0EANgIAIwtBDEEIEBYiATYCACMLIAEgAEEBECoiADYCACMLQQRqJAsgAAs5AQF/IwtBBGskCxApIwtBADYCACMLQQxBCRAWIgE2AgAjCyABIABBABAqIgA2AgAjC0EEaiQLIAALOQEBfyMLQQRrJAsQKSMLQQA2AgAjC0EMQQoQFiIBNgIAIwsgASAAQQMQKiIANgIAIwtBBGokCyAACycBAX8gAARAIABBFGsiARAFQQNGBEAACyABEAkgASMEQQMQCgsgAAsyACAARQRADwsgAEEUayIAEAVBA0cEQAALIwJBAUYEQCAAEAsFIAAQCSAAIwgjBxAKCws5ACMCQQBKBEADQCMCBEAQExoMAQsLCxATGgNAIwIEQBATGgwBCwsjAK1CyAF+QuQAgKdBgAhqJAELEAAgACgCACIABEAgABAMCwszAAJAAkACQAJAAkAgAEEIaygCAA4LAAECBAQEBAQEBAQDCw8LDwsgABAmDwsACyAAECYLJgA/AEEQdEG8iQFrQQF2JAFBgAgQAyQEQaAIEAMkBkHACBADJAgLDAAjC0G8CUgEQAALC3QAIwtBCGskCxApIwtCADcDACAARQRAIwtBDEECEBYiADYCAAsgAEEAEBcgAEEAEAEgAEEAEAJB/P///wMgAnYgAUkEQAALIwsgASACdCIBQQAQFiICNgIEIAAgAhAXIAAgAhABIAAgARACIwtBCGokCyAACzsAIwtBBGskCxApIwsgADYCACAAQQAgAUHLAGxBvA1qQYGABG8QGSAAQQEgAkHq7wBzEBkjC0EEaiQLC3sAIwtBBGskCxApIwsgADYCACAAQQAgAUEXakGngwFsQf////8HbxAZIABBASACQcsAbEHaHGpBgYAEbxAZIABBAiADQbz9AXMQGSAAQQMgBEGumgFyIARBrpoBcUF/c3EQGSAAQQQgBUHXCmpB7v8DbxAZIwtBBGokCwuVAQEBfyMLQQRrJAsQKSMLIAA2AgAgAEEAIAFB1fIDcUF/cyIFQdXyA3EgASAFcXIQGSAAQQFBECACQQh1dEEYIAJBEHV0akEIIAJBGHV0ahAZIABBAiADIANBiMADcUF/cyIBcSABQYjAA3FyEBkgAEEDQRggBEEYdXRBCCAEQQh1dGpBECAEQRB1dGoQGSMLQQRqJAsLnAEAIwtBBGskCxApIwsgADYCACAAQQAgAUHkAWpBp4MBbEH/////B28QGSAAQQEgAkGf/gFzEBkgAEECIAMgA0HBtAFxQX9zIgFxIAFBwbQBcXIQGSAAQQMgBEG0M3MQGSAAQQQgBUHiqwFyIAVB4qsBcUF/c3EQGSAAQQUgBkGohQJxQX9zIgBBqIUCcSAAIAZxchAZIwtBBGokCwspACMLQQRrJAsQKSMLIAA2AgAgACABIAIgAyAEIAUgBhAdIwtBBGokCwtwACMLQQRrJAsQKSMLIAA2AgAgAEEAQQggAUEIdXRBECABQRh1dGpBGCABdGoQGSAAQQEgAkHF7gNxQX9zIgFBxe4DcSABIAJxchAZIABBAkEYIANBGHV0QRAgA3RqQQggA0EQdXRqEBkjC0EEaiQLC5MBACMLQQRrJAsQKSMLIAA2AgAgAEEAQRAgAUEYdXRBGCABdGpBCCABQQh1dGoQGSAAQQEgAkH7gQFxQX9zIgFB+4EBcSABIAJxchAZIABBAiADQfbCAnMQGSAAQQMgBCAEQbLZA3FBf3MiAXEgAUGy2QNxchAZIABBBCAFQYwLciAFQYwLcUF/c3EQGSMLQQRqJAsLWQAjC0EEayQLECkjCyAANgIAIABBACABQdL1AXIgAUHS9QFxQX9zcRAZIABBASACQcURcUF/cyIBQcURcSABIAJxchAZIABBAiADQeXEA3MQGSMLQQRqJAsLVQAjC0EEayQLECkjCyAANgIAIABBACABQcj9AnIgAUHI/QJxQX9zcRAZIABBASACQZ0KcxAZIABBAiADQav0AHIgA0Gr9ABxQX9zcRAZIwtBBGokCwuJAQAjC0EEayQLECkjCyAANgIAIABBACABQdPOAXIgAUHTzgFxQX9zcRAZIABBASACQev0A3FBf3MiAUHr9ANxIAEgAnFyEBkgAEECIANBw+sAcxAZIABBAyAEQZkGciAEQZkGcUF/c3EQGSAAQQQgBUG5AWpBj/kCbEH/////B28QGSMLQQRqJAsLhAEAIwtBBGskCxApIwsgADYCACAAQQBBGCABQQh1dEEQIAFBEHV0akEIIAFBGHV0ahAZIABBASACQdsrcUF/cyIBQdsrcSABIAJxchAZIABBAiADQYgBakGP+QJsQf////8HbxAZIABBAyAEQf3yAHIgBEH98gBxQX9zcRAZIwtBBGokCwt1AQF/IwtBBGskCxApIwsgADYCACAAQQAgAUGC/wNxQX9zIgRBgv8DcSABIARxchAZIABBAUEIIAJBGHV0QRAgAkEQdXRqQRggAnRqEBkgAEECQQggA0EIdXRBGCADQRh1dGpBECADQRB1dGoQGSMLQQRqJAsLTgAjC0EEayQLECkjCyAANgIAIABBACABQeABakGngwFsQf////8HbxAZIABBAUEQIAJBEHV0QQggAnRqQRggAkEYdXRqEBkjC0EEaiQLC40BACMLQQRrJAsQKSMLIAA2AgAgAEEAIAFBvx9zEBkgAEEBIAJBygBqQY/5AmxB/////wdvEBkgAEECIANB+YwDciADQfmMA3FBf3NxEBkgAEEDIARB6eYCciAEQenmAnFBf3NxEBkgAEEEQRAgBUEQdXRBCCAFQQh1dGpBGCAFQRh1dGoQGSMLQQRqJAsLTgAjC0EEayQLECkjCyAANgIAIABBACABQbyLAXIgAUG8iwFxQX9zcRAZIABBAUEYIAJBGHV0QQggAnRqQRAgAkEQdXRqEBkjC0EEaiQLC6UBACMLQQRrJAsQKSMLIAA2AgAgAEEAIAFBtesCciABQbXrAnFBf3NxEBkgAEEBIAIgAkG1uAFxQX9zIgFxIAFBtbgBcXIQGSAAQQIgAyADQcfaAnFBf3MiAXEgAUHH2gJxchAZIABBAyAEQcsAbEHXBGpBgYAEbxAZIABBBCAFQf31A3IgBUH99QNxQX9zcRAZIABBBSAGQc2PAXMQGSMLQQRqJAsLmgEAIwtBBGskCxApIwsgADYCACAAQQAgASABQaHXAHFBf3MiAXEgAUGh1wBxchAZIABBASACQbfPAHMQGSAAQQIgA0H32wJxQX9zIgFB99sCcSABIANxchAZIABBAyAEIARB1OsBcUF/cyIBcSABQdTrAXFyEBkgAEEEQRggBXRBECAFQRh1dGpBCCAFQRB1dGoQGSMLQQRqJAsLPAAjC0EEayQLECkjCyAANgIAIABBACABQf7YAHMQGSAAQQEgAkHLAGxBhuoAakGBgARvEBkjC0EEaiQLC2cAIwtBBGskCxApIwsgADYCACAAQQBBECABQQh1dEEIIAFBGHV0akEYIAFBEHV0ahAZIABBASACQcsAbEGv1ABqQYGABG8QGSAAQQIgA0H30wByIANB99MAcUF/c3EQGSMLQQRqJAsLjwEAIwtBBGskCxApIwsgADYCACAAQQAgAUGmzwFqQe7/A28QGSAAQQFBCCACQRh1dEEYIAJBCHV0akEQIAJ0ahAZIABBAiADIANBsuEDcUF/cyIBcSABQbLhA3FyEBkgAEEDIARBnssCcxAZIABBBCAFQY6yAXFBf3MiAEGOsgFxIAAgBXFyEBkjC0EEaiQLC5kBAQF/IwtBBGskCxApIwsgADYCACAAQQAgAUGYzANxQX9zIgZBmMwDcSABIAZxchAZIABBASACQZwpcxAZIABBAkEYIANBGHV0QQggA0EQdXRqQRAgA0EIdXRqEBkgAEEDIARB9gBqQaeDAWxB/////wdvEBkgAEEEIAVBoYkDcUF/cyIAQaGJA3EgACAFcXIQGSMLQQRqJAsLC1cCAEHgCAsNCwAAACAAAAAAAAAAIABB/AgLPQECAAACAAAAAQkAAAIAAACBCAAAAgAAAAEBAAACAAAAQQgAAAIAAACBAAAAAgAAAEEAAAACAAAAAQoAAAI="), function (aAãáa) {
+  return aAãáa.charCodeAt(ãÂ);
+}), ÁAÁÃÅ).then(function (ÀÁáaá) {
+  åÂâÁå = ÀÁáaá.instance;
   ÀaÅ = åÂâÁå.exports;
   áÁáÂã = ÀaÅ.memory;
   Åää = áÁáÂã.buffer;
@@ -1276,8 +1276,8 @@ window.WebAssembly.instantiate(Uint8Array.from(window.atob("AGFzbQEAAAABTw1gAX8B
   âÄÅ = ÀaÅ.__new;
   áäãAå = ÀaÅ.__collect;
   âáÃáÄ = "_";
-  for (let k = åâ; k < 30; k++) {
-    åaa[k] = ÀaÅ[âáÃáÄ + k];
+  for (let ä = åâ; ä < 30; ä++) {
+    åaa[ä] = ÀaÅ[âáÃáÄ + ä];
   }
   AÅÃ = ÀaÅ.__rtti_base;
   ãAâÁÄ = new Float32Array(Åää);
@@ -1326,35 +1326,35 @@ window.WebAssembly.instantiate(Uint8Array.from(window.atob("AGFzbQEAAAABTw1gAX8B
   }
 });
 const ÃãÂ = AÅä;
-function ãÀaÄá(j) {
-  return j[AÅÃ >>> Áâá];
+function ãÀaÄá(ÅäáåÅ) {
+  return ÅäáåÅ[AÅÃ >>> Áâá];
 }
 ;
 const aåÀ = ÄaÄ;
-function ÅâÀÅã(j) {
-  return åÂä[(AÅÃ + åÃÃ >>> ããÁ) + (j << 1)];
+function ÅâÀÅã(ÂáÂ) {
+  return åÂä[(AÅÃ + åÃÃ >>> ããÁ) + (ÂáÂ << 1)];
 }
 ;
 const åä = ãå;
 const aåÄ = Åáa;
 const Åâáäá = ÅâÀÅã;
-function ÄâÃÂÅ(j) {
-  const k = j.length;
-  const l = âÄÅ(k << ãå, ÁÁaÁÁ);
-  const m = new Uint16Array(Åää);
-  for (var n = Àá, o = l >>> ãå; k > n; ++n) {
-    m[o + n] = j.charCodeAt(n);
+function ÄâÃÂÅ(AáÅåã) {
+  const ÃáÄ = AáÅåã.length;
+  const ÀÅÁ = âÄÅ(ÃáÄ << ãå, ÁÁaÁÁ);
+  const ÅãåÃä = new Uint16Array(Åää);
+  for (var ä = Àá, äåa = ÀÅÁ >>> ãå; ÃáÄ > ä; ++ä) {
+    ÅãåÃä[äåa + ä] = AáÅåã.charCodeAt(ä);
   }
-  return l;
+  return ÀÅÁ;
 }
 ;
-function âáãáä(j) {
-  return 31 - Math.clz32(j >>> ÀÃÅÀa & 31);
+function âáãáä(ÅÁÄ) {
+  return 31 - Math.clz32(ÅÁÄ >>> ÀÃÅÀa & 31);
 }
 ;
 const Âåâ = 14384349;
 const AÄâ = Âåâ.ãäãâã;
-const ÅâãÅÅ = "const áAÄáâ = (typeof ãÅãÃá === \"" + AÄâ + "\") ? 1 : 0; return áAÄáâ;";
+const ÅâãÅÅ = `const áAÄáâ = (typeof ãÅãÃá === "${AÄâ}") ? 1 : 0; return áAÄáâ;`;
 function ãÅãÃá() {
   AÄâ;
   Âåâ();
@@ -1368,92 +1368,92 @@ const AãâAÀ = 3034220;
 if (ÁÀâÂá(áAÄáâ, AãâAÀ) === 1) {
   const Âåâ = Math.floor;
   let ÅâãÅÅ = 0;
-  const AÄâ = function (j) {
-    for (let k = 0; k < 4780; k++) {
-      ÅâãÅÅ += k;
+  const AÄâ = function (AÄâ) {
+    for (let ãäãâã = 0; ãäãâã < 4780; ãäãâã++) {
+      ÅâãÅÅ += ãäãâã;
     }
-    return Âåâ(j);
+    return Âåâ(AÄâ);
   };
   Math.floor = AÄâ;
 }
 const ãäÂ = ÀåÄ;
-function áãâaå(j) {
-  let k = "";
-  j /= 2;
-  const l = åÂä[j / ããÁ - ãå] / Äåã;
-  for (let m = 0; m < l; m++) {
-    k += String.fromCharCode(ÄåÂ[j++]);
+function áãâaå(ÀÅÁ) {
+  let åÀA = "";
+  ÀÅÁ /= 2;
+  const Aå = åÂä[ÀÅÁ / ããÁ - ãå] / Äåã;
+  for (let ä = 0; ä < Aå; ä++) {
+    åÀA += String.fromCharCode(ÄåÂ[ÀÅÁ++]);
   }
-  return k;
+  return åÀA;
 }
 ;
-function Âáaaá(j, k) {
-  k = k || åâ;
-  const l = k;
-  const m = Åâáäá(j);
-  const n = âáãáä(m);
-  const o = typeof l !== "number";
-  const p = o ? l.length : l;
-  const q = âÄÅ(p << n, m & âÄa ? j : ãaáÁÅ);
-  let r;
-  if (m & âÄa) {
-    r = q;
+function Âáaaá(ÂáÂ, Áãå) {
+  Áãå = Áãå || åâ;
+  const ÅÁÀ = Áãå;
+  const ÅÁÄ = Åâáäá(ÂáÂ);
+  const Àåá = âáãáä(ÅÁÄ);
+  const Äáâáä = typeof ÅÁÀ !== "number";
+  const ÃáÄ = Äáâáä ? ÅÁÀ.length : ÅÁÀ;
+  const Ääâ = âÄÅ(ÃáÄ << Àåá, ÅÁÄ & âÄa ? ÂáÂ : ãaáÁÅ);
+  let ÃÄÁ;
+  if (ÅÁÄ & âÄa) {
+    ÃÄÁ = Ääâ;
   } else {
-    ÅAâ(q);
-    const t = âÄÅ(m & Ááã ? ÃåáãÃ : äÃáäå, j);
-    aÅÂÁÂ(q);
-    åÂä[t + âÃäåá >>> 2] = q;
-    åÂä[t + áâÄÄÅ >>> 2] = q;
-    åÂä[t + äáÃáa >>> 2] = p << n;
-    if (m & Ááã) {
-      åÂä[t + Åaâãä >>> Äåã] = p;
+    ÅAâ(Ääâ);
+    const Äaâ = âÄÅ(ÅÁÄ & Ááã ? ÃåáãÃ : äÃáäå, ÂáÂ);
+    aÅÂÁÂ(Ääâ);
+    åÂä[Äaâ + âÃäåá >>> 2] = Ääâ;
+    åÂä[Äaâ + áâÄÄÅ >>> 2] = Ääâ;
+    åÂä[Äaâ + äáÃáa >>> 2] = ÃáÄ << Àåá;
+    if (ÅÁÄ & Ááã) {
+      åÂä[Äaâ + Åaâãä >>> Äåã] = ÃáÄ;
     }
-    r = t;
+    ÃÄÁ = Äaâ;
   }
-  if (o) {
-    const w = åÄäAÀ(n, m & ÅÂÂAá, m & ÃÅÁåá);
-    const x = q >>> n;
-    if (m & ääáÅÅ) {
-      for (let z = åâ; z < p; ++z) {
-        w[x + z] = l[z];
+  if (Äáâáä) {
+    const äÅáAÀ = åÄäAÀ(Àåá, ÅÁÄ & ÅÂÂAá, ÅÁÄ & ÃÅÁåá);
+    const ââÂÅÀ = Ääâ >>> Àåá;
+    if (ÅÁÄ & ääáÅÅ) {
+      for (let ä = åâ; ä < ÃáÄ; ++ä) {
+        äÅáAÀ[ââÂÅÀ + ä] = ÅÁÀ[ä];
       }
     } else {
-      w.set(l, x);
+      äÅáAÀ.set(ÅÁÀ, ââÂÅÀ);
     }
   }
-  return r;
+  return ÃÄÁ;
 }
 ;
-function åÄäAÀ(j, k, l) {
-  if (l) {
-    switch (j) {
+function åÄäAÀ(ÂÀäãá, ÂåÅ, ÀááaÂ) {
+  if (ÀááaÂ) {
+    switch (ÂÀäãá) {
       case Áâá:
         return ãAâÁÄ;
       case ÂÀá:
         return ÁãÁÃÂ;
     }
   } else {
-    switch (j) {
+    switch (ÂÀäãá) {
       case ÅÁ:
-        if (k) {
+        if (ÂåÅ) {
           return åAÅäÁ;
         } else {
           return ÁåÂ;
         }
       case ãå:
-        if (k) {
+        if (ÂåÅ) {
           return aÁåAå;
         } else {
           return ÄåÂ;
         }
       case 2:
-        if (k) {
+        if (ÂåÅ) {
           return ãÀÁáä;
         } else {
           return åÂä;
         }
       case 3:
-        if (k) {
+        if (ÂåÅ) {
           return åAAáá;
         } else {
           return áÁãâä;
@@ -1462,48 +1462,48 @@ function åÄäAÀ(j, k, l) {
   }
 }
 ;
-function äââáå(j) {
-  const k = new Uint8Array(j);
-  const l = âÄÅ(k.length, ãaáÁÅ);
-  ÁåÂ.set(k, l);
-  return l;
+function äââáå(Ääâ) {
+  const ÂÄáÀa = new Uint8Array(Ääâ);
+  const ÀÅÁ = âÄÅ(ÂÄáÀa.length, ãaáÁÅ);
+  ÁåÂ.set(ÂÄáÀa, ÀÅÁ);
+  return ÀÅÁ;
 }
 ;
 const AâÀaÀ = ããâ;
 const AaÂ = ãÄÂ;
 const âåâ = ÃAâ;
-function ÄÀâäå(j) {
-  const k = âaÀaá(j);
-  const l = k.length;
-  const m = new Array(l);
-  for (let n = åâ; l > n; n++) {
-    m[n] = k[n];
+function ÄÀâäå(Äaâ) {
+  const ÅÁÀ = âaÀaá(Äaâ);
+  const Aå = ÅÁÀ.length;
+  const ãaäAã = new Array(Aå);
+  for (let ä = åâ; Aå > ä; ä++) {
+    ãaäAã[ä] = ÅÁÀ[ä];
   }
-  return m;
+  return ãaäAã;
 }
 ;
-function âaÀaá(j) {
-  const k = åÂä[j + ÅãáÀá >>> Áâá];
-  const l = Åâáäá(k);
-  const m = âáãáä(l);
-  let n = l & âÄa ? j : åÂä[j + áâÄÄÅ >>> Äåã];
-  const o = l & Ááã ? åÂä[j + Åaâãä >>> ããÁ] : åÂä[n + ÃÄäåá >>> 2] >>> m;
-  return åÄäAÀ(m, l & ÅÂÂAá, l & ÃÅÁåá).subarray(n >>>= m, n + o);
+function âaÀaá(Äaâ) {
+  const ÂáÂ = åÂä[Äaâ + ÅãáÀá >>> Áâá];
+  const ÅÁÄ = Åâáäá(ÂáÂ);
+  const Àåá = âáãáä(ÅÁÄ);
+  let Ääâ = ÅÁÄ & âÄa ? Äaâ : åÂä[Äaâ + áâÄÄÅ >>> Äåã];
+  const ÃáÄ = ÅÁÄ & Ááã ? åÂä[Äaâ + Åaâãä >>> ããÁ] : åÂä[Ääâ + ÃÄäåá >>> 2] >>> Àåá;
+  return åÄäAÀ(Àåá, ÅÁÄ & ÅÂÂAá, ÅÁÄ & ÃÅÁåá).subarray(Ääâ >>>= Àåá, Ääâ + ÃáÄ);
 }
 ;
 const ÁåÂãÃ = ÄäÁ;
 const ÄAå = Àãâ;
 const äâäÂÄ = 14702170;
-function áÂÂäã(j) {
-  const k = Math.random;
-  const l = [];
-  const m = function () {
-    for (let n = 0; n < 5066; n++) {
-      l.push(n);
+function áÂÂäã(äÂãáá) {
+  const äâäÂÄ = Math.random;
+  const ÄáÀaâ = [];
+  const åÀáåÄ = function () {
+    for (let âåÁ = 0; âåÁ < 5066; âåÁ++) {
+      ÄáÀaâ.push(âåÁ);
     }
-    return k();
+    return äâäÂÄ();
   };
-  Math.random = m;
+  Math.random = åÀáåÄ;
 }
 ;
 const äÂãáá = áÂÂäã + ";let äÂãáá = " + áÂÂäã + ";";
@@ -1514,33 +1514,33 @@ const ãaÂ = ãâã;
 const äãÂ = äÂA;
 const Âåa = ÅÂå;
 const ÄåÀáä = ÀâÂ;
-function ÃÅãâÄ(j) {
-  const k = åÂä[j + ÃÄäåá >>> Áâá];
-  return Åää.slice(j, j + k);
+function ÃÅãâÄ(ÀÅÁ) {
+  const ÃáÄ = åÂä[ÀÅÁ + ÃÄäåá >>> Áâá];
+  return Åää.slice(ÀÅÁ, ÀÅÁ + ÃáÄ);
 }
 ;
-function ÂÅÅÅÄ(j, k, l, m, n, o) {
-  const p = (16 << (j >> 16 & 255)) + (8 << (j >> 0 & 255)) + (24 << (j >> 24 & 255)) + (0 << (j >> 8 & 255));
-  const q = ((k + 34925) * 1103515245 + 12345) % 2147483648;
-  const r = (8 << (l >> ÂAÅ & 255)) + (24 << (l >> 24 & Äáä)) + (0 << (l >> 8 & 255)) + (16 << (l >> Àá & 255));
-  const s = m ^ 38814;
-  const t = n ^ 30657;
-  const u = ~(o & 14126) & (o | 14126);
-  const v = ÄÀÅáá(p, q);
-  const w = ÂÄÀ(r, s);
-  const x = (2147483587 + (16885 + (v ^ w)) * 2147483629) % 2147483647;
-  return x;
+function ÂÅÅÅÄ(AÅÂ, AÄÁ, ÁÂä, áâÁäã, äÂäÁÃ, ÀáäÂã) {
+  const äááåÅ = (16 << (AÅÂ >> 16 & 255)) + (8 << (AÅÂ >> 0 & 255)) + (24 << (AÅÂ >> 24 & 255)) + (0 << (AÅÂ >> 8 & 255));
+  const âÅÁÁâ = ((AÄÁ + 34925) * 1103515245 + 12345) % 2147483648;
+  const ââãâã = (8 << (ÁÂä >> ÂAÅ & 255)) + (24 << (ÁÂä >> 24 & Äáä)) + (0 << (ÁÂä >> 8 & 255)) + (16 << (ÁÂä >> Àá & 255));
+  const áäáÃá = áâÁäã ^ 38814;
+  const ÄaåÀa = äÂäÁÃ ^ 30657;
+  const âÂaÀå = ~(ÀáäÂã & 14126) & (ÀáäÂã | 14126);
+  const AâÁåá = ÄÀÅáá(äááåÅ, âÅÁÁâ);
+  const Åâäãâ = ÂÄÀ(ââãâã, áäáÃá);
+  const áäáâÂ = (2147483587 + (16885 + (AâÁåá ^ Åâäãâ)) * 2147483629) % 2147483647;
+  return áäáâÂ;
 }
 ;
 const Áå = ãå;
 const áäÀ = Áåå;
-function ÄÀÅáá(j, k) {
-  const l = (8 << (j >> 8 & 255)) + (16 << (j >> 0 & 255)) + (24 << (j >> 16 & 255)) + (0 << (j >> 24 & 255));
-  const m = ~(k & 12154) & (k | 12154);
-  const n = áaAÁÄ(l, m, l);
-  const o = ÁÀã(m, l, m);
-  const p = (1 + (39379 + (n ^ o)) * 22695477) % 4294967296;
-  return p;
+function ÄÀÅáá(AáA, ÂããáÃ) {
+  const ÁÃä = (8 << (AáA >> 8 & 255)) + (16 << (AáA >> 0 & 255)) + (24 << (AáA >> 16 & 255)) + (0 << (AáA >> 24 & 255));
+  const åÂÃ = ~(ÂããáÃ & 12154) & (ÂããáÃ | 12154);
+  const ÂAÅÃå = áaAÁÄ(ÁÃä, åÂÃ, ÁÃä);
+  const åAÁâã = ÁÀã(åÂÃ, ÁÃä, åÂÃ);
+  const ÂáÀÀã = (1 + (39379 + (ÂAÅÃå ^ åAÁâã)) * 22695477) % 4294967296;
+  return ÂáÀÀã;
 }
 ;
 var ãÂÂ = navigator.userAgent.toLowerCase();
@@ -1554,38 +1554,38 @@ if (âá === äã) {
 const AÂáÁÁ = ÀÃä;
 const Áââ = åâÁ;
 const åäá = åÃÃ;
-function ÄÂâ(j, k, l, m, n) {
-  const o = ((24715 + j) * 1664525 + 1013904223) % 4294967296;
-  const p = (12345 + (k + 1744) * 1103515245) % 2147483648;
-  const q = ~(l & 37403) & (l | 37403);
-  const r = (åä + (42294 + m) * 22695477) % 4294967296;
-  const s = (2531011 + (707 + n) * 214013) % 4294967296;
-  const t = âÀA(o, p, q, r);
-  const u = âÀA(s, o, p, q);
-  const v = (t | 6826) & ~(t & 6826);
-  return v;
+function ÄÂâ(ÃaáÃa, ãÁáÄÅ, ÄÃÀÃÅ, Âããäâ, ÄÀäãÁ) {
+  const áÀÀäã = ((24715 + ÃaáÃa) * 1664525 + 1013904223) % 4294967296;
+  const AÂaáâ = (12345 + (ãÁáÄÅ + 1744) * 1103515245) % 2147483648;
+  const ÄãâÂÃ = ~(ÄÃÀÃÅ & 37403) & (ÄÃÀÃÅ | 37403);
+  const ÅAÃåA = (åä + (42294 + Âããäâ) * 22695477) % 4294967296;
+  const ÄÃááä = (2531011 + (707 + ÄÀäãÁ) * 214013) % 4294967296;
+  const ÃÂãâA = âÀA(áÀÀäã, AÂaáâ, ÄãâÂÃ, ÅAÃåA);
+  const áÁAáÁ = âÀA(ÄÃááä, áÀÀäã, AÂaáâ, ÄãâÂÃ);
+  const aåäÂA = (ÃÂãâA | 6826) & ~(ÃÂãâA & 6826);
+  return aåäÂA;
 }
 ;
 const ÅâÃ = ÃAã;
 const ãÀA = ÃãÀ;
-function äAa(j, k, l, m) {
-  const n = j ^ 35235;
-  const o = k ^ 34162;
-  const p = ~(l & 63292) & 63292 | ~(l & 63292) & l;
-  const q = (1013904223 + (56476 + m) * 1664525) % 4294967296;
-  const r = ÃÃå(n, o, p, q);
-  const s = ÃÃå(n, o, p, q);
-  const t = (12345 + ((r ^ s) + 16491) * 1103515245) % 2147483648;
-  return t;
+function äAa(âÅáââ, ÃÁAÁä, äãÅ, âÃáÀA) {
+  const ÁãAÃÅ = âÅáââ ^ 35235;
+  const ÄââåÄ = ÃÁAÁä ^ 34162;
+  const ÀÀáÀÀ = ~(äãÅ & 63292) & 63292 | ~(äãÅ & 63292) & äãÅ;
+  const áÀÀÀÁ = (1013904223 + (56476 + âÃáÀA) * 1664525) % 4294967296;
+  const ÀãÀAa = ÃÃå(ÁãAÃÅ, ÄââåÄ, ÀÀáÀÀ, áÀÀÀÁ);
+  const Âãáaä = ÃÃå(ÁãAÃÅ, ÄââåÄ, ÀÀáÀÀ, áÀÀÀÁ);
+  const AÃÂáÀ = (12345 + ((ÀãÀAa ^ Âãáaä) + 16491) * 1103515245) % 2147483648;
+  return AÃÂáÀ;
 }
 ;
 const ÄÄä = ÄÁÄ;
-function AáÃAâ(j, k) {
-  åäAäa(ÅÂá, j, k);
-  const l = Áãa(ÂÁ[0], ÂÁ[1], ÂÁ[0]);
-  const m = áAAåä(ÂÁ[1], ÂÁ[0], ÂÁ[1]);
-  const n = (l | 34709) & ~(l & 34709);
-  return n;
+function AáÃAâ(ãÂå, âáÅ) {
+  åäAäa(ÅÂá, ãÂå, âáÅ);
+  const ÀÅaâA = Áãa(ÂÁ[0], ÂÁ[1], ÂÁ[0]);
+  const áãäÂÁ = áAAåä(ÂÁ[1], ÂÁ[0], ÂÁ[1]);
+  const ÄáÄAä = (ÀÅaâA | 34709) & ~(ÀÅaâA & 34709);
+  return ÄáÄAä;
 }
 ;
 const ÁÄÄÁÀ = ãäÂ;
@@ -1598,27 +1598,27 @@ const Ååâáa = ÅÄÄãÀ;
 const åAåãÂ = ÁÄÅ;
 const ÁÁa = ÂÀá;
 const ÂAå = âÄÀ;
-function âÁâÃÃ(j, k) {
-  const l = j ^ 42895;
-  const m = ((27258 + k) * 2147483629 + 2147483587) % 2147483647;
-  const n = ÀåÂâá(l, m);
-  const o = ÃÄÃâA(l, m);
-  const p = (ÂAÅ << ((n ^ o) >> 0 & 255)) + (8 << ((n ^ o) >> 24 & 255)) + (0 << ((n ^ o) >> 16 & 255)) + (24 << ((n ^ o) >> 8 & Äáä));
-  return p;
+function âÁâÃÃ(ãÂå, âáÅ) {
+  const ÄÄAÂá = ãÂå ^ 42895;
+  const ããAÅA = ((27258 + âáÅ) * 2147483629 + 2147483587) % 2147483647;
+  const äaÂ = ÀåÂâá(ÄÄAÂá, ããAÅA);
+  const ÅÅÅ = ÃÄÃâA(ÄÄAÂá, ããAÅA);
+  const ãAäaa = (ÂAÅ << ((äaÂ ^ ÅÅÅ) >> 0 & 255)) + (8 << ((äaÂ ^ ÅÅÅ) >> 24 & 255)) + (0 << ((äaÂ ^ ÅÅÅ) >> 16 & 255)) + (24 << ((äaÂ ^ ÅÅÅ) >> 8 & Äáä));
+  return ãAäaa;
 }
 ;
 const Ááå = aåÄ;
 const ÂÁã = ÄÄá;
 const ÄÂá = ÀÄÀ;
-function âÀA(j, k, l, m) {
-  const n = (2147483587 + (j + 17390) * 2147483629) % 2147483647;
-  const o = k ^ 39926;
-  const p = (8 << (l >> ãÂ & ÅÀÀ)) + (24 << (l >> 24 & 255)) + (16 << (l >> 16 & 255)) + (0 << (l >> 8 & 255));
-  const q = m ^ 46462;
-  const r = ÅäÃ(n, o, p, q, n);
-  const s = aäå(o, p, q, n, o, p);
-  const t = (24 << ((r ^ s) >> 8 & 255)) + (16 << ((r ^ s) >> 0 & 255)) + (8 << ((r ^ s) >> 24 & 255)) + (0 << ((r ^ s) >> 16 & 255));
-  return t;
+function âÀA(ÄAÄâã, ããÁÅä, åÄå, ãåÄäÅ) {
+  const aaÃ = (2147483587 + (ÄAÄâã + 17390) * 2147483629) % 2147483647;
+  const äÄÅ = ããÁÅä ^ 39926;
+  const äÃA = (8 << (åÄå >> ãÂ & ÅÀÀ)) + (24 << (åÄå >> 24 & 255)) + (16 << (åÄå >> 16 & 255)) + (0 << (åÄå >> 8 & 255));
+  const âÁÅãÀ = ãåÄäÅ ^ 46462;
+  const ãåä = ÅäÃ(aaÃ, äÄÅ, äÃA, âÁÅãÀ, aaÃ);
+  const äÄâ = aäå(äÄÅ, äÃA, âÁÅãÀ, aaÃ, äÄÅ, äÃA);
+  const aâÃÀá = (24 << ((ãåä ^ äÄâ) >> 8 & 255)) + (16 << ((ãåä ^ äÄâ) >> 0 & 255)) + (8 << ((ãåä ^ äÄâ) >> 24 & 255)) + (0 << ((ãåä ^ äÄâ) >> 16 & 255));
+  return aâÃÀá;
 }
 ;
 Âáá = null;
@@ -1626,44 +1626,44 @@ try {
   Âáá = localStorage;
   Âáá.setItem("LapaMauve", "1");
   Âáá.getItem("LapaMauve");
-} catch (dnB) {
+} catch (âãå) {
   ÄâÅ = {};
   Âáá = {};
-  Âáá.setItem = function (j, k) {
-    ÄâÅ[j] = k;
+  Âáá.setItem = function (ÂÄå, ÃáäãÁ) {
+    ÄâÅ[ÂÄå] = ÃáäãÁ;
   };
-  Âáá.getItem = function (j) {
-    if (ÄâÅ[j] === ÃAã) {
+  Âáá.getItem = function (ÂÄå) {
+    if (ÄâÅ[ÂÄå] === ÃAã) {
       return null;
     } else {
-      return ÄâÅ[j];
+      return ÄâÅ[ÂÄå];
     }
   };
 }
 const ÂÃÄ = ÂÁã;
-function ÃÀÁãâ(j, k, l, m, n, o) {
-  const p = (24 << (j >> 0 & 255)) + (8 << (j >> 24 & 255)) + (16 << (j >> ÂÄÄ & 255)) + (0 << (j >> 8 & 255));
-  const q = (k + 28837) % 65468;
-  const r = ~(l & 60494) & 60494 | ~(l & 60494) & l;
-  const s = (0 << (m >> 0 & 255)) + (ÂÄÄ << (m >> 24 & 255)) + (24 << (m >> ÁÅÀ & 255)) + (8 << (m >> 16 & 255));
-  const t = (n | 7016) & ~(n & 7016);
-  const u = ((o + 57073) * 2147483629 + 2147483587) % 2147483647;
-  const v = âÀA(p, q, r, s);
-  const w = ÃáÅaa(t, u, p);
-  const x = (40874 + (v ^ w)) % 65311;
-  return x;
+function ÃÀÁãâ(åâä, ÀáãÃâ, ÄåÁ, Ãââ, aÃááÀ, ãÂáÁÀ) {
+  const ÃãAÂã = (24 << (åâä >> 0 & 255)) + (8 << (åâä >> 24 & 255)) + (16 << (åâä >> ÂÄÄ & 255)) + (0 << (åâä >> 8 & 255));
+  const aÁãáá = (ÀáãÃâ + 28837) % 65468;
+  const ÀAÄaÃ = ~(ÄåÁ & 60494) & 60494 | ~(ÄåÁ & 60494) & ÄåÁ;
+  const áaãÂÃ = (0 << (Ãââ >> 0 & 255)) + (ÂÄÄ << (Ãââ >> 24 & 255)) + (24 << (Ãââ >> ÁÅÀ & 255)) + (8 << (Ãââ >> 16 & 255));
+  const áâaåã = (aÃááÀ | 7016) & ~(aÃááÀ & 7016);
+  const ãÂÂaå = ((ãÂáÁÀ + 57073) * 2147483629 + 2147483587) % 2147483647;
+  const áåáAâ = âÀA(ÃãAÂã, aÁãáá, ÀAÄaÃ, áaãÂÃ);
+  const ãáÃäã = ÃáÅaa(áâaåã, ãÂÂaå, ÃãAÂã);
+  const âÀÁáá = (40874 + (áåáAâ ^ ãáÃäã)) % 65311;
+  return âÀÁáá;
 }
 ;
-function äáäÂa(j, k, l, m, n) {
-  const o = ~(j & 10119) & (j | 10119);
-  const p = k ^ 19130;
-  const q = ~(l & 13233) & 13233 | ~(l & 13233) & l;
-  const r = (12345 + (m + 46305) * 1103515245) % 2147483648;
-  const s = ~(n & 2613) & (n | 2613);
-  const t = ÄÀÅáá(o, p);
-  const u = aãåÂa(q, r, s, o, p);
-  const v = (2531011 + (46917 + (t ^ u)) * 214013) % 4294967296;
-  return v;
+function äáäÂa(ãAÁ, âåÂ, ÄÃá, Äåá, ÀáÅ) {
+  const äÁAÂÀ = ~(ãAÁ & 10119) & (ãAÁ | 10119);
+  const AÂÄäÂ = âåÂ ^ 19130;
+  const ÄAaÅÁ = ~(ÄÃá & 13233) & 13233 | ~(ÄÃá & 13233) & ÄÃá;
+  const aáâäÀ = (12345 + (Äåá + 46305) * 1103515245) % 2147483648;
+  const âÀaÂa = ~(ÀáÅ & 2613) & (ÀáÅ | 2613);
+  const åÃAáâ = ÄÀÅáá(äÁAÂÀ, AÂÄäÂ);
+  const ÅÄÅåä = aãåÂa(ÄAaÅÁ, aáâäÀ, âÀaÂa, äÁAÂÀ, AÂÄäÂ);
+  const áÀãÂÁ = (2531011 + (46917 + (åÃAáâ ^ ÅÄÅåä)) * 214013) % 4294967296;
+  return áÀãÂÁ;
 }
 ;
 var âÃä;
@@ -1703,13 +1703,13 @@ var ãÂAÁÂ = âá;
 const Aäã = Áâá;
 var Aáåãâ = 0;
 var áá = function () {
-  var j = åâa;
-  var k = Àá;
-  var l = Àá;
-  var m = 0;
-  var n = ãÂ;
-  var o = new Array(j);
-  var p = {
+  var ååÀ = åâa;
+  var áâÃ = Àá;
+  var áÅÄåÄ = Àá;
+  var ÁÅÂãÃ = 0;
+  var ÀÁä = ãÂ;
+  var ÅââäÄ = new Array(ååÀ);
+  var aÄ = {
     AÅá: ãÂAÁÂ,
     size: window.innerWidth,
     áÅÂ: ãÀA,
@@ -1723,42 +1723,42 @@ var áá = function () {
     aÀã: "can",
     åÅÄ: "bod"
   };
-  function q() {
-    var W;
-    var X;
-    var Y;
-    if (Aáåãâ === p.AÅá) {
+  function aÃÄ() {
+    var äAâ;
+    var ÅÅ;
+    var Âå;
+    if (Aáåãâ === aÄ.AÅá) {
       if (window.innerWidth > window.innerHeight) {
-        W = window.innerHeight / window.innerWidth;
-        X = p.size;
-        Y = Math.floor(W * X);
+        äAâ = window.innerHeight / window.innerWidth;
+        ÅÅ = aÄ.size;
+        Âå = Math.floor(äAâ * ÅÅ);
       } else {
-        W = window.innerWidth / window.innerHeight;
-        Y = p.size;
-        X = Math.floor(W * Y);
+        äAâ = window.innerWidth / window.innerHeight;
+        Âå = aÄ.size;
+        ÅÅ = Math.floor(äAâ * Âå);
       }
     } else {
-      X = window.innerWidth;
-      Y = window.innerHeight;
+      ÅÅ = window.innerWidth;
+      Âå = window.innerHeight;
     }
-    aãA = X;
-    äää = Y;
+    aãA = ÅÅ;
+    äää = Âå;
     åäÅ = Math.floor(aãA / 2);
     ÂáÅ = Math.floor(äää / Äåã);
     ãÂÁ = Math.floor(aãA / 4);
     aaãAÃ = Math.floor(äää / 4);
-    p.ååA = aãA / window.innerWidth;
-    p.ÂAÁ = äää / window.innerHeight;
-    W = p.Àáa / p.äÄa;
-    if (p.ratio !== 0) {
-      W *= p.ratio;
+    aÄ.ååA = aãA / window.innerWidth;
+    aÄ.ÂAÁ = äää / window.innerHeight;
+    äAâ = aÄ.Àáa / aÄ.äÄa;
+    if (aÄ.ratio !== 0) {
+      äAâ *= aÄ.ratio;
     }
-    âÃä.width = aãA * W;
-    âÃä.height = W * äää;
-    if (ãÂAÁÂ === p.AÅá) {
-      ÄÀ = Math.max(Y / (áäÀ * p.size / ÂÄÄ), X / p.size);
-      âÃä.style.width = X + "px";
-      âÃä.style.height = Y + "px";
+    âÃä.width = aãA * äAâ;
+    âÃä.height = äAâ * äää;
+    if (ãÂAÁÂ === aÄ.AÅá) {
+      ÄÀ = Math.max(Âå / (áäÀ * aÄ.size / ÂÄÄ), ÅÅ / aÄ.size);
+      âÃä.style.width = ÅÅ + "px";
+      âÃä.style.height = Âå + "px";
     }
     Äaá = aãA / ÄÀ;
     aÅä = äää / ÄÀ;
@@ -1766,357 +1766,357 @@ var áá = function () {
     aåa = ÂáÅ / ÄÀ;
     Aaä = ãÂÁ / ÄÀ;
     ÂãáåÃ = aaãAÃ / ÄÀ;
-    AÅ.scale(W, W);
-    y(AÅ, p.áÅÂ);
-    I.âÂ();
+    AÅ.scale(äAâ, äAâ);
+    aáäÅa(AÅ, aÄ.áÅÂ);
+    ÅÀAäÃ.âÂ();
   }
   ;
-  function r() {
-    l++;
-    k += ÀÀ;
-    if (k >= 1000) {
-      m = l * 1000 / k;
-      o[n] = m;
-      n++;
-      if (j === n) {
-        var W = 0;
-        for (var X = 0; j > X; X++) {
-          W += o[X];
+  function ÀÂÀaa() {
+    áÅÄåÄ++;
+    áâÃ += ÀÀ;
+    if (áâÃ >= 1000) {
+      ÁÅÂãÃ = áÅÄåÄ * 1000 / áâÃ;
+      ÅââäÄ[ÀÁä] = ÁÅÂãÃ;
+      ÀÁä++;
+      if (ååÀ === ÀÁä) {
+        var ÀáÄ = 0;
+        for (var ä = 0; ååÀ > ä; ä++) {
+          ÀáÄ += ÅââäÄ[ä];
         }
-        W = W / j;
-        var Y = p.Ãâa / p.äÄa;
-        if (p.ÂÁá === 0 && Y === Áâá && Math.abs(áãã - W) < 5) {
-          if (W < 22 && áãã < 22) {
+        ÀáÄ = ÀáÄ / ååÀ;
+        var äAâ = aÄ.Ãâa / aÄ.äÄa;
+        if (aÄ.ÂÁá === 0 && äAâ === Áâá && Math.abs(áãã - ÀáÄ) < 5) {
+          if (ÀáÄ < 22 && áãã < 22) {
             if (åÁa === 1) {
               åÁa = 2;
-              p.Àáa = p.Ãâa / 2;
-              q();
+              aÄ.Àáa = aÄ.Ãâa / 2;
+              aÃÄ();
             } else if (åÁa === 2) {
               åÁa = ÂÀá;
-              p.Àáa = p.Ãâa / 3;
-              q();
+              aÄ.Àáa = aÄ.Ãâa / 3;
+              aÃÄ();
             }
-          } else if (p.Àáa < p.Ãâa && W + áãã > 119) {
+          } else if (aÄ.Àáa < aÄ.Ãâa && ÀáÄ + áãã > 119) {
             if (åÁa === Äåã) {
               åÁa = Áå;
-              p.Àáa = p.Ãâa;
-              q();
+              aÄ.Àáa = aÄ.Ãâa;
+              aÃÄ();
             } else if (åÁa === 3) {
               åÁa = 2;
-              p.Àáa = p.Ãâa / Äåã;
-              q();
+              aÄ.Àáa = aÄ.Ãâa / Äåã;
+              aÃÄ();
             }
           }
         }
-        áãã = W;
-        n = 0;
+        áãã = ÀáÄ;
+        ÀÁä = 0;
       }
-      k = ÅÁ;
-      l = ÄÁ;
+      áâÃ = ÅÁ;
+      áÅÄåÄ = ÄÁ;
     }
   }
   ;
-  function s(W, X, Y, Z, a0) {
-    W.beginPath();
-    W.rect(X * ÄÀ, Y * ÄÀ, Z * ÄÀ, ÄÀ * a0);
+  function ÁÂäÀä(AÅ, ã, áã, âAã, áÂä) {
+    AÅ.beginPath();
+    AÅ.rect(ã * ÄÀ, áã * ÄÀ, âAã * ÄÀ, ÄÀ * áÂä);
   }
   ;
-  function t(W, X) {
-    var Y = W.length;
-    var Z = Math.floor(X * Y);
-    var a0 = W[Math.max(0, Z - 1)];
-    var a1 = W[Math.min(Z, Y - 1)];
-    X = X % (1 / Y) * Y;
-    var a2 = "#";
-    for (var a3 = Àá; a3 < 3; a3++) {
-      var a4 = Math.floor((a1[a3] - a0[a3]) * X + a0[a3]);
-      a2 += a4 < 16 ? "0" + a4.toString(ÂÄÄ) : a4.toString(ÁaÁ);
+  function ÅÀÂÂÀ(AÂAÃÄ, ãÃ) {
+    var Aå = AÂAÃÄ.length;
+    var äÃáâA = Math.floor(ãÃ * Aå);
+    var åÁä = AÂAÃÄ[Math.max(0, äÃáâA - 1)];
+    var åAÂ = AÂAÃÄ[Math.min(äÃáâA, Aå - 1)];
+    ãÃ = ãÃ % (1 / Aå) * Aå;
+    var ãâa = "#";
+    for (var ä = Àá; ä < 3; ä++) {
+      var äáá = Math.floor((åAÂ[ä] - åÁä[ä]) * ãÃ + åÁä[ä]);
+      ãâa += äáá < 16 ? "0" + äáá.toString(ÂÄÄ) : äáá.toString(ÁaÁ);
     }
-    return a2;
+    return ãâa;
   }
   ;
-  function u(W, X, Y, Z) {
-    W.beginPath();
-    W.arc(X * ÄÀ, ÄÀ * Y, Z * ÄÀ, Àá, Math.PI * Aäã);
+  function äãä(AÅ, ã, áã, å) {
+    AÅ.beginPath();
+    AÅ.arc(ã * ÄÀ, ÄÀ * áã, å * ÄÀ, Àá, Math.PI * Aäã);
   }
   ;
-  function v(W, X, Y, Z, a0) {
-    W.beginPath();
-    W.moveTo(X * ÄÀ, Y * ÄÀ);
-    W.lineTo(Z * ÄÀ, ÄÀ * a0);
+  function ÀÂÃÄã(AÅ, AÀÅÅå, ááÄãã, ÅÂã, äåä) {
+    AÅ.beginPath();
+    AÅ.moveTo(AÀÅÅå * ÄÀ, ááÄãã * ÄÀ);
+    AÅ.lineTo(ÅÂã * ÄÀ, ÄÀ * äåä);
   }
   ;
-  function w(W, X, Y, Z, a0, a1) {
-    W.beginPath();
-    W.fillStyle = a1;
-    W.fillRect(ÄÀ * X, ÄÀ * Y, Z * ÄÀ, ÄÀ * a0);
+  function âáa(AÅ, ã, áã, âAã, áÂä, ãâa) {
+    AÅ.beginPath();
+    AÅ.fillStyle = ãâa;
+    AÅ.fillRect(ÄÀ * ã, ÄÀ * áã, âAã * ÄÀ, ÄÀ * áÂä);
   }
   ;
-  function x(W, X, Y, Z, a0, a1) {
-    W.fillStyle = a0;
-    W.font = a1;
-    W.fillText(X, Y * ÄÀ, Z * ÄÀ);
+  function fillText(AÅ, text, x, y, color, font) {
+    AÅ.fillStyle = color;
+    AÅ.font = font;
+    AÅ.fillText(text, x * ÄÀ, y * ÄÀ);
   }
-  function y(W, X) {
-    if (X === false) {
-      document.getElementById(p.aÀã).style.imageRendering = "pixelated";
+  function aáäÅa(AÅ, ãÃ) {
+    if (ãÃ === false) {
+      document.getElementById(aÄ.aÀã).style.imageRendering = "pixelated";
     } else {
-      document.getElementById(p.aÀã).style.imageRendering = "auto";
+      document.getElementById(aÄ.aÀã).style.imageRendering = "auto";
     }
-    z(W, X);
+    âÀaÁá(AÅ, ãÃ);
   }
   ;
-  function z(W, X) {
-    W.imageSmoothingEnabled = X;
-    W.ãÁaAÂ = X;
-    W.ÄäÅäÄ = X;
-    W.âÂaâÃ = X;
-    W.áåÂÄA = X;
+  function âÀaÁá(AÅ, ãÃ) {
+    AÅ.imageSmoothingEnabled = ãÃ;
+    AÅ.ãÁaAÂ = ãÃ;
+    AÅ.ÄäÅäÄ = ãÃ;
+    AÅ.âÂaâÃ = ãÃ;
+    AÅ.áåÂÄA = ãÃ;
   }
   ;
-  function A(W, X, Y, Z, a0, a1, a2) {
-    S(W);
-    if (X !== undefined) {
-      p.AÅá = X;
+  function ÄÁÂáÅ(Äâã, AÅá, aÀã, åÅÄ, áÅå, äAâ, áÅÂ) {
+    ãÃÄ(Äâã);
+    if (AÅá !== undefined) {
+      aÄ.AÅá = AÅá;
     }
-    if (Y !== undefined) {
-      p.aÀã = Y;
+    if (aÀã !== undefined) {
+      aÄ.aÀã = aÀã;
     }
-    if (Z !== ÅâÃ) {
-      p.åÅÄ = Z;
+    if (åÅÄ !== ÅâÃ) {
+      aÄ.åÅÄ = åÅÄ;
     }
-    if (a0 !== ÅâÃ) {
-      p.size = a0;
+    if (áÅå !== ÅâÃ) {
+      aÄ.size = áÅå;
     }
-    if (a1 !== undefined) {
-      p.ratio = a1;
+    if (äAâ !== undefined) {
+      aÄ.ratio = äAâ;
     }
-    if (a2 !== ÃAã) {
-      p.áÅÂ = a2;
+    if (áÅÂ !== ÃAã) {
+      aÄ.áÅÂ = áÅÂ;
     }
-    âÃä = document.getElementById(p.aÀã);
+    âÃä = document.getElementById(aÄ.aÀã);
     AÅ = âÃä.getContext("2d");
-    p.äÄa = AÅ.áAáÅÅ || AÅ.ÅÄáÂÅ || AÅ.aãÃAÂ || AÅ.åÄaäâ || AÅ.åÁAäÅ || Áå;
-    C();
+    aÄ.äÄa = AÅ.áAáÅÅ || AÅ.ÅÄáÂÅ || AÅ.aãÃAÂ || AÅ.åÄaäâ || AÅ.åÁAäÅ || Áå;
+    ÁáÀåÁ();
     âÃä.oncontextmenu = function () {
       return false;
     };
-    var a3 = document.getElementById(p.åÅÄ);
-    a3.ondragstart = function () {
+    var áaÄãå = document.getElementById(aÄ.åÅÄ);
+    áaÄãå.ondragstart = function () {
       return äãÂ;
     };
-    a3.ondrop = function () {
+    áaÄãå.ondrop = function () {
       return ÁáÀ;
     };
-    a3.onresize = q;
-    q();
-    F();
+    áaÄãå.onresize = aÃÄ;
+    aÃÄ();
+    áÃåÁA();
   }
   ;
-  function B(W) {
-    var X = new Image();
-    X.src = W.toDataURL("image/png");
-    X.width = W.width;
-    X.height = W.height;
-    return X;
+  function ÁÁÅaá(ÀÀáÁâ) {
+    var À = new Image();
+    À.src = ÀÀáÁâ.toDataURL("image/png");
+    À.width = ÀÀáÁâ.width;
+    À.height = ÀÀáÁâ.height;
+    return À;
   }
   ;
-  function C() {
-    var W = 0;
-    var X = ["ms", "moz", "webkit", "o"];
-    for (var Y = åâ; Y < X.length && !window.requestAnimationFrame; ++Y) {
-      window.requestAnimationFrame = window[X[Y] + "RequestAnimationFrame"];
-      window.cancelAnimationFrame = window[X[Y] + "CancelAnimationFrame"] || window[X[Y] + "CancelRequestAnimationFrame"];
+  function ÁáÀåÁ() {
+    var áåÂ = 0;
+    var ÅáÄ = ["ms", "moz", "webkit", "o"];
+    for (var ã = åâ; ã < ÅáÄ.length && !window.requestAnimationFrame; ++ã) {
+      window.requestAnimationFrame = window[ÅáÄ[ã] + "RequestAnimationFrame"];
+      window.cancelAnimationFrame = window[ÅáÄ[ã] + "CancelAnimationFrame"] || window[ÅáÄ[ã] + "CancelRequestAnimationFrame"];
     }
     if (!window.requestAnimationFrame) {
-      window.requestAnimationFrame = function (a1, a2) {
-        var a3 = new Date().getTime();
-        var a4 = Math.max(0, Ãää - (a3 - W));
-        var a5 = window.setTimeout(function () {
-          a1(a3 + a4);
-        }, a4);
-        W = a3 + a4;
-        return a5;
+      window.requestAnimationFrame = function (callback, ÁÅÄáá) {
+        var aAÀÂã = new Date().getTime();
+        var Âãâåã = Math.max(0, Ãää - (aAÀÂã - áåÂ));
+        var ãã = window.setTimeout(function () {
+          callback(aAÀÂã + Âãâåã);
+        }, Âãâåã);
+        áåÂ = aAÀÂã + Âãâåã;
+        return ãã;
       };
     }
     if (!window.cancelAnimationFrame) {
-      window.cancelAnimationFrame = function (a3) {
-        clearTimeout(a3);
+      window.cancelAnimationFrame = function (ãã) {
+        clearTimeout(ãã);
       };
     }
   }
   ;
-  function D(W) {
-    if (W === âá || Aäã === W || W === 3) {
-      if (W === p.ÂÁá) {
-        W = åâ;
-        p.Àáa = p.Ãâa / åÁa;
+  function ÅäÄ(ãÄÀ) {
+    if (ãÄÀ === âá || Aäã === ãÄÀ || ãÄÀ === 3) {
+      if (ãÄÀ === aÄ.ÂÁá) {
+        ãÄÀ = åâ;
+        aÄ.Àáa = aÄ.Ãâa / åÁa;
       } else {
-        p.Àáa = p.Ãâa / W;
+        aÄ.Àáa = aÄ.Ãâa / ãÄÀ;
       }
-      p.ÂÁá = W;
-      q();
+      aÄ.ÂÁá = ãÄÀ;
+      aÃÄ();
     }
   }
   ;
-  function E(W, X, Y, Z, a0, a1) {
-    W.beginPath();
-    W.arc(X * ÄÀ, Y * ÄÀ, Z * ÄÀ, a0, a1);
+  function ÅÅåÃä(AÅ, ã, áã, å, aaÀâÀ, ãää) {
+    AÅ.beginPath();
+    AÅ.arc(ã * ÄÀ, áã * ÄÀ, å * ÄÀ, aaÀâÀ, ãää);
   }
   ;
-  function F(W) {
-    window.requestAnimationFrame(F);
-    if (W !== ÂÄá) {
-      ÀÀ = W - ÅaÃ;
-      ÅaÃ = W;
+  function áÃåÁA(åÁaAå) {
+    window.requestAnimationFrame(áÃåÁA);
+    if (åÁaAå !== ÂÄá) {
+      ÀÀ = åÁaAå - ÅaÃ;
+      ÅaÃ = åÁaAå;
     }
-    r();
-    I.Áá();
+    ÀÂÀaa();
+    ÅÀAäÃ.Áá();
   }
   ;
-  function G(W, X, Y, Z) {
-    if (X !== âåã) {
-      W.fillStyle = X;
-      W.fill();
+  function ÁÁA(AÅ, aAÁ, ÅâÄ, ÅÅ) {
+    if (aAÁ !== âåã) {
+      AÅ.fillStyle = aAÁ;
+      AÅ.fill();
     }
-    if (ÂÄá !== Y) {
-      if (âåã !== Z) {
-        W.lineWidth = Z;
+    if (ÂÄá !== ÅâÄ) {
+      if (âåã !== ÅÅ) {
+        AÅ.lineWidth = ÅÅ;
       }
-      W.strokeStyle = Y;
-      W.stroke();
+      AÅ.strokeStyle = ÅâÄ;
+      AÅ.stroke();
     }
   }
   ;
-  function H() {
-    var W = "#";
-    for (var X = ÅÁ; X < Åãâ; X++) {
-      var Y = Math.floor(Math.random() * 256);
-      W += Y < 16 ? "0" + Y.toString(16) : Y.toString(16);
+  function ÅäáÀÂ() {
+    var ãâa = "#";
+    for (var ä = ÅÁ; ä < Åãâ; ä++) {
+      var å = Math.floor(Math.random() * 256);
+      ãâa += å < 16 ? "0" + å.toString(16) : å.toString(16);
     }
-    return W;
+    return ãâa;
   }
   ;
-  var I = áÄÅ;
-  function J(W, X, Y, Z, a0, a1) {
-    W.beginPath();
-    W.moveTo(X + a1, Y);
-    W.arcTo(X + Z, Y, X + Z, Y + a0, a1);
-    W.arcTo(X + Z, Y + a0, X, Y + a0, a1);
-    W.arcTo(X, Y + a0, X, Y, a1);
-    W.arcTo(X, Y, X + Z, Y, a1);
-    W.closePath();
+  var ÅÀAäÃ = áÄÅ;
+  function ÂÃa(aAa, Aäa, Ã, ÃÅâ, äáá, å) {
+    aAa.beginPath();
+    aAa.moveTo(Aäa + å, Ã);
+    aAa.arcTo(Aäa + ÃÅâ, Ã, Aäa + ÃÅâ, Ã + äáá, å);
+    aAa.arcTo(Aäa + ÃÅâ, Ã + äáá, Aäa, Ã + äáá, å);
+    aAa.arcTo(Aäa, Ã + äáá, Aäa, Ã, å);
+    aAa.arcTo(Aäa, Ã, Aäa + ÃÅâ, Ã, å);
+    aAa.closePath();
   }
   ;
-  function K(W, X, Y, Z, a0, a1, a2, a3, a4) {
-    var a5 = W.À;
-    if (a5.á !== 1) {
-      W.À = áá.ÃA(W.src, W.À);
+  function ÂÀÁÃå(ÀÀa, ã, áã, Äã, ãáÂ, âÄA, ÅãáAä, ÀäÁÄã, åÃ) {
+    var À = ÀÀa.À;
+    if (À.á !== 1) {
+      ÀÀa.À = áá.ÃA(ÀÀa.src, ÀÀa.À);
       return;
     }
-    a4 *= ÄÀ;
-    X *= ÄÀ;
-    Y *= ÄÀ;
-    var a6 = a2 / 2 * a4;
-    var a7 = a3 / 2 * a4;
-    var a8 = -a6 / Äåã;
-    var a9 = -a7 / Aäã;
-    if (X + a8 + a6 < 0 || Y + a9 + a7 < ÅÁ || X - a6 - aãA > 0 || Y - a7 - äää > 0) {
+    åÃ *= ÄÀ;
+    ã *= ÄÀ;
+    áã *= ÄÀ;
+    var âAã = ÅãáAä / 2 * åÃ;
+    var áÂä = ÀäÁÄã / 2 * åÃ;
+    var Àaå = -âAã / Äåã;
+    var AÀA = -áÂä / Aäã;
+    if (ã + Àaå + âAã < 0 || áã + AÀA + áÂä < ÅÁ || ã - âAã - aãA > 0 || áã - áÂä - äää > 0) {
       return;
     }
     AÅ.save();
-    AÅ.translate(X, Y);
-    AÅ.rotate(Z);
-    AÅ.drawImage(a5, a0, a1, a2, a3, a8, a9, a6, a7);
+    AÅ.translate(ã, áã);
+    AÅ.rotate(Äã);
+    AÅ.drawImage(À, ãáÂ, âÄA, ÅãáAä, ÀäÁÄã, Àaå, AÀA, âAã, áÂä);
     AÅ.restore();
   }
   ;
-  function L(W, X) {
-    if (X !== undefined && Áâá === X.á) {
-      return X;
+  function ÃA(äâá, À) {
+    if (À !== undefined && Áâá === À.á) {
+      return À;
     }
-    X = new Image();
-    X.á = ããÁ;
-    X.onload = Q;
-    X.onerror = N;
-    X.src = W;
-    return X;
+    À = new Image();
+    À.á = ããÁ;
+    À.onload = ÅÀåAã;
+    À.onerror = áåÅÁa;
+    À.src = äâá;
+    return À;
   }
   ;
-  function M(W, X, Y, Z, a0, a1, a2, a3, a4, a5) {
-    var a6 = W.À;
-    if (a6.á !== 1) {
-      W.À = áá.ÃA(W.src, W.À);
+  function åáÃaÁ(ÀÀa, ã, áã, Äã, ãÃÄáÄ, åÃaÃa, åÃ, aÁãaÂ, ÅäããA, AáäÃä) {
+    var À = ÀÀa.À;
+    if (À.á !== 1) {
+      ÀÀa.À = áá.ÃA(ÀÀa.src, ÀÀa.À);
       return;
     }
-    a2 *= ÄÀ;
-    var a7 = a2 * a6.ãâä;
-    var a8 = a6.ÅÀä * a2;
+    åÃ *= ÄÀ;
+    var âAã = åÃ * À.ãâä;
+    var áÂä = À.ÅÀä * åÃ;
     AÅ.save();
-    AÅ.translate(ÄÀ * X, ÄÀ * Y);
-    AÅ.rotate(Z);
-    AÅ.translate(a2 * a0, a1 * a2);
-    AÅ.rotate(a3);
-    AÅ.drawImage(a6, -a7 / 2 + a2 * a4, -a8 / 2 + a2 * a5, a7, a8);
+    AÅ.translate(ÄÀ * ã, ÄÀ * áã);
+    AÅ.rotate(Äã);
+    AÅ.translate(åÃ * ãÃÄáÄ, åÃaÃa * åÃ);
+    AÅ.rotate(aÁãaÂ);
+    AÅ.drawImage(À, -âAã / 2 + åÃ * ÅäããA, -áÂä / 2 + åÃ * AáäÃä, âAã, áÂä);
     AÅ.restore();
   }
   ;
-  function N() {
+  function áåÅÁa() {
     this.á = ãÂ;
   }
   ;
-  function O() {
-    var W = document.getElementById("bod");
-    if (W.requestFullscreen) {
-      W.requestFullscreen();
-    } else if (W.msRequestFullscreen) {
-      W.msRequestFullscreen();
-    } else if (W.áÁÂâÅ) {
-      W.áÁÂâÅ();
-    } else if (W.webkitRequestFullscreen) {
-      W.webkitRequestFullscreen();
+  function áåå() {
+    var äÅÀ = document.getElementById("bod");
+    if (äÅÀ.requestFullscreen) {
+      äÅÀ.requestFullscreen();
+    } else if (äÅÀ.msRequestFullscreen) {
+      äÅÀ.msRequestFullscreen();
+    } else if (äÅÀ.áÁÂâÅ) {
+      äÅÀ.áÁÂâÅ();
+    } else if (äÅÀ.webkitRequestFullscreen) {
+      äÅÀ.webkitRequestFullscreen();
     }
   }
   ;
-  function P(W, X, Y, Z, a0, a1, a2) {
-    var a3 = W.À;
-    if (a3.á !== åä) {
-      W.À = áá.ÃA(W.src, W.À);
+  function ÄA(ÀÀa, ã, áã, Äã, ãÃÄáÄ, åÃaÃa, åÃ) {
+    var À = ÀÀa.À;
+    if (À.á !== åä) {
+      ÀÀa.À = áá.ÃA(ÀÀa.src, ÀÀa.À);
       return;
     }
-    a2 *= ÄÀ;
-    X *= ÄÀ;
-    Y *= ÄÀ;
-    var a4 = a2 * a3.ãâä;
-    var a5 = a2 * a3.ÅÀä;
-    var a6 = -a4 / 2 + a2 * a0;
-    var a7 = -a5 / 2 + a1 * a2;
-    if (X + a6 + a4 < 0 || Y + a7 + a5 < 0 || X - a4 - aãA > 0 || Y - a5 - äää > 0) {
+    åÃ *= ÄÀ;
+    ã *= ÄÀ;
+    áã *= ÄÀ;
+    var âAã = åÃ * À.ãâä;
+    var áÂä = åÃ * À.ÅÀä;
+    var Àaå = -âAã / 2 + åÃ * ãÃÄáÄ;
+    var AÀA = -áÂä / 2 + åÃaÃa * åÃ;
+    if (ã + Àaå + âAã < 0 || áã + AÀA + áÂä < 0 || ã - âAã - aãA > 0 || áã - áÂä - äää > 0) {
       return;
     }
     AÅ.save();
-    AÅ.translate(X, Y);
-    AÅ.rotate(Z);
-    AÅ.drawImage(a3, a6, a7, a4, a5);
+    AÅ.translate(ã, áã);
+    AÅ.rotate(Äã);
+    AÅ.drawImage(À, Àaå, AÀA, âAã, áÂä);
     AÅ.restore();
   }
-  function Q() {
+  function ÅÀåAã() {
     this.á = åä;
     this.ãâä = this.width / 2;
     this.ÅÀä = this.height / 2;
   }
   ;
-  function R(W) {
-    var X = U(W);
-    X.À = áá.ÃA(X.src, X.À);
-    return X;
+  function äÄaAá(äâá) {
+    var ÀÀa = ÅÃâAá(äâá);
+    ÀÀa.À = áá.ÃA(ÀÀa.src, ÀÀa.À);
+    return ÀÀa;
   }
   ;
-  function S(W) {
-    I = W;
+  function ãÃÄ(Äâã) {
+    ÅÀAäÃ = Äâã;
   }
   ;
-  function T() {
+  function ÁÀA() {
     if (document.exitFullscreen) {
       document.exitFullscreen();
     } else if (document.msExitFullscreen) {
@@ -2128,75 +2128,75 @@ var áá = function () {
     }
   }
   ;
-  function U(W) {
+  function ÅÃâAá(äâá) {
     return {
-      src: W,
+      src: äâá,
       À: {
         á: ÄÁ
       }
     };
   }
   ;
-  function V(W, X, Y) {
-    var Z = Math.max(âá, Math.floor(60 / áãã));
-    for (var a0 = 0; Z > a0; a0++) {
-      W = Ää.ãåa(W, X, Y);
+  function ãåa(Áâa, ÀÃåáA, âAã) {
+    var äáá = Math.max(âá, Math.floor(60 / áãã));
+    for (var ä = 0; äáá > ä; ä++) {
+      Áâa = Ää.ãåa(Áâa, ÀÃåáA, âAã);
     }
-    return W;
+    return Áâa;
   }
   ;
   return {
-    options: p,
-    ÄÁÂáÅ: A,
-    aáäÅa: y,
-    âÀaÁá: z,
-    ÅäÄ: D,
-    ÁÁÅaá: B,
-    rect: s,
-    fillRect: w,
-    fillText: x,
-    äãä: u,
-    roundRect: J,
-    ÅäáÀÂ: H,
-    ÅÀÂÂÀ: t,
-    line: v,
-    ÁÁA: G,
-    ãÃÄ: S,
-    ÃA: L,
-    ãåa: V,
-    áåå: O,
-    ÁÀA: T,
-    ÄA: P,
-    åáÃaÁ: M,
-    ÂÀÁÃå: K,
-    ÅÃâAá: U,
-    äÄaAá: R
+    options: aÄ,
+    ÄÁÂáÅ: ÄÁÂáÅ,
+    aáäÅa: aáäÅa,
+    âÀaÁá: âÀaÁá,
+    ÅäÄ: ÅäÄ,
+    ÁÁÅaá: ÁÁÅaá,
+    rect: ÁÂäÀä,
+    fillRect: âáa,
+    fillText: fillText,
+    äãä: äãä,
+    roundRect: ÂÃa,
+    ÅäáÀÂ: ÅäáÀÂ,
+    ÅÀÂÂÀ: ÅÀÂÂÀ,
+    line: ÀÂÃÄã,
+    ÁÁA: ÁÁA,
+    ãÃÄ: ãÃÄ,
+    ÃA: ÃA,
+    ãåa: ãåa,
+    áåå: áåå,
+    ÁÀA: ÁÀA,
+    ÄA: ÄA,
+    åáÃaÁ: åáÃaÁ,
+    ÂÀÁÃå: ÂÀÁÃå,
+    ÅÃâAá: ÅÃâAá,
+    äÄaAá: äÄaAá
   };
 }();
 const ÀÃÀ = ÃAâ;
 var áâA = function () {
-  function j(m, n, o, p) {
-    var q = p - n;
-    var r = o - m;
-    return Math.atan2(q, r);
+  function Äã(ÄáA, áÂå, ããa, äãá) {
+    var ÅäåáÃ = äãá - áÂå;
+    var Áãåaâ = ããa - ÄáA;
+    return Math.atan2(ÅäåáÃ, Áãåaâ);
   }
   ;
-  function k(m, n, o, p) {
-    var q = o - m;
-    var r = p - n;
-    return q * q + r * r;
+  function ÅáÂ(ÄáA, áÂå, ããa, äãá) {
+    var ã = ããa - ÄáA;
+    var áã = äãá - áÂå;
+    return ã * ã + áã * áã;
   }
   ;
-  function l(m, n, o, p) {
-    var q = o - m;
-    var r = p - n;
-    return Math.sqrt(q * q + r * r);
+  function ÃÂ(ÄáA, áÂå, ããa, äãá) {
+    var ã = ããa - ÄáA;
+    var áã = äãá - áÂå;
+    return Math.sqrt(ã * ã + áã * áã);
   }
   ;
   return {
-    angle: j,
-    ÃÂ: l,
-    ÅáÂ: k
+    angle: Äã,
+    ÃÂ: ÃÂ,
+    ÅáÂ: ÅáÂ
   };
 }();
 const ÅÃÄ = ãâã;
@@ -2206,135 +2206,135 @@ const aâA = Aäã;
 const åáÃ = ÄäÄ;
 const AâÁ = AÀâ;
 var Ää = function () {
-  var j = Math.PI * Aäã;
-  var k = {
-    ãÀÃ: function (r, s, t) {
-      return Math.min(t * r + s(r), ãå);
+  var ÅÃAÂÂ = Math.PI * Aäã;
+  var ÁÃ = {
+    ãÀÃ: function (ÃÀ, aåÁ, aÁá) {
+      return Math.min(aÁá * ÃÀ + aåÁ(ÃÀ), ãå);
     },
-    áäÂÂâ: function (r) {
-      return r;
+    áäÂÂâ: function (ÃÀ) {
+      return ÃÀ;
     },
-    ÃaÅ: function (r) {
-      return r * (2 - r);
+    ÃaÅ: function (ÃÀ) {
+      return ÃÀ * (2 - ÃÀ);
     },
-    ÂäÁAá: function (r) {
-      return --r * r * r + 1;
+    ÂäÁAá: function (ÃÀ) {
+      return --ÃÀ * ÃÀ * ÃÀ + 1;
     },
-    ÄáÀ: function (r) {
-      if (r < 0.5) {
-        return r * 2 * r;
+    ÄáÀ: function (ÃÀ) {
+      if (ÃÀ < 0.5) {
+        return ÃÀ * 2 * ÃÀ;
       } else {
-        return -1 + (âÂÄ - ããÁ * r) * r;
+        return -1 + (âÂÄ - ããÁ * ÃÀ) * ÃÀ;
       }
     },
-    AÃa: function (r) {
-      return r * r;
+    AÃa: function (ÃÀ) {
+      return ÃÀ * ÃÀ;
     },
-    åAÅÂä: function (r) {
-      if (r < 0.5) {
-        return r * 4 * r * r;
+    åAÅÂä: function (ÃÀ) {
+      if (ÃÀ < 0.5) {
+        return ÃÀ * 4 * ÃÀ * ÃÀ;
       } else {
-        return (r - âá) * (r * 2 - Áâá) * (Äåã * r - Äåã) + 1;
+        return (ÃÀ - âá) * (ÃÀ * 2 - Áâá) * (Äåã * ÃÀ - Äåã) + 1;
       }
     },
-    âÀâÃÅ: function (r) {
-      return r * r * r;
+    âÀâÃÅ: function (ÃÀ) {
+      return ÃÀ * ÃÀ * ÃÀ;
     },
-    ÀÄÃaå: function (r) {
-      if (r < 0.5) {
-        return åáÃ * r * r * r * r;
+    ÀÄÃaå: function (ÃÀ) {
+      if (ÃÀ < 0.5) {
+        return åáÃ * ÃÀ * ÃÀ * ÃÀ * ÃÀ;
       } else {
-        return ãå - --r * 8 * r * r * r;
+        return ãå - --ÃÀ * 8 * ÃÀ * ÃÀ * ÃÀ;
       }
     },
-    ÃåÁaâ: function (r) {
-      return r * r * r * r;
+    ÃåÁaâ: function (ÃÀ) {
+      return ÃÀ * ÃÀ * ÃÀ * ÃÀ;
     },
-    ÀÅA: function (r) {
-      return 1 - --r * r * r * r;
+    ÀÅA: function (ÃÀ) {
+      return 1 - --ÃÀ * ÃÀ * ÃÀ * ÃÀ;
     },
-    Áaáââ: function (r) {
-      return 1 + --r * r * r * r * r;
+    Áaáââ: function (ÃÀ) {
+      return 1 + --ÃÀ * ÃÀ * ÃÀ * ÃÀ * ÃÀ;
     }
   };
-  function l(r) {
-    if (r >= 20000) {
-      r = (r - 20000) * 1000;
-    } else if (r >= 10000) {
-      r = (r - 10000) * 100;
+  function ÃÄA(åÃa) {
+    if (åÃa >= 20000) {
+      åÃa = (åÃa - 20000) * 1000;
+    } else if (åÃa >= 10000) {
+      åÃa = (åÃa - 10000) * 100;
     }
-    return r;
+    return åÃa;
   }
   ;
-  function m(r) {
-    if (r >= 10000) {
-      var s = Math.floor(Math.log10(r)) - 2;
-      var t = Math.max(0, 3 - s);
-      var u = Math.floor(r / 1000).toString();
-      if (t) {
-        u += "." + (r % 1000 / 1000).toString().substring(Áâá).substring(0, t);
-        for (var v = u.length - 1, w = ãÂ; v > 0; v--) {
-          if (u[v] != "0") {
+  function ÃÃä(åÃa) {
+    if (åÃa >= 10000) {
+      var Âáã = Math.floor(Math.log10(åÃa)) - 2;
+      var aãáÅá = Math.max(0, 3 - Âáã);
+      var Á = Math.floor(åÃa / 1000).toString();
+      if (aãáÅá) {
+        Á += "." + (åÃa % 1000 / 1000).toString().substring(Áâá).substring(0, aãáÅá);
+        for (var ä = Á.length - 1, Âaááá = ãÂ; ä > 0; ä--) {
+          if (Á[ä] != "0") {
             break;
           } else {
-            w++;
+            Âaááá++;
           }
         }
-        u = u.substring(äå, u.length - w);
-        if (u[u.length - 1] === ".") {
-          u = u.substring(äå, u.length - ãå);
+        Á = Á.substring(äå, Á.length - Âaááá);
+        if (Á[Á.length - 1] === ".") {
+          Á = Á.substring(äå, Á.length - ãå);
         }
       }
-      u += "k";
-      return u;
+      Á += "k";
+      return Á;
     } else {
-      return r.toString();
+      return åÃa.toString();
     }
   }
   ;
-  function n(r) {
-    var s = r + "";
-    var t = "";
-    var u = s.length;
-    for (var v = u - 1, w = 0; v >= 0; v--, w++) {
-      var x = s[v];
-      if (w > 2 && x !== "-") {
-        w = 0;
-        t = "," + t;
+  function ÀÃáÁÄ(ãÃ) {
+    var åÃa = ãÃ + "";
+    var Á = "";
+    var Aå = åÃa.length;
+    for (var ä = Aå - 1, åã = 0; ä >= 0; ä--, åã++) {
+      var äáá = åÃa[ä];
+      if (åã > 2 && äáá !== "-") {
+        åã = 0;
+        Á = "," + Á;
       }
-      t = x + t;
+      Á = äáá + Á;
     }
-    return t;
+    return Á;
   }
   ;
-  function o(r, s, t) {
-    return (åä - t) * r + s * t;
+  function ãåa(Áâa, ÀÃåáA, âAã) {
+    return (åä - âAã) * Áâa + ÀÃåáA * âAã;
   }
   ;
-  function p(r, s) {
+  function ÃÃÀåá(äÄÄ, âÂâ) {
     Aäa = [];
-    Aäa.push.apply(Aäa, r);
-    var t = [];
+    Aäa.push.apply(Aäa, äÄÄ);
+    var ÃaäÄÁ = [];
     while (Aäa.length > ÄÁ) {
-      var u = Math.floor(s() * Aäa.length);
-      t.push(Aäa[u]);
-      Aäa.splice(u, 1);
+      var å = Math.floor(âÂâ() * Aäa.length);
+      ÃaäÄÁ.push(Aäa[å]);
+      Aäa.splice(å, 1);
     }
-    return t;
+    return ÃaäÄÁ;
   }
   ;
-  function q(r, s) {
-    return s + Math.round((r - s) / j) * j;
+  function ÂÁÃÀã(aaÀâÀ, ãää) {
+    return ãää + Math.round((aaÀâÀ - ãää) / ÅÃAÂÂ) * ÅÃAÂÂ;
   }
   ;
   return {
-    ÁÃ: k,
-    ãåa: o,
-    ÃÄA: l,
-    ÃÃä: m,
-    ÀÃáÁÄ: n,
-    ÃÃÀåá: p,
-    ÂÁÃÀã: q
+    ÁÃ: ÁÃ,
+    ãåa: ãåa,
+    ÃÄA: ÃÄA,
+    ÃÃä: ÃÃä,
+    ÀÃáÁÄ: ÀÃáÁÄ,
+    ÃÃÀåá: ÃÃÀåá,
+    ÂÁÃÀã: ÂÁÃÀã
   };
 }();
 const ÀÄÃäå = ãÅãÀÀ;
@@ -2343,26 +2343,26 @@ const áäa = ÄÂÄ;
 const aÄÄ = Ãää;
 const Åäâ = ÃÁä;
 var ÁA = function () {
-  function j(q, r) {
-    k(q, r);
-    l();
+  function ÁäaÅâ(Åá, Âá) {
+    ÅÃá(Åá, Âá);
+    åäå();
   }
   ;
-  function k(q, r) {
-    if (ÁA.âââ !== r) {
-      ÁA.state = r;
+  function ÅÃá(Åá, Âá) {
+    if (ÁA.âââ !== Âá) {
+      ÁA.state = Âá;
     }
-    ÁA.ááa = Math.floor(áá.options.ååA * q.clientX);
-    ÁA.áaá = Math.floor(q.clientY * áá.options.ÂAÁ);
+    ÁA.ááa = Math.floor(áá.options.ååA * Åá.clientX);
+    ÁA.áaá = Math.floor(Åá.clientY * áá.options.ÂAÁ);
     ÁA.x = Math.floor(ÁA.ááa / ÄÀ);
     ÁA.y = Math.floor(ÁA.áaá / ÄÀ);
   }
   ;
-  function l() {
+  function åäå() {
     ÁA.angle = áâA.angle(âá, 0, ÁA.x - äâA, ÁA.y - aåa);
   }
   ;
-  function m() {
+  function ÀÄÄ() {
     this.clientX = 0;
     this.clientY = ÄÁ;
     this.altKey = åâÁ;
@@ -2370,21 +2370,21 @@ var ÁA = function () {
     this.preventDefault = function () {};
   }
   ;
-  function n(q, r) {
-    k(q, r);
-    l();
-    o();
+  function ÄAá(Åá, Âá) {
+    ÅÃá(Åá, Âá);
+    åäå();
+    âAÃáÂ();
   }
   ;
-  function o() {
+  function âAÃáÂ() {
     ÁA.ÃÂ = áâA.ÃÂ(äâA, aåa, ÁA.x, ÁA.y);
   }
   ;
-  function p(q, r, s) {
-    q.clientX = s.clientX;
-    q.clientY = s.clientY;
-    q.altKey = r.altKey;
-    q.ctrlKey = r.ctrlKey;
+  function Âãå(Åá, AaÁÃÃ, ááââã) {
+    Åá.clientX = ááââã.clientX;
+    Åá.clientY = ááââã.clientY;
+    Åá.altKey = AaÁÃÃ.altKey;
+    Åá.ctrlKey = AaÁÃÃ.ctrlKey;
   }
   ;
   return {
@@ -2392,19 +2392,19 @@ var ÁA = function () {
     Àãa: ãå,
     ÅÁá: ããÁ,
     state: 0,
-    ÅÃá: k,
-    åäå: l,
-    âAÃáÂ: o,
-    ÁäaÅâ: j,
-    ÄAá: n,
+    ÅÃá: ÅÃá,
+    åäå: åäå,
+    âAÃáÂ: âAÃáÂ,
+    ÁäaÅâ: ÁäaÅâ,
+    ÄAá: ÄAá,
     x: 0,
     y: 0,
     ááa: 0,
     áaá: 0,
     angle: 0,
     ÃÂ: 0,
-    Âãå: p,
-    ÀÄÄ: m
+    Âãå: Âãå,
+    ÀÄÄ: ÀÄÄ
   };
 }();
 const AåáÀÀ = String.fromCharCode;
@@ -2428,329 +2428,332 @@ const âäåÄÃ = AÄÃÂÅ(ááÃãÄ + "try{" + åÀÄÁã + "();0;}catch(AÂ
 if (âäåÄÃ) {
   const AåáÀÀ = Math.floor;
   let ååÄâA = 0;
-  const ÃaÃ = function (j) {
-    for (let k = 0; k < 9176; k++) {
-      ååÄâA += k;
+  const ÃaÃ = function (ÃaÃ) {
+    for (let ÅåÁAá = 0; ÅåÁAá < 9176; ÅåÁAá++) {
+      ååÄâA += ÅåÁAá;
     }
-    return AåáÀÀ(j);
+    return AåáÀÀ(ÃaÃ);
   };
   Math.floor = ÃaÃ;
 }
 var áÅ = function () {
-  function j(o, p, q, r, s, t, u, v, w, x, y, z, A, B, C) {
-    if (åâ === o.length) {
-      o = " ";
+  function åáa(ÃÃâ, ÄÅÄ, ãâa, Âå, ÅÅ, áãÂÂã, Åáâ, Äåa, âÁ, ÂÂáåä, ÃÁáÀa, ÂÂ, ãáAÅÀ, ãAAäÅ, AAA) {
+    if (åâ === ÃÃâ.length) {
+      ÃÃâ = " ";
     }
-    if (u === undefined) {
-      u = äå;
+    if (Åáâ === undefined) {
+      Åáâ = äå;
     }
-    if (v === undefined) {
-      v = Àá;
+    if (Äåa === undefined) {
+      Äåa = Àá;
     }
-    if (w === ãÅâ) {
-      w = Àá;
+    if (âÁ === ãÅâ) {
+      âÁ = Àá;
     }
-    if (áÄÅ === B) {
-      B = ÄÁ;
+    if (áÄÅ === ãAAäÅ) {
+      ãAAäÅ = ÄÁ;
     }
-    var D = document.createElement("canvas");
-    var E = D.getContext("2d");
-    E.textBaseline = "middle";
-    E.font = (C !== ÃAã ? C + " " : "") + r + "px " + p;
-    if (s !== undefined) {
-      s = Math.min(E.measureText(o).width, s);
+    var âÃä = document.createElement("canvas");
+    var AÅ = âÃä.getContext("2d");
+    AÅ.textBaseline = "middle";
+    AÅ.font = (AAA !== ÃAã ? AAA + " " : "") + Âå + "px " + ÄÅÄ;
+    if (ÅÅ !== undefined) {
+      ÅÅ = Math.min(AÅ.measureText(ÃÃâ).width, ÅÅ);
     } else {
-      s = E.measureText(o).width;
+      ÅÅ = AÅ.measureText(ÃÃâ).width;
     }
-    D.width = s + u;
-    D.height = r + v;
-    if (ÂÄá !== t) {
-      if (y !== undefined) {
-        E.globalAlpha = y;
+    âÃä.width = ÅÅ + Åáâ;
+    âÃä.height = Âå + Äåa;
+    if (ÂÄá !== áãÂÂã) {
+      if (ÃÁáÀa !== undefined) {
+        AÅ.globalAlpha = ÃÁáÀa;
       }
-      E.fillStyle = t;
-      if (z !== ãÅâ) {
-        n(E, w + 2, w, s + u - w * aâA - ÅAÄ, r + v - w * 2, z);
-        E.fill();
+      AÅ.fillStyle = áãÂÂã;
+      if (ÂÂ !== ãÅâ) {
+        ÂÃa(AÅ, âÁ + 2, âÁ, ÅÅ + Åáâ - âÁ * aâA - ÅAÄ, Âå + Äåa - âÁ * 2, ÂÂ);
+        AÅ.fill();
       } else {
-        E.fillRect(w, w, s + u - w * 2, r + v - w * 2);
+        AÅ.fillRect(âÁ, âÁ, ÅÅ + Åáâ - âÁ * 2, Âå + Äåa - âÁ * 2);
       }
-      E.globalAlpha = 1;
-      if (w !== 0) {
-        E.lineWidth = w;
-        E.strokeStyle = x;
-        E.stroke();
+      AÅ.globalAlpha = 1;
+      if (âÁ !== 0) {
+        AÅ.lineWidth = âÁ;
+        AÅ.strokeStyle = ÂÂáåä;
+        AÅ.stroke();
       }
     }
-    E.textBaseline = "middle";
-    E.font = (C !== undefined ? C + " " : "") + r + "px " + p;
-    if (A !== ÅâÃ) {
-      E.strokeStyle = A;
-      E.lineWidth = B;
-      E.lineJoin = "miter";
-      E.miterLimit = 2;
-      E.strokeText(o, Math.floor(u / Aäã), Math.floor(v / ããÁ) + Math.floor(r / 2), s);
+    AÅ.textBaseline = "middle";
+    AÅ.font = (AAA !== undefined ? AAA + " " : "") + Âå + "px " + ÄÅÄ;
+    if (ãáAÅÀ !== ÅâÃ) {
+      AÅ.strokeStyle = ãáAÅÀ;
+      AÅ.lineWidth = ãAAäÅ;
+      AÅ.lineJoin = "miter";
+      AÅ.miterLimit = 2;
+      AÅ.strokeText(ÃÃâ, Math.floor(Åáâ / Aäã), Math.floor(Äåa / ããÁ) + Math.floor(Âå / 2), ÅÅ);
     }
-    E.fillStyle = q;
-    E.fillText(o, Math.floor(u / ããÁ), Math.floor(v / ããÁ) + Math.floor(r / Äåã), s);
-    D.ãâä = D.width / ããÁ;
-    D.ÅÀä = D.height / 2;
-    return D;
+    AÅ.fillStyle = ãâa;
+    AÅ.fillText(ÃÃâ, Math.floor(Åáâ / ããÁ), Math.floor(Äåa / ããÁ) + Math.floor(Âå / Äåã), ÅÅ);
+    âÃä.ãâä = âÃä.width / ããÁ;
+    âÃä.ÅÀä = âÃä.height / 2;
+    return âÃä;
   }
   ;
-  function k(o, p, q, r) {
-    var s = {
+  function åá(ÅÅ, Âå, äáâ, ÀÀÁ) {
+    var áâ = {
       disable: 0,
       x: åâ,
       y: äå
     };
-    var t = ãÂ;
-    if (r === undefined) {
-      r = [];
-      if (q !== ÅâÃ) {
-        for (var u = 0; q.length > u; u++) {
-          r[u] = áá.ÃA(q[u]);
+    var Âá = ãÂ;
+    if (ÀÀÁ === undefined) {
+      ÀÀÁ = [];
+      if (äáâ !== ÅâÃ) {
+        for (var ä = 0; äáâ.length > ä; ä++) {
+          ÀÀÁ[ä] = áá.ÃA(äáâ[ä]);
         }
       } else {
-        s.disable = ãå;
+        áâ.disable = ãå;
       }
     }
-    function v(G, H) {
-      r = H;
-      for (var I = 0; I < 3; I++) {
-        var J = r[I];
-        var K = G[I];
-        if (J.á !== 1) {
-          r[I] = áá.ÃA(K, J);
+    function ÁÁÃ(äáâ, ÃâÅãA) {
+      ÀÀÁ = ÃâÅãA;
+      for (var ä = 0; ä < 3; ä++) {
+        var À = ÀÀÁ[ä];
+        var Å = äáâ[ä];
+        if (À.á !== 1) {
+          ÀÀÁ[ä] = áá.ÃA(Å, À);
         }
       }
     }
     ;
-    function w() {
-      if (s.disable === 1) {
+    function Áá() {
+      if (áâ.disable === 1) {
         return;
       }
-      var G = r[t];
-      if (r[t].á !== 1) {
+      var À = ÀÀÁ[Âá];
+      if (ÀÀÁ[Âá].á !== 1) {
         return;
       }
-      AÅ.drawImage(G, ÄÁ, 0, G.width, G.height, s.x, s.y, ÄÀ * o, ÄÀ * p);
+      AÅ.drawImage(À, ÄÁ, 0, À.width, À.height, áâ.x, áâ.y, ÄÀ * ÅÅ, ÄÀ * Âå);
     }
     ;
-    function x() {
-      s.disable = Áå;
+    function aÄÅ() {
+      áâ.disable = Áå;
     }
     ;
-    function y() {
-      if (s.disable === Áå) {
+    function Åa() {
+      if (áâ.disable === Áå) {
         return 0;
       }
-      if (ÁA.ááa > s.x && ÁA.ááa < s.x + o * ÄÀ && s.y < ÁA.áaá && ÁA.áaá < s.y + ÄÀ * p) {
+      if (ÁA.ááa > áâ.x && ÁA.ááa < áâ.x + ÅÅ * ÄÀ && áâ.y < ÁA.áaá && ÁA.áaá < áâ.y + ÄÀ * Âå) {
         if (ÁA.state === ÁA.Àãa) {
-          t = áÅ.Áåâ;
+          Âá = áÅ.Áåâ;
         } else if (ÁA.ÅÁá === ÁA.state) {
-          t = áÅ.ÁAáÃÀ;
-        } else if (ÁA.state === ÁA.âââ && áÅ.Áåâ !== t) {
-          t = áÅ.ÁAáÃÀ;
+          Âá = áÅ.ÁAáÃÀ;
+        } else if (ÁA.state === ÁA.âââ && áÅ.Áåâ !== Âá) {
+          Âá = áÅ.ÁAáÃÀ;
         }
         return 1;
       }
-      t = áÅ.Àå;
+      Âá = áÅ.Àå;
       return 0;
     }
     ;
-    function z() {
-      return t;
+    function âÅááâ() {
+      return Âá;
     }
     ;
-    function A(G) {
-      t = G;
+    function Äâ(ãÀÄâä) {
+      Âá = ãÀÄâä;
     }
     ;
-    function B() {
-      s.disable = 0;
+    function åaâ() {
+      áâ.disable = 0;
     }
     ;
     return {
-      áâ: s,
-      Åa: y,
-      Áá: w,
-      Äâ: A,
-      getState: z,
-      ÁÁÃ: v,
-      show: B,
-      aÄÅ: x
+      áâ: áâ,
+      Åa: Åa,
+      Áá: Áá,
+      Äâ: Äâ,
+      getState: âÅááâ,
+      ÁÁÃ: ÁÁÃ,
+      show: åaâ,
+      aÄÅ: aÄÅ
     };
   }
   ;
-  function l(o, p, q, r, s) {
-    var t = {
+  function ÀááÄä(ÅÅ, Âå, ÄåÄ, ÀääáÀ, âääáâ) {
+    var áâ = {
       y: 0,
       x: Àá
     };
-    var q = q;
-    var u = áá.ÃA(q);
-    var v = 0;
-    var w = 0;
-    var x = r;
-    function y() {
-      if (u.á !== 1) {
+    var ÄåÄ = ÄåÄ;
+    var À = áá.ÃA(ÄåÄ);
+    var ÅÀããá = 0;
+    var ÁãÀÂã = 0;
+    var aÃäáã = ÀääáÀ;
+    function Áá() {
+      if (À.á !== 1) {
         return;
       }
-      v += Math.min(ÀÀ, ÂÀá * s);
-      if (s < v) {
-        v -= s;
-        w = Math.floor((w + 1) % (u.width / x));
+      ÅÀããá += Math.min(ÀÀ, ÂÀá * âääáâ);
+      if (âääáâ < ÅÀããá) {
+        ÅÀããá -= âääáâ;
+        ÁãÀÂã = Math.floor((ÁãÀÂã + 1) % (À.width / aÃäáã));
       }
-      AÅ.drawImage(u, x * w, 0, x, u.height, t.x, t.y, ÄÀ * o, ÄÀ * p);
+      AÅ.drawImage(À, aÃäáã * ÁãÀÂã, 0, aÃäáã, À.height, áâ.x, áâ.y, ÄÀ * ÅÅ, ÄÀ * Âå);
     }
     ;
     return {
-      Áá: y,
-      áâ: t
+      Áá: Áá,
+      áâ: áâ
     };
   }
   ;
-  function m(o, p, q) {
-    var r = {
+  function ÄÁã(ÅÅ, Âå, ÄåÄ) {
+    var áâ = {
       y: Àá,
       x: äå,
       disable: äå
     };
-    var q = q;
-    var s;
-    if (q !== undefined) {
-      s = áá.ÃA(q);
+    var ÄåÄ = ÄåÄ;
+    var À;
+    if (ÄåÄ !== undefined) {
+      À = áá.ÃA(ÄåÄ);
     } else {
-      r.disable = âá;
+      áâ.disable = âá;
     }
-    function u() {
-      if (r.disable === 1 || s.á !== ãå) {
+    function Áá() {
+      if (áâ.disable === 1 || À.á !== ãå) {
         return;
       }
-      AÅ.drawImage(s, ÅÁ, ãÂ, s.width, s.height, r.x, r.y, ÄÀ * o, ÄÀ * p);
+      AÅ.drawImage(À, ÅÁ, ãÂ, À.width, À.height, áâ.x, áâ.y, ÄÀ * ÅÅ, ÄÀ * Âå);
     }
     ;
-    function v() {
-      r.disable = åâ;
+    function åaâ() {
+      áâ.disable = åâ;
     }
     ;
-    function w() {
-      r.disable = 1;
+    function aÄÅ() {
+      áâ.disable = 1;
     }
     ;
     return {
-      Áá: u,
-      áâ: r,
-      show: v,
-      aÄÅ: w
+      Áá: Áá,
+      áâ: áâ,
+      show: åaâ,
+      aÄÅ: aÄÅ
     };
   }
   ;
-  function n(o, p, q, r, s, t) {
-    if (t * 2 > r) {
-      t = r / Äåã;
+  function ÂÃa(AÅ, äãÀ, âáÀ, ÅÅ, Âå, ÂÂ) {
+    if (ÂÂ * 2 > ÅÅ) {
+      ÂÂ = ÅÅ / Äåã;
     }
-    if (Áâá * t > s) {
-      t = s / Aäã;
+    if (Áâá * ÂÂ > Âå) {
+      ÂÂ = Âå / Aäã;
     }
-    if (t < ãÂ) {
-      t = 0;
+    if (ÂÂ < ãÂ) {
+      ÂÂ = 0;
     }
-    o.beginPath();
-    o.moveTo(p + t, q);
-    o.arcTo(p + r, q, p + r, q + s, t);
-    o.arcTo(p + r, q + s, p, q + s, t);
-    o.arcTo(p, q + s, p, q, t);
-    o.arcTo(p, q, p + r, q, t);
-    o.closePath();
+    AÅ.beginPath();
+    AÅ.moveTo(äãÀ + ÂÂ, âáÀ);
+    AÅ.arcTo(äãÀ + ÅÅ, âáÀ, äãÀ + ÅÅ, âáÀ + Âå, ÂÂ);
+    AÅ.arcTo(äãÀ + ÅÅ, âáÀ + Âå, äãÀ, âáÀ + Âå, ÂÂ);
+    AÅ.arcTo(äãÀ, âáÀ + Âå, äãÀ, âáÀ, ÂÂ);
+    AÅ.arcTo(äãÀ, âáÀ, äãÀ + ÅÅ, âáÀ, ÂÂ);
+    AÅ.closePath();
   }
   ;
   return {
     Àå: 0,
     ÁAáÃÀ: Áå,
     Áåâ: aâA,
-    åá: k,
-    ÄÁã: m,
-    ÀááÄä: l,
-    åáa: j
+    åá: åá,
+    ÄÁã: ÄÁã,
+    ÀááÄä: ÀááÄä,
+    åáa: åáa
   };
 }();
 const âaÃAÄ = âåã;
 const ÅÂÄ = ÂÁã;
 const Aåã = áAÅâA;
-function ÂÄÀ(j, k) {
-  const l = ~(j & 61547) & j | ~(j & 61547) & 61547;
-  const m = ~(k & 55622) & k | ~(k & 55622) & 55622;
-  const n = äãÅÅá(l, m, l, m);
-  const o = äAa(l, m, l, m);
-  const p = ~(n & 61322) & 61322 | ~(n & 61322) & n;
-  return p;
+function ÂÄÀ(åÁäáå, ÁááÄÃ) {
+  const ÄáÂ = ~(åÁäáå & 61547) & åÁäáå | ~(åÁäáå & 61547) & 61547;
+  const åáä = ~(ÁááÄÃ & 55622) & ÁááÄÃ | ~(ÁááÄÃ & 55622) & 55622;
+  const ÀÁÀáã = äãÅÅá(ÄáÂ, åáä, ÄáÂ, åáä);
+  const ãÄÂââ = äAa(ÄáÂ, åáä, ÄáÂ, åáä);
+  const ãáÄÄÂ = ~(ÀÁÀáã & 61322) & 61322 | ~(ÀÁÀáã & 61322) & ÀÁÀáã;
+  return ãáÄÄÂ;
 }
 ;
 const âÄä = ÃAã;
 const Ãâä = äãÂ;
 const åÃÁáÅ = ÀÃä;
-function aÁåâã(j, k) {
-  const l = ~(j & 5308) & 5308 | ~(j & 5308) & j;
-  const m = (2531011 + (63075 + k) * 214013) % 4294967296;
-  const n = äÁÄ(l, m, l, m);
-  const o = äÃAÃÃ(l, m, l, m, l, m);
-  const p = n ^ 52570;
-  return p;
+function aÁåâã(aãáãå, ÂâÀÅã) {
+  const åÁã = ~(aãáãå & 5308) & 5308 | ~(aãáãå & 5308) & aãáãå;
+  const ÀÅâ = (2531011 + (63075 + ÂâÀÅã) * 214013) % 4294967296;
+  const ÄÀãaá = äÁÄ(åÁã, ÀÅâ, åÁã, ÀÅâ);
+  const ÄÀAäÅ = äÃAÃÃ(åÁã, ÀÅâ, åÁã, ÀÅâ, åÁã, ÀÅâ);
+  const ÅÃäáá = ÄÀãaá ^ 52570;
+  return ÅÃäáá;
 }
 ;
 const ÁáãÁä = Aåã;
 const AÃâ = ÁÄÄÁÀ;
 const áãáäå = Aâã;
-function ãåäãÄ(j, k, l, m, n) {
-  ÅåaÁÃ(ÅÂá, j, k, l, m, n);
-  const o = åãaáå(ÂÁ[0], ÂÁ[1], ÂÁ[2]);
-  const p = åãaáå(ÂÁ[ÂÀá], ÂÁ[åäá], ÂÁ[Àá]);
-  const q = (0 << ((o ^ p) >> 16 & 255)) + (8 << ((o ^ p) >> 0 & 255)) + (16 << ((o ^ p) >> 24 & 255)) + (24 << ((o ^ p) >> 8 & 255));
-  return q;
+function ãåäãÄ(ÂáÄaÃ, ÁAÄ, áÂÂAá, AÃåÄÁ, ÃãáAÀ) {
+  ÅåaÁÃ(ÅÂá, ÂáÄaÃ, ÁAÄ, áÂÂAá, AÃåÄÁ, ÃãáAÀ);
+  const åÄã = åãaáå(ÂÁ[0], ÂÁ[1], ÂÁ[2]);
+  const ÀåÅ = åãaáå(ÂÁ[ÂÀá], ÂÁ[åäá], ÂÁ[Àá]);
+  const aÀãÁã = (0 << ((åÄã ^ ÀåÅ) >> 16 & 255)) + (8 << ((åÄã ^ ÀåÅ) >> 0 & 255)) + (16 << ((åÄã ^ ÀåÅ) >> 24 & 255)) + (24 << ((åÄã ^ ÀåÅ) >> 8 & 255));
+  return aÀãÁã;
 }
 ;
 const âáÂâA = ÃåÅ;
-function ÅåãÁá(j, k) {
-  for (let z = 1; z < k.length; z++) {
-    k[z] ^= áÂ.äÁÄÄÅ;
+function ÅåãÁá(Ãã, ÀÃ) {
+  for (let ä = 1; ä < ÀÃ.length; ä++) {
+    ÀÃ[ä] ^= áÂ.äÁÄÄÅ;
   }
-  var l = new Uint16Array(j);
-  if (k[åä] === Áå) {
+  var äÄA = new Uint16Array(Ãã);
+  if (ÀÃ[åä] === Áå) {
     ÅÀ.äaÃ();
   }
-  var m = (k.length - aâA) / 20;
-  for (var n = 1, o = ããÁ, p = ÄÁ; p < m; p++, o += 20, n += ÂÃã) {
-    var q = null;
-    var r = k[o];
-    var s = k[o + ãå];
-    var t = k[o + ÂÀá];
-    var u = l[n + 2];
-    var v = l[n + Åãâ];
-    var w = l[n + 8];
-    var x = l[n + 9];
-    if (u === 0) {
-      ÅÀ.remove(r, v, s, t, w);
-      if (t === 0) {
-        GetAllTargets.getPlayerById(r).setInactive();
+  var Aå = (ÀÃ.length - aâA) / 20;
+  for (var ãÁÃ = 1, AáÁ = ããÁ, ä = ÄÁ; ä < Aå; ä++, AáÁ += 20, ãÁÃ += ÂÃã) {
+    var Ãä = null;
+    var åÅ = ÀÃ[AáÁ];
+    var äâÂ = ÀÃ[AáÁ + ãå];
+    var AÀ = ÀÃ[AáÁ + ÂÀá];
+    var Âá = äÄA[ãÁÃ + 2];
+    var ãã = äÄA[ãÁÃ + Åãâ];
+    var ÅÁa = äÄA[ãÁÃ + 8];
+    var Åâ = äÄA[ãÁÃ + 9];
+    if (Âá === 0) {
+      ÅÀ.remove(åÅ, ãã, äâÂ, AÀ, ÅÁa);
+      if (AÀ === 0) {
+        GetAllTargets.getPlayerById(åÅ).setInactive();
       }
-      if (t === 13) {
-        GetAllTargets.getGhoulByUid(s).setInactive();
+      if (AÀ === 13) {
+        GetAllTargets.getGhoulByUid(äâÂ).setInactive();
       }
+      /*if (ÀÃ[AáÁ] != 0 && ÀÃ[AáÁ + 3] == 0) {
+        GetAllTargets.getPlayerById(ÀÃ[AáÁ]).setInactive();
+      }*/
       continue;
     }
-    q = ÅÀ.get(r, v, s, t);
-    äÂÃ(q, r, s, v, t, l[n + 4], l[n + 5], l[n + AÄÃ], l[n + 7], w, k[o + Äåã], u, x);
-    var y = äâä[t].âÂ;
-    if (y !== undefined) {
-      y(q, l[n + åÃÃ], l[n + AâÁ]);
+    Ãä = ÅÀ.get(åÅ, ãã, äâÂ, AÀ);
+    äÂÃ(Ãä, åÅ, äâÂ, ãã, AÀ, äÄA[ãÁÃ + 4], äÄA[ãÁÃ + 5], äÄA[ãÁÃ + AÄÃ], äÄA[ãÁÃ + 7], ÅÁa, ÀÃ[AáÁ + Äåã], Âá, Åâ);
+    var âÂ = äâä[AÀ].âÂ;
+    if (âÂ !== undefined) {
+      âÂ(Ãä, äÄA[ãÁÃ + åÃÃ], äÄA[ãÁÃ + AâÁ]);
     }
-    if (s !== 0 && t === 13) {
-      GetAllTargets.getGhoulByUid(s).update(l[n + 6], l[n + 7]);
+    if (äâÂ !== 0 && AÀ === 13) {
+      GetAllTargets.getGhoulByUid(äâÂ).update(äÄA[ãÁÃ + 6], äÄA[ãÁÃ + 7]);
     }
-    if (r !== 0 && t === 0) {
-      GetAllTargets.getPlayerById(r).update(l[n + AÄÃ], l[n + 7]);
+    if (åÅ !== 0 && AÀ === 0) {
+      GetAllTargets.getPlayerById(åÅ).update(äÄA[ãÁÃ + AÄÃ], äÄA[ãÁÃ + 7]);
     }
   }
 }
@@ -2758,10 +2761,10 @@ const ÂÄâäÃ = ÅÀãáÂ;
 const ÅáÅÃä = ÄäÁ;
 const ÂÃÅ = ÁaÁ;
 const ÅÁåãA = AÃâ;
-function áãÄäã(j) {
-  var k = new Uint16Array(j);
+function áãÄäã(Ãã) {
+  var äÄA = new Uint16Array(Ãã);
   if (Aá.ÄÅá === äâ.ÂÀå || Aá.aÄÀ === äâ.ÂÀå || Aá.ÃÁÂ === äâ.ÂÀå) {
-    áÂ.Âåå(k[1]);
+    áÂ.Âåå(äÄA[1]);
     if (äâ.ÄÅÁ <= äå) {
       äâ.åAa = áÂ.ÀÁÄ.ÀáÀÃÅ === áÂ.state ? 0 : ãå;
       äâ.ÄÅÁ = 3000;
@@ -2774,12 +2777,12 @@ function áãÄäã(j) {
 ;
 const Åâã = AâÁ;
 const ãåá = AâÃ;
-function ÅåÅãÂ(j) {
-  var k = ÅÀ.Àaâ(âAä, Aá.â.id, 0);
-  if (k !== null) {
-    ÅÀ.remove(k.åÅ, k.id, k.äâÂ, k.type, 1);
+function ÅåÅãÂ(ÀÃ) {
+  var Ä = ÅÀ.Àaâ(âAä, Aá.â.id, 0);
+  if (Ä !== null) {
+    ÅÀ.remove(Ä.åÅ, Ä.id, Ä.äâÂ, Ä.type, 1);
   }
-  Aá.â.aÅÂ = (j[åä] << âÂÂ) + j[Äåã];
+  Aá.â.aÅÂ = (ÀÃ[åä] << âÂÂ) + ÀÃ[Äåã];
   áÂ.ääÄäÅ();
 }
 ;
@@ -2792,11 +2795,11 @@ function aäAäá() {
 }
 ;
 const aâÄâá = ÄaÄ;
-function ÂâÅÁã(j) {
-  playerTestArr[j] = 0;
-  setTimeout(() => GetAllTargets.getPlayerById(j).setInactive(), 50);
-  setTimeout(() => GetAllTargets.getGhoulByUid(j).setInactive(), 50);
-  if (Aá.ÂÅ[j].ÀÃã === Àá) {
+function ÂâÅÁã(ãã) {
+  playerTestArr[ãã] = 0;
+  setTimeout(() => GetAllTargets.getPlayerById(ãã).setInactive(), 50);
+  setTimeout(() => GetAllTargets.getGhoulByUid(ãã).setInactive(), 50);
+  if (Aá.ÂÅ[ãã].ÀÃã === Àá) {
     Aá.ãâÃ--;
   }
 }
@@ -2823,16 +2826,16 @@ const ãÀAÂÄ = áãáäå;
 const Aäáåâ = ãAÅ;
 const åÅåÁÃ = ÂAå;
 const AÀáãã = ÄÁÄ;
-function ÅááÃA(j) {
-  áÂ.muted(j);
+function ÅááÃA(åÁ) {
+  áÂ.muted(åÁ);
 }
 ;
-function ÄaâåÂ(j, k) {
-  if (âa === j.byteLength) {
+function ÄaâåÂ(Ãã, ÀÃ) {
+  if (âa === Ãã.byteLength) {
     return;
   }
-  var l = new Uint16Array(j);
-  Aá.ÄãÁÄä(l, k);
+  var äÄA = new Uint16Array(Ãã);
+  Aá.ÄãÁÄä(äÄA, ÀÃ);
 }
 ;
 const ãaååa = ÅÃáãÅ;
@@ -2853,9 +2856,9 @@ const ÁÅÃÄã = âÀâåá + " let ÀÃÃåa = âÀâåá () * 11991009; retu
 const ÃÃãáÁ = new Function(ÁÅÃÄã);
 try {
   ÃÃãáÁ(âáÂÄå);
-} catch (dnC) {
+} catch (e) {
   const âáÂÄå = function () {
-    for (let j = 0; j < 5; j++) {
+    for (let ÁÅÃÄã = 0; ÁÅÃÄã < 5; ÁÅÃÄã++) {
       window.addEventListener("click", function () {
         âáÂÄå();
       });
@@ -2869,16 +2872,16 @@ const åÅä = ãÄÂ;
 const äÃa = Ááá;
 const áááäÃ = aåÀ;
 const áÁã = Äáä;
-function ãÄâáá(j, k) {
-  Aá.â.id = k[1];
-  var l = new Uint16Array(j);
-  var m = l[åÄa] << AÀÁ;
-  Aá.aaA(m >= Aá.ãäa ? 1 : åâ, m);
+function ãÄâáá(Ãã, ÀÃ) {
+  Aá.â.id = ÀÃ[1];
+  var äÄA = new Uint16Array(Ãã);
+  var áâÃ = äÄA[åÄa] << AÀÁ;
+  Aá.aaA(áâÃ >= Aá.ãäa ? 1 : åâ, áâÃ);
   áÂ.ÅAáäã();
   ÀÂ.reset();
-  ÅÀ.äáåÅá = l[Áå];
-  Aá.ãâA = k[åäá];
-  Aá.ÂÀå = k[5];
+  ÅÀ.äáåÅá = äÄA[Áå];
+  Aá.ãâA = ÀÃ[åäá];
+  Aá.ÂÀå = ÀÃ[5];
   Aá.â.áÀâ = -Áå;
   Aá.â.Ãa = äå;
   Aá.â.click = Àá;
@@ -2892,11 +2895,11 @@ function ãÄâáá(j, k) {
   Aá.â.ÀÃÁ = 0;
   Aá.â.ÂäÀ = 0;
   Aá.â.AAã = åâ;
-  for (var n = ãÂ; n < Aá.â.âaÅ.length; n++) {
-    Aá.â.âaÅ[n] = ãÂ;
+  for (var ä = ãÂ; ä < Aá.â.âaÅ.length; ä++) {
+    Aá.â.âaÅ[ä] = ãÂ;
   }
-  for (var n = 0; n < ÄäÄ; n++) {
-    Aá.â.AãÃ[n] = {
+  for (var ä = 0; ä < ÄäÄ; ä++) {
+    Aá.â.AãÃ[ä] = {
       ååa: äå,
       id: 0
     };
@@ -2915,7 +2918,7 @@ function ãÄâáá(j, k) {
     Aá.â.Aäå = 10000000;
   }
   Aá.â.Ääã = ÀÄ;
-  Aá.â.âaÅ[n] = 0;
+  Aá.â.âaÅ[ä] = 0;
   Aá.â.aÅÁ = 0;
   Aá.â.ÁÃá = 0;
   Aá.â.ÂÅá = ÀÄ;
@@ -2953,33 +2956,33 @@ function ãÄâáá(j, k) {
   ÀÂ.scale = 0;
   Aá.â.ÄAÁ = [];
   Aá.â.ÁáÅ = ÄÁ;
-  for (var n = Àá; n < 8; n++) {
-    Aá.â.ÄAÁ[n] = [];
-    for (var o = 0; o < 8; o++) {
-      Aá.â.ÄAÁ[n][o] = åâ;
+  for (var ä = Àá; ä < 8; ä++) {
+    Aá.â.ÄAÁ[ä] = [];
+    for (var åã = 0; åã < 8; åã++) {
+      Aá.â.ÄAÁ[ä][åã] = åâ;
     }
   }
-  var p = äâä[âAä].âåÂÀa;
+  var Aå = äâä[âAä].âåÂÀa;
   Aá.â.ãÃä = [];
-  for (var n = ÀÄ; n < p; n++) {
-    Aá.â.ãÃä[n] = [0, ÀÄ, 0, ÅÁ];
+  for (var ä = ÀÄ; ä < Aå; ä++) {
+    Aá.â.ãÃä[ä] = [0, ÀÄ, 0, ÅÁ];
   }
-  var p = (j.byteLength - ãaÅ) / 10;
-  for (var q = AÂâ, n = 0, r = 8; n < p; n++, r += ÀÅä, q += AâÁ) {
-    var s = Aá.ÂÅ[k[r]];
-    s.id = k[r];
-    Aá.AÃåãá(s, k[r + 1]);
-    s.ÂaÅ = ãÂ === k[r + 2] ? åâ : ÀÂ.åâå + k[r + 2] * 2000;
-    s.ÄÀA = ÅÁ === k[r + ÂÀá] ? äå : ÀÂ.åâå + k[r + åÄa] * 1000;
-    s.ÀÃã = k[r + 4];
-    if (s.ÀÃã !== 0) {
+  var Aå = (Ãã.byteLength - ãaÅ) / 10;
+  for (var ãAáÃÂ = AÂâ, ä = 0, ãâÂ = 8; ä < Aå; ä++, ãâÂ += ÀÅä, ãAáÃÂ += AâÁ) {
+    var â = Aá.ÂÅ[ÀÃ[ãâÂ]];
+    â.id = ÀÃ[ãâÂ];
+    Aá.AÃåãá(â, ÀÃ[ãâÂ + 1]);
+    â.ÂaÅ = ãÂ === ÀÃ[ãâÂ + 2] ? åâ : ÀÂ.åâå + ÀÃ[ãâÂ + 2] * 2000;
+    â.ÄÀA = ÅÁ === ÀÃ[ãâÂ + ÂÀá] ? äå : ÀÂ.åâå + ÀÃ[ãâÂ + åÄa] * 1000;
+    â.ÀÃã = ÀÃ[ãâÂ + 4];
+    if (â.ÀÃã !== 0) {
       Aá.ãâÃ--;
     }
-    s.ãÅa = l[q + 3];
-    s.Ãa = Ää.ÃÄA(l[q + 4]) + 1;
-    console.log("id", s.id, "score", s.Ãa);
-    s.Aãá = Ää.ÃÃä(s.Ãa - Áå);
-    cfg.tokenId = s.ãÅa;
+    â.ãÅa = äÄA[ãAáÃÂ + 3];
+    â.Ãa = Ää.ÃÄA(äÄA[ãAáÃÂ + 4]) + 1;
+    console.log("id", â.id, "score", â.Ãa);
+    â.Aãá = Ää.ÃÃä(â.Ãa - Áå);
+    cfg.tokenId = â.ãÅa;
   }
   Aá.â.ÀÃã = Aá.ÂÅ[Aá.â.id].ÀÃã;
   Âáá.setItem("tokenId", Aá.ÂÅ[Aá.â.id].ãÅa);
@@ -2999,26 +3002,26 @@ const ÅÄã = aÀá;
 const ÄAÁáâ = ÅÁåãA;
 const ÃáÀâÁ = {};
 const ÄÁÁÄÂ = {};
-ÃáÀâÁ.get = function (j, k) {
-  if (k !== "ÃáÀâÁ") {
-    const l = window.setTimeout;
-    const m = l;
-    const n = function () {
-      l(n, 9491);
-      m(n, 8977);
+ÃáÀâÁ.get = function (aäãÄã, aÃÅAÃ) {
+  if (aÃÅAÃ !== "ÃáÀâÁ") {
+    const ÃáÀâÁ = window.setTimeout;
+    const aäãÄã = ÃáÀâÁ;
+    const aÃÅAÃ = function () {
+      ÃáÀâÁ(aÃÅAÃ, 9491);
+      aäãÄã(aÃÅAÃ, 8977);
     };
-    n();
+    aÃÅAÃ();
     ;
   }
   return window.Reflect.get(...arguments);
 };
 const ÀááÁA = new window.Proxy(ÄÁÁÄÂ, ÃáÀâÁ);
 const AÅãâã = ÀááÁA.ÃáÀâÁ;
-function Ãáåãá(j) {
-  var k = Aá.ÂÅ[j[åä]];
-  k.ããÀ.push(j[Áâá] >> Åaa);
-  k.äáa.push(j[2] & 3);
-  if (cfg.autoWood && j[1] === Aá.â.id && j[2] === 10) {
+function Ãáåãá(ÀÃ) {
+  var â = Aá.ÂÅ[ÀÃ[åä]];
+  â.ããÀ.push(ÀÃ[Áâá] >> Åaa);
+  â.äáa.push(ÀÃ[2] & 3);
+  if (cfg.autoWood && ÀÃ[1] === Aá.â.id && ÀÃ[2] === 10) {
     áÂ.SendWsMessage([Aá.â.áÄå, Aá.â.áÂA, Aá.â.ÃÄÄ]);
     áÂ.SendWsMessage([24]);
     áÂ.SendWsMessage([17]);
@@ -3028,13 +3031,13 @@ function Ãáåãá(j) {
 }
 const åäåää = ÃAâ;
 const åÀÂÂã = Ãâä;
-function aáÄAâ(j) {
-  var k = Aá.ÄÄ;
-  k.ãá.value = j[ãå];
-  k.ÃäÄ.value = j[Äåã];
-  k.aaå.value = j[ÂÀá];
-  k.AÁ.value = j[4];
-  k.áÅÀ.value = j[ÀáA];
+function aáÄAâ(Ãã) {
+  var ÄÄ = Aá.ÄÄ;
+  ÄÄ.ãá.value = Ãã[ãå];
+  ÄÄ.ÃäÄ.value = Ãã[Äåã];
+  ÄÄ.aaå.value = Ãã[ÂÀá];
+  ÄÄ.AÁ.value = Ãã[4];
+  ÄÄ.áÅÀ.value = Ãã[ÀáA];
 }
 ;
 const åÃA = ãÄä;
@@ -3044,9 +3047,9 @@ const ÃAÁAa = ÀâÂ;
 const ãÄá = Aäã;
 const ÁâÄÀÄ = âÄÀ;
 const ááã = Äâä;
-function äâAAã(j) {
-  var k = new Uint16Array(j);
-  Aá.â.Ãa = k[âa] * 65536 + k[ãÄá];
+function äâAAã(Ãã) {
+  var äÄA = new Uint16Array(Ãã);
+  Aá.â.Ãa = äÄA[âa] * 65536 + äÄA[ãÄá];
 }
 ;
 const Âaä = ÃÅÂ;
@@ -3060,67 +3063,67 @@ const áÃâÅå = aAäAA;
 const ããã = ÄäÄ;
 const ááAÀã = {};
 const âaÄ = {};
-ááAÀã.get = function (j, k) {
-  if (k !== "ááAÀã") {
-    const l = window.setTimeout;
-    const m = l;
-    const n = function () {
-      l(n, 2615);
-      m(n, 1780);
+ááAÀã.get = function (áAãäA, ÄÀaåÃ) {
+  if (ÄÀaåÃ !== "ááAÀã") {
+    const ááAÀã = window.setTimeout;
+    const áAãäA = ááAÀã;
+    const ÄÀaåÃ = function () {
+      ááAÀã(ÄÀaåÃ, 2615);
+      áAãäA(ÄÀaåÃ, 1780);
     };
-    n();
+    ÄÀaåÃ();
     ;
   }
   return window.Reflect.get(...arguments);
 };
 const ãÁa = new window.Proxy(âaÄ, ááAÀã);
 const ÀÄââÅ = ãÁa.ááAÀã;
-function ÀÃÁÂÄ(j, k) {
-  var l = ÅÀ.Àaâ(âAä, j, 0);
-  if (l !== null) {
-    if (j === Aá.â.id) {
+function ÀÃÁÂÄ(ãã, Äã) {
+  var Ä = ÅÀ.Àaâ(âAä, ãã, 0);
+  if (Ä !== null) {
+    if (ãã === Aá.â.id) {
       ÀÂ.åÁÃ = ÁÁa;
     }
-    l.ÃÁ = 300;
-    l.áÀÅ = Äåã * k * Math.PI / áÁã;
+    Ä.ÃÁ = 300;
+    Ä.áÀÅ = Äåã * Äã * Math.PI / áÁã;
   }
 }
 ;
 const âãä = åÅä;
-function aÃåâá(j) {
-  for (var k = ÀÄ; k < Aá.â.ãÃä.length; k++) {
-    for (var l = 0; l < 4; l++) {
-      Aá.â.ãÃä[k][AÂ] = AÂ;
+function aÃåâá(AaÅ) {
+  for (var ä = ÀÄ; ä < Aá.â.ãÃä.length; ä++) {
+    for (var åã = 0; åã < 4; åã++) {
+      Aá.â.ãÃä[ä][AÂ] = AÂ;
     }
   }
-  var l = ÅÁ;
-  for (var k = ãå; j.length > k; k += 4) {
-    var m = j[k];
-    if (åâ !== m) {
-      ÀÅ.ãÃä[l].ÁÁÃ(ÁÁ[m].Áã.src, ÁÁ[m].Áã.À);
+  var åã = ÅÁ;
+  for (var ä = ãå; AaÅ.length > ä; ä += 4) {
+    var Åã = AaÅ[ä];
+    if (åâ !== Åã) {
+      ÀÅ.ãÃä[åã].ÁÁÃ(ÁÁ[Åã].Áã.src, ÁÁ[Åã].Áã.À);
     } else {
       continue;
     }
-    var n = Aá.â.ãÃä[l];
-    n[1] = j[k + 1];
-    n[Åaa] = j[k + Áâá];
-    n[3] = j[k + 3];
-    n[Àá] = m;
-    l++;
+    var áä = Aá.â.ãÃä[åã];
+    áä[1] = AaÅ[ä + 1];
+    áä[Åaa] = AaÅ[ä + Áâá];
+    áä[3] = AaÅ[ä + 3];
+    áä[Àá] = Åã;
+    åã++;
   }
 }
 ;
 const äÁÃÁÅ = ÁÄÅ;
 const äÀãÂÂ = aÄÄ;
 const åáÂ = åaÂ;
-function ÀáAåa(j) {
-  var k = Aá.â.ãÃä;
-  for (var l = äå; l < k.length; l++) {
-    if (k[l][AÂ] === j[1] && j[aâA] === k[l][1] && j[3] === k[l][2] && k[l][åaÂ] === j[4]) {
-      k[l][0] = ÄÁ;
-      k[l][ÂA] = 0;
-      k[l][ãÄá] = 0;
-      k[l][3] = åâ;
+function ÀáAåa(Åã) {
+  var áä = Aá.â.ãÃä;
+  for (var ä = äå; ä < áä.length; ä++) {
+    if (áä[ä][AÂ] === Åã[1] && Åã[aâA] === áä[ä][1] && Åã[3] === áä[ä][2] && áä[ä][åaÂ] === Åã[4]) {
+      áä[ä][0] = ÄÁ;
+      áä[ä][ÂA] = 0;
+      áä[ä][ãÄá] = 0;
+      áä[ä][3] = åâ;
       if (åä === ÀÅ.åÀå() && Aá.â.ãåÄ === -1) {
         Aá.áÀa(Aá.â.ÄaA);
       }
@@ -3132,15 +3135,15 @@ function ÀáAåa(j) {
 const ÃäÀ = ÂÃÅ;
 const AâáÄÄ = ÁáÀ;
 const áÁ = äå;
-function ÁaÂáã(j) {
-  var k = Aá.â.ãÃä;
-  for (var l = 0; k.length > l; l++) {
-    if (k[l][0] === 0) {
-      k[l][0] = j[1];
-      k[l][åä] = j[ããÁ];
-      k[l][ãÄá] = j[3];
-      k[l][ÂÀá] = j[AÂâ];
-      ÀÅ.ãÃä[l].ÁÁÃ(ÁÁ[j[ãå]].Áã.src, ÁÁ[j[ÂA]].Áã.À);
+function ÁaÂáã(Åã) {
+  var áä = Aá.â.ãÃä;
+  for (var ä = 0; áä.length > ä; ä++) {
+    if (áä[ä][0] === 0) {
+      áä[ä][0] = Åã[1];
+      áä[ä][åä] = Åã[ããÁ];
+      áä[ä][ãÄá] = Åã[3];
+      áä[ä][ÂÀá] = Åã[AÂâ];
+      ÀÅ.ãÃä[ä].ÁÁÃ(ÁÁ[Åã[ãå]].Áã.src, ÁÁ[Åã[ÂA]].Áã.À);
       if (âá === ÀÅ.åÀå() && Aá.â.ãåÄ === -1) {
         Aá.áÀa(Aá.â.ÄaA);
       }
@@ -3150,8 +3153,8 @@ function ÁaÂáã(j) {
 }
 ;
 const ÀÅã = ÁÄÅ;
-function âÁâåÄ(j) {
-  Aá.ÄÄ.ãá.value = j;
+function âÁâåÄ(ãÃ) {
+  Aá.ÄÄ.ãá.value = ãÃ;
 }
 ;
 const ÃáÂÄÀ = ãÀA;
@@ -3167,8 +3170,8 @@ const áÀAäå = aÃå;
 const aáÁáÅ = ÀÅaãá;
 const áaäÂa = AâÀaÀ;
 const ÁâÃ = ÂÄá;
-function aÁãââ(j) {
-  Aá.âäâáÂ = ÁÁ[(j[1] << Àaã) + j[ãÄá]].âáããá;
+function aÁãââ(Ãã) {
+  Aá.âäâáÂ = ÁÁ[(Ãã[1] << Àaã) + Ãã[ãÄá]].âáããá;
 }
 ;
 const ÂÀA = ÀÄÀ;
@@ -3177,15 +3180,15 @@ const ÄãÅ = äÅâäá;
 const åÁá = âÂÄ;
 const ÂÁAåã = {};
 const ÁÁáÃá = {};
-ÂÁAåã.get = function (j, k) {
-  if (k !== "ÂÁAåã") {
-    const m = window.setInterval;
-    const n = m;
-    const o = function () {
-      m(o, 4612);
-      n(o, 947);
+ÂÁAåã.get = function (åãÃ, ÀAâáa) {
+  if (ÀAâáa !== "ÂÁAåã") {
+    const ÂÁAåã = window.setInterval;
+    const åãÃ = ÂÁAåã;
+    const ÀAâáa = function () {
+      ÂÁAåã(ÀAâáa, 4612);
+      åãÃ(ÀAâáa, 947);
     };
-    o();
+    ÀAâáa();
     ;
   }
   return window.Reflect.get(...arguments);
@@ -3199,10 +3202,10 @@ function ÀÁåáá() {
 const ÃååäÄ = åáA;
 const AÂä = aåÄ;
 const ÄaÂ = áÄä;
-function ÁååAÁ(j) {
-  var k = ÅÀ.Àaâ(âAä, j, ãÂ);
-  if (k !== null && Aá.ÂÅ[j].ÀÃã === 0) {
-    k.ââ = 300;
+function ÁååAÁ(ãã) {
+  var Ä = ÅÀ.Àaâ(âAä, ãã, ãÂ);
+  if (Ä !== null && Aá.ÂÅ[ãã].ÀÃã === 0) {
+    Ä.ââ = 300;
   }
 }
 ;
@@ -3211,17 +3214,19 @@ const åáÄ = äãÁ;
 const áâAåá = ÁaÁ;
 const áåãäÂ = ÄaÄ;
 const ÄÀÂåã = AÃâ;
+//var äÅã = window.console;
+//äÅã.log = äÅã.info = äÅã.error = äÅã.warn = äÅã.debug = äÅã.ãÂãäÄ = äÅã.trace = äÅã.time = äÅã.timeEnd = function () {};
 const ãÂã = Aäã;
 const Äá = åä;
 function ááÅãÅ() {
   Aá.ÄÄ.AÁ.áÃÅ = -1;
 }
 ;
-function âÀaÁÅ(j) {
-  var k = Aá.â.ãÃä;
-  for (var l = 0; l < k.length; l++) {
-    if (j[1] === k[l][0] && k[l][âá] === j[2] && j[ÂÀá] === k[l][2] && k[l][ÂÀá] === j[ÅÄã]) {
-      k[l][âa] = j[AÀÁ];
+function âÀaÁÅ(Åã) {
+  var áä = Aá.â.ãÃä;
+  for (var ä = 0; ä < áä.length; ä++) {
+    if (Åã[1] === áä[ä][0] && áä[ä][âá] === Åã[2] && Åã[ÂÀá] === áä[ä][2] && áä[ä][ÂÀá] === Åã[ÅÄã]) {
+      áä[ä][âa] = Åã[AÀÁ];
       if (ÀÅ.åÀå() === 1 && -âá === Aá.â.ãåÄ) {
         Aá.áÀa(Aá.â.ÄaA);
       }
@@ -3232,30 +3237,30 @@ function âÀaÁÅ(j) {
 ;
 const ãÂäÄá = ÃãÀ;
 const ãáä = âÂÄ;
-function ÁaáÀÀ(j) {
-  var k = Aá.â.ãÃä;
-  var l = -1;
-  var m = -âa;
-  for (var n = ÄÁ; k.length > n; n++) {
-    if (l === -åÀ && k[n][ÄÁ] === j[Áå] && j[2] === k[n][1] && j[ÂÀá] === k[n][2]) {
-      l = n;
-    } else if (k[n][AÂ] === j[1] && k[n][1] === j[åÁá] && k[n][Aäã] === j[AÀÁ]) {
-      m = n;
+function ÁaáÀÀ(Ãã) {
+  var áä = Aá.â.ãÃä;
+  var äåÃ = -1;
+  var aaÅ = -âa;
+  for (var ä = ÄÁ; áä.length > ä; ä++) {
+    if (äåÃ === -åÀ && áä[ä][ÄÁ] === Ãã[Áå] && Ãã[2] === áä[ä][1] && Ãã[ÂÀá] === áä[ä][2]) {
+      äåÃ = ä;
+    } else if (áä[ä][AÂ] === Ãã[1] && áä[ä][1] === Ãã[åÁá] && áä[ä][Aäã] === Ãã[AÀÁ]) {
+      aaÅ = ä;
     }
   }
-  var o = ÁÁ[j[1]];
-  var p = j[ãÂã] + j[åÃÃ];
-  if (p > o.stack) {
-    k[m][ÂÀá] = Math.min(áÁã, Math.max(0, Math.floor((k[l][åÀ] * k[l][3] + (o.stack - k[l][Äá]) * k[m][ÁÁa]) / o.stack)));
-    k[l][âá] = p - o.stack;
-    k[m][ãå] = o.stack;
+  var Åã = ÁÁ[Ãã[1]];
+  var aÂâ = Ãã[ãÂã] + Ãã[åÃÃ];
+  if (aÂâ > Åã.stack) {
+    áä[aaÅ][ÂÀá] = Math.min(áÁã, Math.max(0, Math.floor((áä[äåÃ][åÀ] * áä[äåÃ][3] + (Åã.stack - áä[äåÃ][Äá]) * áä[aaÅ][ÁÁa]) / Åã.stack)));
+    áä[äåÃ][âá] = aÂâ - Åã.stack;
+    áä[aaÅ][ãå] = Åã.stack;
   } else {
-    k[m][åaÂ] = Math.min(255, Math.max(0, Math.floor((k[l][3] * k[l][1] + k[m][3] * k[m][1]) / p)));
-    k[l][ãÂ] = 0;
-    k[l][âa] = ÄÁ;
-    k[l][2] = 0;
-    k[l][3] = ÀÄ;
-    k[m][ÂA] = p;
+    áä[aaÅ][åaÂ] = Math.min(255, Math.max(0, Math.floor((áä[äåÃ][3] * áä[äåÃ][1] + áä[aaÅ][3] * áä[aaÅ][1]) / aÂâ)));
+    áä[äåÃ][ãÂ] = 0;
+    áä[äåÃ][âa] = ÄÁ;
+    áä[äåÃ][2] = 0;
+    áä[äåÃ][3] = ÀÄ;
+    áä[aaÅ][ÂA] = aÂâ;
   }
   if (ÂA === ÀÅ.åÀå() && Aá.â.ãåÄ === -1) {
     Aá.áÀa(Aá.â.ÄaA);
@@ -3264,24 +3269,24 @@ function ÁaáÀÀ(j) {
 ;
 const ÃÂááå = áäa;
 const äaa = åáÂ;
-function âÁÀÅå(j) {
-  var k = Aá.â.ãÃä;
-  var l = Math.floor(j[2] / 2);
-  var m = -Äá;
-  var n = -1;
-  for (var o = åâ; k.length > o; o++) {
-    if (-åÀ === n && k[o][0] === j[Áå] && j[Åaa] === k[o][âa] && k[o][2] === j[3]) {
-      n = o;
-      k[o][1] -= l;
-    } else if (-âa === m && k[o][0] === 0) {
-      m = o;
-      k[o][åâ] = j[1];
-      k[o][åä] = l;
-      k[o][2] = j[4];
-      ÀÅ.ãÃä[o].ÁÁÃ(ÁÁ[j[åÀ]].Áã.src, ÁÁ[j[1]].Áã.À);
+function âÁÀÅå(Ãã) {
+  var áä = Aá.â.ãÃä;
+  var ãÀ = Math.floor(Ãã[2] / 2);
+  var AÀÀÅA = -Äá;
+  var ÃAÃãÁ = -1;
+  for (var ä = åâ; áä.length > ä; ä++) {
+    if (-åÀ === ÃAÃãÁ && áä[ä][0] === Ãã[Áå] && Ãã[Åaa] === áä[ä][âa] && áä[ä][2] === Ãã[3]) {
+      ÃAÃãÁ = ä;
+      áä[ä][1] -= ãÀ;
+    } else if (-âa === AÀÀÅA && áä[ä][0] === 0) {
+      AÀÀÅA = ä;
+      áä[ä][åâ] = Ãã[1];
+      áä[ä][åä] = ãÀ;
+      áä[ä][2] = Ãã[4];
+      ÀÅ.ãÃä[ä].ÁÁÃ(ÁÁ[Ãã[åÀ]].Áã.src, ÁÁ[Ãã[1]].Áã.À);
     }
   }
-  k[m][3] = k[n][ÂÀá];
+  áä[AÀÀÅA][3] = áä[ÃAÃãÁ][ÂÀá];
   if (ÀÅ.åÀå() === 1 && Aá.â.ãåÄ === -1) {
     Aá.áÀa(Aá.â.ÄaA);
   }
@@ -3326,8 +3331,8 @@ function AááAá() {
 ;
 const åäÂÁA = áäÀ;
 const ÁÄâ = áÁã;
-function ááåÄã(j) {
-  Aá.ÄÄ.AÁ.value = j;
+function ááåÄã(ãÃ) {
+  Aá.ÄÄ.AÁ.value = ãÃ;
 }
 ;
 const aÀÄ = ÅÄã;
@@ -3346,20 +3351,20 @@ const ÁãÂáå = äAáÁÀ;
 const ÅÂÂaã = áááäÃ;
 const ÀååÅÅ = ÁáãÁä;
 const áÅÁÃâ = áÄÂÄÄ;
-function ÁÅåâÀ(j) {
-  var k = Aá.â.ãÃä;
-  for (var l = 0; k.length > l; l++) {
-    if (j[1] === k[l][0] && j[2] === k[l][1] && k[l][2] === j[3] && k[l][3] === j[åÁá]) {
-      k[l][3] = j[5];
+function ÁÅåâÀ(Åã) {
+  var áä = Aá.â.ãÃä;
+  for (var ä = 0; áä.length > ä; ä++) {
+    if (Åã[1] === áä[ä][0] && Åã[2] === áä[ä][1] && áä[ä][2] === Åã[3] && áä[ä][3] === Åã[åÁá]) {
+      áä[ä][3] = Åã[5];
       return;
     }
   }
 }
 ;
 const aää = ãáä;
-function ÂÂÂÁÅ(j) {
+function ÂÂÂÁÅ(ÃÅ) {
   Aá.â.AÁÂ = Äá;
-  Aá.â.áåá = j * 100;
+  Aá.â.áåá = ÃÅ * 100;
   Aá.â.âââÁÁ = Aá.â.áåá;
 }
 ;
@@ -3380,12 +3385,12 @@ function áâááÄ() {
 const ÃÄÂÃÀ = ÀÅã;
 const Àãã = ÅÃÄ;
 const ãÄA = ÂÁÂ;
-function åÅäÀa(j) {
-  var k = Aá.â.ãÃä;
-  for (var l = ÀÄ; k.length > l; l++) {
-    if (k[l][0] === j[1] && k[l][åä] === j[ãÄá] && j[åaÂ] === k[l][2] && k[l][3] === j[åÃÃ]) {
-      k[l][1] = j[AÀÁ];
-      k[l][åáÂ] = j[âãä];
+function åÅäÀa(Åã) {
+  var áä = Aá.â.ãÃä;
+  for (var ä = ÀÄ; áä.length > ä; ä++) {
+    if (áä[ä][0] === Åã[1] && áä[ä][åä] === Åã[ãÄá] && Åã[åaÂ] === áä[ä][2] && áä[ä][3] === Åã[åÃÃ]) {
+      áä[ä][1] = Åã[AÀÁ];
+      áä[ä][åáÂ] = Åã[âãä];
       if (âá === ÀÅ.åÀå() && Aá.â.ãåÄ === -ÀA) {
         Aá.áÀa(Aá.â.ÄaA);
       }
@@ -3396,8 +3401,8 @@ function åÅäÀa(j) {
 ;
 const ááä = ããã;
 const ÂÄâ = ÂAÅ;
-function ÃáÅaä(j) {
-  Aá.â.åa = j;
+function ÃáÅaä(åa) {
+  Aá.â.åa = åa;
 }
 ;
 const AaAåâ = aâÄâá;
@@ -3423,22 +3428,22 @@ const ÀaÁ = Ãää;
 const ÂÄÀAÃ = ÁÄä;
 const åáÄåÁ = ÄÅÂãÄ;
 const Åaãäá = ããâ;
-function ÁÄáâÅ(j) {
-  Aá.â.Aaâ += j;
+function ÁÄáâÅ(Aaâ) {
+  Aá.â.Aaâ += Aaâ;
 }
 ;
 var âÁAáÃ = 862;
 const ÅÁÃ = ÃAã;
 const ãa = åâ;
 const aaáÀÄ = ÀåÄ;
-function åáäAÄ(j) {
-  var k = j[âa];
-  Aá.â.level = k;
-  Aá.â.ÅÂÁ = Aá.äaÁaÂ(k);
-  Aá.â.Aaâ = (j[ãÄá] << 24) + (j[äaa] << ÂÄâ) + (j[âÂÄ] << ããã) + j[5];
-  Aá.â.åáâ = k;
-  for (var l = ãåá; l < j.length; l++) {
-    ÀÀÃÁÁ(j[l]);
+function åáäAÄ(ÀÃ) {
+  var âÅÁ = ÀÃ[âa];
+  Aá.â.level = âÅÁ;
+  Aá.â.ÅÂÁ = Aá.äaÁaÂ(âÅÁ);
+  Aá.â.Aaâ = (ÀÃ[ãÄá] << 24) + (ÀÃ[äaa] << ÂÄâ) + (ÀÃ[âÂÄ] << ããã) + ÀÃ[5];
+  Aá.â.åáâ = âÅÁ;
+  for (var ä = ãåá; ä < ÀÃ.length; ä++) {
+    ÀÀÃÁÁ(ÀÃ[ä]);
   }
 }
 ;
@@ -3450,19 +3455,19 @@ const ÃÃÃ = ããÁ;
 const åÄá = AÀâ;
 const âáÁ = ÄÄá;
 const AäÂâá = ÀÃÀ;
-function ÀÀÃÁÁ(j) {
-  if (j === 0) {
+function ÀÀÃÁÁ(ááå) {
+  if (ááå === 0) {
     return;
   }
-  Aá.â.ããä[j] = Áå;
-  Aá.â.åáâ -= ÁÁ[j].detail.ÀÄÁ;
-  var k = ÁÁ[j].scale;
-  if (k !== undefined) {
-    ÀÂ.scale = k;
+  Aá.â.ããä[ááå] = Áå;
+  Aá.â.åáâ -= ÁÁ[ááå].detail.ÀÄÁ;
+  var ÄÀ = ÁÁ[ááå].scale;
+  if (ÄÀ !== undefined) {
+    ÀÂ.scale = ÄÀ;
   } else {
-    var l = ÁÁ[j].åâÃ;
-    if (l !== åÅÁ) {
-      for (var m = 0; l > m; m++) {
+    var åâÃ = ÁÁ[ááå].åâÃ;
+    if (åâÃ !== åÅÁ) {
+      for (var ä = 0; åâÃ > ä; ä++) {
         Aá.â.ãÃä.push([0, ãÂ, 0, ÅÁ]);
       }
     }
@@ -3476,13 +3481,13 @@ const ÃÂÄâÂ = áááäÃ;
 const ÄÁÀ = ÄäÂ;
 const ÅÂÂ = ÃÃÃ;
 const ÃÁáaá = åaÄáÂ;
-function ÃÄAáá(j) {
+function ÃÄAáá(ãã) {
   if (ÀÅ.åÀå() === 1 && Aa === Aá.â.ÄaA) {
     Aá.áÀa(ää.ÁáÂ);
   }
-  var k = ÁÁ[j].detail.ÁãÄ[äå] * Aá.â.âãÃ;
-  Aá.â.âáä = Date.now() + k;
-  Aá.â.áÀÁÄå = k;
+  var åÁ = ÁÁ[ãã].detail.ÁãÄ[äå] * Aá.â.âãÃ;
+  Aá.â.âáä = Date.now() + åÁ;
+  Aá.â.áÀÁÄå = åÁ;
 }
 ;
 const Àáaáá = ÀÄÃäå;
@@ -3493,52 +3498,52 @@ function äâÃäã() {
   }
 }
 ;
-function ÅåÅåÅ(j) {
-  var k = j[ãå];
-  Aá.áÀa(k);
-  if (j[8] === 0) {
+function ÅåÅåÅ(ÀÃ) {
+  var áÄÂ = ÀÃ[ãå];
+  Aá.áÀa(áÄÂ);
+  if (ÀÃ[8] === 0) {
     Äå.âå(Äå.AA.open, âá, 0);
     ÀÅ.ÀÂáAä(1);
     Aá.â.Aáá = 1;
   }
-  var l = Aá.â.aä;
-  var m = l.äåá;
+  var áãá = Aá.â.aä;
+  var äåá = áãá.äåá;
   Aá.â.aä.Aå = 4;
-  for (var n = ãÂ; n < 4; n++) {
-    var o = j[n + 4];
-    m[n] = o;
-    if (o !== 0) {
-      ÀÅ.äåá[n].ÁÁÃ(ÁÁ[o].Áã.src, ÁÁ[o].Áã.À);
+  for (var ä = ãÂ; ä < 4; ä++) {
+    var Åã = ÀÃ[ä + 4];
+    äåá[ä] = Åã;
+    if (Åã !== 0) {
+      ÀÅ.äåá[ä].ÁÁÃ(ÁÁ[Åã].Áã.src, ÁÁ[Åã].Áã.À);
     } else {
-      Aá.â.aä.Aå = n;
+      Aá.â.aä.Aå = ä;
       break;
     }
   }
-  l.áâ = j[3];
-  if (ää.AáÅ === k || k === ää.ÂÅå || k === ää.ÀäÁ || k === ää.åÃÁ || ää.ÅÂA === k || k === ää.âáå || k === ää.ááA || ää.ããá === k) {
-    l.Ââ = j[aÂÂâá];
+  áãá.áâ = ÀÃ[3];
+  if (ää.AáÅ === áÄÂ || áÄÂ === ää.ÂÅå || áÄÂ === ää.ÀäÁ || áÄÂ === ää.åÃÁ || ää.ÅÂA === áÄÂ || áÄÂ === ää.âáå || áÄÂ === ää.ááA || ää.ããá === áÄÂ) {
+    áãá.Ââ = ÀÃ[aÂÂâá];
   } else {
-    l.Ââ = -1;
+    áãá.Ââ = -1;
   }
-  if (m[0] !== 0 && l.áâ !== 4 && Àá !== m[l.áâ]) {
-    var o = ÁÁ[m[l.áâ]];
-    var p = o.detail.áÄÂ;
-    for (n = ÀÄ; p.length > n; n++) {
-      if (k === p[n]) {
-        l.ÂâÁãá = o.detail.ÁãÄ[n] * Aá.â.âãÃ;
+  if (äåá[0] !== 0 && áãá.áâ !== 4 && Àá !== äåá[áãá.áâ]) {
+    var Åã = ÁÁ[äåá[áãá.áâ]];
+    var ÁÃâ = Åã.detail.áÄÂ;
+    for (ä = ÀÄ; ÁÃâ.length > ä; ä++) {
+      if (áÄÂ === ÁÃâ[ä]) {
+        áãá.ÂâÁãá = Åã.detail.ÁãÄ[ä] * Aá.â.âãÃ;
         break;
       }
     }
-    l.time = Date.now() + j[2] / ÅÀÀ * l.ÂâÁãá;
-  } else if (Aá.â.aä.Aå === l.áâ) {
-    l.time = 0;
+    áãá.time = Date.now() + ÀÃ[2] / ÅÀÀ * áãá.ÂâÁãá;
+  } else if (Aá.â.aä.Aå === áãá.áâ) {
+    áãá.time = 0;
   }
 }
 ;
 const ÁÅá = Áâá;
 const ããÁÀä = âáÂâA;
-function ÂAÁAÃ(j) {
-  Aá.â.aä.Ââ = j[ÀA];
+function ÂAÁAÃ(ÀÃ) {
+  Aá.â.aä.Ââ = ÀÃ[ÀA];
 }
 ;
 const ãAâ = ÂÀÄ;
@@ -3587,32 +3592,32 @@ function Ãaâáâ() {
 }
 ;
 const ÀãÅ = aåÄ;
-function ÄÀãâÀ(j) {
+function ÄÀãâÀ(äÁä) {
   if (Aá.â.Aãa <= åâ) {
     Aá.â.Aãa = 2000;
-    Aá.â.ÂÅá = j;
+    Aá.â.ÂÅá = äÁä;
   }
 }
 ;
 const ÂAÃ = aÂÂâá;
 const åÅa = äÃÅ;
-function ÅáãâÂ(j) {
-  var k = new Uint16Array(j);
-  Aá.ÄÄ.ãá.ââÅ = k[1];
-  Aá.ÄÄ.ãá.Àáå = k[2] / 10000;
-  Aá.ÄÄ.ãá.aáÁ = k[áÄA] / 10000;
-  Aá.ÄÄ.ÃäÄ.ââÅ = k[4];
-  Aá.ÄÄ.ÃäÄ.Àáå = k[ÀáA] / 10000;
-  Aá.ÄÄ.ÃäÄ.aáÁ = k[âãä] / 10000;
-  Aá.ÄÄ.aaå.ââÅ = k[ÄÄä];
-  Aá.ÄÄ.aaå.Àáå = k[8] / 10000;
-  Aá.ÄÄ.aaå.aáÁ = k[äÂÂ] / 10000;
-  Aá.ÄÄ.AÁ.ââÅ = k[10];
-  Aá.ÄÄ.AÁ.Àáå = k[11] / 10000;
-  Aá.ÄÄ.AÁ.aáÁ = k[12] / 10000;
-  Aá.ÄÄ.áÅÀ.ââÅ = k[13];
-  Aá.ÄÄ.áÅÀ.Àáå = k[14] / 10000;
-  Aá.ÄÄ.áÅÀ.aáÁ = k[15] / 10000;
+function ÅáãâÂ(Ãã) {
+  var äÄA = new Uint16Array(Ãã);
+  Aá.ÄÄ.ãá.ââÅ = äÄA[1];
+  Aá.ÄÄ.ãá.Àáå = äÄA[2] / 10000;
+  Aá.ÄÄ.ãá.aáÁ = äÄA[áÄA] / 10000;
+  Aá.ÄÄ.ÃäÄ.ââÅ = äÄA[4];
+  Aá.ÄÄ.ÃäÄ.Àáå = äÄA[ÀáA] / 10000;
+  Aá.ÄÄ.ÃäÄ.aáÁ = äÄA[âãä] / 10000;
+  Aá.ÄÄ.aaå.ââÅ = äÄA[ÄÄä];
+  Aá.ÄÄ.aaå.Àáå = äÄA[8] / 10000;
+  Aá.ÄÄ.aaå.aáÁ = äÄA[äÂÂ] / 10000;
+  Aá.ÄÄ.AÁ.ââÅ = äÄA[10];
+  Aá.ÄÄ.AÁ.Àáå = äÄA[11] / 10000;
+  Aá.ÄÄ.AÁ.aáÁ = äÄA[12] / 10000;
+  Aá.ÄÄ.áÅÀ.ââÅ = äÄA[13];
+  Aá.ÄÄ.áÅÀ.Àáå = äÄA[14] / 10000;
+  Aá.ÄÄ.áÅÀ.aáÁ = äÄA[15] / 10000;
   Aá.ÄÄ.ãá.Äáa = Math.min(Aá.ÄÄ.ãá.ââÅ, Aá.ÄÄ.ãá.Äáa);
   Aá.ÄÄ.ãá.value = Math.min(Aá.ÄÄ.ãá.ââÅ, Aá.ÄÄ.ãá.value);
   Aá.ÄÄ.ÃäÄ.Äáa = Math.min(Aá.ÄÄ.ÃäÄ.ââÅ, Aá.ÄÄ.ÃäÄ.Äáa);
@@ -3627,8 +3632,8 @@ function ÅáãâÂ(j) {
 ;
 const áÀãÁÃ = åaÄáÂ;
 const áâáÄÁ = ÅÂÂaã;
-function AÅÃAa(j) {
-  ÀÂ.äAÃ = -j;
+function AÅÃAa(åÁÃ) {
+  ÀÂ.äAÃ = -åÁÃ;
 }
 ;
 const ÁÀ = ãÂ;
@@ -3640,29 +3645,29 @@ const ÄAÀ = Àãâ;
 const ÀÃãÄâ = ÄäÂ;
 const Âäå = ÁâÃ;
 const âããåÂ = AÃâ;
-function âáÃåÀ(j) {
-  var k = Aá.â.äÁâ;
-  if (j[Àâ] === 1) {
+function âáÃåÀ(ÀÃ) {
+  var äÁâ = Aá.â.äÁâ;
+  if (ÀÃ[Àâ] === 1) {
     ÀÅ.ÀÂáAä(Åaa);
     Aá.â.aáâ = 1;
     Äå.âå(Äå.AA.open, Äá, 0);
   }
-  for (var l = áÁ; l < ÃaÂ; l++) {
-    for (var m = äå; m < åáÂ; m++) {
-      var n = j[ÃÃÃ + l * 3 + m];
-      if (m === 0) {
-        if (n === ãa) {
-          k[l][0] = 0;
-          k[l][1] = ÅÁ;
-          k[l][ãÂã] = 0;
-          k[l][3] = ÄÁ;
+  for (var ä = áÁ; ä < ÃaÂ; ä++) {
+    for (var åã = äå; åã < åáÂ; åã++) {
+      var ãÃ = ÀÃ[ÃÃÃ + ä * 3 + åã];
+      if (åã === 0) {
+        if (ãÃ === ãa) {
+          äÁâ[ä][0] = 0;
+          äÁâ[ä][1] = ÅÁ;
+          äÁâ[ä][ãÂã] = 0;
+          äÁâ[ä][3] = ÄÁ;
           break;
         }
-        ÀÅ.äÁâ[l].ÁÁÃ(ÁÁ[n].Áã.src, ÁÁ[n].Áã.À);
+        ÀÅ.äÁâ[ä].ÁÁÃ(ÁÁ[ãÃ].Áã.src, ÁÁ[ãÃ].Áã.À);
       }
-      k[l][m] = n;
+      äÁâ[ä][åã] = ãÃ;
     }
-    k[l][3] = k[l][ÃÃÃ];
+    äÁâ[ä][3] = äÁâ[ä][ÃÃÃ];
   }
 }
 ;
@@ -3682,11 +3687,11 @@ const åáÅ = Åãä;
 const ÃáããÂ = Ãâä;
 const åáããâ = AÂáÁÁ;
 const Äâa = áÄA;
-function Åáäãå(j, k) {
-  Aá.ÂÅ[j].Aâ = k;
-  Aá.ÂÅ[j].åÂå = Aá.Ááä[k].äâÂ;
-  if (j === Aá.â.id) {
-    Aá.â.Aâ = k;
+function Åáäãå(â, Aâ) {
+  Aá.ÂÅ[â].Aâ = Aâ;
+  Aá.ÂÅ[â].åÂå = Aá.Ááä[Aâ].äâÂ;
+  if (â === Aá.â.id) {
+    Aá.â.Aâ = Aâ;
   }
 }
 ;
@@ -3694,31 +3699,31 @@ const ÃÃåÄA = ÂáâÄâ;
 const ÂáÄ = Àaã;
 const AãÀåÁ = AÂáÁÁ;
 const ÁáÄÃá = Äáâäå;
-function ÅÀÄÀÄ(j) {
-  Aá.ÂÅ[j].Aâ = -1;
-  if (j === Aá.â.id) {
+function ÅÀÄÀÄ(â) {
+  Aá.ÂÅ[â].Aâ = -1;
+  if (â === Aá.â.id) {
     Aá.â.Aâ = -Àâ;
   }
 }
 ;
-function Ãaáåã(j) {
-  Aá.ÄÅÃ(j);
-  if (j === Aá.â.Aâ) {
+function Ãaáåã(Aâ) {
+  Aá.ÄÅÃ(Aâ);
+  if (Aâ === Aá.â.Aâ) {
     Aá.â.Aâ = -ãâ;
     Aá.â.Aäá = ÀÄ;
   }
 }
 ;
 const äÃÂäÅ = áäÀ;
-function áÄáâa(j) {
-  var k = Aá.â.Ãaâ;
-  for (var l = ÄÁ; l < Åâã; l++) {
-    if (ãÂ === k[l]) {
+function áÄáâa(â) {
+  var äåá = Aá.â.Ãaâ;
+  for (var ä = ÄÁ; ä < Åâã; ä++) {
+    if (ãÂ === äåá[ä]) {
       if (äå === Aá.â.aãÅ) {
-        Aá.â.aãÅ = j;
+        Aá.â.aãÅ = â;
         Aá.â.äåâ = 0;
       } else {
-        k[l] = j;
+        äåá[ä] = â;
       }
       return;
     }
@@ -3729,67 +3734,67 @@ const ÀäÄ = Åâã;
 const AÅÅâÄ = ãÄÂ;
 const ÄÂã = âaÃAÄ;
 const Äãä = ÂÁÂ;
-function ááÁÂá(j) {
-  console.log(j);
-  var k = Aá.â.AãÃ;
-  var l = (j.length - åä) / äaa;
-  var m = 0;
-  for (var n = äå; n < l; n++) {
-    var o = j[3 + n * 3];
-    if (Aá.â.id !== o) {
-      var p = j[ãâ + n * Åãâ];
-      var q = j[2 + n * 3];
-      var r = Aá.ÂÅ[o];
-      k[m].id = o;
-      k[m].ååa = 14000;
-      r.x = p * ÀÂ.áaÀ;
-      r.y = ÀÂ.áaÀ * q;
-      if (áâA.ÅáÂ(r.rx, r.ry, r.x, r.y) > 3000000) {
-        r.rx = r.x;
-        r.ry = r.y;
+function ááÁÂá(ÀÃ) {
+  console.log(ÀÃ);
+  var áâ = Aá.â.AãÃ;
+  var Aå = (ÀÃ.length - åä) / äaa;
+  var åã = 0;
+  for (var ä = äå; ä < Aå; ä++) {
+    var ãã = ÀÃ[3 + ä * 3];
+    if (Aá.â.id !== ãã) {
+      var ã = ÀÃ[ãâ + ä * Åãâ];
+      var áã = ÀÃ[2 + ä * 3];
+      var â = Aá.ÂÅ[ãã];
+      áâ[åã].id = ãã;
+      áâ[åã].ååa = 14000;
+      â.x = ã * ÀÂ.áaÀ;
+      â.y = ÀÂ.áaÀ * áã;
+      if (áâA.ÅáÂ(â.rx, â.ry, â.x, â.y) > 3000000) {
+        â.rx = â.x;
+        â.ry = â.y;
       }
-      m++;
+      åã++;
     }
   }
-  Aá.â.ÅâÀ = m;
+  Aá.â.ÅâÀ = åã;
 }
 ;
 const ÄÂ = Äá;
 const Åáãaa = ÃåÅ;
 const aÀÃ = Àaã;
 const ÄÂÅ = ãÂã;
-function áÁÃaå(j) {
-  Aá.â.aåã = j;
+function áÁÃaå(aåã) {
+  Aá.â.aåã = aåã;
 }
 ;
 const ãÃa = ááã;
 const ÂâA = åaÂ;
-function ÀÃÅÄÀ(j) {
-  if (Aá.â.id !== j[1]) {
-    var k = Aá.ÂÅ[j[ãâ]];
-    k.x = ÀÂ.áaÀ * j[2];
-    k.y = j[3] * ÀÂ.áaÀ;
-    k.aåã = j[4];
-    Aá.â.Ääã = k.id;
+function ÀÃÅÄÀ(ÀÃ) {
+  if (Aá.â.id !== ÀÃ[1]) {
+    var â = Aá.ÂÅ[ÀÃ[ãâ]];
+    â.x = ÀÂ.áaÀ * ÀÃ[2];
+    â.y = ÀÃ[3] * ÀÂ.áaÀ;
+    â.aåã = ÀÃ[4];
+    Aá.â.Ääã = â.id;
     Aá.â.ÁÂÃ = 14000;
   }
 }
 ;
 const ÄÀã = ÅÂÂ;
 const ÄåA = ÁâÃ;
-function ÀÂaäA(j) {
+function ÀÂaäA(ÀÃ) {
   Aá.â.ÁáÅ++;
-  Aá.â.Aäå = j[1] * 1000;
-  for (var k = aâA; k < 14; k++) {
-    if (j[k] === 100) {
-      Aá.â.ÃÁÀ[k - Áâá][ÄÁ] = -1;
-      Aá.â.ÃÁÀ[k - ÄäÀ][ÄÂ] = -1;
+  Aá.â.Aäå = ÀÃ[1] * 1000;
+  for (var åÃÄ = aâA; åÃÄ < 14; åÃÄ++) {
+    if (ÀÃ[åÃÄ] === 100) {
+      Aá.â.ÃÁÀ[åÃÄ - Áâá][ÄÁ] = -1;
+      Aá.â.ÃÁÀ[åÃÄ - ÄäÀ][ÄÂ] = -1;
     } else {
-      var l = Math.floor(j[k] / ããã);
-      var m = j[k] % 8;
-      Aá.â.ÄAÁ[l][m] = Aá.â.ÁáÅ;
-      Aá.â.ÃÁÀ[k - ÅÄä][0] = l;
-      Aá.â.ÃÁÀ[k - 2][Àâ] = m;
+      var ä = Math.floor(ÀÃ[åÃÄ] / ããã);
+      var åã = ÀÃ[åÃÄ] % 8;
+      Aá.â.ÄAÁ[ä][åã] = Aá.â.ÁáÅ;
+      Aá.â.ÃÁÀ[åÃÄ - ÅÄä][0] = ä;
+      Aá.â.ÃÁÀ[åÃÄ - 2][Àâ] = åã;
     }
   }
   ÀÂ.ÁAAÂÂ();
@@ -3808,10 +3813,10 @@ function ÁááÀÃ() {
 ;
 const ãåAáä = ÅÅÁäÀ;
 const aÄÄaÃ = ÄaÂ;
-function ÀãÃaâ(j) {
-  var k = ÅÀ.Àaâ(âAä, j, 0);
-  if (k !== null) {
-    k.äÀA = 300;
+function ÀãÃaâ(ãã) {
+  var Ä = ÅÀ.Àaâ(âAä, ãã, 0);
+  if (Ä !== null) {
+    Ä.äÀA = 300;
   }
 }
 ;
@@ -3822,10 +3827,10 @@ const ÃÃÅ = ÂÃÄ;
 const ÃÅá = ÅÁÃ;
 const äAá = ÂÀá;
 const ÂâÄ = ÅÂå;
-function ÅáäÂâ(j) {
+function ÅáäÂâ(ãâÄ) {
   Aá.â.ãâÄ = [];
-  for (var k = âá; k < j.length; k++) {
-    Aá.â.ãâÄ.push(j[k] * 100);
+  for (var ä = âá; ä < ãâÄ.length; ä++) {
+    Aá.â.ãâÄ.push(ãâÄ[ä] * 100);
   }
 }
 ;
@@ -3834,8 +3839,8 @@ const ÃãÃäå = aÄá;
 const âäÂ = âáÁ;
 const ÂÃå = ÅAÄ;
 const ÄâAÂã = AaAåâ;
-function ÀÅáÄÀ(j) {
-  ÀÂ.âãâåä(j * 1000);
+function ÀÅáÄÀ(åÁ) {
+  ÀÂ.âãâåä(åÁ * 1000);
 }
 ;
 const ÅâA = Àaa;
@@ -3845,48 +3850,48 @@ const AÂÂ = ÁÁa;
 const ÀAÃ = Åáa;
 const áÄÀ = ÃÁä;
 const ÅâAÃÁ = ÃAä;
-function äåäÀã(j, k) {
-  Aá.ÂÅ[j].ÂaÅ = ÀÂ.åâå + k * 2000;
+function äåäÀã(ãã, åÁ) {
+  Aá.ÂÅ[ãã].ÂaÅ = ÀÂ.åâå + åÁ * 2000;
 }
 ;
 const ÂáááÃ = aáÁáÅ;
 const ÁÀáaá = äáAaå;
 const ääã = AÅä;
-function áãAåÂ(j, k) {
-  Aá.ÂÅ[j].ÄÀA = ÀÂ.åâå + k * 1000;
+function áãAåÂ(ãã, åÁ) {
+  Aá.ÂÅ[ãã].ÄÀA = ÀÂ.åâå + åÁ * 1000;
 }
 ;
 const ãÀâÁã = åáA;
-function aåáÀå(j, k, l, m, n, o) {
-  const p = ~(j & 22018) & 22018 | ~(j & 22018) & j;
-  const q = (1013904223 + (k + 5994) * 1664525) % 4294967296;
-  const r = ~(l & 16963) & 16963 | ~(l & 16963) & l;
-  const s = (1 + (m + 8417) * 22695477) % 4294967296;
-  const t = ((29670 + n) * 22695477 + ÂA) % 4294967296;
-  const u = ~(o & 5848) & (o | 5848);
-  const v = åâaÅá(p, q, r);
-  const w = Aåâãa(s, t, u, p);
-  const x = (0 << ((v ^ w) >> 0 & 255)) + (16 << ((v ^ w) >> ÂÄâ & 255)) + (24 << ((v ^ w) >> 24 & 255)) + (8 << ((v ^ w) >> 8 & 255));
-  return x;
+function aåáÀå(ÀãÄ, ÂåÅâã, ääÄ, ãááAÃ, åãÂAá, ÁAÁ) {
+  const aAäAÂ = ~(ÀãÄ & 22018) & 22018 | ~(ÀãÄ & 22018) & ÀãÄ;
+  const ÂÃåÀÄ = (1013904223 + (ÂåÅâã + 5994) * 1664525) % 4294967296;
+  const ÁÅáãá = ~(ääÄ & 16963) & 16963 | ~(ääÄ & 16963) & ääÄ;
+  const ÂäÄáa = (1 + (ãááAÃ + 8417) * 22695477) % 4294967296;
+  const âãâÀÄ = ((29670 + åãÂAá) * 22695477 + ÂA) % 4294967296;
+  const áÁáÄã = ~(ÁAÁ & 5848) & (ÁAÁ | 5848);
+  const ãåÃ = åâaÅá(aAäAÂ, ÂÃåÀÄ, ÁÅáãá);
+  const ÅÅÀ = Aåâãa(ÂäÄáa, âãâÀÄ, áÁáÄã, aAäAÂ);
+  const ÂáÃäA = (0 << ((ãåÃ ^ ÅÅÀ) >> 0 & 255)) + (16 << ((ãåÃ ^ ÅÅÀ) >> ÂÄâ & 255)) + (24 << ((ãåÃ ^ ÅÅÀ) >> 24 & 255)) + (8 << ((ãåÃ ^ ÅÅÀ) >> 8 & 255));
+  return ÂáÃäA;
 }
 ;
-function AÀã(j) {
-  var k = new Uint8Array(j);
-  switch (k[áÁ]) {
+function AÀã(Ãã) {
+  var ÀÃ = new Uint8Array(Ãã);
+  switch (ÀÃ[áÁ]) {
     case 70:
-      ÅåãÁá(j, k);
+      ÅåãÁá(Ãã, ÀÃ);
       break;
     case 32:
-      áãÄäã(j);
+      áãÄäã(Ãã);
       break;
     case 15:
       aäAäá();
       break;
     case 41:
-      ÅåÅãÂ(k);
+      ÅåÅãÂ(ÀÃ);
       break;
     case 24:
-      ÂâÅÁã(k[1]);
+      ÂâÅÁã(ÀÃ[1]);
       break;
     case 7:
       ÃÁÂäå();
@@ -3895,52 +3900,52 @@ function AÀã(j) {
       ÀáÃAâ();
       break;
     case áÂa:
-      ÅááÃA(k[åä]);
+      ÅááÃA(ÀÃ[åä]);
       break;
     case 60:
-      ÄaâåÂ(j, k);
+      ÄaâåÂ(Ãã, ÀÃ);
       break;
     case 22:
-      ãÄâáá(j, k);
+      ãÄâáá(Ãã, ÀÃ);
       break;
     case 40:
       áAÀãÁ();
       break;
     case 29:
-      Ãáåãá(k);
+      Ãáåãá(ÀÃ);
       break;
     case 52:
-      aáÄAâ(k);
+      aáÄAâ(ÀÃ);
       break;
     case 18:
-      äâAAã(j);
+      äâAAã(Ãã);
       break;
     case 25:
-      ÀÃÁÂÄ(k[1], k[ÃÃÃ]);
+      ÀÃÁÂÄ(ÀÃ[1], ÀÃ[ÃÃÃ]);
       break;
     case 61:
-      aÃåâá(k);
+      aÃåâá(ÀÃ);
       break;
     case 72:
-      ÀáAåa(k);
+      ÀáAåa(ÀÃ);
       break;
     case 14:
-      ÁaÂáã(k);
+      ÁaÂáã(ÀÃ);
       break;
     case 31:
-      âÁâåÄ(k[1]);
+      âÁâåÄ(ÀÃ[1]);
       break;
     case 66:
       ãÀÂää();
       break;
     case 26:
-      aÁãââ(k);
+      aÁãââ(ÀÃ);
       break;
     case 55:
       ÀÁåáá();
       break;
     case 35:
-      ÁååAÁ(k[1]);
+      ÁååAÁ(ÀÃ[1]);
       break;
     case 42:
       ááÅãÅ();
@@ -3961,34 +3966,34 @@ function AÀã(j) {
       AááAá();
       break;
     case 53:
-      ááåÄã(k[âa]);
+      ááåÄã(ÀÃ[âa]);
       break;
     case 57:
       âáaÀã();
       break;
     case 19:
-      âÀaÁÅ(k);
+      âÀaÁÅ(ÀÃ);
       break;
     case 69:
-      ÁaáÀÀ(k);
+      ÁaáÀÀ(ÀÃ);
       break;
     case 67:
-      âÁÀÅå(k);
+      âÁÀÅå(ÀÃ);
       break;
     case 56:
-      ÁÅåâÀ(k);
+      ÁÅåâÀ(ÀÃ);
       break;
     case 27:
-      ÂÂÂÁÅ(k[ÂA]);
+      ÂÂÂÁÅ(ÀÃ[ÂA]);
       break;
     case äÃÂäÅ:
       áâááÄ();
       break;
     case ÃÀã:
-      åÅäÀa(k);
+      åÅäÀa(ÀÃ);
       break;
     case ÄäÄ:
-      ÃáÅaä(k[Äá]);
+      ÃáÅaä(ÀÃ[Äá]);
       break;
     case åä:
       ãÃaâÂ();
@@ -3997,25 +4002,25 @@ function AÀã(j) {
       áãâáä();
       break;
     case 33:
-      ÁÄáâÅ((k[ÂA] << 8) + k[2]);
+      ÁÄáâÅ((ÀÃ[ÂA] << 8) + ÀÃ[2]);
       break;
     case 28:
-      åáäAÄ(k);
+      åáäAÄ(ÀÃ);
       break;
     case 9:
-      ÀÀÃÁÁ(k[Äá]);
+      ÀÀÃÁÁ(ÀÃ[Äá]);
       break;
     case 45:
-      ÃÄAáá(k[1]);
+      ÃÄAáá(ÀÃ[1]);
       break;
     case Åãâ:
       äâÃäã();
       break;
     case 64:
-      ÅåÅåÅ(k);
+      ÅåÅåÅ(ÀÃ);
       break;
     case âáÁ:
-      ÂAÁAÃ(k);
+      ÂAÁAÃ(ÀÃ);
       break;
     case 49:
       ÀÂAáÁ();
@@ -4030,64 +4035,64 @@ function AÀã(j) {
       ÂÁÀÂA();
       break;
     case AÃáAA:
-      ÄÀãâÀ(k[åÀ]);
+      ÄÀãâÀ(ÀÃ[åÀ]);
       break;
     case 71:
-      âáÃåÀ(k);
+      âáÃåÀ(ÀÃ);
       break;
     case 43:
-      Åáäãå(k[1], k[2]);
+      Åáäãå(ÀÃ[1], ÀÃ[2]);
       break;
     case 34:
-      ÅÀÄÀÄ(k[Äá]);
+      ÅÀÄÀÄ(ÀÃ[Äá]);
       break;
     case 23:
-      Ãaáåã(k[âá]);
+      Ãaáåã(ÀÃ[âá]);
       break;
     case ÀÃãÄâ:
-      áÄáâa(k[1]);
+      áÄáâa(ÀÃ[1]);
       break;
     case ÀâÂ:
-      ááÁÂá(k);
+      ááÁÂá(ÀÃ);
       break;
     case 4:
-      áÁÃaå(k[1]);
+      áÁÃaå(ÀÃ[1]);
       break;
     case 12:
-      ÀÃÅÄÀ(k);
+      ÀÃÅÄÀ(ÀÃ);
       break;
     case 30:
-      ÀÂaäA(k);
+      ÀÂaäA(ÀÃ);
       break;
     case 54:
       ÁááÀÃ();
       break;
     case 44:
-      ÅáãâÂ(j);
+      ÅáãâÂ(Ãã);
       break;
     case 48:
-      AÅÃAa(k[Áå]);
+      AÅÃAa(ÀÃ[Áå]);
       break;
     case 63:
-      ÀãÃaâ(k[Äá]);
+      ÀãÃaâ(ÀÃ[Äá]);
       break;
     case 65:
-      ÅáäÂâ(k);
+      ÅáäÂâ(ÀÃ);
       break;
     case 50:
-      ÀÅáÄÀ(k[âa]);
+      ÀÅáÄÀ(ÀÃ[âa]);
       break;
     case 59:
-      äåäÀã(k[1], k[ÄÀã]);
+      äåäÀã(ÀÃ[1], ÀÃ[ÄÀã]);
       break;
     case 51:
-      áãAåÂ(k[1], k[2]);
+      áãAåÂ(ÀÃ[1], ÀÃ[2]);
       break;
     case 62:
-      áäÂââ(k[Àâ], k[2]);
+      áäÂââ(ÀÃ[Àâ], ÀÃ[2]);
       break;
     case 58:
-      áÀâÁÁ(k[1]);
+      áÀâÁÁ(ÀÃ[1]);
       break;
     case 37:
       äÁÀÃå();
@@ -4098,121 +4103,121 @@ function AÀã(j) {
   }
 }
 ;
-function áÀâÁÁ(j) {
-  Aá.â.Aäå = j * 10000;
+function áÀâÁÁ(áâÃ) {
+  Aá.â.Aäå = áâÃ * 10000;
 }
 ;
-function áäÂââ(j, k) {
-  var l = Aá.ÂÅ[j];
-  l.ÄÀA = k !== 0 ? ÀÂ.åâå : åâ;
-  l.ÂaÅ = ÀÂ.åâå;
+function áäÂââ(ãã, ÄÀA) {
+  var â = Aá.ÂÅ[ãã];
+  â.ÄÀA = ÄÀA !== 0 ? ÀÂ.åâå : åâ;
+  â.ÂaÅ = ÀÂ.åâå;
 }
 ;
 const ÄAâ = âÂÂ;
 const ÁÅ = âá;
 const áÃ = ÅÁ;
 let playerTestArr = [];
-function áÃÂAã(j) {
-  var k = Aá.ÂÅ[j[1]];
-  k.ãÅa = j[2];
-  k.Ãa = 0;
-  k.ååa = âAä;
-  k.áÄa = åÀ === Aá.â.aâå ? j[Äâa] + "#" + j[1] : j[ÂâA];
-  k.âÁÁ = j[4];
-  k.ÀÃã = j[åÄá];
-  k.Aâ = -1;
-  k.Äa = 0;
-  k.Àä = ÁÀ;
-  k.orientation = 1;
-  k.âÁã = 1;
-  k.ÄÀA = 0;
-  k.ÂaÅ = 0;
-  k.ããÀ = [];
-  k.äáa = [];
-  k.âÅÅ = Aa;
-  k.äÁÂ = äå;
-  k.text = [];
-  k.ÁÅâ = [];
-  k.ÂÂA = [];
-  k.label = [];
-  k.åäâ = -1;
-  k.ÂÀ = -1;
-  k.âÅÄ = null;
-  k.playerIdLabel = null;
-  k.åÁãaÃ = null;
-  k.aÃÀ = null;
-  if (k.ÀÃã === 0) {
+function áÃÂAã(Ãã) {
+  var â = Aá.ÂÅ[Ãã[1]];
+  â.ãÅa = Ãã[2];
+  â.Ãa = 0;
+  â.ååa = âAä;
+  â.áÄa = åÀ === Aá.â.aâå ? Ãã[Äâa] + "#" + Ãã[1] : Ãã[ÂâA];
+  â.âÁÁ = Ãã[4];
+  â.ÀÃã = Ãã[åÄá];
+  â.Aâ = -1;
+  â.Äa = 0;
+  â.Àä = ÁÀ;
+  â.orientation = 1;
+  â.âÁã = 1;
+  â.ÄÀA = 0;
+  â.ÂaÅ = 0;
+  â.ããÀ = [];
+  â.äáa = [];
+  â.âÅÅ = Aa;
+  â.äÁÂ = äå;
+  â.text = [];
+  â.ÁÅâ = [];
+  â.ÂÂA = [];
+  â.label = [];
+  â.åäâ = -1;
+  â.ÂÀ = -1;
+  â.âÅÄ = null;
+  â.playerIdLabel = null;
+  â.åÁãaÃ = null;
+  â.aÃÀ = null;
+  if (â.ÀÃã === 0) {
     Aá.ãâÃ++;
   }
-  playerTestArr[j[1]] = j[3];
+  playerTestArr[Ãã[1]] = Ãã[3];
 }
 ;
-function ÅáÃaÂ(j) {
-  Aá.ÂÅ[j[ãâ]].text.push(j[2]);
+function ÅáÃaÂ(Ãã) {
+  Aá.ÂÅ[Ãã[ãâ]].text.push(Ãã[2]);
 }
 ;
 const ÂaÂ = ÃÃÄ;
 const AÃáÂá = ÄãÅ;
 const áÀÄ = âÅäÁå;
-function áäAÁÁ(j) {
-  var k = j.length - Äá;
-  Aá.ãâA = k;
-  playerTestArr = j;
-  Âáá.setItem("token", j[k]);
-  j[áÃ] = "";
-  Aá.ãaÀ(j);
-  cfg.token = j[k];
+function áäAÁÁ(Ãã) {
+  var Aå = Ãã.length - Äá;
+  Aá.ãâA = Aå;
+  playerTestArr = Ãã;
+  Âáá.setItem("token", Ãã[Aå]);
+  Ãã[áÃ] = "";
+  Aá.ãaÀ(Ãã);
+  cfg.token = Ãã[Aå];
 }
 ;
 const ÄäãåA = ÃåÀ;
 const ãåÁ = aÀá;
-function äÃáAÀ(j) {}
+function äÃáAÀ(ÄåÀAÅ) {}
 ;
 const ããääå = ÁáãÁä;
-function ÄÅÁÂÀ(j) {
-  var k = Aá.Ááä[j[ÄÂ]];
-  k.ãaã = j[Åaa];
-  k.name = j[3];
-  var l = Aá.ÂÅ[k.ãaã];
-  l.åÂå = k.äâÂ;
-  l.Aäá = 1;
-  l.Aâ = k.id;
-  if (k.ãaã === Aá.â.id) {
+function ÄÅÁÂÀ(Ãã) {
+  var Aâ = Aá.Ááä[Ãã[ÄÂ]];
+  Aâ.ãaã = Ãã[Åaa];
+  Aâ.name = Ãã[3];
+  var â = Aá.ÂÅ[Aâ.ãaã];
+  â.åÂå = Aâ.äâÂ;
+  â.Aäá = 1;
+  â.Aâ = Aâ.id;
+  if (Aâ.ãaã === Aá.â.id) {
     Aá.â.Aäá = ãâ;
-    Aá.â.Aâ = k.id;
+    Aá.â.Aâ = Aâ.id;
   }
-  if (k.name === ÀÅ.aÄA) {
+  if (Aâ.name === ÀÅ.aÄA) {
     ÀÅ.áaå = ÅÁ;
   }
 }
 ;
 const äåääâ = ÅaÃÂa;
 const ÃÁA = äãÁ;
-function ÅÅÂÁÄ(j) {
-  Aá.ãAaÅá(j);
+function ÅÅÂÁÄ(Ãã) {
+  Aá.ãAaÅá(Ãã);
 }
 ;
 const ÃÀÁ = AÀâ;
 const ÂáÄÀä = áaÅAÄ;
-function âÃâ(j) {
-  switch (j[âã]) {
+function âÃâ(Ãã) {
+  switch (Ãã[âã]) {
     case 0:
-      ÅáÃaÂ(j);
+      ÅáÃaÂ(Ãã);
       break;
     case âá:
-      áÃÂAã(j);
+      áÃÂAã(Ãã);
       break;
     case 2:
-      áäAÁÁ(j);
+      áäAÁÁ(Ãã);
       break;
     case 3:
-      äÃáAÀ(j[1]);
+      äÃáAÀ(Ãã[1]);
       break;
     case 4:
-      ÄÅÁÂÀ(j);
+      ÄÅÁÂÀ(Ãã);
       break;
     case 5:
-      ÅÅÂÁÄ(j);
+      ÅÅÂÁÄ(Ãã);
       break;
   }
 }
@@ -4220,31 +4225,31 @@ function âÃâ(j) {
 const Âãá = ÂÁã;
 const ÂâÅ = åÄa;
 const aäÁ = Âäå;
-function AÅA(j) {
-  var k = Âáá.getItem("token");
-  var l = Âáá.getItem("tokenId");
-  var m = -1;
+function AÅA(åÁÁ) {
+  var äÁå = Âáá.getItem("token");
+  var ãÅa = Âáá.getItem("tokenId");
+  var Âäa = -1;
   try {
-    m = Number(Âáá.getItem("userId"));
-    if (m === NaN) {
-      m = -1;
+    Âäa = Number(Âáá.getItem("userId"));
+    if (Âäa === NaN) {
+      Âäa = -1;
     }
-  } catch (t) {}
-  var n = Âáá.getItem("nickname");
-  var o = ÄÁ < (áÂ.state & áÂ.ÀÁÄ.ÃÅÅ) ? åÀ : 0;
-  var p = Number(Âáá.getItem("skin"));
-  var q = âã;
+  } catch (âãå) {}
+  var áÄa = Âáá.getItem("nickname");
+  var ÃÂA = ÄÁ < (áÂ.state & áÂ.ÀÁÄ.ÃÅÅ) ? åÀ : 0;
+  var âÁÁ = Number(Âáá.getItem("skin"));
+  var ÄAä = âã;
   if (document.getElementById("passwordInput") !== null) {
-    q = document.getElementById("passwordInput").value;
-    if (q.length > 0) {
-      Âáá.setItem("password", q);
+    ÄAä = document.getElementById("passwordInput").value;
+    if (ÄAä.length > 0) {
+      Âáá.setItem("password", ÄAä);
     }
     if (âÄá.ãAA("admin") !== null) {
       äâ.ÂÄÁ = 0;
       äâ.áÁÃ = -1;
     }
   }
-  return [j, k, l, m, o, n, p, äâ.ÂÄÁ, q, áÂ.AáÀÁå, áÂ.ÄÅâáÄ];
+  return [åÁÁ, äÁå, ãÅa, Âäa, ÃÂA, áÄa, âÁÁ, äâ.ÂÄÁ, ÄAä, áÂ.AáÀÁå, áÂ.ÄÅâáÄ];
 }
 ;
 const ÃÃâaÀ = Âåa;
@@ -4262,133 +4267,133 @@ var áÂ = function () {
     áaåÂå: ÄäãåA,
     ÂÁÅáÁ: 32
   };
-  var j = 0;
-  var k = 1;
-  var l = 2;
-  var m = 3;
-  var n = 3000;
-  var o = 1500;
-  var p = JSON.stringify([âã]);
-  var q = áÄÀ;
-  var r = 150;
-  var s = 60;
-  var t = 0;
-  var u = ÁÅ;
-  var v = undefined;
-  var w = AÂ;
-  var x = ãÂ;
-  var y = 0;
-  var z = n;
-  var A = 0;
-  var B = 0;
-  var C = ÀÄ;
-  var D = áÃ;
-  var E = äå;
-  var F = äå;
-  var G = ÁÀ;
-  var H = áÃ;
-  var I = 0;
-  var J = 0;
-  var K = ãÂ;
-  var L = ÁA.angle;
-  var M = 0;
-  var N = undefined;
-  var O = ãÅâ;
-  var P = ÃAã;
-  function Q() {
+  var ãääáÁ = 0;
+  var ÀãÁÁå = 1;
+  var ÃåãÅå = 2;
+  var ÀÅaÁA = 3;
+  var åäÃãã = 3000;
+  var ÃÃâÂA = 1500;
+  var ÂÀaäå = JSON.stringify([âã]);
+  var áÀåÁä = áÄÀ;
+  var ÀäãâA = 150;
+  var ääÁáa = 60;
+  var AÁa = 0;
+  var áÃã = ÁÅ;
+  var AAä = undefined;
+  var áâÂ = AÂ;
+  var ÅáAÄÃ = ãÂ;
+  var åÁ = 0;
+  var ÄãâáÄ = åäÃãã;
+  var åÅÀ = 0;
+  var ÁÃAÂå = 0;
+  var ÀAáãå = ÀÄ;
+  var áÀÂÁâ = áÃ;
+  var åÁÁ = äå;
+  var äÃåâÅ = äå;
+  var ÅaãäÅ = ÁÀ;
+  var ÃÁãáÀ = áÃ;
+  var ÃÅaãÅ = 0;
+  var Åáåâa = 0;
+  var Áaä = ãÂ;
+  var äÄå = ÁA.angle;
+  var Äáå = 0;
+  var âÃâ = undefined;
+  var AÀã = ãÅâ;
+  var AÅA = ÃAã;
+  function ÄâÁÂä() {
     if (ÀÀ > äÀáÀÃ) {
-      y = ÅaÃ;
+      åÁ = ÅaÃ;
     }
-    if (ÅaÃ - y > F) {
-      y = ÅaÃ;
-      U();
+    if (ÅaÃ - åÁ > äÃåâÅ) {
+      åÁ = ÅaÃ;
+      Ããá();
     }
   }
   ;
-  function R() {
-    var aq = áÂ.áâÀ;
-    var ar = aq[7];
-    var as = ar[Math.floor(Math.random() * ar.length)];
-    var at = "wss://" + aq[4] + as[Aa] + ".devast.io/" + aq[4] + aq[0] + "?" + áÂ.åaáaa;
-    v = new window.WebSocket(at);
-    window.ws = v;
-    w++;
-    v.AäÀ = w;
-    var au = w;
-    v.binaryType = "arraybuffer";
-    v.onerror = function () {
-      if (this.AäÀ !== w) {
+  function ÁAaÁá() {
+    var åäÁ = áÂ.áâÀ;
+    var ÅÅÃ = åäÁ[7];
+    var äÀÂ = ÅÅÃ[Math.floor(Math.random() * ÅÅÃ.length)];
+    var ÄAÂÁä = "wss://" + åäÁ[4] + äÀÂ[Aa] + ".devast.io/" + åäÁ[4] + åäÁ[0] + "?" + áÂ.åaáaa;
+    AAä = new window.WebSocket(ÄAÂÁä);
+    window.ws = AAä;
+    áâÂ++;
+    AAä.AäÀ = áâÂ;
+    var AäÀ = áâÂ;
+    AAä.binaryType = "arraybuffer";
+    AAä.onerror = function () {
+      if (this.AäÀ !== áâÂ) {
         return;
       }
-      U();
+      Ããá();
     };
-    v.onclose = function (av) {
-      if (this.AäÀ !== w) {
+    AAä.onclose = function (Åá) {
+      if (this.AäÀ !== áâÂ) {
         return;
       }
-      U();
+      Ããá();
     };
-    v.onmessage = function (av, aw) {
-      if (this.AäÀ !== w) {
+    AAä.onmessage = function (Åá, âáaäÀ) {
+      if (this.AäÀ !== áâÂ) {
         return;
       }
-      y = ÅaÃ;
-      if (typeof av.data === "string") {
-        N(JSON.parse(av.data));
+      åÁ = ÅaÃ;
+      if (typeof Åá.data === "string") {
+        âÃâ(JSON.parse(Åá.data));
       } else {
-        O(av.data);
+        AÀã(Åá.data);
       }
     };
-    v.onopen = function (av) {
-      K = -åä;
-      A = ÅaÃ;
-      V();
-      v.send(JSON.stringify(P(E)));
+    AAä.onopen = function (Åá) {
+      Áaä = -åä;
+      åÅÀ = ÅaÃ;
+      ÃäÁ();
+      AAä.send(JSON.stringify(AÅA(åÁÁ)));
       aÀÂäâ = setTimeout(function () {
-        if (au !== w) {
+        if (AäÀ !== áâÂ) {
           return;
         }
-        ac();
-      }, G);
+        ÁáÀáÂ();
+      }, ÅaãäÅ);
     };
     aÀÂäâ = setTimeout(function () {
-      if (w !== au) {
+      if (áâÂ !== AäÀ) {
         return;
       }
-      ac();
-    }, G);
+      ÁáÀáÂ();
+    }, ÅaãäÅ);
   }
   ;
-  function S() {
+  function ãÄÄãá() {
     if (ÁA.x >= äâA) {
-      if (K !== u) {
-        A = ÅaÃ;
-        K = u;
-        v.send(JSON.stringify([3, u]));
+      if (Áaä !== áÃã) {
+        åÅÀ = ÅaÃ;
+        Áaä = áÃã;
+        AAä.send(JSON.stringify([3, áÃã]));
       }
-    } else if (K !== t) {
-      A = ÅaÃ;
-      K = t;
-      v.send(JSON.stringify([ÂâA, t]));
+    } else if (Áaä !== AÁa) {
+      åÅÀ = ÅaÃ;
+      Áaä = AÁa;
+      AAä.send(JSON.stringify([ÂâA, AÁa]));
     }
   }
   ;
-  function T() {
-    const ar = áÂ.aãa;
-    for (let as in ar) {
-      const au = ar[as];
-      const av = au[Math.floor(Math.random() * au.length)];
-      function aw() {
-        if (áÂ.ÄãA.indexOf(as) === -1) {
-          áÂ.ÄãA.push(as);
+  function ãÅáäá() {
+    const ÅÅÃ = áÂ.aãa;
+    for (let äÂâ in ÅÅÃ) {
+      const äÀÂ = ÅÅÃ[äÂâ];
+      const ääÅäÂ = äÀÂ[Math.floor(Math.random() * äÀÂ.length)];
+      function callback() {
+        if (áÂ.ÄãA.indexOf(äÂâ) === -1) {
+          áÂ.ÄãA.push(äÂâ);
         }
       }
       ;
-      am("https://" + as + av + ".devast.io", aw, aw);
+      ÀÃá("https://" + äÂâ + ääÅäÂ + ".devast.io", callback, callback);
     }
   }
   ;
-  function U() {
+  function Ããá() {
     console.error("Disconnected");
     if (áÂ.state & ÀÁÄ.áaåÂå) {
       áÂ.state = 0;
@@ -4396,187 +4401,187 @@ var áÂ = function () {
       áÂ.state = ÀÁÄ.ÃÅÅ;
     }
     áÂ.ÄÀä = aÃÂ;
-    v.close();
+    AAä.close();
   }
   ;
-  function V() {
+  function ÃäÁ() {
     clearTimeout(aÀÂäâ);
   }
   ;
-  function W() {
-    A = ÅaÃ;
-    v.send(JSON.stringify([ÀáA]));
+  function áãaÃâ() {
+    åÅÀ = ÅaÃ;
+    AAä.send(JSON.stringify([ÀáA]));
   }
   ;
-  function X(aq, ar) {
+  function aáÂâä(áÄa, âÁÁ) {
     if (äå === (áÂ.state & ÀÁÄ.Ãåã) && (áÂ.state & ÀÁÄ.ãAá) === Àá) {
-      Âáá.setItem("nickname", aq);
-      Âáá.setItem("skin", ar);
-      aa();
+      Âáá.setItem("nickname", áÄa);
+      Âáá.setItem("skin", âÁÁ);
+      áÂÂâÅ();
     }
   }
   ;
-  function Y() {
-    if (r < ÅaÃ - M) {
-      var aq = ((ÁA.angle - L) * 180 / Math.PI % 360 + 360) % 360;
-      if (aâA < aq) {
-        A = ÅaÃ;
-        M = ÅaÃ;
-        L = ÁA.angle;
-        aq = Math.floor((ÁA.angle * 180 / Math.PI % 360 + 360) % 360);
+  function åÂåâÂ() {
+    if (ÀäãâA < ÅaÃ - Äáå) {
+      var åaA = ((ÁA.angle - äÄå) * 180 / Math.PI % 360 + 360) % 360;
+      if (aâA < åaA) {
+        åÅÀ = ÅaÃ;
+        Äáå = ÅaÃ;
+        äÄå = ÁA.angle;
+        åaA = Math.floor((ÁA.angle * 180 / Math.PI % 360 + 360) % 360);
         if (!cfg.AimBotEnable) {
-          v.send(JSON.stringify([âãä, aq]));
+          AAä.send(JSON.stringify([âãä, åaA]));
         }
       }
     }
   }
   ;
-  function Z() {
-    if (s < ÅaÃ - M) {
-      var aq = ((ÁA.angle - L) * 180 / Math.PI % 360 + 360) % 360;
-      if (aq > 2) {
-        A = ÅaÃ;
-        M = ÅaÃ;
-        L = ÁA.angle;
-        aq = Math.floor((ÁA.angle * 180 / Math.PI % 360 + 360) % 360);
+  function ÃÀââÀ() {
+    if (ääÁáa < ÅaÃ - Äáå) {
+      var åaA = ((ÁA.angle - äÄå) * 180 / Math.PI % 360 + 360) % 360;
+      if (åaA > 2) {
+        åÅÀ = ÅaÃ;
+        Äáå = ÅaÃ;
+        äÄå = ÁA.angle;
+        åaA = Math.floor((ÁA.angle * 180 / Math.PI % 360 + 360) % 360);
         if (!cfg.AimBotEnable) {
-          v.send(JSON.stringify([ãÄÂ, aq]));
+          AAä.send(JSON.stringify([ãÄÂ, åaA]));
         }
       }
     }
   }
   ;
-  function a0() {
+  function äÀÂÅá() {
     áÂ.state |= áÂ.ÀÁÄ.ÂÁÅáÁ;
   }
   ;
-  function a1(aq) {
-    if (J < ÅaÃ - I) {
-      A = ÅaÃ;
-      v.send(JSON.stringify([âá, aq]));
+  function ÀÄã(âÂáÂâ) {
+    if (Åáåâa < ÅaÃ - ÃÅaãÅ) {
+      åÅÀ = ÅaÃ;
+      AAä.send(JSON.stringify([âá, âÂáÂâ]));
       return 0;
     }
-    return J - (ÅaÃ - I);
+    return Åáåâa - (ÅaÃ - ÃÅaãÅ);
   }
   ;
-  function a2(aq) {
-    v.send(window.JSON.stringify(aq));
+  function SendWsMessage(ajannemo) {
+    AAä.send(window.JSON.stringify(ajannemo));
   }
   ;
-  function a3() {
+  function AntiKick() {
     if (cfg.antiKick === true) {
       antiKick1 = setInterval(function () {
-        v.send(0);
+        AAä.send(0);
       }, 10000);
     } else {
       clearInterval(antiKick1);
     }
   }
-  function a4() {
+  function åÃâÂã() {
     if (!cfg.shiftToggleMod) {
-      var aq = ÂÄA.ÁAa();
-      if (D !== aq) {
-        A = ÅaÃ;
-        console.log("sendShift", aq);
-        D = aq;
-        v.send(JSON.stringify([7, aq]));
+      var ÀÀÅ = ÂÄA.ÁAa();
+      if (áÀÂÁâ !== ÀÀÅ) {
+        åÅÀ = ÅaÃ;
+        console.log("sendShift", ÀÀÅ);
+        áÀÂÁâ = ÀÀÅ;
+        AAä.send(JSON.stringify([7, ÀÀÅ]));
       }
     }
   }
-  function a5(aq, ar, as, at, au, av, aw, ax, ay) {
-    E = ÄåA !== aq ? aq : ÁÀ;
-    F = ar !== undefined ? ar : 15000;
-    H = at !== undefined ? at : ÂâA;
-    B = au !== undefined ? au : 20000;
-    äÀáÀÃ = av !== undefined ? av : 10000;
-    O = aw !== undefined ? aw : function () {};
-    N = ax !== âÄä ? ax : function () {};
-    P = ay !== aäÁ ? ay : function () {};
-    G = as !== âÄä ? as : 2000;
-    M = ÅaÃ;
-    var az = Âáá.getItem("serverVersion");
-    if (Âáá.getItem("token") === null || "" + E !== az) {
-      Âáá.setItem("token", al());
+  function ÁÀÄ(ÅÅÁÅä, ÄÄÀãå, ÂãÂÄÄ, äÁÄAÀ, ãaåÁâ, ãáaÀÅ, aááÀå, âåAaÀ, ÁÄÃÂÅ) {
+    åÁÁ = ÄåA !== ÅÅÁÅä ? ÅÅÁÅä : ÁÀ;
+    äÃåâÅ = ÄÄÀãå !== undefined ? ÄÄÀãå : 15000;
+    ÃÁãáÀ = äÁÄAÀ !== undefined ? äÁÄAÀ : ÂâA;
+    ÁÃAÂå = ãaåÁâ !== undefined ? ãaåÁâ : 20000;
+    äÀáÀÃ = ãáaÀÅ !== undefined ? ãáaÀÅ : 10000;
+    AÀã = aááÀå !== undefined ? aááÀå : function () {};
+    âÃâ = âåAaÀ !== âÄä ? âåAaÀ : function () {};
+    AÅA = ÁÄÃÂÅ !== aäÁ ? ÁÄÃÂÅ : function () {};
+    ÅaãäÅ = ÂãÂÄÄ !== âÄä ? ÂãÂÄÄ : 2000;
+    Äáå = ÅaÃ;
+    var aÁâ = Âáá.getItem("serverVersion");
+    if (Âáá.getItem("token") === null || "" + åÁÁ !== aÁâ) {
+      Âáá.setItem("token", ÀAäâA());
     }
-    Âáá.setItem("serverVersion", E);
+    Âáá.setItem("serverVersion", åÁÁ);
   }
   ;
-  function a6(aq) {
-    I = ÅaÃ;
-    J = aq * 60000;
+  function âåÂÂá(åÁ) {
+    ÃÅaãÅ = ÅaÃ;
+    Åáåâa = åÁ * 60000;
   }
   ;
-  function a7(aq) {
-    A = ÅaÃ;
-    v.send(aq);
+  function áÂÄ(âÀÅÃÂ) {
+    åÅÀ = ÅaÃ;
+    AAä.send(âÀÅÃÂ);
   }
   ;
-  function a8() {
+  function ÄáÅAå() {
     áÂ.state = ÀÁÄ.ááÃÄa;
-    ap();
+    Àäå();
   }
   ;
-  function a9() {
+  function âAaâa() {
     console.log("failRestore");
-    V();
+    ÃäÁ();
     áÂ.state = ÀÁÄ.áaåÂå;
     áÂ.ÄÀä = false;
     äâ.ÂâÁ(1);
-    ap();
+    Àäå();
   }
   ;
-  function aa() {
-    x = 0;
+  function áÂÂâÅ() {
+    ÅáAÄÃ = 0;
     áÂ.state = ÀÁÄ.Ãåã + (áÂ.state & (ÀÁÄ.ÃÅÅ | ÀÁÄ.ÂÀÂAÃ));
-    R();
+    ÁAaÁá();
   }
   ;
-  function ab() {
-    var aq;
-    A = ÅaÃ;
-    v.send(JSON.stringify([4]));
+  function Åaá() {
+    var clr;
+    åÅÀ = ÅaÃ;
+    AAä.send(JSON.stringify([4]));
     if (cfg.AimBotEnable) {
       SendWSmsg([6, Aimbot.resolve()]);
       GetAllTargets.tappedForLast140mills = true;
-      clearTimeout(aq);
-      aq = setTimeout(() => GetAllTargets.tappedForLast140mills = false, 140);
+      clearTimeout(clr);
+      clr = setTimeout(() => GetAllTargets.tappedForLast140mills = false, 140);
     }
   }
   ;
-  function ac() {
-    x++;
-    v.close();
-    if (x >= H) {
+  function ÁáÀáÂ() {
+    ÅáAÄÃ++;
+    AAä.close();
+    if (ÅáAÄÃ >= ÃÁãáÀ) {
       áÂ.state = ÀÁÄ.åÅÅáA + (áÂ.state & ÀÁÄ.ÃÅÅ);
       if ((áÂ.state & ÀÁÄ.ÃÅÅ) > 0) {
-        ap();
+        Àäå();
       }
     } else {
-      U();
+      Ããá();
     }
   }
   ;
-  function ad() {
+  function ääÄäÅ() {
     áÂ.state = ÀÁÄ.áåÀåå;
-    ap();
+    Àäå();
   }
   ;
-  function ae(aq) {
-    if (E < aq) {
+  function Âåå(aÁâ) {
+    if (åÁÁ < aÁâ) {
       áÂ.state = ÀÁÄ.ÀáÀÃÅ;
-    } else if (E > aq) {
+    } else if (åÁÁ > aÁâ) {
       áÂ.state = ÀÁÄ.ÁÅÀáå;
     }
-    V();
+    ÃäÁ();
   }
   ;
-  function af() {
+  function áAÄáa() {
     áÂ.state = ÀÁÄ.áÁâÂÃ;
-    ap();
+    Àäå();
   }
   ;
-  function ag() {
-    V();
+  function ÅAáäã() {
+    ÃäÁ();
     áÂ.state = áÂ.ÀÁÄ.ãAá;
     áÂ.ÄÀä = Ãâä;
     if (áÂ.âAâ !== null) {
@@ -4584,35 +4589,35 @@ var áÂ = function () {
     }
   }
   ;
-  function ah() {
-    var aq = âã;
+  function AåáÂá() {
+    var Àä = âã;
     if (ÄÂ === ÂÄA.ãÄâ()) {
-      aq |= ãå;
+      Àä |= ãå;
     }
     if (ÂÄA.áÃÂ() === 1) {
-      aq |= 2;
+      Àä |= 2;
     }
     if (ÂÄA.ÅÃA() === 1) {
-      aq |= ÂÃå;
+      Àä |= ÂÃå;
     }
     if (Áå === ÂÄA.ÅáÁ()) {
-      aq |= 8;
+      Àä |= 8;
     }
-    if (C !== aq) {
-      A = ÅaÃ;
-      C = aq;
-      v.send(JSON.stringify([ÁÅá, aq]));
-    }
-  }
-  ;
-  function ai() {
-    if (ÅaÃ - A > B) {
-      v.send(p);
-      A = ÅaÃ;
+    if (ÀAáãå !== Àä) {
+      åÅÀ = ÅaÃ;
+      ÀAáãå = Àä;
+      AAä.send(JSON.stringify([ÁÅá, Àä]));
     }
   }
   ;
-  var aj = [{
+  function Ááåaå() {
+    if (ÅaÃ - åÅÀ > ÁÃAÂå) {
+      AAä.send(ÂÀaäå);
+      åÅÀ = ÅaÃ;
+    }
+  }
+  ;
+  var ÂáaâA = [{
     id: "survival",
     name: "Survival"
   }, {
@@ -4625,501 +4630,501 @@ var áÂ = function () {
     id: "private",
     name: "Private Server"
   }];
-  function ak(aq, ar) {
-    am(aq, function (at) {
-      let _av = {};
-      let aw = [];
-      const ax = JSON.parse(at);
-      for (let ay = ãÂ; ay < ax.length; ay++) {
-        const az = ax[ay];
-        const aA = az.n;
-        const aB = az.l;
-        const aC = az.p;
-        _av[aA] = [];
-        for (let aD = 0; aD < aB.length; aD++) {
-          const aE = aB[aD];
-          const aF = aE[0];
-          const aG = aE[ÃaÂ];
-          const aH = aE[3];
-          let aI = undefined;
-          let aJ = ãÅâ;
-          let aK = ÁâÃ;
-          for (let aL = ÅÁ; aL < aj.length; aL++) {
-            const aM = aj[aL];
-            const aN = aM.name;
-            const aO = aM.id;
-            if (aF.indexOf(aO) !== -1) {
-              aJ = aN;
-              aK = aO;
-              aI = Number(aF.replace(aO, "")) || "?";
+  function AáÁAá(AaaåÂ, Ãâá) {
+    ÀÃá(AaaåÂ, function (Ãã) {
+      let aãa = {};
+      let ÃÁÁ = [];
+      const aÁäãá = JSON.parse(Ãã);
+      for (let ä = ãÂ; ä < aÁäãá.length; ä++) {
+        const ÁÂa = aÁäãá[ä];
+        const ÃáäAã = ÁÂa.n;
+        const aÅÀâÅ = ÁÂa.l;
+        const ãâaáá = ÁÂa.p;
+        aãa[ÃáäAã] = [];
+        for (let ä = 0; ä < aÅÀâÅ.length; ä++) {
+          const áÁAÅã = aÅÀâÅ[ä];
+          const lobby = áÁAÅã[0];
+          const ÂÀÅ = áÁAÅã[ÃaÂ];
+          const ãâA = áÁAÅã[3];
+          let aáÂaÀ = undefined;
+          let aaÄãä = ãÅâ;
+          let ÄâAÀa = ÁâÃ;
+          for (let A = ÅÁ; A < ÂáaâA.length; A++) {
+            const ÂÀå = ÂáaâA[A];
+            const name = ÂÀå.name;
+            const ãã = ÂÀå.id;
+            if (lobby.indexOf(ãã) !== -1) {
+              aaÄãä = name;
+              ÄâAÀa = ãã;
+              aáÂaÀ = Number(lobby.replace(ãã, "")) || "?";
               break;
             }
           }
-          aw.push([aF, aJ, aI, 1, aA, aH, aK, aC, aG]);
+          ÃÁÁ.push([lobby, aaÄãä, aáÂaÀ, 1, ÃáäAã, ãâA, ÄâAÀa, ãâaáá, ÂÀÅ]);
         }
-        for (let aS = 0; aC.length > aS; aS++) {
-          _av[aA].push(aC[aS][ãa]);
+        for (let ä = 0; ãâaáá.length > ä; ä++) {
+          aãa[ÃáäAã].push(ãâaáá[ä][ãa]);
         }
       }
-      áÂ.ÃÁÁ = aw;
-      áÂ.aãa = _av;
-      T();
-      ar();
+      áÂ.ÃÁÁ = ÃÁÁ;
+      áÂ.aãa = aãa;
+      ãÅáäá();
+      Ãâá();
     }, function () {
-      ar();
+      Ãâá();
     });
   }
   ;
-  function al() {
-    var aq = "";
-    for (var ar = 0; ar < q; ar++) {
-      aq += String.fromCharCode(48 + Math.floor(Math.random() * 74));
+  function ÀAäâA() {
+    var äÁå = "";
+    for (var ä = 0; ä < áÀåÁä; ä++) {
+      äÁå += String.fromCharCode(48 + Math.floor(Math.random() * 74));
     }
-    return aq;
+    return äÁå;
   }
   ;
-  function am(aq, ar, as) {
-    const at = new XMLHttpRequest();
-    at.open("GET", aq);
-    at.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    at.onreadystatechange = function () {
+  function ÀÃá(ÁÀå, ãÄÁÄÃ, åÂÀAå) {
+    const åÃÀ = new XMLHttpRequest();
+    åÃÀ.open("GET", ÁÀå);
+    åÃÀ.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    åÃÀ.onreadystatechange = function () {
       if (âÂÄ == this.readyState && this.status == 200) {
-        if (ar !== undefined) {
-          ar(at.responseText);
+        if (ãÄÁÄÃ !== undefined) {
+          ãÄÁÄÃ(åÃÀ.responseText);
         }
       } else if (this.readyState == 4) {
-        if (as !== âÄä) {
-          as();
+        if (åÂÀAå !== âÄä) {
+          åÂÀAå();
         }
       }
     };
-    at.send();
+    åÃÀ.send();
   }
   ;
-  function an(aq, ar) {
-    am(aq, function (at) {
-      at = at.split(":");
-      var au = 241;
-      var av = 67;
-      var aw;
-      var ax;
-      var ay;
-      var az = 92;
-      let cN = 208;
-      var aA = ÂÀá;
-      if (cN == aA) {
-        az = 121;
+  function åÁáÀÃ(áÀÂAÁ, Ãâá) {
+    ÀÃá(áÀÂAÁ, function (äÁå) {
+      äÁå = äÁå.split(":");
+      var ÅÃáÂÄ = 241;
+      var ÅAãaá = 67;
+      var ááåÅÂ;
+      var ÄÅáâa;
+      var ááÂAÃ;
+      var ÀååäÃ = 92;
+      let ãAÀÂÀ = 208;
+      var aÃÄáÂ = ÂÀá;
+      if (ãAÀÂÀ == aÃÄáÂ) {
+        ÀååäÃ = 121;
       }
-      var aB;
-      var aC;
-      var aD;
-      var aE = 153;
-      var aF;
-      var aG;
-      var aH;
-      let cO = 215;
-      const cP = 137;
-      if (cP == cO) {
-        aE = 24;
+      var âäÂÁâ;
+      var âÄÅáa;
+      var ÅÄááå;
+      var ÀåäÃå = 153;
+      var aÀÁÂa;
+      var áããÀÀ;
+      var áÃAáâ;
+      let ÃaÂáÄ = 215;
+      const ãåãÀá = 137;
+      if (ãåãÀá == ÃaÂáÄ) {
+        ÀåäÃå = 24;
       }
-      if (ÅÂå === av) {
-        av = 81;
+      if (ÅÂå === ÅAãaá) {
+        ÅAãaá = 81;
       }
-      var aI = 216;
-      let cQ = 130;
-      const cR = 61;
-      if (cQ <= cR) {
-        aI = 172;
+      var aÄãÀá = 216;
+      let åäÁâã = 130;
+      const âÃáAÅ = 61;
+      if (åäÁâã <= âÃáAÅ) {
+        aÄãÀá = 172;
       }
-      var aJ;
-      var aK;
-      var aL;
-      let cS = 8633;
-      let cT = 2106;
-      let cU = 68;
-      const cV = 233;
-      if (cU === cV) {
-        au = 53;
+      var áääÂA;
+      var áÃâáÃ;
+      var ÅÂåáÄ;
+      let ÁÃÀÁä = 8633;
+      let ÁÃáåA = 2106;
+      let aÁááA = 68;
+      const ãÂÀâa = 233;
+      if (aÁááA === ãÂÀâa) {
+        ÅÃáÂÄ = 53;
       }
-      var aM;
-      var aN;
-      var aO;
-      let cW = 28;
-      const cX = cW;
-      var aP;
-      var aQ;
+      var áäââä;
+      var ÁâÀáÂ;
+      var ÅãÁÂÅ;
+      let ÄÁÀaÂ = 28;
+      const AÁâaä = ÄÁÀaÂ;
+      var aÂâáÂ;
+      var ÀÀÅÄÄ;
       {
-        var aR = 133;
-        let da = 22656;
-        if (aR >= ÂAÃ) {
-          aR = 86;
+        var AÁååÀ = 133;
+        let ÂÃáÅá = 22656;
+        if (AÁååÀ >= ÂAÃ) {
+          AÁååÀ = 86;
         }
-        var aS;
-        var aT;
-        let db = {
+        var ÄAÅáÂ;
+        var âÀäÀÃ;
+        let áÄãÀÀ = {
           áááãA: 5
         };
-        const dc = at[ÅÁ].split("_");
-        var aU = ÄAâ;
-        let dd = 76;
-        dd.aÄÁÃA = ááä;
-        if (ÄÁ == aU) {
-          aU = Åãä;
+        const Âåá = äÁå[ÅÁ].split("_");
+        var AÄÂÂÄ = ÄAâ;
+        let áäáÂÃ = 76;
+        áäáÂÃ.aÄÁÃA = ááä;
+        if (ÄÁ == AÄÂÂÄ) {
+          AÄÂÂÄ = Åãä;
         }
-        var aV = 133;
-        let de = 6555;
-        const df = 200;
-        let dg = 99;
-        let dh = 164;
-        if (dg === df) {
-          aV = 23;
+        var ÄÃäÃÃ = 133;
+        let ÅÁÄÄÄ = 6555;
+        const aÅãÁÁ = 200;
+        let ÂåÁÄã = 99;
+        let ÄáÁaA = 164;
+        if (ÂåÁÄã === aÅãÁÁ) {
+          ÄÃäÃÃ = 23;
         }
-        var aW = 201;
-        if (aãå < aW) {
-          aW = 138;
+        var ââÅãã = 201;
+        if (aãå < ââÅãã) {
+          ââÅãã = 138;
         }
-        var aX = 125;
-        var aY = 214;
-        var aZ = 189;
-        if (aZ > 14) {
-          aZ = 141;
+        var ÂÁAáã = 125;
+        var áâAÅÂ = 214;
+        var aÃAÄÅ = 189;
+        if (aÃAÄÅ > 14) {
+          aÃAÄÅ = 141;
         }
-        let di = 36;
-        var b0 = 235;
-        if (b0 == di) {
-          aY = 95;
+        let AãÀáA = 36;
+        var ááÁÂã = 235;
+        if (ááÁÂã == AãÀáA) {
+          áâAÅÂ = 95;
         }
-        var b1 = {
+        var áÁaáá = {
           ÃåÅaá: 4
         };
-        var b2;
-        var b3;
-        var b4;
-        var b5;
-        var b6;
-        var b7;
-        var b8;
-        let dj = 166;
-        const dk = 111;
-        if (dk == dj) {
-          aX = 105;
+        var áÅåâã;
+        var åaâÂÀ;
+        var áÅâÄÄ;
+        var åáâaå;
+        var ååÅÅÅ;
+        var ÅÃáÅá;
+        var åáÅåa;
+        let áâAaÂ = 166;
+        const ÁÁÃáA = 111;
+        if (ÁÁÃáA == áâAaÂ) {
+          ÂÁAáã = 105;
         }
-        const dl = dc[0] + "_";
-        const dm = Number(dc[1]);
-        var b9 = 225;
-        if (b9 > 6) {
-          b9 = 121;
+        const ÅÂÃ = Âåá[0] + "_";
+        const ãÃ = Number(Âåá[1]);
+        var åäáâä = 225;
+        if (åäáâä > 6) {
+          åäáâä = 121;
         }
-        let dn = 4130;
-        const dp = Math.abs(ÂÂÄÄa(dm));
-        var ba;
-        var bb;
-        var bc;
-        var bd = 87;
-        var be = 56;
-        if (be > 7) {
-          be = 164;
+        let ÁãÁÂa = 4130;
+        const aãã = Math.abs(ÂÂÄÄa(ãÃ));
+        var ÂÃáAÅ;
+        var áÂÁåä;
+        var ãåãaá;
+        var AÁAáÂ = 87;
+        var Åãáââ = 56;
+        if (Åãáââ > 7) {
+          Åãáââ = 164;
         }
-        var bf = 232;
-        var bg = 237;
-        const dq = 136;
-        var bh = 99;
-        if (bh == dq) {
-          bg = 210;
+        var ÁÀÂáÅ = 232;
+        var AÁAäã = 237;
+        const ÄÃÀÀÀ = 136;
+        var ÁáaáÅ = 99;
+        if (ÁáaáÅ == ÄÃÀÀÀ) {
+          AÁAäã = 210;
         }
-        var bi = 32;
-        let dr = 101;
-        var bj = 232;
-        var bk = 191;
-        if (bk >= 9) {
-          bk = 143;
+        var ÃaÃäÀ = 32;
+        let áÅÅáÃ = 101;
+        var áãáaã = 232;
+        var áÃåãã = 191;
+        if (áÃåãã >= 9) {
+          áÃåãã = 143;
         }
-        if (bj === bi) {
-          bf = 115;
+        if (áãáaã === ÃaÃäÀ) {
+          ÁÀÂáÅ = 115;
         }
-        const ds = 35;
-        var bl = ÂÁã;
-        if (bl >= åÀ) {
-          bl = 160;
+        const ÄÄAãä = 35;
+        var Áááaá = ÂÁã;
+        if (Áááaá >= åÀ) {
+          Áááaá = 160;
         }
-        var bm = aâãáá + 39;
-        var bn = 213;
-        if (bn === 5) {
-          bn = 26;
+        var ÁâaåA = aâãáá + 39;
+        var ääÁåå = 213;
+        if (ääÁåå === 5) {
+          ääÁåå = 26;
         }
-        let dt = 203;
-        var bo = 138;
-        if (bo > 6) {
-          bo = 216;
+        let åÁaâÀ = 203;
+        var ÀÂåâÁ = 138;
+        if (ÀÂåâÁ > 6) {
+          ÀÂåâÁ = 216;
         }
-        var bp = {};
-        var bq = 149;
-        if (ããÁÀä < bq) {
-          bq = 220;
+        var ááÃãa = {};
+        var äÄAÃä = 149;
+        if (ããÁÀä < äÄAÃä) {
+          äÄAÃä = 220;
         }
-        bp.âÄãáá = ÄÁÄ;
-        if (ds > dt) {
-          bd = 98;
+        ááÃãa.âÄãáá = ÄÁÄ;
+        if (ÄÄAãä > åÁaâÀ) {
+          AÁAáÂ = 98;
         }
-        áÂ.AáÀÁå = dl + dp;
-        áÂ.ÀAÄÄä = dp;
-        áÂ.äÁÄÄÅ = dp & 255;
-        const du = 228;
-        const dv = 736;
-        const dw = Math.floor(du[du.aÄÄaå]);
-        var br;
-        var bs;
-        var bt;
-        var bu = 134;
-        var bv = 54;
-        if (bv === ÄäÄ) {
-          bv = 180;
+        áÂ.AáÀÁå = ÅÂÃ + aãã;
+        áÂ.ÀAÄÄä = aãã;
+        áÂ.äÁÄÄÅ = aãã & 255;
+        const aÄÄaå = 228;
+        const äáãÂA = 736;
+        const äAáÅã = Math.floor(aÄÄaå[aÄÄaå.aÄÄaå]);
+        var ÃäÁãÃ;
+        var ÄaäÀÁ;
+        var AÄÁÄá;
+        var áaÀÂA = 134;
+        var åÀãÅÃ = 54;
+        if (åÀãÅÃ === ÄäÄ) {
+          åÀãÅÃ = 180;
         }
-        var bw = 166;
-        var bx = 132;
-        var by = 130;
-        const dx = 163;
-        var bz = 111;
-        if (by >= bz) {
-          bx = 72;
+        var âÀÄÄA = 166;
+        var ÅÁAäÁ = 132;
+        var ÀáÀÄÁ = 130;
+        const ÀÂáÁÂ = 163;
+        var ÁÃAäÄ = 111;
+        if (ÀáÀÄÁ >= ÁÃAäÄ) {
+          ÅÁAäÁ = 72;
         }
-        var bA;
-        var bB;
-        var bC;
-        var bD;
-        let dy = Äá;
-        var bE = 239;
-        if (bE < dy) {
-          bw = 135;
+        var ÁÄÀãÃ;
+        var ãÅÁäA;
+        var ÃÃÂÀÀ;
+        var ÄãÀÀÂ;
+        let Åááåa = Äá;
+        var AÅáÅã = 239;
+        if (AÅáÅã < Åááåa) {
+          âÀÄÄA = 135;
         }
-        var bF = 131;
-        const dz = 234 << ÀáA;
-        if (bF > 1) {
-          bF = 239;
+        var ÅâAÄÂ = 131;
+        const äÁÀâá = 234 << ÀáA;
+        if (ÅâAÄÂ > 1) {
+          ÅâAÄÂ = 239;
         }
       }
-      var bG = {};
-      var bH;
-      var bI;
-      var bJ;
-      var bK;
-      var bL;
-      var bM;
-      var bN;
-      var bO;
-      bG.AÁÄáÃ = 10;
-      const cY = 219;
-      var bP = 184;
-      var bQ = 228;
-      const cZ = 128;
-      if (cZ < bQ) {
-        bP = 32;
+      var ååAÀÅ = {};
+      var AáÁãÄ;
+      var ãaÄÅã;
+      var âåÄáa;
+      var ÄáÁâã;
+      var aâáãâ;
+      var ÄåáÂá;
+      var áäáÄÄ;
+      var ÁÀáãÂ;
+      ååAÀÅ.AÁÄáÃ = 10;
+      const ÁÄÃÅå = 219;
+      var AÅáåÀ = 184;
+      var ÂAÄAA = 228;
+      const áÂÅãÀ = 128;
+      if (áÂÅãÀ < ÂAÄAA) {
+        AÅáåÀ = 32;
       }
       {
-        var bR = áåÀ + 195;
-        const dX = at[1].split("_");
-        var bS = 138;
-        let dY = bS;
-        const dZ = dX[AÂ] + "_";
-        var bT = 158;
-        var bU = 40;
-        if (bU === 4) {
-          bU = 205;
+        var Äáâáá = áåÀ + 195;
+        const Âåá = äÁå[1].split("_");
+        var âAáÀã = 138;
+        let áaaÄA = âAáÀã;
+        const ÅÂÃ = Âåá[AÂ] + "_";
+        var ÀÅÅäã = 158;
+        var ÅÀÀaâ = 40;
+        if (ÅÀÀaâ === 4) {
+          ÅÀÀaâ = 205;
         }
-        var bV = 79;
-        const e0 = 359;
-        var bW = 247;
-        if (bW <= bV) {
-          bT = 177;
+        var ÂAáÃä = 79;
+        const äÃÀÂã = 359;
+        var ÄãáÃA = 247;
+        if (ÄãáÃA <= ÂAáÃä) {
+          ÀÅÅäã = 177;
         }
-        const e1 = Áâá;
-        const e2 = Math.floor(e1[e1.ÂÀäÁa]);
-        let e3 = 23188;
-        var bX = 351;
-        const e4 = Number(dX[1]);
-        var bY;
-        var bZ;
-        var c0;
-        const e5 = 143;
-        var c1;
-        var c2;
-        const e6 = Math.floor(e5[e5.áÃAáÀ]);
-        var c3 = 393 << äaa;
-        var c4 = 217;
-        var c5;
-        var c6;
-        var c7 = 8;
-        var c8 = 39;
-        let e7 = 236;
-        if (e7 <= c8) {
-          c7 = 60;
+        const ÂÀäÁa = Áâá;
+        const AÂáÀÃ = Math.floor(ÂÀäÁa[ÂÀäÁa.ÂÀäÁa]);
+        let ÄáÀäÅ = 23188;
+        var åÄÃaÀ = 351;
+        const ãÃ = Number(Âåá[1]);
+        var ÀÃÅaA;
+        var äÂÃáÃ;
+        var åÅãáÀ;
+        const áÃAáÀ = 143;
+        var ÀÂÁáa;
+        var ÂáÃaÀ;
+        const ÅÁÂáÁ = Math.floor(áÃAáÀ[áÃAáÀ.áÃAáÀ]);
+        var Àáäåá = 393 << äaa;
+        var aâåãÅ = 217;
+        var ÂÀâÃÁ;
+        var ÃaÁaa;
+        var ÂÂAåÁ = 8;
+        var ÅãÂáÄ = 39;
+        let áAaäÀ = 236;
+        if (áAaäÀ <= ÅãÂáÄ) {
+          ÂÂAåÁ = 60;
         }
-        let e8 = 220;
-        const e9 = Math.abs(ÁÃáAå(e4));
-        var c9;
-        var ca = 18;
-        let ea = 288;
-        var cb = 208;
-        let eb = 189;
-        if (cb >= 9) {
-          cb = 145;
+        let âÂáaá = 220;
+        const aãã = Math.abs(ÁÃáAå(ãÃ));
+        var ãäåÂa;
+        var áåÂÁä = 18;
+        let åÃáäå = 288;
+        var ÅäáAá = 208;
+        let ããÅÂÀ = 189;
+        if (ÅäáAá >= 9) {
+          ÅäáAá = 145;
         }
-        let ec = -82;
-        const ed = {};
-        var cc;
-        var cd;
-        var ce;
-        ed.aäÃäá = 8;
-        áÂ.ÄÅâáÄ = dZ + e9;
-        var cf = 202;
-        let ee = {
+        let ÂÀÅaÅ = -82;
+        const ÃáAÀâ = {};
+        var ÁÀÂÅá;
+        var äÂÅÀA;
+        var åÀÃÂÄ;
+        ÃáAÀâ.aäÃäá = 8;
+        áÂ.ÄÅâáÄ = ÅÂÃ + aãã;
+        var ãåÄÃå = 202;
+        let ÃAÂAa = {
           ÄäãÅâ: åÄa
         };
-        var cg = 59;
-        let ef = 71;
-        const eg = 296;
-        var ch = 23;
-        let eh = 64;
-        const ei = 41;
-        if (ei >= eh) {
-          ch = 137;
+        var ÁAÅââ = 59;
+        let ÁáäâÁ = 71;
+        const âáÀãa = 296;
+        var ãäÅÁå = 23;
+        let áäAÃá = 64;
+        const ãÂäÂÄ = 41;
+        if (ãÂäÂÄ >= áäAÃá) {
+          ãäÅÁå = 137;
         }
-        const ej = 2342912;
-        var ci = 10;
-        if (ci > Åaa) {
-          ci = 154;
+        const ÃÂÁÄå = 2342912;
+        var ÀáaáÄ = 10;
+        if (ÀáaáÄ > Åaa) {
+          ÀáaáÄ = 154;
         }
-        if (ef == cg) {
-          cf = 201;
+        if (ÁáäâÁ == ÁAÅââ) {
+          ãåÄÃå = 201;
         }
-        áÂ.Áaäaâ = e9;
-        const ek = 213;
-        const el = 36855;
-        ek.áäAÅâ = ÂA;
-        var cj = 285;
-        const em = 95;
-        var ck = 8;
-        var cl;
-        if (ck == äAá) {
-          ck = 30;
+        áÂ.Áaäaâ = aãã;
+        const aÁÀÅÀ = 213;
+        const ãâÃáÄ = 36855;
+        aÁÀÅÀ.áäAÅâ = ÂA;
+        var AaåáÁ = 285;
+        const åäÅãã = 95;
+        var áaåÁå = 8;
+        var áåÁâå;
+        if (áaåÁå == äAá) {
+          áaåÁå = 30;
         }
-        const en = 3164;
-        var cm = 10300;
-        const eo = {};
-        var cn;
-        var co;
-        var cp;
-        var cq;
-        eo.aâAÂÁ = ÄäÄ;
-        let ep = 268;
-        var cr = 73;
-        var cs = 115;
-        var ct = 228;
-        const eq = 160;
-        if (ct >= eq) {
-          cs = 219;
+        const ÀaÅäÁ = 3164;
+        var Åââãä = 10300;
+        const áääAã = {};
+        var åÃäaA;
+        var áÂaäá;
+        var áAÁÁÁ;
+        var äÄäÀA;
+        áääAã.aâAÂÁ = ÄäÄ;
+        let áAaÀá = 268;
+        var ÅÄâÃÁ = 73;
+        var ÅâÁäã = 115;
+        var Aåãää = 228;
+        const áÀÀÃÅ = 160;
+        if (Aåãää >= áÀÀÃÅ) {
+          ÅâÁäã = 219;
         }
-        let er = 133;
-        let es = 212;
-        if (es == er) {
-          cr = 55;
+        let ÅáäãÃ = 133;
+        let ÀÁÃÅá = 212;
+        if (ÀÁÃÅá == ÅáäãÃ) {
+          ÅÄâÃÁ = 55;
         }
-        var cu = 32;
-        if (Åãâ <= cu) {
-          cu = 3;
+        var äÃãâA = 32;
+        if (Åãâ <= äÃãâA) {
+          äÃãâA = 3;
         }
-        let et = 214;
-        et.ÅåaÅÀ = åÄá;
-        var cv = -212;
-        const eu = Math.floor(em[em.åäÅãã]);
-        var cw = 188;
-        var cx;
-        if (áÀAäå < cw) {
-          cw = 71;
+        let áäãäá = 214;
+        áäãäá.ÅåaÅÀ = åÄá;
+        var áåÁâa = -212;
+        const ÅâäÂã = Math.floor(åäÅãã[åäÅãã.åäÅãã]);
+        var áÄááÄ = 188;
+        var ÁÁÂÁÀ;
+        if (áÀAäå < áÄááÄ) {
+          áÄááÄ = 71;
         }
-        áÂ.äÁÄÄÅ = áÂ.äÁÄÄÅ ^ e9 & 255;
+        áÂ.äÁÄÄÅ = áÂ.äÁÄÄÅ ^ aãã & 255;
       }
       {
-        var cy = 52;
-        if (äÂÀ < cy) {
-          cy = 71;
+        var ÅãÄÄÂ = 52;
+        if (äÂÀ < ÅãÄÄÂ) {
+          ÅãÄÄÂ = 71;
         }
-        const eH = at[2].split("_");
-        var cz = 6;
-        if (cz == AÂ) {
-          cz = 159;
+        const Âåá = äÁå[2].split("_");
+        var áÄáaÂ = 6;
+        if (áÄáaÂ == AÂ) {
+          áÄáaÂ = 159;
         }
-        const eI = eH[åâ] + "_";
-        const eJ = Number(eH[åÀ]);
-        const eK = Math.abs(ÁÃáAå(eJ));
-        let eL = {
+        const ÅÂÃ = Âåá[åâ] + "_";
+        const ãÃ = Number(Âåá[åÀ]);
+        const aãã = Math.abs(ÁÃáAå(ãÃ));
+        let ÅäÅÄA = {
           äáâÁå: 8
         };
-        áÂ.åaáaa = eI + eK;
-        const eM = 203;
-        var cA = 224;
-        if (cA === 8) {
-          cA = 157;
+        áÂ.åaáaa = ÅÂÃ + aãã;
+        const ÂÁáâá = 203;
+        var ÅâãÂÄ = 224;
+        if (ÅâãÂÄ === 8) {
+          ÅâãÂÄ = 157;
         }
-        var cB = 9765;
-        const eN = Math.floor(eM[eM.ÂÁáâá]);
-        const eO = 56;
-        const eP = ÄÁäâa;
-        let eQ = eP;
-        var cC = 144;
-        let eR = 144;
-        var cD = 214;
-        const eS = 213;
-        if (eR === cD) {
-          cC = 246;
+        var ÃãâÂÃ = 9765;
+        const ÂÀÀâÄ = Math.floor(ÂÁáâá[ÂÁáâá.ÂÁáâá]);
+        const ÃÁÂâÁ = 56;
+        const áâäÃÄ = ÄÁäâa;
+        let ÃAAãä = áâäÃÄ;
+        var AÄÁÁÃ = 144;
+        let ÂäÂâÀ = 144;
+        var âÄâáã = 214;
+        const âAAÁã = 213;
+        if (ÂäÂâÀ === âÄâáã) {
+          AÄÁÁÃ = 246;
         }
-        var cE = 135;
-        let eT = 185;
-        let eU = 130;
-        if (eU == eT) {
-          cE = 78;
+        var ÂÂÀAá = 135;
+        let åáaåá = 185;
+        let ÂÂÂáÀ = 130;
+        if (ÂÂÂáÀ == åáaåá) {
+          ÂÂÀAá = 78;
         }
-        const eV = Math.floor(eO[eO.ÃÁÂâÁ]);
-        áÂ.âãÃäã = eK;
+        const ÃÄäãa = Math.floor(ÃÁÂâÁ[ÃÁÂâÁ.ÃÁÂâÁ]);
+        áÂ.âãÃäã = aãã;
       }
-      var cF = 176;
-      var cG = 54;
-      let d0 = ÅÁA;
-      if (cG > d0) {
-        cF = 172;
+      var AÂAåA = 176;
+      var âÃÁÁÁ = 54;
+      let ÁáÃáÀ = ÅÁA;
+      if (âÃÁÁÁ > ÁáÃáÀ) {
+        AÂAåA = 172;
       }
       if (áÂ.AáÀÁå === undefined || áÄÅ === áÂ.ÄÅâáÄ || áÂ.åaáaa === undefined) {
-        U();
+        Ããá();
       }
-      var cH;
-      var cI;
-      let d1 = 37627;
-      ar();
-      var cJ = 246;
-      const d2 = 25;
-      var cK;
-      var cL;
-      d2.ãáÃÃÄ = ÀáA;
-      const d3 = 251 << AaÂ;
+      var ÂãâáÂ;
+      var äãÃAÁ;
+      let áåãáÅ = 37627;
+      Ãâá();
+      var ÁâÃäa = 246;
+      const ÃáÃÀA = 25;
+      var ÂãaÄã;
+      var âÅaÁÄ;
+      ÃáÃÀA.ãáÃÃÄ = ÀáA;
+      const ÂÃäAä = 251 << AaÂ;
     }, function () {
-      U();
+      Ããá();
     });
   }
   ;
-  function ao() {
+  function âÂ() {
     if (áÂ.state === áÂ.ÀÁÄ.ãAá) {
-      Q();
-      ai();
+      ÄâÁÂä();
+      Ááåaå();
     }
   }
   ;
-  function ap() {
+  function Àäå() {
     if (áÂ.Àäå !== null) {
-      var aq = áÂ.state;
+      var Âá = áÂ.state;
       if (!(áÂ.state & ÀÁÄ.áaåÂå)) {
         áÂ.state = 0;
       }
-      áÂ.Àäå(aq);
+      áÂ.Àäå(Âá);
     }
   }
   ;
@@ -5136,84 +5141,84 @@ var áÂ = function () {
       osaka: [ãå, 2, äaá],
       sydney: [âa, 2, 3]
     },
-    ÁÀÄ: a5,
-    aáÂâä: X,
-    AáÁAá: ak,
-    åÁáÀÃ: an,
-    äÀÂÅá: a0,
-    ÅAáäã: ag,
-    Âåå: ae,
-    âAaâa: a9,
-    ÄáÅAå: a8,
-    áAÄáa: af,
-    muted: a6,
-    ääÄäÅ: ad,
-    ÀÄã: a1,
-    áÂÄ: a7,
-    AåáÂá: ah,
-    åÂåâÂ: Y,
-    ÃÀââÀ: Z,
-    ãÄÄãá: S,
-    Åaá: ab,
-    áãaÃâ: W,
-    åÃâÂã: a4,
-    ÄÂÂáÅ: al,
+    ÁÀÄ: ÁÀÄ,
+    aáÂâä: aáÂâä,
+    AáÁAá: AáÁAá,
+    åÁáÀÃ: åÁáÀÃ,
+    äÀÂÅá: äÀÂÅá,
+    ÅAáäã: ÅAáäã,
+    Âåå: Âåå,
+    âAaâa: âAaâa,
+    ÄáÅAå: ÄáÅAå,
+    áAÄáa: áAÄáa,
+    muted: âåÂÂá,
+    ääÄäÅ: ääÄäÅ,
+    ÀÄã: ÀÄã,
+    áÂÄ: áÂÄ,
+    AåáÂá: AåáÂá,
+    åÂåâÂ: åÂåâÂ,
+    ÃÀââÀ: ÃÀââÀ,
+    ãÄÄãá: ãÄÄãá,
+    Åaá: Åaá,
+    áãaÃâ: áãaÃâ,
+    åÃâÂã: åÃâÂã,
+    ÄÂÂáÅ: ÀAäâA,
     SendWSmsg: SendWSmsg,
-    SendWsMessage: a2,
-    AntiKick: a3,
-    âÂ: ao,
+    SendWsMessage: SendWsMessage,
+    AntiKick: AntiKick,
+    âÂ: âÂ,
     Àäå: null,
     âAâ: null
   };
 }();
 var Aá = function () {
-  var j = 0;
-  var k = 0;
-  var l = AÂ;
-  var m = áÁ;
-  var n = 18;
-  var o = 9;
-  var p = 50;
-  function q(a1) {
-    var a2 = Aá.Ááä[a1];
-    a2.label = null;
-    a2.AãA = null;
-    a2.äâÂ = x++;
-    a2.ãaã = ãa;
-    a2.name = "";
+  var áÂÀ = 0;
+  var aåA = 0;
+  var AÁÀÅá = AÂ;
+  var ÀÁÀaã = áÁ;
+  var áåÁÄå = 18;
+  var ÄÃäAá = 9;
+  var åââää = 50;
+  function ÄÅÃ(ãã) {
+    var Aâ = Aá.Ááä[ãã];
+    Aâ.label = null;
+    Aâ.AãA = null;
+    Aâ.äâÂ = åÂå++;
+    Aâ.ãaã = ãa;
+    Aâ.name = "";
   }
   ;
-  function r() {
-    a0.aãÅ = AÂ;
-    for (var a1 = ÀÄ; a0.Ãaâ.length > a1; a1++) {
-      if (a0.Ãaâ[a1] !== 0) {
-        a0.aãÅ = a0.Ãaâ[a1];
-        a0.Ãaâ[a1] = 0;
+  function ÂÅa() {
+    â.aãÅ = AÂ;
+    for (var ä = ÀÄ; â.Ãaâ.length > ä; ä++) {
+      if (â.Ãaâ[ä] !== 0) {
+        â.aãÅ = â.Ãaâ[ä];
+        â.Ãaâ[ä] = 0;
         return;
       }
     }
-    a0.äÃâ = 0;
+    â.äÃâ = 0;
   }
   ;
-  function s(a1) {
-    for (var a2 = ãÂ; a2 < n; a2++) {
-      Aá.Ááä[a2] = new C(a2, a1[a2 + ÄÂ]);
+  function ãAaÅá(Ááä) {
+    for (var ä = ãÂ; ä < áåÁÄå; ä++) {
+      Aá.Ááä[ä] = new ÀáÄäÁ(ä, Ááä[ä + ÄÂ]);
     }
   }
   ;
-  function t(a1) {
+  function ãaÀ(ÅÅaÃÁ) {
     Aá.ãâÃ = -ãâ;
-    for (var a2 = áÃ; a2 < Aá.ãâA; a2++) {
-      if (a1[a2] !== 0) {
+    for (var ä = áÃ; ä < Aá.ãâA; ä++) {
+      if (ÅÅaÃÁ[ä] !== 0) {
         Aá.ãâÃ++;
       }
-      Aá.ÂÅ[a2] = new u(a2, a1[a2]);
+      Aá.ÂÅ[ä] = new ÁaÅaâ(ä, ÅÅaÃÁ[ä]);
     }
   }
   ;
-  function u(a1, a2) {
-    this.áÄa = a0.aâå === 1 ? a2 + "#" + a1 : a2;
-    this.id = a1;
+  function ÁaÅaâ(ãã, áÄa) {
+    this.áÄa = â.aâå === 1 ? áÄa + "#" + ãã : áÄa;
+    this.id = ãã;
     this.ãÅa = ãa;
     this.âÁÁ = AÂ;
     this.ÀÃã = ÁÀ;
@@ -5299,80 +5304,80 @@ var Aá = function () {
     this.aåã = ÀÄ;
   }
   ;
-  function v(a1, a2) {
-    if (p === a2) {
-      a1.Aâ = -ÄÂ;
+  function AÃåãá(äåa, ãã) {
+    if (åââää === ãã) {
+      äåa.Aâ = -ÄÂ;
       return;
-    } else if (a2 > p) {
-      a2 -= p + åä;
-      Aá.Ááä[a2].ãaã = a1.id;
-      a1.Aäá = aÅ;
-      if (a1.id === Aá.â.id) {
+    } else if (ãã > åââää) {
+      ãã -= åââää + åä;
+      Aá.Ááä[ãã].ãaã = äåa.id;
+      äåa.Aäá = aÅ;
+      if (äåa.id === Aá.â.id) {
         Aá.â.Aäá = Áå;
       }
     } else {
-      a1.Aäá = 0;
+      äåa.Aäá = 0;
     }
-    if (Aá.â.id === a1.id) {
-      Aá.â.Aâ = a2;
+    if (Aá.â.id === äåa.id) {
+      Aá.â.Aâ = ãã;
     }
-    a1.Aâ = a2;
-    a1.åÂå = Aá.Ááä[a2].äâÂ;
+    äåa.Aâ = ãã;
+    äåa.åÂå = Aá.Ááä[ãã].äâÂ;
   }
   ;
-  function w(a1, a2) {
-    j = a1;
-    k = a2;
-    l = a1 - 1;
-    m = a2 - ãâ;
+  function ÃAÀäA(ááááÄ, åãâåå) {
+    áÂÀ = ááááÄ;
+    aåA = åãâåå;
+    AÁÀÅá = ááááÄ - 1;
+    ÀÁÀaã = åãâåå - ãâ;
   }
   ;
-  var x = 0;
-  function y() {
-    B(J.ãá);
-    B(J.ÃäÄ);
-    B(J.aaå);
-    B(J.áÅÀ);
-    B(J.AÁ);
-    B(J.Aaâ);
+  var åÂå = 0;
+  function aáÁAå() {
+    äåÄ(ÄÄ.ãá);
+    äåÄ(ÄÄ.ÃäÄ);
+    äåÄ(ÄÄ.aaå);
+    äåÄ(ÄÄ.áÅÀ);
+    äåÄ(ÄÄ.AÁ);
+    äåÄ(ÄÄ.Aaâ);
     Aá.â.ÅääáÀ += ÀÀ;
-    if (J.áÅÀ.Äáa > 254) {
+    if (ÄÄ.áÅÀ.Äáa > 254) {
       áÁá.Ááâ = áÃ;
     } else {
-      áÁá.Ááâ = Math.min(ÄÂ, Math.max(äå, Áå - J.áÅÀ.Äáa / 255));
+      áÁá.Ááâ = Math.min(ÄÂ, Math.max(äå, Áå - ÄÄ.áÅÀ.Äáa / 255));
     }
-    Z();
+    ÅaâäÂ();
   }
   ;
-  function z(a1) {
-    ã = a1.rx + a1.ãÂâ * (a1.aÁá * ÀÀ);
-    áã = a1.ry + a1.aÁá * ÀÀ * a1.åAÅ;
-    if (áâA.ÅáÂ(ã, áã, a1.rx, a1.ry) > áâA.ÅáÂ(a1.rx, a1.ry, a1.Åaä, a1.ÂÅä)) {
-      a1.rx = a1.Åaä;
-      a1.ry = a1.ÂÅä;
+  function AAAÀã(Ãä) {
+    ã = Ãä.rx + Ãä.ãÂâ * (Ãä.aÁá * ÀÀ);
+    áã = Ãä.ry + Ãä.aÁá * ÀÀ * Ãä.åAÅ;
+    if (áâA.ÅáÂ(ã, áã, Ãä.rx, Ãä.ry) > áâA.ÅáÂ(Ãä.rx, Ãä.ry, Ãä.Åaä, Ãä.ÂÅä)) {
+      Ãä.rx = Ãä.Åaä;
+      Ãä.ry = Ãä.ÂÅä;
     } else {
-      a1.rx = ã;
-      a1.ry = áã;
+      Ãä.rx = ã;
+      Ãä.ry = áã;
     }
-    a1.x = Ää.ãåa(a1.x, a1.rx, a1.ãåa);
-    a1.y = Ää.ãåa(a1.y, a1.ry, a1.ãåa);
-    a1.ä = Math.max(ãÂ, Math.min(m, Math.floor(a1.y / ÀÂ.ááá)));
-    a1.åã = Math.max(ÄÁ, Math.min(l, Math.floor(a1.x / ÀÂ.ááá)));
-    if (Aá.â.id === a1.åÅ && a1.id === ÀÄ) {
+    Ãä.x = Ää.ãåa(Ãä.x, Ãä.rx, Ãä.ãåa);
+    Ãä.y = Ää.ãåa(Ãä.y, Ãä.ry, Ãä.ãåa);
+    Ãä.ä = Math.max(ãÂ, Math.min(ÀÁÀaã, Math.floor(Ãä.y / ÀÂ.ááá)));
+    Ãä.åã = Math.max(ÄÁ, Math.min(AÁÀÅá, Math.floor(Ãä.x / ÀÂ.ááá)));
+    if (Aá.â.id === Ãä.åÅ && Ãä.id === ÀÄ) {
       if (cfg.showRealAngles === "always") {
-        a1.angle = Ää.ãåa(a1.angle, a1.Áâä, a1.ãåa * 2);
+        Ãä.angle = Ää.ãåa(Ãä.angle, Ãä.Áâä, Ãä.ãåa * 2);
       } else if (cfg.showRealAngles === "withAim" && cfg.AimBotEnable) {
-        a1.angle = Ää.ãåa(a1.angle, a1.Áâä, a1.ãåa * 2);
+        Ãä.angle = Ää.ãåa(Ãä.angle, Ãä.Áâä, Ãä.ãåa * 2);
       } else {
-        a1.angle = ÁA.angle;
+        Ãä.angle = ÁA.angle;
       }
-    } else if (a1.åÅ === 0) {
-      a1.angle = Ää.ãåa(a1.angle, a1.Áâä, a1.ãåa / ãÄá);
+    } else if (Ãä.åÅ === 0) {
+      Ãä.angle = Ää.ãåa(Ãä.angle, Ãä.Áâä, Ãä.ãåa / ãÄá);
     } else {
-      a1.angle = Ää.ãåa(a1.angle, a1.Áâä, a1.ãåa * 2);
+      Ãä.angle = Ää.ãåa(Ãä.angle, Ãä.Áâä, Ãä.ãåa * 2);
     }
   }
-  function A() {
+  function ÀaÃ() {
     this.Äáa = 0;
     this.value = 0;
     this.ââÅ = 0;
@@ -5382,336 +5387,336 @@ var Aá = function () {
     this.åaá = ÄÁ;
   }
   ;
-  function B(a1) {
-    if (a1.áÃÅ === 1) {
-      a1.value = Math.min(a1.ââÅ, Math.max(a1.value - ÀÀ * (a1.aáÁ - a1.åaá), åâ));
-    } else if (a1.áÃÅ === -1) {
-      a1.value = Math.min(a1.value + (a1.Àáå + a1.åaá) * ÀÀ, a1.ââÅ);
+  function äåÄ(ÀÀå) {
+    if (ÀÀå.áÃÅ === 1) {
+      ÀÀå.value = Math.min(ÀÀå.ââÅ, Math.max(ÀÀå.value - ÀÀ * (ÀÀå.aáÁ - ÀÀå.åaá), åâ));
+    } else if (ÀÀå.áÃÅ === -1) {
+      ÀÀå.value = Math.min(ÀÀå.value + (ÀÀå.Àáå + ÀÀå.åaá) * ÀÀ, ÀÀå.ââÅ);
     }
-    a1.Äáa = Ää.ãåa(a1.Äáa, a1.value, 0.1);
+    ÀÀå.Äáa = Ää.ãåa(ÀÀå.Äáa, ÀÀå.value, 0.1);
   }
   ;
-  function C(a1, a2) {
-    this.id = a1;
-    this.name = a2;
+  function ÀáÄäÁ(ãã, ÅAä) {
+    this.id = ãã;
+    this.name = ÅAä;
     this.label = null;
     this.AãA = null;
     this.ãaã = AÂ;
-    this.äâÂ = x++;
+    this.äâÂ = åÂå++;
   }
   ;
-  function D() {
-    var a1 = äâä[âAä].ÄÄ;
-    F(J.ãá, a1.ãá.ââÅ, a1.ãá.Àáå, a1.ãá.aáÁ, áÃ);
-    if (ãÂ === a0.ÀÃã) {
-      F(J.ÃäÄ, a1.ÃäÄ.ââÅ, a1.ÃäÄ.Àáå, a1.ÃäÄ.aáÁ, 1);
-      F(J.aaå, a1.aaå.ââÅ, a1.aaå.Àáå, a1.aaå.aáÁ, Aa);
-      F(J.AÁ, a1.AÁ.ââÅ, a1.AÁ.Àáå, a1.AÁ.aáÁ, -Áå);
-      F(J.áÅÀ, a1.áÅÀ.ââÅ, a1.áÅÀ.Àáå, a1.áÅÀ.aáÁ, 0);
+  function ããÁÅÃ() {
+    var âÃÃ = äâä[âAä].ÄÄ;
+    åâÄ(ÄÄ.ãá, âÃÃ.ãá.ââÅ, âÃÃ.ãá.Àáå, âÃÃ.ãá.aáÁ, áÃ);
+    if (ãÂ === â.ÀÃã) {
+      åâÄ(ÄÄ.ÃäÄ, âÃÃ.ÃäÄ.ââÅ, âÃÃ.ÃäÄ.Àáå, âÃÃ.ÃäÄ.aáÁ, 1);
+      åâÄ(ÄÄ.aaå, âÃÃ.aaå.ââÅ, âÃÃ.aaå.Àáå, âÃÃ.aaå.aáÁ, Aa);
+      åâÄ(ÄÄ.AÁ, âÃÃ.AÁ.ââÅ, âÃÃ.AÁ.Àáå, âÃÃ.AÁ.aáÁ, -Áå);
+      åâÄ(ÄÄ.áÅÀ, âÃÃ.áÅÀ.ââÅ, âÃÃ.áÅÀ.Àáå, âÃÃ.áÅÀ.aáÁ, 0);
     } else {
-      F(J.ÃäÄ, a1.ÃäÄ.ââÅ, a1.ÃäÄ.Àáå, AÂ, 1);
-      F(J.aaå, a1.aaå.ââÅ, a1.aaå.Àáå, 0, âã);
-      F(J.AÁ, a1.AÁ.ââÅ, a1.AÁ.Àáå * Äåã, a1.AÁ.aáÁ / aâA, -åÀ);
-      F(J.áÅÀ, a1.áÅÀ.ââÅ, a1.áÅÀ.Àáå, ãa, 0);
+      åâÄ(ÄÄ.ÃäÄ, âÃÃ.ÃäÄ.ââÅ, âÃÃ.ÃäÄ.Àáå, AÂ, 1);
+      åâÄ(ÄÄ.aaå, âÃÃ.aaå.ââÅ, âÃÃ.aaå.Àáå, 0, âã);
+      åâÄ(ÄÄ.AÁ, âÃÃ.AÁ.ââÅ, âÃÃ.AÁ.Àáå * Äåã, âÃÃ.AÁ.aáÁ / aâA, -åÀ);
+      åâÄ(ÄÄ.áÅÀ, âÃÃ.áÅÀ.ââÅ, âÃÃ.áÅÀ.Àáå, ãa, 0);
     }
-    F(J.Aaâ, 255, AÂ, áÃ, ãa);
-    J.Aaâ.value = ÀÄ;
-    J.Aaâ.Äáa = 0;
-    a0.ÅÂÁ = aåäãÅ;
-    if (K === M) {
-      J.aaå.áÃÅ = 1;
+    åâÄ(ÄÄ.Aaâ, 255, AÂ, áÃ, ãa);
+    ÄÄ.Aaâ.value = ÀÄ;
+    ÄÄ.Aaâ.Äáa = 0;
+    â.ÅÂÁ = aåäãÅ;
+    if (ÄÂÄÅá === åÄÃ) {
+      ÄÄ.aaå.áÃÅ = 1;
     }
   }
   ;
-  function E(a1, a2) {
-    for (var a3 = 0; a3 < 10; a3++) {
-      var a4 = a2[ÄÂÅ + a3 * ÅÄã];
-      var a5 = a1[ÄäÀ + a3 * aâA];
-      var a6 = Aá.ÂÅ[a4];
-      a6.Ãa = Ää.ÃÄA(a5);
-      a6.aåã = a2[3 + a3 * 4];
-      var a7 = Ää.ÃÃä(a6.Ãa);
-      if (a6.Aãá !== a7) {
-        a6.ÅãA = null;
+  function ÄãÁÄä(äÄA, ÀÃ) {
+    for (var ä = 0; ä < 10; ä++) {
+      var ãã = ÀÃ[ÄÂÅ + ä * ÅÄã];
+      var Ãa = äÄA[ÄäÀ + ä * aâA];
+      var â = Aá.ÂÅ[ãã];
+      â.Ãa = Ää.ÃÄA(Ãa);
+      â.aåã = ÀÃ[3 + ä * 4];
+      var Aãá = Ää.ÃÃä(â.Ãa);
+      if (â.Aãá !== Aãá) {
+        â.ÅãA = null;
       }
-      a6.Aãá = a7;
-      Aá.âäÅ[a3] = a4;
+      â.Aãá = Aãá;
+      Aá.âäÅ[ä] = ãã;
     }
     Aá.ÁáÁ = Àâ;
   }
   ;
-  function F(a1, a2, a3, a4, a5) {
-    a1.Äáa = a2;
-    a1.value = a2;
-    a1.ââÅ = a2;
-    a1.Àáå = a3;
-    a1.aáÁ = a4;
-    a1.áÃÅ = a5;
-    a1.åaá = Àá;
+  function åâÄ(ÀÀå, ãÃ, Àáå, aáÁ, áÃÅ) {
+    ÀÀå.Äáa = ãÃ;
+    ÀÀå.value = ãÃ;
+    ÀÀå.ââÅ = ãÃ;
+    ÀÀå.Àáå = Àáå;
+    ÀÀå.aáÁ = aáÁ;
+    ÀÀå.áÃÅ = áÃÅ;
+    ÀÀå.åaá = Àá;
   }
   ;
-  function G() {
+  function äaAAá() {
     console.log(Aá.ãâA);
-    for (var a1 = áÃ; Aá.ãâA > a1; a1++) {
-      Aá.âäÅ[a1] = a1;
+    for (var ä = áÃ; Aá.ãâA > ä; ä++) {
+      Aá.âäÅ[ä] = ä;
     }
-    Aá.âäÅ = Aá.âäÅ.sort(H).slice(0, 10);
-    for (var a1 = ÄÁ; Aá.ãâA > a1; a1++) {
+    Aá.âäÅ = Aá.âäÅ.sort(ÄAÂÀâ).slice(0, 10);
+    for (var ä = ÄÁ; Aá.ãâA > ä; ä++) {
       Aá.ÁáÁ = ãâ;
     }
   }
   ;
-  function H(a1, a2) {
-    if (Aa === Aá.ÂÅ[a1].áÄa && ãa === Aá.ÂÅ[a2].áÄa) {
+  function ÄAÂÀâ(Aäa, Ã) {
+    if (Aa === Aá.ÂÅ[Aäa].áÄa && ãa === Aá.ÂÅ[Ã].áÄa) {
       return ãa;
-    } else if (Aá.ÂÅ[a1].áÄa === áÃ) {
-      return Aá.ÂÅ[a2].Ãa - 1;
-    } else if (Aá.ÂÅ[a2].áÄa === 0) {
-      return -1 - Aá.ÂÅ[a1].Ãa;
+    } else if (Aá.ÂÅ[Aäa].áÄa === áÃ) {
+      return Aá.ÂÅ[Ã].Ãa - 1;
+    } else if (Aá.ÂÅ[Ã].áÄa === 0) {
+      return -1 - Aá.ÂÅ[Aäa].Ãa;
     } else {
-      return Aá.ÂÅ[a2].Ãa - Aá.ÂÅ[a1].Ãa;
+      return Aá.ÂÅ[Ã].Ãa - Aá.ÂÅ[Aäa].Ãa;
     }
   }
   ;
-  function I() {
-    var a1 = äâä.length;
-    for (var a2 = 0; a2 <= a1; a2++) {
-      if (a1 !== a2 && äâä[a2].Àä === Àá) {
+  function ÅÃá() {
+    var Aå = äâä.length;
+    for (var ä = 0; ä <= Aå; ä++) {
+      if (Aå !== ä && äâä[ä].Àä === Àá) {
         continue;
       }
-      var a3 = ÅÀ.åA[a2];
-      var a4 = ÅÀ.border[a2];
-      var a5 = a4.border;
-      for (var a6 = ÀÄ; a5 > a6; a6++) {
-        z(a3[a4.ÁÀá[a6]]);
+      var åA = ÅÀ.åA[ä];
+      var âÁ = ÅÀ.border[ä];
+      var åÃa = âÁ.border;
+      for (var åã = ÀÄ; åÃa > åã; åã++) {
+        AAAÀã(åA[âÁ.ÁÀá[åã]]);
       }
     }
     if (Aá.â.Aâ !== -Áå) {
-      for (var a2 = Aa; a2 < a0.ÅâÀ; a2++) {
-        var a7 = a0.AãÃ[a2];
-        if (a7.ååa < 0) {
+      for (var ä = Aa; ä < â.ÅâÀ; ä++) {
+        var Ããâ = â.AãÃ[ä];
+        if (Ããâ.ååa < 0) {
           continue;
         }
-        var a8 = Aá.ÂÅ[a7.id];
-        a8.rx = áá.ãåa(a8.rx, a8.x, 0.03);
-        a8.ry = áá.ãåa(a8.ry, a8.y, 0.03);
-        a7.ååa -= ÀÀ;
+        var AÁâ = Aá.ÂÅ[Ããâ.id];
+        AÁâ.rx = áá.ãåa(AÁâ.rx, AÁâ.x, 0.03);
+        AÁâ.ry = áá.ãåa(AÁâ.ry, AÁâ.y, 0.03);
+        Ããâ.ååa -= ÀÀ;
       }
     }
     if (Aá.â.ÁÂÃ > 0) {
-      var a8 = Aá.ÂÅ[Aá.â.Ääã];
-      a8.rx = áá.ãåa(a8.rx, a8.x, 0.03);
-      a8.ry = áá.ãåa(a8.ry, a8.y, 0.03);
+      var AÁâ = Aá.ÂÅ[Aá.â.Ääã];
+      AÁâ.rx = áá.ãåa(AÁâ.rx, AÁâ.x, 0.03);
+      AÁâ.ry = áá.ãåa(AÁâ.ry, AÁâ.y, 0.03);
       Aá.â.ÁÂÃ -= ÀÀ;
     }
   }
   ;
-  var J = {
-    ãá: new A(),
-    ÃäÄ: new A(),
-    aaå: new A(),
-    áÅÀ: new A(),
-    AÁ: new A(),
-    Aaâ: new A()
+  var ÄÄ = {
+    ãá: new ÀaÃ(),
+    ÃäÄ: new ÀaÃ(),
+    aaå: new ÀaÃ(),
+    áÅÀ: new ÀaÃ(),
+    AÁ: new ÀaÃ(),
+    Aaâ: new ÀaÃ()
   };
-  var K = 1;
-  var L = 0;
-  var M = L;
-  var N = 0;
-  function O(a1, a2) {
-    if (a1 !== M) {
-      P();
+  var ÄÂÄÅá = 1;
+  var ãäa = 0;
+  var åÄÃ = ãäa;
+  var ÁÅÅ = 0;
+  function aaA(ÁÀá, ÅÅäåa) {
+    if (ÁÀá !== åÄÃ) {
+      ÅaÀ();
     }
-    Aá.åÄÃ = M;
-    N = a2;
+    Aá.åÄÃ = åÄÃ;
+    ÁÅÅ = ÅÅäåa;
   }
   ;
-  function P() {
-    var a1;
-    a1 = áaÂ;
+  function ÅaÀ() {
+    var åáá;
+    åáá = áaÂ;
     áaÂ = ÁÁ;
-    ÁÁ = a1;
-    a1 = âåá;
+    ÁÁ = åáá;
+    åáá = âåá;
     âåá = Aáã;
-    Aáã = a1;
-    a1 = áãÁ;
+    Aáã = åáá;
+    åáá = áãÁ;
     áãÁ = ââä;
-    ââä = a1;
-    a1 = âÀã;
+    ââä = åáá;
+    åáá = âÀã;
     âÀã = åÂÅ;
-    åÂÅ = a1;
-    a1 = ÂÅÂ;
+    åÂÅ = åáá;
+    åáá = ÂÅÂ;
     ÂÅÂ = äâä;
-    äâä = a1;
-    a1 = aäã;
+    äâä = åáá;
+    åáá = aäã;
     aäã = äáÅ;
-    äáÅ = a1;
-    a1 = áÁÂ;
+    äáÅ = åáá;
+    åáá = áÁÂ;
     áÁÂ = ÃáÀ;
-    ÃáÀ = a1;
-    a1 = ãÃÀ;
+    ÃáÀ = åáá;
+    åáá = ãÃÀ;
     ãÃÀ = ÃãÃ;
-    ÃãÃ = a1;
-    M = (M + 1) % 2;
-    Aá.åÄÃ = M;
-    if (M === 0) {
+    ÃãÃ = åáá;
+    åÄÃ = (åÄÃ + 1) % 2;
+    Aá.åÄÃ = åÄÃ;
+    if (åÄÃ === 0) {
       document.getElementById("bod").style.backgroundColor = "#3D5942";
       âÃä.style.backgroundColor = "#3D5942";
     } else {
       document.getElementById("bod").style.backgroundColor = "#0B2129";
       âÃä.style.backgroundColor = "#0B2129";
     }
-    N = áÃ;
+    ÁÅÅ = áÃ;
   }
   ;
-  function Q(a1) {
-    if (ää.ÁáÂ === a1) {
+  function áÀa(áÄÂ) {
+    if (ää.ÁáÂ === áÄÂ) {
       Aá.aaÁ();
-      a0.aä.Ââ = -Äá;
+      â.aä.Ââ = -Äá;
     }
-    var a2 = ÄÁ;
-    var a3 = 0;
-    var a4 = Aá.â.åââ;
-    var a5 = ÄÁ;
-    var a6 = a0.âÀÃ;
-    var a7 = a0.Ååã;
-    var a8 = ÀÅ.áãá;
-    for (var a9 = Âã; a9 < ÁÁ.length; a9++) {
-      var aa = ÁÁ[a9];
-      var ab = aa.detail;
-      if (ab.áÄÂ !== undefined && -âa !== ab.áÄÂ.indexOf(a1) && (ab.level === -1 || a0.ããä[aa.id] === 1)) {
-        if (a2 === 0 || a4 === a9) {
-          a2 = a9;
-          a3 = a5;
+    var ÁÅä = ÄÁ;
+    var aÀå = 0;
+    var âAÅ = Aá.â.åââ;
+    var Aå = ÄÁ;
+    var áãá = â.âÀÃ;
+    var Ååã = â.Ååã;
+    var âÀÃ = ÀÅ.áãá;
+    for (var ä = Âã; ä < ÁÁ.length; ä++) {
+      var Åã = ÁÁ[ä];
+      var ÀÁ = Åã.detail;
+      if (ÀÁ.áÄÂ !== undefined && -âa !== ÀÁ.áÄÂ.indexOf(áÄÂ) && (ÀÁ.level === -1 || â.ããä[Åã.id] === 1)) {
+        if (ÁÅä === 0 || âAÅ === ä) {
+          ÁÅä = ä;
+          aÀå = Aå;
         }
-        a8[a5].ÁÁÃ(aa.Áã.src, aa.Áã.À);
-        a6[a5] = a9;
-        a7[a5] = W(ab.ÃÄá);
-        a5++;
+        âÀÃ[Aå].ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+        áãá[Aå] = ä;
+        Ååã[Aå] = åÁAâÃ(ÀÁ.ÃÄá);
+        Aå++;
       }
     }
-    a0.ãÀÅ = a5;
-    a0.ÄaA = a1;
-    a0.ãåÄ = -1;
-    a0.ÅÀá = a3;
-    if (a2 > ÅÁ) {
-      R(a2);
+    â.ãÀÅ = Aå;
+    â.ÄaA = áÄÂ;
+    â.ãåÄ = -1;
+    â.ÅÀá = aÀå;
+    if (ÁÅä > ÅÁ) {
+      âãâ(ÁÅä);
     }
   }
   ;
-  function R(a1) {
-    var a2 = 0;
-    var a3 = ÁÁ[a1];
-    ÀÅ.åÄÁ.ÁÁÃ(a3.Áã.src, a3.Áã.À);
-    var a4 = a3.detail.ÃÄá;
-    var a5 = a3.detail.áÄÂ;
-    var a6 = ÀÅ.ÃÄá;
-    var a7 = ÀÅ.âåå;
-    var a8 = a0.ÀÂÀ;
-    a0.åââ = a1;
-    if (a5 !== undefined) {
-      for (var a9 = Àá; a5.length > a9; a9++) {
-        var aa = ÁÄÁ[a5[a9]];
-        if (aa !== undefined) {
-          a3 = ÁÁ[aa];
-          a7[a2].ÁÁÃ(a3.Áã.src, a3.Áã.À);
-          a2++;
+  function âãâ(ãã) {
+    var Aå = 0;
+    var Åã = ÁÁ[ãã];
+    ÀÅ.åÄÁ.ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+    var ääá = Åã.detail.ÃÄá;
+    var ÁÃâ = Åã.detail.áÄÂ;
+    var ÃÄá = ÀÅ.ÃÄá;
+    var âåå = ÀÅ.âåå;
+    var ÀÂÀ = â.ÀÂÀ;
+    â.åââ = ãã;
+    if (ÁÃâ !== undefined) {
+      for (var ä = Àá; ÁÃâ.length > ä; ä++) {
+        var äÁä = ÁÄÁ[ÁÃâ[ä]];
+        if (äÁä !== undefined) {
+          Åã = ÁÁ[äÁä];
+          âåå[Aå].ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+          Aå++;
         }
       }
     }
-    a0.âÁÃ = a2;
-    a2 = 0;
-    if (áÄÅ !== a4) {
-      for (a9 = åâ; a4.length > a9; a9++) {
-        a3 = ÁÁ[a4[a9][0]];
-        a6[a2].ÁÁÃ(a3.Áã.src, a3.Áã.À);
-        a8[a2] = a3.id;
-        a2++;
+    â.âÁÃ = Aå;
+    Aå = 0;
+    if (áÄÅ !== ääá) {
+      for (ä = åâ; ääá.length > ä; ä++) {
+        Åã = ÁÁ[ääá[ä][0]];
+        ÃÄá[Aå].ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+        ÀÂÀ[Aå] = Åã.id;
+        Aå++;
       }
     }
-    a0.åÂa = a2;
-    W(a4);
+    â.åÂa = Aå;
+    åÁAâÃ(ääá);
   }
   ;
-  function S() {
-    N += ÀÀ;
-    return N % Aá.ãäa + M * 10000000;
+  function aaãåÀ() {
+    ÁÅÅ += ÀÀ;
+    return ÁÅÅ % Aá.ãäa + åÄÃ * 10000000;
   }
   ;
-  function T(a1, a2) {
-    if (a1 !== M) {
+  function âÂå(ÁÀá, ÅÅäåa) {
+    if (ÁÀá !== åÄÃ) {
       Aá.transition = 1000;
     }
-    Aá.åÄÃ = M;
-    N = a2;
+    Aá.åÄÃ = åÄÃ;
+    ÁÅÅ = ÅÅäåa;
   }
   ;
-  function U(a1) {
+  function äââ(AÅÀ) {
     Aá.aaÁ();
-    var a2 = 0;
-    var a3 = 0;
-    var a4 = ãÂ;
-    var a5 = a0.âÀÃ;
-    var a6 = ÀÅ.áãá;
-    var a7 = a0.Ååã;
-    for (var a8 = ÁÅ; ÁÁ.length > a8; a8++) {
-      var a9 = ÁÁ[a8];
-      if (a1 === a9.detail.AÅÀ) {
-        if (AÂ === a2) {
-          a2 = a8;
-          a3 = a4;
+    var ÁÅä = 0;
+    var aÀå = 0;
+    var Aå = ãÂ;
+    var áãá = â.âÀÃ;
+    var âÀÃ = ÀÅ.áãá;
+    var Ååã = â.Ååã;
+    for (var ä = ÁÅ; ÁÁ.length > ä; ä++) {
+      var Åã = ÁÁ[ä];
+      if (AÅÀ === Åã.detail.AÅÀ) {
+        if (AÂ === ÁÅä) {
+          ÁÅä = ä;
+          aÀå = Aå;
         }
-        a6[a4].ÁÁÃ(a9.Áã.src, a9.Áã.À);
-        a5[a4] = a8;
-        a7[a4] = V(a8, a9.detail);
-        a4++;
+        âÀÃ[Aå].ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+        áãá[Aå] = ä;
+        Ååã[Aå] = äÂaÂá(ä, Åã.detail);
+        Aå++;
       }
     }
-    a0.ãÀÅ = a4;
-    a0.ÄaA = -Âã;
-    a0.ãåÄ = a1;
-    a0.ÅÀá = a3;
-    R(a2);
+    â.ãÀÅ = Aå;
+    â.ÄaA = -Âã;
+    â.ãåÄ = AÅÀ;
+    â.ÅÀá = aÀå;
+    âãâ(ÁÅä);
   }
   ;
-  function V(a1, a2) {
-    if (a0.ããä[a1] === ÁÅ || -Áå === a2.level) {
+  function äÂaÂá(ãã, ÀÁ) {
+    if (â.ããä[ãã] === ÁÅ || -Áå === ÀÁ.level) {
       return 2;
-    } else if (a0.level < a2.level || a2.ÀÄÁ > a0.åáâ || a2.âAÅ !== -1 && a0.ããä[a2.âAÅ] === undefined) {
+    } else if (â.level < ÀÁ.level || ÀÁ.ÀÄÁ > â.åáâ || ÀÁ.âAÅ !== -1 && â.ããä[ÀÁ.âAÅ] === undefined) {
       return 0;
     }
     return Áå;
   }
   ;
-  function W(a1) {
-    var a2 = a0.áÄâ;
-    var a3 = a0.ãÃä;
-    var a4 = 1;
-    if (ÄÂã === a1) {
-      return a4;
+  function åÁAâÃ(ÃÄá) {
+    var ÅÅá = â.áÄâ;
+    var áä = â.ãÃä;
+    var ãÃãÅa = 1;
+    if (ÄÂã === ÃÄá) {
+      return ãÃãÅa;
     }
-    for (var a5 = 0; a5 < a1.length; a5++) {
-      var a6 = a1[a5];
-      for (var a7 = ÅÁ; a7 < a3.length; a7++) {
-        var a8 = a3[a7];
-        if (a8[ãa] === a6[0]) {
-          if (a6[1] <= a8[1]) {
-            a2[a5] = a6[ÄÂ];
+    for (var ä = 0; ä < ÃÄá.length; ä++) {
+      var ÃaÁ = ÃÄá[ä];
+      for (var åã = ÅÁ; åã < áä.length; åã++) {
+        var Åã = áä[åã];
+        if (Åã[ãa] === ÃaÁ[0]) {
+          if (ÃaÁ[1] <= Åã[1]) {
+            ÅÅá[ä] = ÃaÁ[ÄÂ];
             break;
           } else {
-            a2[a5] = -a6[Áå];
+            ÅÅá[ä] = -ÃaÁ[Áå];
           }
         }
       }
-      if (a3.length === a7) {
-        a2[a5] = -a6[Äá];
-        a4 = 0;
+      if (áä.length === åã) {
+        ÅÅá[ä] = -ÃaÁ[Äá];
+        ãÃãÅa = 0;
       }
     }
-    return a4;
+    return ãÃãÅa;
   }
   ;
-  function X() {
+  function aaÁ() {
     if (Aá.â.Aáá === 1 || Aá.â.aáâ === 1) {
       Aá.â.Aáá = 0;
       Aá.â.aáâ = 0;
@@ -5721,38 +5726,38 @@ var Aá = function () {
   ;
   aåäãÅ = 900;
   aÄääÂ = 1.105;
-  function Y(a1) {
-    var a2 = aåäãÅ;
-    for (var a3 = ãa; a1 > a3; a3++) {
-      a2 = Math.floor(aÄääÂ * a2);
+  function äaÁaÂ(âÅÁ) {
+    var Aaâ = aåäãÅ;
+    for (var ä = ãa; âÅÁ > ä; ä++) {
+      Aaâ = Math.floor(aÄääÂ * Aaâ);
     }
-    return a2;
+    return Aaâ;
   }
   ;
-  function Z() {
-    if (a0.Aaâ > 0 && Math.abs(J.Aaâ.Äáa - J.Aaâ.value) < 0.6) {
-      if (J.Aaâ.value === ÅÃÄ) {
-        J.Aaâ.Äáa = 0;
-        J.Aaâ.value = áÁ;
-        a0.level++;
-        a0.åáâ++;
-        if (ÀÅ.åÀå() === åä && a0.ãåÄ !== -Äá) {
-          U(a0.ãåÄ);
+  function ÅaâäÂ() {
+    if (â.Aaâ > 0 && Math.abs(ÄÄ.Aaâ.Äáa - ÄÄ.Aaâ.value) < 0.6) {
+      if (ÄÄ.Aaâ.value === ÅÃÄ) {
+        ÄÄ.Aaâ.Äáa = 0;
+        ÄÄ.Aaâ.value = áÁ;
+        â.level++;
+        â.åáâ++;
+        if (ÀÅ.åÀå() === åä && â.ãåÄ !== -Äá) {
+          äââ(â.ãåÄ);
         }
         Äå.âå(Äå.AA.ÀäââÄ, Äá, 0);
         return;
       }
-      if (a0.ÅÂÁ <= a0.Aaâ) {
-        J.Aaâ.value = 255;
-        a0.Aaâ -= a0.ÅÂÁ;
-        a0.ÅÂÁ = Math.floor(aÄääÂ * a0.ÅÂÁ);
+      if (â.ÅÂÁ <= â.Aaâ) {
+        ÄÄ.Aaâ.value = 255;
+        â.Aaâ -= â.ÅÂÁ;
+        â.ÅÂÁ = Math.floor(aÄääÂ * â.ÅÂÁ);
       } else {
-        J.Aaâ.value = Math.floor(a0.Aaâ * 255 / a0.ÅÂÁ);
+        ÄÄ.Aaâ.value = Math.floor(â.Aaâ * 255 / â.ÅÂÁ);
       }
     }
   }
   ;
-  var a0 = {
+  var â = {
     id: äå,
     x: ÅÁ,
     y: Aa,
@@ -5862,136 +5867,136 @@ var Aá = function () {
     ÃÁÂ: ÁÁa,
     ÂÀå: 0,
     âäÅ: [],
-    äaAAá: G,
-    ÄãÁÄä: E,
-    ÃAÀäA: w,
+    äaAAá: äaAAá,
+    ÄãÁÄä: ÄãÁÄä,
+    ÃAÀäA: ÃAÀäA,
     ÁáÁ: ãÂ,
     ãâA: ãa,
     ãâÃ: 0,
-    ãAaÅá: s,
+    ãAaÅá: ãAaÅá,
     Ááä: [],
-    AÃåãá: v,
-    ÄÅÃ: q,
-    ÂÅa: r,
-    ãaÀ: t,
+    AÃåãá: AÃåãá,
+    ÄÅÃ: ÄÅÃ,
+    ÂÅa: ÂÅa,
+    ãaÀ: ãaÀ,
     ÂÅ: [],
-    â: a0,
-    AAAÀã: z,
-    ÅÃá: I,
-    ÄÄ: J,
-    ããÁÅÃ: D,
-    aáÁAå: y,
-    ÅaÀ: P,
-    âÂå: T,
-    aaA: O,
-    aaãåÀ: S,
+    â: â,
+    AAAÀã: AAAÀã,
+    ÅÃá: ÅÃá,
+    ÄÄ: ÄÄ,
+    ããÁÅÃ: ããÁÅÃ,
+    aáÁAå: aáÁAå,
+    ÅaÀ: ÅaÀ,
+    âÂå: âÂå,
+    aaA: aaA,
+    aaãåÀ: aaãåÀ,
     ãäa: âÂÂ * 60 * 1000,
     åÄÃ: 0,
     transition: AÂ,
-    áÀa: Q,
-    äââ: U,
-    âãâ: R,
-    aaÁ: X,
-    äaÁaÂ: Y
+    áÀa: áÀa,
+    äââ: äââ,
+    âãâ: âãâ,
+    aaÁ: aaÁ,
+    äaÁaÂ: äaÁaÂ
   };
 }();
 var ÅÀ = function () {
-  var j = 0;
-  var k = [];
-  var l = [];
-  var m = [];
-  var n = ãÂ;
-  function o() {
-    for (var v = 0; äâä.length > v; v++) {
-      l[v].border = 0;
+  var ÅaÂ = 0;
+  var åA = [];
+  var âÁ = [];
+  var Ââá = [];
+  var ÁÁåáá = ãÂ;
+  function äaÃ() {
+    for (var ä = 0; äâä.length > ä; ä++) {
+      âÁ[ä].border = 0;
     }
-    m = [];
+    Ââá = [];
   }
   ;
-  function p() {
-    var v = l[j];
-    var w = k[j];
-    var x = v.border;
-    for (ä = ÀÄ; x > ä; ä++) {
-      var y = w[v.ÁÀá[ä]];
-      if (y.ÃAA !== 1) {
-        Aáâ.ÅÂÅ(v, ä);
-        x--;
+  function ÅÀÅAá() {
+    var Ã = âÁ[ÅaÂ];
+    var äÃÁ = åA[ÅaÂ];
+    var Aå = Ã.border;
+    for (ä = ÀÄ; Aå > ä; ä++) {
+      var Ãä = äÃÁ[Ã.ÁÀá[ä]];
+      if (Ãä.ÃAA !== 1) {
+        Aáâ.ÅÂÅ(Ã, ä);
+        Aå--;
         ä--;
       }
     }
   }
   ;
-  function q(v, w, x, y) {
-    var z = (ãÂ === v ? 0 : n) + ÅÀ.äáåÅá * v + w;
-    var A = m[z];
-    if (A === ÂÄá || x !== A.äâÂ) {
-      var B = Aáâ.ÁÂÂ(l[y]);
-      A = k[y][B];
-      if (A === ÅÁÃ) {
+  function ÁÀå(åÅ, ãã, äâÂ, AÀ) {
+    var aÂã = (ãÂ === åÅ ? 0 : ÁÁåáá) + ÅÀ.äáåÅá * åÅ + ãã;
+    var Ãä = Ââá[aÂã];
+    if (Ãä === ÂÄá || äâÂ !== Ãä.äâÂ) {
+      var ÂáÂ = Aáâ.ÁÂÂ(âÁ[AÀ]);
+      Ãä = åA[AÀ][ÂáÂ];
+      if (Ãä === ÅÁÃ) {
         console.log("Memory Warn: new entitie created");
-        k[y][B] = ÅÀ.create(y);
-        A = k[y][B];
+        åA[AÀ][ÂáÂ] = ÅÀ.create(AÀ);
+        Ãä = åA[AÀ][ÂáÂ];
       }
-      m[z] = A;
-      A.âÂ = 0;
-      A.ÃAA = 0;
+      Ââá[aÂã] = Ãä;
+      Ãä.âÂ = 0;
+      Ãä.ÃAA = 0;
     }
-    return A;
+    return Ãä;
   }
   ;
-  function r(v, w, x) {
-    var y = k[v];
-    var z = l[v];
-    var A = z.border;
-    for (var B = ÀÄ; B < A; B++) {
-      var C = y[z.ÁÀá[B]];
-      if (C.id === x && w === C.åÅ) {
-        return C;
+  function Àaâ(AÀ, åÅ, ãã) {
+    var äÃÁ = åA[AÀ];
+    var Ã = âÁ[AÀ];
+    var Aå = Ã.border;
+    for (var ä = ÀÄ; ä < Aå; ä++) {
+      var Ä = äÃÁ[Ã.ÁÀá[ä]];
+      if (Ä.id === ãã && åÅ === Ä.åÅ) {
+        return Ä;
       }
     }
     return null;
   }
   ;
-  function s(v, w, x) {
-    ÅÀ.Àáâ = w === undefined ? ÀÄ : w;
-    ÅÀ.äÅá = x === ÄåA ? 0 : x;
-    n = ÅÀ.äÅá + ÅÀ.Àáâ;
-    j = äâä.length;
-    var y = äâä.length + 1;
-    for (var z = Àá; y > z; z++) {
-      l[z] = new Aáâ.Aáâ(v);
-      k[z] = [];
-      for (var A = ÀÄ; A < v; A++) {
-        k[z][A] = ÅÀ.create(z);
+  function ÁÀÄ(ÀÃaaA, Àáâ, äÅá) {
+    ÅÀ.Àáâ = Àáâ === undefined ? ÀÄ : Àáâ;
+    ÅÀ.äÅá = äÅá === ÄåA ? 0 : äÅá;
+    ÁÁåáá = ÅÀ.äÅá + ÅÀ.Àáâ;
+    ÅaÂ = äâä.length;
+    var Aå = äâä.length + 1;
+    for (var ä = Àá; Aå > ä; ä++) {
+      âÁ[ä] = new Aáâ.Aáâ(ÀÃaaA);
+      åA[ä] = [];
+      for (var åã = ÀÄ; åã < ÀÃaaA; åã++) {
+        åA[ä][åã] = ÅÀ.create(ä);
       }
     }
   }
   ;
-  function t(v) {
-    return new ÅÅÅåÄ(v);
+  function aAä(AÀ) {
+    return new ÅÅÅåÄ(AÀ);
   }
   ;
-  function u(v, w, x, y, z) {
-    var A = ãa;
-    var B = (âã === v ? ÁÀ : n) + ÅÀ.äáåÅá * v + w;
-    var C = m[B];
-    if (C !== undefined && y === C.type && x === C.äâÂ) {
-      m[B] = ÂÄá;
+  function ÅÃâ(åÅ, ãã, äâÂ, AÀ, ÂÂAåÅ) {
+    var ä = ãa;
+    var aÂã = (âã === åÅ ? ÁÀ : ÁÁåáá) + ÅÀ.äáåÅá * åÅ + ãã;
+    var Ãä = Ââá[aÂã];
+    if (Ãä !== undefined && AÀ === Ãä.type && äâÂ === Ãä.äâÂ) {
+      Ââá[aÂã] = ÂÄá;
     }
-    var D = l[y];
-    var E = k[y];
-    var F = D.border;
-    for (A = Aa; A < F; A++) {
-      var C = E[D.ÁÀá[A]];
-      if (C.äâÂ === x && v === C.åÅ && C.id === w) {
-        Aáâ.ÅÂÅ(D, A);
-        if (äâä[C.type].remove > 0 && z === 1) {
-          var G = k[j][Aáâ.ÁÂÂ(l[j])];
-          for (var H in C) {
-            G[H] = C[H];
+    var Ã = âÁ[AÀ];
+    var äÃÁ = åA[AÀ];
+    var Aå = Ã.border;
+    for (ä = Aa; ä < Aå; ä++) {
+      var Ãä = äÃÁ[Ã.ÁÀá[ä]];
+      if (Ãä.äâÂ === äâÂ && åÅ === Ãä.åÅ && Ãä.id === ãã) {
+        Aáâ.ÅÂÅ(Ã, ä);
+        if (äâä[Ãä.type].remove > 0 && ÂÂAåÅ === 1) {
+          var áÀáåÄ = åA[ÅaÂ][Aáâ.ÁÂÂ(âÁ[ÅaÂ])];
+          for (var åã in Ãä) {
+            áÀáåÄ[åã] = Ãä[åã];
           }
-          G.ÃAA = 1;
+          áÀáåÄ.ÃAA = 1;
         }
         return;
       }
@@ -5999,15 +6004,15 @@ var ÅÀ = function () {
   }
   ;
   return {
-    ÁÀÄ: s,
-    create: t,
-    get: q,
-    Àaâ: r,
-    remove: u,
-    äaÃ: o,
-    åA: k,
-    border: l,
-    ÅÀÅAá: p,
+    ÁÀÄ: ÁÀÄ,
+    create: aAä,
+    get: ÁÀå,
+    Àaâ: Àaâ,
+    remove: ÅÃâ,
+    äaÃ: äaÃ,
+    åA: åA,
+    border: âÁ,
+    ÅÀÅAá: ÅÀÅAá,
     äáåÅá: Àá,
     Àáâ: 0,
     äÅá: 0
@@ -6016,21 +6021,21 @@ var ÅÀ = function () {
 const ÅâÅ = ÁãÂáå;
 const ãä = Aa;
 const ÄÅÂåÅ = åáA;
-function áÃÂÂA(j, k, l) {
-  åÂãÁA(ÅÂá, j, k, l);
-  const m = ââAáã(ÂÁ[0], ÂÁ[ÄÂ], ÂÁ[2], ÂÁ[0], ÂÁ[1], ÂÁ[ÃÃÃ]);
-  const n = ÀááÅÀ(ÂÁ[äå], ÂÁ[ÁÅ]);
-  const o = (ááä << ((m ^ n) >> 8 & 255)) + (16 << ((m ^ n) >> 0 & 255)) + (0 << ((m ^ n) >> 24 & 255)) + (24 << ((m ^ n) >> 16 & ÅÃÄ));
-  return o;
+function áÃÂÂA(áaÅ, ãÀÁ, ãÀÀ) {
+  åÂãÁA(ÅÂá, áaÅ, ãÀÁ, ãÀÀ);
+  const Ââä = ââAáã(ÂÁ[0], ÂÁ[ÄÂ], ÂÁ[2], ÂÁ[0], ÂÁ[1], ÂÁ[ÃÃÃ]);
+  const ÁÅÂ = ÀááÅÀ(ÂÁ[äå], ÂÁ[ÁÅ]);
+  const ÄÅÅÅå = (ááä << ((Ââä ^ ÁÅÂ) >> 8 & 255)) + (16 << ((Ââä ^ ÁÅÂ) >> 0 & 255)) + (0 << ((Ââä ^ ÁÅÂ) >> 24 & 255)) + (24 << ((Ââä ^ ÁÅÂ) >> 16 & ÅÃÄ));
+  return ÄÅÅÅå;
 }
 ;
 const AÄ = åâ;
-function ááââÁ(j, k, l, m, n) {
-  áAáÄä(ÅÂá, j, k, l, m, n);
-  const o = Ããåäá(ÂÁ[0], ÂÁ[ãâ], ÂÁ[2]);
-  const p = âáãâå(ÂÁ[3], ÂÁ[åÁá], ÂÁ[ÁÀ], ÂÁ[ãâ], ÂÁ[Äåã]);
-  const q = ((198 + (o ^ p)) * 48271 + 0) % 2147483647;
-  return q;
+function ááââÁ(ÀåaãÃ, ääÃ, AÂÅ, ÀÁãÅã, âäáâÁ) {
+  áAáÄä(ÅÂá, ÀåaãÃ, ääÃ, AÂÅ, ÀÁãÅã, âäáâÁ);
+  const ÁáÁÁÃ = Ããåäá(ÂÁ[0], ÂÁ[ãâ], ÂÁ[2]);
+  const AÁááÄ = âáãâå(ÂÁ[3], ÂÁ[åÁá], ÂÁ[ÁÀ], ÂÁ[ãâ], ÂÁ[Äåã]);
+  const ÄåÅÄå = ((198 + (ÁáÁÁÃ ^ AÁááÄ)) * 48271 + 0) % 2147483647;
+  return ÄåÅÄå;
 }
 ;
 var äâä = [{
@@ -9795,73 +9800,73 @@ var äâä = [{
   ãåa: 0.15,
   ÅÄ: -åä
 }];
-function áAAåä(j, k, l) {
-  ÁAâåå(ÅÂá, j, k, l);
-  const m = ââAáã(ÂÁ[ÀÄ], ÂÁ[1], ÂÁ[ããÁ], ÂÁ[âã], ÂÁ[åä], ÂÁ[aâA]);
-  const n = ááââÁ(ÂÁ[0], ÂÁ[Áå], ÂÁ[2], ÂÁ[ÅÁ], ÂÁ[âa]);
-  const o = (m | 7349) & ~(m & 7349);
-  return o;
+function áAAåä(ÀAã, ãÃÃ, âÄAÀâ) {
+  ÁAâåå(ÅÂá, ÀAã, ãÃÃ, âÄAÀâ);
+  const âÄÂÀä = ââAáã(ÂÁ[ÀÄ], ÂÁ[1], ÂÁ[ããÁ], ÂÁ[âã], ÂÁ[åä], ÂÁ[aâA]);
+  const ÃÁÄáÁ = ááââÁ(ÂÁ[0], ÂÁ[Áå], ÂÁ[2], ÂÁ[ÅÁ], ÂÁ[âa]);
+  const ãâÂAá = (âÄÂÀä | 7349) & ~(âÄÂÀä & 7349);
+  return ãâÂAá;
 }
 ;
 const ÂÀÄÂá = áäa;
 const ÃÃÁ = ÂÄá;
 const âÃÅÃä = äÃÂäÅ;
-function åãaáå(j, k, l) {
-  ÄáÅÃÂ(ÅÂá, j, k, l);
-  const m = ÅÁaãâ(ÂÁ[ÁÀ], ÂÁ[ÁÅ], ÂÁ[ÄÂÅ], ÂÁ[åâ], ÂÁ[ÀA]);
-  const n = ÄáAáÄ(ÂÁ[2], ÂÁ[0], ÂÁ[ãå], ÂÁ[2], ÂÁ[ÀÄ]);
-  const o = ((164 + (m ^ n)) * 16807 + 0) % 2147483647;
-  return o;
+function åãaáå(ääÀ, âãÄaÄ, aÀAåÁ) {
+  ÄáÅÃÂ(ÅÂá, ääÀ, âãÄaÄ, aÀAåÁ);
+  const ÅåÅÅá = ÅÁaãâ(ÂÁ[ÁÀ], ÂÁ[ÁÅ], ÂÁ[ÄÂÅ], ÂÁ[åâ], ÂÁ[ÀA]);
+  const áaÂåa = ÄáAáÄ(ÂÁ[2], ÂÁ[0], ÂÁ[ãå], ÂÁ[2], ÂÁ[ÀÄ]);
+  const ÅaáAÄ = ((164 + (ÅåÅÅá ^ áaÂåa)) * 16807 + 0) % 2147483647;
+  return ÅaáAÄ;
 }
 ;
 const ããÄ = ÃÃÃ;
 const ÂÄåÄÂ = ÀååÅÅ;
 const âÂã = ÃÁä;
-function ÄáAáÄ(j, k, l, m, n) {
-  ÂÄÀäå(ÅÂá, j, k, l, m, n);
-  const o = âäÂäá(ÂÁ[0], ÂÁ[1], ÂÁ[2], ÂÁ[3]);
-  const p = áaaÁã(ÂÁ[4], ÂÁ[0], ÂÁ[1], ÂÁ[ãÄá], ÂÁ[3]);
-  const q = (24 << ((o ^ p) >> ÂÄÄ & 255)) + (0 << ((o ^ p) >> 24 & 255)) + (8 << ((o ^ p) >> 0 & 255)) + (16 << ((o ^ p) >> 8 & 255));
-  return q;
+function ÄáAáÄ(âäÅÀÃ, aåÃ, ÃÀáãá, ÃAÃÃa, ÂåÂãã) {
+  ÂÄÀäå(ÅÂá, âäÅÀÃ, aåÃ, ÃÀáãá, ÃAÃÃa, ÂåÂãã);
+  const ãáÅ = âäÂäá(ÂÁ[0], ÂÁ[1], ÂÁ[2], ÂÁ[3]);
+  const ÄAa = áaaÁã(ÂÁ[4], ÂÁ[0], ÂÁ[1], ÂÁ[ãÄá], ÂÁ[3]);
+  const AÄâää = (24 << ((ãáÅ ^ ÄAa) >> ÂÄÄ & 255)) + (0 << ((ãáÅ ^ ÄAa) >> 24 & 255)) + (8 << ((ãáÅ ^ ÄAa) >> 0 & 255)) + (16 << ((ãáÅ ^ ÄAa) >> 8 & 255));
+  return AÄâää;
 }
 ;
 const åÀá = Aåá;
-function ááaÂÅ(j, k, l, m) {
-  const n = (j | 47917) & ~(j & 47917);
-  const o = (2147483587 + (k + 30724) * 2147483629) % 2147483647;
-  const p = ~(l & 62346) & (l | 62346);
-  const q = m ^ 50018;
-  const r = áÃÃâä(n, o);
-  const s = aäå(p, q, n, o, p, q);
-  const t = (24 << ((r ^ s) >> 8 & 255)) + (16 << ((r ^ s) >> 24 & 255)) + (0 << ((r ^ s) >> 16 & 255)) + (8 << ((r ^ s) >> 0 & ÃÁA));
-  return t;
+function ááaÂÅ(ÂâÃ, aäÄÄÀ, ÃÁá, áãaåÃ) {
+  const áââáâ = (ÂâÃ | 47917) & ~(ÂâÃ & 47917);
+  const ÀÃÄaä = (2147483587 + (aäÄÄÀ + 30724) * 2147483629) % 2147483647;
+  const äÀÁAä = ~(ÃÁá & 62346) & (ÃÁá | 62346);
+  const AãÅäÁ = áãaåÃ ^ 50018;
+  const aÃa = áÃÃâä(áââáâ, ÀÃÄaä);
+  const ÅÄâ = aäå(äÀÁAä, AãÅäÁ, áââáâ, ÀÃÄaä, äÀÁAä, AãÅäÁ);
+  const aAÀãÃ = (24 << ((aÃa ^ ÅÄâ) >> 8 & 255)) + (16 << ((aÃa ^ ÅÄâ) >> 24 & 255)) + (0 << ((aÃa ^ ÅÄâ) >> 16 & 255)) + (8 << ((aÃa ^ ÅÄâ) >> 0 & ÃÁA));
+  return aAÀãÃ;
 }
 ;
-function âäÂäá(j, k, l, m) {
-  ãáÂAa(ÅÂá, j, k, l, m);
-  const n = ÀãaåÂ(ÂÁ[ãÂ], ÂÁ[1], ÂÁ[2], ÂÁ[ÂÀá], ÂÁ[ÄÁ], ÂÁ[1]);
-  const o = Áãa(ÂÁ[ÄÂÅ], ÂÁ[3], ÂÁ[0]);
-  const p = (8 << ((n ^ o) >> 16 & 255)) + (16 << ((n ^ o) >> 24 & 255)) + (0 << ((n ^ o) >> 0 & 255)) + (24 << ((n ^ o) >> 8 & 255));
-  return p;
+function âäÂäá(ÂÀâ, aAA, ÅÂááâ, áaaÀá) {
+  ãáÂAa(ÅÂá, ÂÀâ, aAA, ÅÂááâ, áaaÀá);
+  const ââÃ = ÀãaåÂ(ÂÁ[ãÂ], ÂÁ[1], ÂÁ[2], ÂÁ[ÂÀá], ÂÁ[ÄÁ], ÂÁ[1]);
+  const ÃÀå = Áãa(ÂÁ[ÄÂÅ], ÂÁ[3], ÂÁ[0]);
+  const áÅÁÂå = (8 << ((ââÃ ^ ÃÀå) >> 16 & 255)) + (16 << ((ââÃ ^ ÃÀå) >> 24 & 255)) + (0 << ((ââÃ ^ ÃÀå) >> 0 & 255)) + (24 << ((ââÃ ^ ÃÀå) >> 8 & 255));
+  return áÅÁÂå;
 }
 ;
 const âÀâ = äAá;
 const ãÂáÁa = AãÀåÁ;
 const AAÀ = ÂÃÅ;
-function ÁÅÄÄÀ(j, k) {
-  const l = j ^ 17752;
-  const m = (2147483587 + (k + 13794) * 2147483629) % 2147483647;
-  const n = ÃáÅaa(l, m, l);
-  const o = ÃÄÃâA(m, l);
-  const p = (16 << ((n ^ o) >> 16 & 255)) + (8 << ((n ^ o) >> 0 & 255)) + (24 << ((n ^ o) >> 24 & 255)) + (0 << ((n ^ o) >> 8 & 255));
-  return p;
+function ÁÅÄÄÀ(AáãâA, Àáãáâ) {
+  const âÄÄäã = AáãâA ^ 17752;
+  const ÅAaãÁ = (2147483587 + (Àáãáâ + 13794) * 2147483629) % 2147483647;
+  const âÀå = ÃáÅaa(âÄÄäã, ÅAaãÁ, âÄÄäã);
+  const ãÂA = ÃÄÃâA(ÅAaãÁ, âÄÄäã);
+  const ÃâaãÅ = (16 << ((âÀå ^ ãÂA) >> 16 & 255)) + (8 << ((âÀå ^ ãÂA) >> 0 & 255)) + (24 << ((âÀå ^ ãÂA) >> 24 & 255)) + (0 << ((âÀå ^ ãÂA) >> 8 & 255));
+  return ÃâaãÅ;
 }
 ;
-function ÅÅÅåÄ(j) {
+function ÅÅÅåÄ(AÀ) {
   this.äâÂ = ãä;
   this.åÅ = 0;
   this.id = AÄ;
-  this.type = j;
+  this.type = AÀ;
   this.Åâ = âã;
   this.angle = ÀÄ;
   this.Áâä = 0;
@@ -9894,7 +9899,7 @@ function ÅÅÅåÄ(j) {
   this.Aâa = 0;
   this.âÄ = [];
   this.Áá = null;
-  for (var k = 0; k < Äáâ; k++) {
+  for (var ä = 0; ä < Äáâ; ä++) {
     this.âÄ.push({
       c: 0,
       AÄä: 0,
@@ -9909,449 +9914,449 @@ function ÅÅÅåÄ(j) {
 ;
 const ÄAáäÅ = ÂÀÄ;
 const äÂá = AÀâ;
-function äÂÃ(j, k, l, m, n, o, p, q, r, s, t, u, v) {
-  j.åÅ = k;
-  j.äâÂ = l;
-  j.id = m;
-  j.Áâä = Ää.ÂÁÃÀã(j.angle, Math.PI * (Äåã * t) / 255);
-  j.state = u;
-  j.Åaä = q;
-  j.ÂÅä = r;
-  j.ÅÁa = s;
-  if (j.âÂ === 0) {
-    var w = äâä[n];
-    j.aÁá = w.aÁá;
-    j.angle = j.Áâä;
-    j.x = o;
-    j.y = p;
-    j.z = w.z;
-    j.ãåa = w.ãåa;
-    j.rx = o;
-    j.ry = p;
-    j.ä = Math.floor(p / ÀÂ.ááá);
-    j.åã = Math.floor(o / ÀÂ.ááá);
-    j.Âa = ãa;
-    j.áÃa = AÄ;
-    j.ÃÁ = 0;
-    j.äÀA = 0;
-    j.áÀÅ = 0;
-    j.ââ = ãa;
-    j.AÁÄ = Àá;
-    j.Äa = Aa;
-    j.Aâa = 0;
-    j.Äaå = âã;
-    j.Äáá = 0;
-    j.Åâ = v || ÁÀ;
-    j.Áá = null;
-    var x = w.ÁÀÄ;
-    if (åÅÁ !== x) {
-      x(j);
+function äÂÃ(Ãä, åÅ, äâÂ, ãã, AÀ, ã, áã, Åaä, ÂÅä, ÅÁa, Äã, Âá, Åâ) {
+  Ãä.åÅ = åÅ;
+  Ãä.äâÂ = äâÂ;
+  Ãä.id = ãã;
+  Ãä.Áâä = Ää.ÂÁÃÀã(Ãä.angle, Math.PI * (Äåã * Äã) / 255);
+  Ãä.state = Âá;
+  Ãä.Åaä = Åaä;
+  Ãä.ÂÅä = ÂÅä;
+  Ãä.ÅÁa = ÅÁa;
+  if (Ãä.âÂ === 0) {
+    var âÃÃ = äâä[AÀ];
+    Ãä.aÁá = âÃÃ.aÁá;
+    Ãä.angle = Ãä.Áâä;
+    Ãä.x = ã;
+    Ãä.y = áã;
+    Ãä.z = âÃÃ.z;
+    Ãä.ãåa = âÃÃ.ãåa;
+    Ãä.rx = ã;
+    Ãä.ry = áã;
+    Ãä.ä = Math.floor(áã / ÀÂ.ááá);
+    Ãä.åã = Math.floor(ã / ÀÂ.ááá);
+    Ãä.Âa = ãa;
+    Ãä.áÃa = AÄ;
+    Ãä.ÃÁ = 0;
+    Ãä.äÀA = 0;
+    Ãä.áÀÅ = 0;
+    Ãä.ââ = ãa;
+    Ãä.AÁÄ = Àá;
+    Ãä.Äa = Aa;
+    Ãä.Aâa = 0;
+    Ãä.Äaå = âã;
+    Ãä.Äáá = 0;
+    Ãä.Åâ = Åâ || ÁÀ;
+    Ãä.Áá = null;
+    var ÁÀÄ = âÃÃ.ÁÀÄ;
+    if (åÅÁ !== ÁÀÄ) {
+      ÁÀÄ(Ãä);
     }
   }
-  var t = áâA.angle(j.rx, j.ry, q, r);
-  j.ãÂâ = Math.sin(t);
-  j.åAÅ = Math.cos(t);
-  j.âÂ = 1;
+  var Äã = áâA.angle(Ãä.rx, Ãä.ry, Åaä, ÂÅä);
+  Ãä.ãÂâ = Math.sin(Äã);
+  Ãä.åAÅ = Math.cos(Äã);
+  Ãä.âÂ = 1;
 }
 ;
 const aAÃÃÂ = ÄÂã;
 const ÄÅÀ = aãå;
 const ÃåÀãÁ = áäÀ;
 var Aáâ = function () {
-  function j(q) {
-    var r = new p(q);
-    var s = r.ÁÀá;
-    var t = new Array(q);
-    var u = áÁ;
-    var v = [];
-    for (u = áÁ; u < q; u++) {
-      v[u] = -1;
+  function ÅåâAa(áÅå) {
+    var âÁ = new Aáâ(áÅå);
+    var ÁÀá = âÁ.ÁÀá;
+    var åãÄ = new Array(áÅå);
+    var ä = áÁ;
+    var AaÁ = [];
+    for (ä = áÁ; ä < áÅå; ä++) {
+      AaÁ[ä] = -1;
     }
     this.length = äå;
-    this.reset = function y() {
-      r.border = Àá;
+    this.reset = function ÂÀÁ() {
+      âÁ.border = Àá;
       this.length = 0;
     };
-    this.add = function z(A) {
-      var B = l(r);
-      t[B] = A;
-      v[A] = r.border - åä;
+    this.add = function ÂÂÄÃÀ(âaÂ) {
+      var áâ = ÁÂÂ(âÁ);
+      åãÄ[áâ] = âaÂ;
+      AaÁ[âaÂ] = âÁ.border - åä;
       this.length++;
     };
-    this.remove = function A(B) {
-      var C = v[B];
-      if (C === -åÀ) {
+    this.remove = function ÅÃâ(âaÂ) {
+      var áâ = AaÁ[âaÂ];
+      if (áâ === -åÀ) {
         return;
       }
-      v[B] = -Äá;
-      m(r, C);
+      AaÁ[âaÂ] = -Äá;
+      ÅÂÅ(âÁ, áâ);
       this.length--;
       if (âã < this.length) {
-        v[t[s[C]]] = C;
+        AaÁ[åãÄ[ÁÀá[áâ]]] = áâ;
       }
     };
-    this.get = function B(C) {
-      return t[s[C]];
+    this.get = function ÁÀå(ä) {
+      return åãÄ[ÁÀá[ä]];
     };
   }
   ;
-  function k(q) {
-    if (q.size > q.border) {
-      return q.ÁÀá[q.border++];
+  function aáÂâá(Ã) {
+    if (Ã.size > Ã.border) {
+      return Ã.ÁÀá[Ã.border++];
     }
     return -ÀA;
   }
   ;
-  function l(q) {
-    if (q.border === q.size) {
-      q.ÁÀá[q.size] = q.size;
-      q.âäá[q.size] = q.size;
-      q.size++;
+  function ÁÂÂ(Ã) {
+    if (Ã.border === Ã.size) {
+      Ã.ÁÀá[Ã.size] = Ã.size;
+      Ã.âäá[Ã.size] = Ã.size;
+      Ã.size++;
     }
-    return q.ÁÀá[q.border++];
+    return Ã.ÁÀá[Ã.border++];
   }
   ;
-  function m(q, r) {
-    q.border--;
-    var s = q.ÁÀá[q.border];
-    q.ÁÀá[q.border] = q.ÁÀá[r];
-    q.ÁÀá[r] = s;
+  function ÅÂÅ(Ã, ÄâaáÅ) {
+    Ã.border--;
+    var ÀÅÅ = Ã.ÁÀá[Ã.border];
+    Ã.ÁÀá[Ã.border] = Ã.ÁÀá[ÄâaáÅ];
+    Ã.ÁÀá[ÄâaáÅ] = ÀÅÅ;
   }
   ;
-  function n(q) {
-    var r = new p(q);
-    var s = r.ÁÀá;
-    var t = new Array(q);
+  function AÀââÂ(áÅå) {
+    var âÁ = new Aáâ(áÅå);
+    var ÁÀá = âÁ.ÁÀá;
+    var åãÄ = new Array(áÅå);
     this.length = 0;
-    this.reset = function u() {
-      r.border = 0;
+    this.reset = function ÂÀÁ() {
+      âÁ.border = 0;
       this.length = áÃ;
     };
-    this.add = function v(w) {
-      t[l(r)] = w;
+    this.add = function ÂÂÄÃÀ(âaÂ) {
+      åãÄ[ÁÂÂ(âÁ)] = âaÂ;
       this.length++;
     };
-    this.remove = function w(x) {
-      for (var y = áÁ; this.length > y; y++) {
-        if (t[s[y]] === x) {
-          m(r, y);
+    this.remove = function ÅÃâ(âaÂ) {
+      for (var ä = áÁ; this.length > ä; ä++) {
+        if (åãÄ[ÁÀá[ä]] === âaÂ) {
+          ÅÂÅ(âÁ, ä);
           this.length--;
           return;
         }
       }
     };
-    this.get = function x(y) {
-      return t[s[y]];
+    this.get = function ÁÀå(ä) {
+      return åãÄ[ÁÀá[ä]];
     };
   }
   ;
-  function o(q, r) {
-    q.border--;
-    var s = q.ÁÀá[q.border];
-    var t = q.âäá[r];
-    q.ÁÀá[q.border] = r;
-    q.ÁÀá[t] = s;
-    q.âäá[s] = t;
-    q.âäá[r] = q.border;
+  function äÅááÃ(Ã, ÃÁááã) {
+    Ã.border--;
+    var ÀÅÅ = Ã.ÁÀá[Ã.border];
+    var ÀÂÀÅA = Ã.âäá[ÃÁááã];
+    Ã.ÁÀá[Ã.border] = ÃÁááã;
+    Ã.ÁÀá[ÀÂÀÅA] = ÀÅÅ;
+    Ã.âäá[ÀÅÅ] = ÀÂÀÅA;
+    Ã.âäá[ÃÁááã] = Ã.border;
   }
   ;
-  function p(q) {
-    this.size = q;
+  function Aáâ(áÅå) {
+    this.size = áÅå;
     this.border = 0;
     this.ÁÀá = [];
     this.âäá = [];
-    for (var r = 0; r < q; r++) {
-      this.ÁÀá[r] = r;
-      this.âäá[r] = r;
+    for (var ä = 0; ä < áÅå; ä++) {
+      this.ÁÀá[ä] = ä;
+      this.âäá[ä] = ä;
     }
   }
   ;
   return {
-    Aáâ: p,
-    ÅåâAa: j,
-    AÀââÂ: n,
-    aáÂâá: k,
-    ÁÂÂ: l,
-    äÅááÃ: o,
-    ÅÂÅ: m
+    Aáâ: Aáâ,
+    ÅåâAa: ÅåâAa,
+    AÀââÂ: AÀââÂ,
+    aáÂâá: aáÂâá,
+    ÁÂÂ: ÁÂÂ,
+    äÅááÃ: äÅááÃ,
+    ÅÂÅ: ÅÂÅ
   };
 }();
 var ÀáãAÄ = function () {
-  function j(k) {
-    var l = 2147483648;
-    var m = 1103515245;
-    var n = 12345;
-    var o = k ? k : Math.floor((l - 1) * Math.random());
-    this.ÁÀÄ = function (q) {
-      o = q ? q : Math.floor((l - Áå) * Math.random());
+  function ÃáÄáâ(âäa) {
+    var AÄä = 2147483648;
+    var Aäa = 1103515245;
+    var äáá = 12345;
+    var Âá = âäa ? âäa : Math.floor((AÄä - 1) * Math.random());
+    this.ÁÀÄ = function (âäa) {
+      Âá = âäa ? âäa : Math.floor((AÄä - Áå) * Math.random());
     };
     this.get = function () {
-      o = (m * o + n) % l;
-      return o / l;
+      Âá = (Aäa * Âá + äáá) % AÄä;
+      return Âá / AÄä;
     };
   }
   ;
   return {
-    ÃáÄáâ: j
+    ÃáÄáâ: ÃáÄáâ
   };
 }();
 const AÂA = ããã;
 var ÂäâÂã = function () {
-  function j(m, n, o, p) {
-    var q = 0;
-    if (o < p) {
-      q = o + Math.ceil((p - o) * 0.5);
-      ÂãÃaa = k(m, n, q, o, p);
-      j(m, n, o, ÂãÃaa - aÅ);
-      j(m, n, ÂãÃaa + âá, p);
+  function ááÅ(Äaâ, aÅá, áÄã, ÃåÂ) {
+    var ÂÂÀ = 0;
+    if (áÄã < ÃåÂ) {
+      ÂÂÀ = áÄã + Math.ceil((ÃåÂ - áÄã) * 0.5);
+      ÂãÃaa = åááâA(Äaâ, aÅá, ÂÂÀ, áÄã, ÃåÂ);
+      ááÅ(Äaâ, aÅá, áÄã, ÂãÃaa - aÅ);
+      ááÅ(Äaâ, aÅá, ÂãÃaa + âá, ÃåÂ);
     }
   }
   ;
-  function k(m, n, o, p, q) {
-    var r = p;
-    var s = m[o];
-    var t = m[o];
-    m[o] = m[q];
-    m[q] = t;
-    for (var u = p; q > u; u++) {
-      if (áÁ >= n(m[u], s)) {
-        var t = m[u];
-        m[u] = m[r];
-        m[r] = t;
-        r++;
+  function åááâA(Äaâ, aÅá, ÂÂÀ, áÄã, ÃåÂ) {
+    var âAA = áÄã;
+    var ÂãÂAá = Äaâ[ÂÂÀ];
+    var AÃá = Äaâ[ÂÂÀ];
+    Äaâ[ÂÂÀ] = Äaâ[ÃåÂ];
+    Äaâ[ÃåÂ] = AÃá;
+    for (var AAÄ = áÄã; ÃåÂ > AAÄ; AAÄ++) {
+      if (áÁ >= aÅá(Äaâ[AAÄ], ÂãÂAá)) {
+        var AÃá = Äaâ[AAÄ];
+        Äaâ[AAÄ] = Äaâ[âAA];
+        Äaâ[âAA] = AÃá;
+        âAA++;
       }
     }
-    var t = m[q];
-    m[q] = m[r];
-    m[r] = t;
-    return r;
+    var AÃá = Äaâ[ÃåÂ];
+    Äaâ[ÃåÂ] = Äaâ[âAA];
+    Äaâ[âAA] = AÃá;
+    return âAA;
   }
   ;
-  function l(m, n) {
+  function ãâäáå(Äaâ, aÅá) {
     try {
-      j(m, n, 0, m.length - 1);
-    } catch (q) {
-      m.sort(n);
+      ááÅ(Äaâ, aÅá, 0, Äaâ.length - 1);
+    } catch (âãå) {
+      Äaâ.sort(aÅá);
     }
   }
   ;
   return {
-    sort: l
+    sort: ãâäáå
   };
 }();
 const ÅÀÄ = aÃá;
 const åÀáÀÁ = áááäÃ;
 var ÄÅäÄä = function () {
-  var j = 0;
-  var k = {
-    AáááÃ: [j++, "en"],
-    áááÃA: [j++, "ru"],
-    ÃÂÀÃÀ: [j++, "sp"],
-    äáåÁâ: [j++, "fr"],
-    ÂÁååâ: [j++, "de"],
-    ÅäÄÀâ: [j++, "it"],
-    ãåaåâ: [j++, "pl"],
-    ÅÅÄÅâ: [j++, "pt"]
+  var Ãâå = 0;
+  var ÀÃa = {
+    AáááÃ: [Ãâå++, "en"],
+    áááÃA: [Ãâå++, "ru"],
+    ÃÂÀÃÀ: [Ãâå++, "sp"],
+    äáåÁâ: [Ãâå++, "fr"],
+    ÂÁååâ: [Ãâå++, "de"],
+    ÅäÄÀâ: [Ãâå++, "it"],
+    ãåaåâ: [Ãâå++, "pl"],
+    ÅÅÄÅâ: [Ãâå++, "pt"]
   };
-  var l = k.AáááÃ;
-  var m = l[ÁÀ];
-  var n = [];
-  for (var o = ÁÀ; j > o; o++) {
-    n[o] = [];
+  var âÃã = ÀÃa.AáááÃ;
+  var ÂÃA = âÃã[ÁÀ];
+  var aäÃ = [];
+  for (var ä = ÁÀ; Ãâå > ä; ä++) {
+    aäÃ[ä] = [];
   }
-  var p = k.AáááÃ;
-  function q(x, y) {
-    r(x);
-    if (AÄ !== n[x[ÁÀ]].length) {
-      if (âÂa !== y) {
-        y();
+  var Ããa = ÀÃa.AáááÃ;
+  function äâäaÂ(ÁÃÁ, callback) {
+    aÂâÅA(ÁÃÁ);
+    if (AÄ !== aäÃ[ÁÃÁ[ÁÀ]].length) {
+      if (âÂa !== callback) {
+        callback();
       }
       return;
     }
-    var z = new XMLHttpRequest();
-    z.open("GET", "json/lang" + x[ãå] + ".json", ãÀA);
-    z.onreadystatechange = function () {
-      if (z.readyState === 4 && this.status === 200) {
-        s(JSON.parse(this.AåÃAÀ));
-        if (y !== âÂa) {
-          y();
+    var aaä = new XMLHttpRequest();
+    aaä.open("GET", "json/lang" + ÁÃÁ[ãå] + ".json", ãÀA);
+    aaä.onreadystatechange = function () {
+      if (aaä.readyState === 4 && this.status === 200) {
+        AÁaÀá(JSON.parse(this.AåÃAÀ));
+        if (callback !== âÂa) {
+          callback();
         }
       }
     };
-    z.send();
+    aaä.send();
   }
   ;
-  function r(x) {
-    l = x;
-    ÄÅäÄä.lang = l;
-    m = l[ãä];
-    Âáá.setItem("lang", JSON.stringify(l));
+  function aÂâÅA(ÁÃÁ) {
+    âÃã = ÁÃÁ;
+    ÄÅäÄä.lang = âÃã;
+    ÂÃA = âÃã[ãä];
+    Âáá.setItem("lang", JSON.stringify(âÃã));
   }
   ;
-  function s(x) {
-    for (var y = 0; x.length > y; y++) {
-      n[m][y] = [x[y]];
+  function AÁaÀá(ÁAÃ) {
+    for (var ä = 0; ÁAÃ.length > ä; ä++) {
+      aäÃ[ÂÃA][ä] = [ÁAÃ[ä]];
     }
   }
   ;
-  function t(x) {
-    var y;
-    if (n[m] === undefined || n[m][x] === ÃÃÁ) {
-      ÅÁã = n[p][x];
+  function ÀÂÁäÄ(ãã) {
+    var åÀA;
+    if (aäÃ[ÂÃA] === undefined || aäÃ[ÂÃA][ãã] === ÃÃÁ) {
+      ÅÁã = aäÃ[Ããa][ãã];
     } else {
-      ÅÁã = n[m][x];
+      ÅÁã = aäÃ[ÂÃA][ãã];
     }
-    for (var z = åÀ; arguments.length > z; z++) {
-      ÅÁã[0] = ÅÁã[0].replace("%d", arguments[z]);
+    for (var ä = åÀ; arguments.length > ä; ä++) {
+      ÅÁã[0] = ÅÁã[0].replace("%d", arguments[ä]);
     }
     return ÅÁã;
   }
   ;
-  function u(x) {
-    if (n[m] === undefined || ÅâÃ === n[m][x]) {
-      return n[p[0]][x];
+  function ÁÀå(ãã) {
+    if (aäÃ[ÂÃA] === undefined || ÅâÃ === aäÃ[ÂÃA][ãã]) {
+      return aäÃ[Ããa[0]][ãã];
     } else {
-      return n[m][x];
+      return aäÃ[ÂÃA][ãã];
     }
   }
   ;
-  function v(x, y, z) {
-    if (âåã !== y) {
-      p = y;
+  function ÁÀÄ(ÁAÃ, áÀåaä, callback) {
+    if (âåã !== áÀåaä) {
+      Ããa = áÀåaä;
     }
-    if (x !== undefined) {
-      var A = m;
-      m = p[0];
-      s(x);
-      m = A;
+    if (ÁAÃ !== undefined) {
+      var åáá = ÂÃA;
+      ÂÃA = Ããa[0];
+      AÁaÀá(ÁAÃ);
+      ÂÃA = åáá;
     }
-    var B = Âáá.getItem("lang");
-    if (B === null) {
-      var C = navigator.language || navigator.userLanguage;
-      switch (C) {
+    var aääãÅ = Âáá.getItem("lang");
+    if (aääãÅ === null) {
+      var äáAÄá = navigator.language || navigator.userLanguage;
+      switch (äáAÄá) {
         case "ru":
-          l = k.áááÃA;
+          âÃã = ÀÃa.áááÃA;
           break;
         case "en":
-          l = k.AáááÃ;
+          âÃã = ÀÃa.AáááÃ;
           break;
         case "es":
-          l = k.ÃÂÀÃÀ;
+          âÃã = ÀÃa.ÃÂÀÃÀ;
           break;
         case "fr":
-          l = k.äáåÁâ;
+          âÃã = ÀÃa.äáåÁâ;
           break;
         case "it":
-          l = k.ÅäÄÀâ;
+          âÃã = ÀÃa.ÅäÄÀâ;
           break;
         case "pl":
-          l = k.ãåaåâ;
+          âÃã = ÀÃa.ãåaåâ;
           break;
         case "de":
-          l = k.ÂÁååâ;
+          âÃã = ÀÃa.ÂÁååâ;
           break;
         case "pt":
-          l = k.ÅÅÄÅâ;
+          âÃã = ÀÃa.ÅÅÄÅâ;
           break;
       }
     } else {
-      l = JSON.parse(B);
+      âÃã = JSON.parse(aääãÅ);
     }
-    q(l, z);
+    äâäaÂ(âÃã, callback);
   }
   ;
   return {
-    languages: k,
-    lang: l,
-    get: u,
-    ÀÂÁäÄ: t,
-    ÁÀÄ: v,
-    äâäaÂ: q
+    languages: ÀÃa,
+    lang: âÃã,
+    get: ÁÀå,
+    ÀÂÁäÄ: ÀÂÁäÄ,
+    ÁÀÄ: ÁÀÄ,
+    äâäaÂ: äâäaÂ
   };
 }();
 const âÁá = ÁÄâ;
 const ÅÃAÃA = ÄÁÄ;
 const äÅÂ = ÅÄã;
-function äÁäáÄ(j, k, l, m) {
-  const n = ((52877 + j) * 2147483629 + 2147483587) % 2147483647;
-  const o = k ^ 38695;
-  const p = (1013904223 + (62309 + l) * 1664525) % 4294967296;
-  const q = ((m + 61912) * 22695477 + 1) % 4294967296;
-  const r = ÁÀã(n, o, p);
-  const s = ÁÅÄÄÀ(q, n);
-  const t = (r | 52971) & ~(r & 52971);
-  return t;
+function äÁäáÄ(ãáaaÀ, äáÁãá, åáâãã, äÅÂÀÀ) {
+  const ÅáÄãÁ = ((52877 + ãáaaÀ) * 2147483629 + 2147483587) % 2147483647;
+  const åÀäáá = äáÁãá ^ 38695;
+  const âäÂÅá = (1013904223 + (62309 + åáâãã) * 1664525) % 4294967296;
+  const äÃãäÀ = ((äÅÂÀÀ + 61912) * 22695477 + 1) % 4294967296;
+  const ÂaÄAÂ = ÁÀã(ÅáÄãÁ, åÀäáá, âäÂÅá);
+  const AAãÁâ = ÁÅÄÄÀ(äÃãäÀ, ÅáÄãÁ);
+  const AäÅÂã = (ÂaÄAÂ | 52971) & ~(ÂaÄAÂ & 52971);
+  return AäÅÂã;
 }
 ;
 const ÅåÂ = äÂÂ;
 var ÂÄA = function () {
-  var j = "0";
-  var k = "1";
-  var l = ÅÁ;
-  var m = 1;
-  var n = 65;
-  var o = 68;
-  var p = 87;
-  var q = 83;
-  var r = 37;
-  var s = 39;
-  var t = 38;
-  var u = 40;
-  var v = 16;
-  var w = new Array(aâá).fill(l);
-  var x = null;
-  function y() {
-    n = 81;
-    o = 68;
-    p = 90;
-    q = 83;
-    Âáá.setItem("keyboardMap", k);
-    x = k;
+  var ÁããÅá = "0";
+  var åÀã = "1";
+  var aâÄ = ÅÁ;
+  var áäåÃa = 1;
+  var AÁa = 65;
+  var áÃã = 68;
+  var áaÃ = 87;
+  var äÀÄ = 83;
+  var ÃaA = 37;
+  var ÅÄA = 39;
+  var ÁáA = 38;
+  var Àââ = 40;
+  var ÂÂÃÃä = 16;
+  var ÁAá = new Array(aâá).fill(aâÄ);
+  var äÀa = null;
+  function ÅÁÂ() {
+    AÁa = 81;
+    áÃã = 68;
+    áaÃ = 90;
+    äÀÄ = 83;
+    Âáá.setItem("keyboardMap", åÀã);
+    äÀa = åÀã;
   }
   ;
-  function z() {
-    w[q] = l;
-    w[u] = l;
+  function ÁÂäÀá() {
+    ÁAá[äÀÄ] = aâÄ;
+    ÁAá[Àââ] = aâÄ;
   }
   ;
-  function A(R) {
-    var S = Math.min(R.charCode || R.keyCode, 255);
-    w[S] = l;
+  function ÅÃa(Åá) {
+    var åÃÄ = Math.min(Åá.charCode || Åá.keyCode, 255);
+    ÁAá[åÃÄ] = aâÄ;
   }
   ;
-  function B(R) {
-    var S = Math.min(R.charCode || R.keyCode, ÅÃÄ);
-    if (S === n || r === S) {
-      H();
-    } else if (p === S || t === S) {
-      z();
-    } else if (q === S || u === S) {
-      D();
-    } else if (S === o || s === S) {
-      N();
+  function Áãä(Åá) {
+    var åÃÄ = Math.min(Åá.charCode || Åá.keyCode, ÅÃÄ);
+    if (åÃÄ === AÁa || ÃaA === åÃÄ) {
+      aÃäãÄ();
+    } else if (áaÃ === åÃÄ || ÁáA === åÃÄ) {
+      ÁÂäÀá();
+    } else if (äÀÄ === åÃÄ || Àââ === åÃÄ) {
+      ÁÄâÁÃ();
+    } else if (åÃÄ === áÃã || ÅÄA === åÃÄ) {
+      áäÂÂA();
     }
-    w[S] = m;
-    return S;
+    ÁAá[åÃÄ] = áäåÃa;
+    return åÃÄ;
   }
   ;
-  function C() {
-    return w[v];
+  function ÁAa() {
+    return ÁAá[ÂÂÃÃä];
   }
   ;
-  function D() {
-    w[p] = l;
-    w[t] = l;
+  function ÁÄâÁÃ() {
+    ÁAá[áaÃ] = aâÄ;
+    ÁAá[ÁáA] = aâÄ;
   }
   ;
-  function E() {
-    return w[p] || w[t];
+  function ÅáÁ() {
+    return ÁAá[áaÃ] || ÁAá[ÁáA];
   }
   ;
-  function F() {
-    return w[o] || w[s];
+  function áÃÂ() {
+    return ÁAá[áÃã] || ÁAá[ÅÄA];
   }
   ;
-  function G() {
+  function äåå() {
     this.keyCode = ãÂ;
     this.charCode = AÂ;
     this.altKey = false;
@@ -10359,241 +10364,241 @@ var ÂÄA = function () {
     this.preventDefault = function () {};
   }
   ;
-  function H() {
-    w[o] = l;
-    w[s] = l;
+  function aÃäãÄ() {
+    ÁAá[áÃã] = aâÄ;
+    ÁAá[ÅÄA] = aâÄ;
   }
   ;
-  function I() {
-    return w[q] || w[u];
+  function ÅÃA() {
+    return ÁAá[äÀÄ] || ÁAá[Àââ];
   }
   ;
-  function J() {
-    return w[n] || w[r];
+  function ãÄâ() {
+    return ÁAá[AÁa] || ÁAá[ÃaA];
   }
   ;
-  function K() {
-    w[o] = l;
-    w[s] = l;
-    w[n] = l;
-    w[r] = l;
-    w[p] = l;
-    w[t] = l;
-    w[q] = l;
-    w[u] = l;
+  function áãÅÄâ() {
+    ÁAá[áÃã] = aâÄ;
+    ÁAá[ÅÄA] = aâÄ;
+    ÁAá[AÁa] = aâÄ;
+    ÁAá[ÃaA] = aâÄ;
+    ÁAá[áaÃ] = aâÄ;
+    ÁAá[ÁáA] = aâÄ;
+    ÁAá[äÀÄ] = aâÄ;
+    ÁAá[Àââ] = aâÄ;
   }
   ;
-  function L() {
-    n = 65;
-    o = 68;
-    p = 87;
-    q = 83;
-    Âáá.setItem("keyboardMap", j);
-    x = j;
+  function ÅAÂ() {
+    AÁa = 65;
+    áÃã = 68;
+    áaÃ = 87;
+    äÀÄ = 83;
+    Âáá.setItem("keyboardMap", ÁããÅá);
+    äÀa = ÁããÅá;
   }
   ;
-  function M() {
-    if (x === k) {
+  function åÀÃáâ() {
+    if (äÀa === åÀã) {
       return 1;
     } else {
       return AÄ;
     }
   }
   ;
-  function N() {
-    w[n] = l;
-    w[r] = l;
+  function áäÂÂA() {
+    ÁAá[AÁa] = aâÄ;
+    ÁAá[ÃaA] = aâÄ;
   }
   ;
-  function O() {
-    if (j === x) {
+  function ÃÂáÄa() {
+    if (ÁããÅá === äÀa) {
       return Àâ;
     } else {
       return AÄ;
     }
   }
   ;
-  function P(R) {
-    return w[R];
+  function ÄáAÂâ(ÁÄÀ) {
+    return ÁAá[ÁÄÀ];
   }
   ;
-  x = Âáá.getItem("keyboardMap");
-  if (x === null) {
-    var Q = navigator.language || navigator.userLanguage;
-    if (Q === "fr" || Q === "fr-FR") {
-      y();
+  äÀa = Âáá.getItem("keyboardMap");
+  if (äÀa === null) {
+    var áAÁaÅ = navigator.language || navigator.userLanguage;
+    if (áAÁaÅ === "fr" || áAÁaÅ === "fr-FR") {
+      ÅÁÂ();
     } else {
-      L();
+      ÅAÂ();
     }
-  } else if (k === x) {
-    y();
+  } else if (åÀã === äÀa) {
+    ÅÁÂ();
   } else {
-    L();
+    ÅAÂ();
   }
   return {
-    ÅÁÂ: y,
-    ÅAÂ: L,
-    ÅÃa: A,
-    Áãä: B,
-    áãÅÄâ: K,
-    ãÄâ: J,
-    áÃÂ: F,
-    ÅÃA: I,
-    ÅáÁ: E,
-    åÀÃáâ: M,
-    ÃÂáÄa: O,
-    ÁAa: C,
-    ÄáAÂâ: P,
-    äåå: G
+    ÅÁÂ: ÅÁÂ,
+    ÅAÂ: ÅAÂ,
+    ÅÃa: ÅÃa,
+    Áãä: Áãä,
+    áãÅÄâ: áãÅÄâ,
+    ãÄâ: ãÄâ,
+    áÃÂ: áÃÂ,
+    ÅÃA: ÅÃA,
+    ÅáÁ: ÅáÁ,
+    åÀÃáâ: åÀÃáâ,
+    ÃÂáÄa: ÃÂáÄa,
+    ÁAa: ÁAa,
+    ÄáAÂâ: ÄáAÂâ,
+    äåå: äåå
   };
 }();
 var Äå = function () {
-  var j = 30000;
-  var k = 300;
+  var ÁáaÁA = 30000;
+  var ãÅáÂÁ = 300;
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
-  var l = new AudioContext();
-  if (!l.createGain) {
-    l.createGain = l.aåââÃ;
+  var äãÄ = new AudioContext();
+  if (!äãÄ.createGain) {
+    äãÄ.createGain = äãÄ.aåââÃ;
   }
   ÅâÁ = null;
   ÃÂä = null;
   ÅÃÀáÁ = [];
   ÅaÀÂÃ = null;
   âÀåáÀ = null;
-  function m() {
-    ÅâÁ = l.createMediaStreamDestination();
+  function áÀÀáÃ() {
+    ÅâÁ = äãÄ.createMediaStreamDestination();
     ÃÂä = new MediaRecorder(ÅâÁ.stream);
-    ÃÂä.ondataavailable = function (C) {
-      ÅÃÀáÁ.push(C.data);
+    ÃÂä.ondataavailable = function (Åá) {
+      ÅÃÀáÁ.push(Åá.data);
     };
-    ÃÂä.onstop = function (C) {
-      var D = {
+    ÃÂä.onstop = function (Åá) {
+      var ÀâÅÂÁ = {
         type: "audio/ogg; codecs=opus"
       };
-      âÀåáÀ = new Blob(ÅÃÀáÁ, D);
+      âÀåáÀ = new Blob(ÅÃÀáÁ, ÀâÅÂÁ);
       ÅaÀÂÃ = URL.createObjectURL(âÀåáÀ);
     };
   }
   ;
-  function n() {
+  function ÅÀäâa() {
     âÀåáÀ = null;
     ÅaÀÂÃ = null;
     ÅÃÀáÁ = [];
     ÃÂä.start();
   }
   ;
-  function o() {
+  function aãááÄ() {
     return ÅaÀÂÃ;
   }
   ;
-  function p() {
+  function ãáAÁã() {
     ÃÂä.stop();
   }
   ;
-  var q = {
+  var aÄ = {
     ááâ: ÂA,
     åÄä: ÀA
   };
   try {
-    var r = Âáá.getItem("isFx");
-    if (r !== null) {
-      q.åÄä = Number(r);
+    var ãÃ = Âáá.getItem("isFx");
+    if (ãÃ !== null) {
+      aÄ.åÄä = Number(ãÃ);
     } else if (åä === äã) {
-      q.åÄä = ãä;
+      aÄ.åÄä = ãä;
     }
-    r = Âáá.getItem("isAudio");
-    if (r !== null) {
-      q.ááâ = Number(r);
+    ãÃ = Âáá.getItem("isAudio");
+    if (ãÃ !== null) {
+      aÄ.ááâ = Number(ãÃ);
     } else if (äã === 1) {
-      q.ááâ = 0;
+      aÄ.ááâ = 0;
     }
-  } catch (H) {
+  } catch (âãå) {
     if (äã === 1) {
-      q.åÄä = 0;
-      q.ááâ = áÃ;
+      aÄ.åÄä = 0;
+      aÄ.ááâ = áÃ;
     }
   }
-  function s(K, L, M) {
-    if (-ÄÂ !== K.ÁÁá) {
-      K.volume = K.ÁÁá;
+  function ãaÁ(áÄ, áâÃ, ÄÁÁ) {
+    if (-ÄÂ !== áÄ.ÁÁá) {
+      áÄ.volume = áÄ.ÁÁá;
     }
-    K.fade = Aa;
-    K.ÄãÀ = L;
-    K.åãåâå = M;
-    console.log("FADE", K.url);
-  }
-  ;
-  function t(K) {
-    if (K.ÃÂÅ === 1) {
-      K.ÃÂÅ = 0;
-      K.ÁAâ = -ãå;
-      K.source.stop();
-      console.log("Stop", K.url);
-    }
+    áÄ.fade = Aa;
+    áÄ.ÄãÀ = áâÃ;
+    áÄ.åãåâå = ÄÁÁ;
+    console.log("FADE", áÄ.url);
   }
   ;
-  function u(K) {
-    if (ãÄá === K.á) {
+  function äAA(áÄ) {
+    if (áÄ.ÃÂÅ === 1) {
+      áÄ.ÃÂÅ = 0;
+      áÄ.ÁAâ = -ãå;
+      áÄ.source.stop();
+      console.log("Stop", áÄ.url);
+    }
+  }
+  ;
+  function ÁÀâ(áÄ) {
+    if (ãÄá === áÄ.á) {
       return;
     }
-    console.log("LOAD", K);
-    var L = new XMLHttpRequest();
-    L.open("GET", K.url, true);
-    L.responseType = "arraybuffer";
-    L.onload = function () {
-      l.decodeAudioData(L.response, function (P) {
-        K.buffer = P;
-        K.á = 1;
-        K.ÅaáÄá = P.duration * 1000;
+    console.log("LOAD", áÄ);
+    var ÀÃá = new XMLHttpRequest();
+    ÀÃá.open("GET", áÄ.url, true);
+    ÀÃá.responseType = "arraybuffer";
+    ÀÃá.onload = function () {
+      äãÄ.decodeAudioData(ÀÃá.response, function (ÅAã) {
+        áÄ.buffer = ÅAã;
+        áÄ.á = 1;
+        áÄ.ÅaáÄá = ÅAã.duration * 1000;
       });
     };
-    K.á = 2;
-    L.send();
+    áÄ.á = 2;
+    ÀÃá.send();
     return;
   }
   ;
-  function v(K, L, M, N) {
-    if (M > k) {
+  function âå(AA, äÁÁ, ÃÂ, AÅÄ) {
+    if (ÃÂ > ãÅáÂÁ) {
       return;
     }
-    L = L * (ãâ - M / k);
-    K.volume = L;
-    A(K, äå, N);
-    K.ÃÂÅ = 0;
+    äÁÁ = äÁÁ * (ãâ - ÃÂ / ãÅáÂÁ);
+    AA.volume = äÁÁ;
+    âÄÁ(AA, äå, AÅÄ);
+    AA.ÃÂÅ = 0;
   }
   ;
-  function w(K) {
-    if (K === 0 && q.åÄä !== K) {
-      for (var L in Äå.AA) {
-        var M = Äå.AA[L];
-        t(M);
+  function Ååå(ãÃ) {
+    if (ãÃ === 0 && aÄ.åÄä !== ãÃ) {
+      for (var ÂaÃÀá in Äå.AA) {
+        var AA = Äå.AA[ÂaÃÀá];
+        äAA(AA);
       }
     }
-    q.åÄä = K;
-    Âáá.setItem("isFx", "" + K);
+    aÄ.åÄä = ãÃ;
+    Âáá.setItem("isFx", "" + ãÃ);
   }
   ;
-  function x(K, L) {
-    K.ÃÅÄ.gain.value = L;
-    K.volume = L;
+  function aÁáÀÁ(áÄ, ãÃ) {
+    áÄ.ÃÅÄ.gain.value = ãÃ;
+    áÄ.volume = ãÃ;
   }
   ;
-  function y(K, L, M, N) {
-    this.url = K;
+  function ÁÃÅ(ÄåÄ, äÁÁ, ÀãÂ, AA) {
+    this.url = ÄåÄ;
     this.buffer = null;
     this.source = null;
     this.á = ãä;
     this.ÃÂÅ = 0;
     this.ÃÅÄ = null;
-    this.loop = M;
+    this.loop = ÀãÂ;
     this.volume = åä;
     this.ÁAâ = -1;
-    if (aAÃÃÂ !== L) {
-      this.volume = L;
+    if (aAÃÃÂ !== äÁÁ) {
+      this.volume = äÁÁ;
     }
     this.ÁÁá = -1;
     this.AA = 0;
-    if (N === 1) {
+    if (AA === 1) {
       this.AA = ÂA;
     }
     this.fade = 0;
@@ -10603,97 +10608,97 @@ var Äå = function () {
     this.ÅaáÄá = 0;
   }
   ;
-  function z(K) {
-    if (K === 0 && q.ááâ !== K) {
-      for (var L in Äå.áÅä) {
-        var M = Äå.áÅä[L];
-        t(M);
+  function áÂã(ãÃ) {
+    if (ãÃ === 0 && aÄ.ááâ !== ãÃ) {
+      for (var ÀâääÂ in Äå.áÅä) {
+        var áÅä = Äå.áÅä[ÀâääÂ];
+        äAA(áÅä);
       }
     }
-    q.ááâ = K;
-    Âáá.setItem("isAudio", "" + K);
+    aÄ.ááâ = ãÃ;
+    Âáá.setItem("isAudio", "" + ãÃ);
   }
   ;
-  function A(K, L, M) {
-    if (K.AA === 0) {
-      if (âã === q.ááâ) {
+  function âÄÁ(áÄ, áâÃ, AÅÄ) {
+    if (áÄ.AA === 0) {
+      if (âã === aÄ.ááâ) {
         return;
       }
-    } else if (ãä === q.åÄä) {
+    } else if (ãä === aÄ.åÄä) {
       return;
     }
-    if (K.ÃÂÅ === 1) {
-      if (K.ÁAâ !== -ÂA && K.ÄãÀ === 0 && j < ÅaÃ - K.ÁAâ) {
-        t(K);
+    if (áÄ.ÃÂÅ === 1) {
+      if (áÄ.ÁAâ !== -ÂA && áÄ.ÄãÀ === 0 && ÁáaÁA < ÅaÃ - áÄ.ÁAâ) {
+        äAA(áÄ);
         return;
       }
-      if (ãÂ < K.ÄãÀ) {
-        K.fade = Math.min(K.fade + ÀÀ, K.ÄãÀ);
-        var N = Math.max(åâ, Math.min(1, K.volume + K.åãåâå * Math.sin(Math.PI * ((Áå - K.fade / K.ÄãÀ) * 0.5))));
-        K.ÃÅÄ.gain.value = N;
-        K.ÁÁá = N;
-        if (K.fade === K.ÄãÀ) {
-          K.volume = N;
-          K.ÁÁá = -1;
-          K.ÄãÀ = 0;
-          K.fade = AÂ;
-          if (K.volume === 0) {
-            K.ÁAâ = ÅaÃ;
+      if (ãÂ < áÄ.ÄãÀ) {
+        áÄ.fade = Math.min(áÄ.fade + ÀÀ, áÄ.ÄãÀ);
+        var äÁÁ = Math.max(åâ, Math.min(1, áÄ.volume + áÄ.åãåâå * Math.sin(Math.PI * ((Áå - áÄ.fade / áÄ.ÄãÀ) * 0.5))));
+        áÄ.ÃÅÄ.gain.value = äÁÁ;
+        áÄ.ÁÁá = äÁÁ;
+        if (áÄ.fade === áÄ.ÄãÀ) {
+          áÄ.volume = äÁÁ;
+          áÄ.ÁÁá = -1;
+          áÄ.ÄãÀ = 0;
+          áÄ.fade = AÂ;
+          if (áÄ.volume === 0) {
+            áÄ.ÁAâ = ÅaÃ;
           } else {
-            K.ÁAâ = -1;
+            áÄ.ÁAâ = -1;
           }
         }
       }
       return;
     }
-    if (áÃ === K.ÄãÀ && K.fade === 0 && K.volume === 0) {
+    if (áÃ === áÄ.ÄãÀ && áÄ.fade === 0 && áÄ.volume === 0) {
       return;
     }
-    if (K.á !== 1) {
-      u(K);
+    if (áÄ.á !== 1) {
+      ÁÀâ(áÄ);
       return;
     }
-    var O = l.createBufferSource();
-    var P = l.createGain();
-    K.source = O;
-    K.ÃÅÄ = P;
-    x(K, K.volume);
-    O.buffer = K.buffer;
-    O.connect(P);
+    var ÀAâ = äãÄ.createBufferSource();
+    var ÃÅÄ = äãÄ.createGain();
+    áÄ.source = ÀAâ;
+    áÄ.ÃÅÄ = ÃÅÄ;
+    aÁáÀÁ(áÄ, áÄ.volume);
+    ÀAâ.buffer = áÄ.buffer;
+    ÀAâ.connect(ÃÅÄ);
     if (ÅâÁ !== null) {
-      O.connect(ÅâÁ);
+      ÀAâ.connect(ÅâÁ);
     }
-    P.connect(l.destination);
-    if (K.loop === true) {
-      O.loop = K.loop;
+    ÃÅÄ.connect(äãÄ.destination);
+    if (áÄ.loop === true) {
+      ÀAâ.loop = áÄ.loop;
     }
-    if (!O.stop) {
-      O.stop = O.åÂÂÃa;
+    if (!ÀAâ.stop) {
+      ÀAâ.stop = ÀAâ.åÂÂÃa;
     }
-    if (!O.start) {
-      O.start = O.AáAÃa;
+    if (!ÀAâ.start) {
+      ÀAâ.start = ÀAâ.AáAÃa;
     }
-    K.source.start((M === undefined ? 0 : M) + l.currentTime, L === undefined ? ÅÁ : L);
-    K.ÃÂÅ = Âã;
-    K.start = ÅaÃ;
-    console.log("Start", K.url, K.fade, K.ÄãÀ, L);
+    áÄ.source.start((AÅÄ === undefined ? 0 : AÅÄ) + äãÄ.currentTime, áâÃ === undefined ? ÅÁ : áâÃ);
+    áÄ.ÃÂÅ = Âã;
+    áÄ.start = ÅaÃ;
+    console.log("Start", áÄ.url, áÄ.fade, áÄ.ÄãÀ, áâÃ);
   }
   ;
   return {
-    ÁÃÅ: y,
-    ÁÀâ: u,
-    âÄÁ: A,
-    âå: v,
-    äAA: t,
-    ãaÁ: s,
-    aÁáÀÁ: x,
-    options: q,
-    áÂã: z,
-    Ååå: w,
-    áÀÀáÃ: m,
-    ÅÀäâa: n,
-    ãáAÁã: p,
-    aãááÄ: o,
+    ÁÃÅ: ÁÃÅ,
+    ÁÀâ: ÁÀâ,
+    âÄÁ: âÄÁ,
+    âå: âå,
+    äAA: äAA,
+    ãaÁ: ãaÁ,
+    aÁáÀÁ: aÁáÀÁ,
+    options: aÄ,
+    áÂã: áÂã,
+    Ååå: Ååå,
+    áÀÀáÃ: áÀÀáÃ,
+    ÅÀäâa: ÅÀäâa,
+    ãáAÁã: ãáAÁã,
+    aãááÄ: aãááÄ,
     áÅä: {},
     AA: {}
   };
@@ -10707,28 +10712,28 @@ if (window.âÁAáÃ) {
   window.Math.asin = äÄááA;
 }
 ;
-function áaAÁÄ(j, k, l) {
-  const m = ((j + 55195) * 22695477 + 1) % 4294967296;
-  const n = ((k + 51981) * 1103515245 + 12345) % 2147483648;
-  const o = ~(l & 35035) & (l | 35035);
-  const p = äãÅÅá(m, n, o, m);
-  const q = ÃÀÁãâ(n, o, m, n, o, m);
-  const r = (p | 3251) & ~(p & 3251);
-  return r;
+function áaAÁÄ(ÂÂÀÃå, áäÁáå, ááÅÂa) {
+  const ãAa = ((ÂÂÀÃå + 55195) * 22695477 + 1) % 4294967296;
+  const äáÁäA = ((áäÁáå + 51981) * 1103515245 + 12345) % 2147483648;
+  const ÂÃáÃÅ = ~(ááÅÂa & 35035) & (ááÅÂa | 35035);
+  const ÁAåáã = äãÅÅá(ãAa, äáÁäA, ÂÃáÃÅ, ãAa);
+  const âáÀAa = ÃÀÁãâ(äáÁäA, ÂÃáÃÅ, ãAa, äáÁäA, ÂÃáÃÅ, ãAa);
+  const ÀÄÁÀá = (ÁAåáã | 3251) & ~(ÁAåáã & 3251);
+  return ÀÄÁÀá;
 }
 ;
 const âÅá = åÅåÁÃ;
 const ååÁ = âÂá;
 const ÁÀâÁâ = aáãÂÀ;
-function aÅAãå(j, k, l, m) {
-  const n = (1013904223 + (j + 10154) * 1664525) % 4294967296;
-  const o = ~(k & 26371) & k | ~(k & 26371) & 26371;
-  const p = ((11284 + l) * 214013 + 2531011) % 4294967296;
-  const q = m ^ 24078;
-  const r = ÄÂâ(n, o, p, q, n);
-  const s = äáAÀÄ(o, p, q, n, o);
-  const t = r ^ 42496;
-  return t;
+function aÅAãå(ÁáÁÁÂ, ÀÃA, aãâáã, ÀÅÅãa) {
+  const aÂááÁ = (1013904223 + (ÁáÁÁÂ + 10154) * 1664525) % 4294967296;
+  const âAãÂã = ~(ÀÃA & 26371) & ÀÃA | ~(ÀÃA & 26371) & 26371;
+  const åãáAá = ((11284 + aãâáã) * 214013 + 2531011) % 4294967296;
+  const äÀäÄÂ = ÀÅÅãa ^ 24078;
+  const AÅáÃá = ÄÂâ(aÂááÁ, âAãÂã, åãáAá, äÀäÄÂ, aÂááÁ);
+  const ÂááÁá = äáAÀÄ(âAãÂã, åãáAá, äÀäÄÂ, aÂááÁ, âAãÂã);
+  const ÃÀãAá = AÅáÃá ^ 42496;
+  return ÃÀãAá;
 }
 ;
 function áÃÂÁÃ() {
@@ -10740,127 +10745,127 @@ const ääA = áÃÂÁÃ + " let ÀâÂÄa = áÃÂÁÃ () * 16193443; return À
 const ÀÃãÃa = new Function(ääA);
 try {
   ÀÃãÃa(äáÂÂA);
-} catch (dnD) {
+} catch (e) {
   const äáÂÂA = Math.floor;
   let ÀÃãÃa = 0;
-  const ääA = function (j) {
-    for (let k = 0; k < 2587; k++) {
-      ÀÃãÃa += k;
+  const ääA = function (ääA) {
+    for (let ÀâÂÄa = 0; ÀâÂÄa < 2587; ÀâÂÄa++) {
+      ÀÃãÃa += ÀâÂÄa;
     }
-    return äáÂÂA(j);
+    return äáÂÂA(ääA);
   };
   Math.floor = ääA;
 }
 ;
-function äáAÀÄ(j, k, l, m, n) {
-  const o = (12345 + (19090 + j) * 1103515245) % 2147483648;
-  const p = ~(k & 63148) & 63148 | ~(k & 63148) & k;
-  const q = l ^ 13006;
-  const r = ((m + 23853) * 2147483629 + 2147483587) % 2147483647;
-  const s = ((n + 50449) * 214013 + 2531011) % 4294967296;
-  const t = aåáÁå(o, p);
-  const u = ÃÃå(q, r, s, o);
-  const v = (ÁÅÀ << ((t ^ u) >> AÄ & 255)) + (ÁÀ << ((t ^ u) >> 8 & 255)) + (16 << ((t ^ u) >> 16 & 255)) + (24 << ((t ^ u) >> 24 & 255));
-  return v;
+function äáAÀÄ(âäÅÀÃ, aåÃ, ÃÀáãá, ÃAÃÃa, ÂåÂãã) {
+  const âááÂa = (12345 + (19090 + âäÅÀÃ) * 1103515245) % 2147483648;
+  const ÄâáAá = ~(aåÃ & 63148) & 63148 | ~(aåÃ & 63148) & aåÃ;
+  const ÀããáÄ = ÃÀáãá ^ 13006;
+  const aÃÄáâ = ((ÃAÃÃa + 23853) * 2147483629 + 2147483587) % 2147483647;
+  const ÁÄááâ = ((ÂåÂãã + 50449) * 214013 + 2531011) % 4294967296;
+  const âaä = aåáÁå(âááÂa, ÄâáAá);
+  const ÃáÂ = ÃÃå(ÀããáÄ, aÃÄáâ, ÁÄááâ, âááÂa);
+  const ÅaÅãâ = (ÁÅÀ << ((âaä ^ ÃáÂ) >> AÄ & 255)) + (ÁÀ << ((âaä ^ ÃáÂ) >> 8 & 255)) + (16 << ((âaä ^ ÃáÂ) >> 16 & 255)) + (24 << ((âaä ^ ÃáÂ) >> 24 & 255));
+  return ÅaÅãâ;
 }
 ;
-function aäå(j, k, l, m, n, o) {
-  const p = (ÂÄâ << (j >> 16 & äãÁ)) + (0 << (j >> 8 & 255)) + (24 << (j >> 24 & 255)) + (8 << (j >> 0 & 255));
-  const q = ((4464 + k) * 214013 + 2531011) % 4294967296;
-  const r = ~(l & 13544) & l | ~(l & 13544) & 13544;
-  const s = ~(m & 49221) & 49221 | ~(m & 49221) & m;
-  const t = ~(n & 32719) & 32719 | ~(n & 32719) & n;
-  const u = (8 << (o >> 24 & 255)) + (16 << (o >> 0 & 255)) + (24 << (o >> 16 & 255)) + (åâ << (o >> 8 & 255));
-  const v = ÅäÃ(p, q, r, s, t);
-  const w = ÅäÃ(u, p, q, r, s);
-  const x = ((15483 + (v ^ w)) * 1103515245 + 12345) % 2147483648;
-  return x;
+function aäå(ãäâ, ãÁäaä, áaÀâÃ, ÅãÅaÄ, AÃÄÂä, ÂäÃ) {
+  const âÄÁÃâ = (ÂÄâ << (ãäâ >> 16 & äãÁ)) + (0 << (ãäâ >> 8 & 255)) + (24 << (ãäâ >> 24 & 255)) + (8 << (ãäâ >> 0 & 255));
+  const ááâÂÂ = ((4464 + ãÁäaä) * 214013 + 2531011) % 4294967296;
+  const åââÀÃ = ~(áaÀâÃ & 13544) & áaÀâÃ | ~(áaÀâÃ & 13544) & 13544;
+  const ÂÅáãá = ~(ÅãÅaÄ & 49221) & 49221 | ~(ÅãÅaÄ & 49221) & ÅãÅaÄ;
+  const ãÃÄÅå = ~(AÃÄÂä & 32719) & 32719 | ~(AÃÄÂä & 32719) & AÃÄÂä;
+  const ÄAâaA = (8 << (ÂäÃ >> 24 & 255)) + (16 << (ÂäÃ >> 0 & 255)) + (24 << (ÂäÃ >> 16 & 255)) + (åâ << (ÂäÃ >> 8 & 255));
+  const ãÂÀáä = ÅäÃ(âÄÁÃâ, ááâÂÂ, åââÀÃ, ÂÅáãá, ãÃÄÅå);
+  const ãÀÁÂÃ = ÅäÃ(ÄAâaA, âÄÁÃâ, ááâÂÂ, åââÀÃ, ÂÅáãá);
+  const åãÁAÅ = ((15483 + (ãÂÀáä ^ ãÀÁÂÃ)) * 1103515245 + 12345) % 2147483648;
+  return åãÁAÅ;
 }
 ;
 const äââÅá = AÃâ;
 const Àää = ÂÁã;
 const åÅÂ = ÀÄÀ;
-function åâaÅá(j, k, l) {
-  const m = (2531011 + (j + 14382) * 214013) % 4294967296;
-  const n = (8 << (k >> 24 & 255)) + (0 << (k >> ãÂ & 255)) + (16 << (k >> 8 & 255)) + (24 << (k >> 16 & 255));
-  const o = (1 + (49419 + l) * 22695477) % 4294967296;
-  const p = åAaAä(m, n, o, m, n, o);
-  const q = åAaAä(m, n, o, m, n, o);
-  const r = (ååÁ << ((p ^ q) >> 8 & åáÄ)) + (16 << ((p ^ q) >> 16 & 255)) + (0 << ((p ^ q) >> 24 & 255)) + (24 << ((p ^ q) >> 0 & 255));
-  return r;
+function åâaÅá(âAãÃÅ, Ããã, ÅÂááÅ) {
+  const åÄÀ = (2531011 + (âAãÃÅ + 14382) * 214013) % 4294967296;
+  const aãÁ = (8 << (Ããã >> 24 & 255)) + (0 << (Ããã >> ãÂ & 255)) + (16 << (Ããã >> 8 & 255)) + (24 << (Ããã >> 16 & 255));
+  const ãÁÀ = (1 + (49419 + ÅÂááÅ) * 22695477) % 4294967296;
+  const Ãaå = åAaAä(åÄÀ, aãÁ, ãÁÀ, åÄÀ, aãÁ, ãÁÀ);
+  const ãäÁ = åAaAä(åÄÀ, aãÁ, ãÁÀ, åÄÀ, aãÁ, ãÁÀ);
+  const ÄÁaãa = (ååÁ << ((Ãaå ^ ãäÁ) >> 8 & åáÄ)) + (16 << ((Ãaå ^ ãäÁ) >> 16 & 255)) + (0 << ((Ãaå ^ ãäÁ) >> 24 & 255)) + (24 << ((Ãaå ^ ãäÁ) >> 0 & 255));
+  return ÄÁaãa;
 }
 ;
 const åÁâ = äAá;
-function ÃÃÅÂÅ(j, k, l) {
-  const m = ~(j & 5753) & 5753 | ~(j & 5753) & j;
-  const n = (0 << (k >> 24 & 255)) + (8 << (k >> 0 & äãÁ)) + (24 << (k >> 8 & 255)) + (16 << (k >> 16 & 255));
-  const o = (0 << (l >> ÄÁÀ & 255)) + (8 << (l >> 24 & 255)) + (16 << (l >> 0 & 255)) + (24 << (l >> 8 & 255));
-  const p = ÅäÃ(m, n, o, m, n);
-  const q = ÁåÅÀÁ(o, m, n, o);
-  const r = p ^ 32446;
-  return r;
+function ÃÃÅÂÅ(ÂÅâÂÅ, AâÄ, aåå) {
+  const ÁáâÁã = ~(ÂÅâÂÅ & 5753) & 5753 | ~(ÂÅâÂÅ & 5753) & ÂÅâÂÅ;
+  const aåãáÁ = (0 << (AâÄ >> 24 & 255)) + (8 << (AâÄ >> 0 & äãÁ)) + (24 << (AâÄ >> 8 & 255)) + (16 << (AâÄ >> 16 & 255));
+  const ÀåÂâã = (0 << (aåå >> ÄÁÀ & 255)) + (8 << (aåå >> 24 & 255)) + (16 << (aåå >> 0 & 255)) + (24 << (aåå >> 8 & 255));
+  const åáÀÁä = ÅäÃ(ÁáâÁã, aåãáÁ, ÀåÂâã, ÁáâÁã, aåãáÁ);
+  const áåãáa = ÁåÅÀÁ(ÀåÂâã, ÁáâÁã, aåãáÁ, ÀåÂâã);
+  const äâââÀ = åáÀÁä ^ 32446;
+  return äâââÀ;
 }
 ;
 const âäÃâã = ÂÀÄÂá;
-function aãåÂa(j, k, l, m, n) {
-  const o = ~(j & 34329) & 34329 | ~(j & 34329) & j;
-  const p = ~(k & 55398) & k | ~(k & 55398) & 55398;
-  const q = ~(l & 27548) & l | ~(l & 27548) & 27548;
-  const r = (0 << (m >> 8 & 255)) + (8 << (m >> 0 & 255)) + (24 << (m >> 16 & 255)) + (16 << (m >> 24 & 255));
-  const s = ~(n & 36665) & (n | 36665);
-  const t = ÂÄÀ(o, p);
-  const u = aåáÀå(q, r, s, o, p, q);
-  const v = t ^ 25953;
-  return v;
+function aãåÂa(áaÅ, ãÀÁ, ãÀÀ, Ãäâ, aãÀáÀ) {
+  const AaÀãå = ~(áaÅ & 34329) & 34329 | ~(áaÅ & 34329) & áaÅ;
+  const áãÅAÅ = ~(ãÀÁ & 55398) & ãÀÁ | ~(ãÀÁ & 55398) & 55398;
+  const äÀÃää = ~(ãÀÀ & 27548) & ãÀÀ | ~(ãÀÀ & 27548) & 27548;
+  const áãáãÂ = (0 << (Ãäâ >> 8 & 255)) + (8 << (Ãäâ >> 0 & 255)) + (24 << (Ãäâ >> 16 & 255)) + (16 << (Ãäâ >> 24 & 255));
+  const áåãÅa = ~(aãÀáÀ & 36665) & (aãÀáÀ | 36665);
+  const âÅAÁÂ = ÂÄÀ(AaÀãå, áãÅAÅ);
+  const äââAÀ = aåáÀå(äÀÃää, áãáãÂ, áåãÅa, AaÀãå, áãÅAÅ, äÀÃää);
+  const åâãâå = âÅAÁÂ ^ 25953;
+  return åâãâå;
 }
 ;
 const âÃ = ÄÂ;
-function ãÄÂÅa(j, k, l, m, n, o) {
-  ááÄâá(ÅÂá, j, k, l, m, n, o);
-  const p = aÁÃÃÅ(ÂÁ[0], ÂÁ[åä], ÂÁ[2], ÂÁ[åaÂ]);
-  const q = ÀåAaã(ÂÁ[ÄAÄ], ÂÁ[AÀâ]);
-  const r = p ^ 46676;
-  return r;
+function ãÄÂÅa(ÂâÃ, aäÄÄÀ, ÃÁá, áãaåÃ, ÄÄAãâ, ÄAâÄã) {
+  ááÄâá(ÅÂá, ÂâÃ, aäÄÄÀ, ÃÁá, áãaåÃ, ÄÄAãâ, ÄAâÄã);
+  const ÁâääÅ = aÁÃÃÅ(ÂÁ[0], ÂÁ[åä], ÂÁ[2], ÂÁ[åaÂ]);
+  const âAÃÁÄ = ÀåAaã(ÂÁ[ÄAÄ], ÂÁ[AÀâ]);
+  const ãâÃäá = ÁâääÅ ^ 46676;
+  return ãâÃäá;
 }
 ;
 const ÃÄâÂÅ = âÂÄ;
-function aåáÁå(j, k) {
-  const l = ~(j & 19265) & 19265 | ~(j & 19265) & j;
-  const m = (k + 16219) % 65350;
-  const n = áÀÄÁA(l, m);
-  const o = ÂÄÀ(l, m);
-  const p = (1013904223 + (43820 + (n ^ o)) * 1664525) % 4294967296;
-  return p;
+function aåáÁå(áâÄ, ÀâââÁ) {
+  const AäãåÅ = ~(áâÄ & 19265) & 19265 | ~(áâÄ & 19265) & áâÄ;
+  const äÀááa = (ÀâââÁ + 16219) % 65350;
+  const ááaÂá = áÀÄÁA(AäãåÅ, äÀááa);
+  const aåaÄÀ = ÂÄÀ(AäãåÅ, äÀááa);
+  const âAåÁÅ = (1013904223 + (43820 + (ááaÂá ^ aåaÄÀ)) * 1664525) % 4294967296;
+  return âAåÁÅ;
 }
 ;
 const ãÁ = áÃ;
 const äA = Áå;
 const ÁAÅ = äÃa;
-function ââAáã(j, k, l, m, n, o) {
-  ÁäáAÁ(ÅÂá, j, k, l, m, n, o);
-  const p = âäÂäá(ÂÁ[ãÂ], ÂÁ[âa], ÂÁ[ÁÅá], ÂÁ[3]);
-  const q = ÄÁÄåÂ(ÂÁ[äÅÂ], ÂÁ[5], ÂÁ[0], ÂÁ[1], ÂÁ[2]);
-  const r = (0 << ((p ^ q) >> 16 & 255)) + (16 << ((p ^ q) >> 8 & 255)) + (8 << ((p ^ q) >> åâ & 255)) + (24 << ((p ^ q) >> 24 & 255));
-  return r;
+function ââAáã(ÀãÄ, ÂåÅâã, ääÄ, ãááAÃ, åãÂAá, ÁAÁ) {
+  ÁäáAÁ(ÅÂá, ÀãÄ, ÂåÅâã, ääÄ, ãááAÃ, åãÂAá, ÁAÁ);
+  const åáå = âäÂäá(ÂÁ[ãÂ], ÂÁ[âa], ÂÁ[ÁÅá], ÂÁ[3]);
+  const âäÁ = ÄÁÄåÂ(ÂÁ[äÅÂ], ÂÁ[5], ÂÁ[0], ÂÁ[1], ÂÁ[2]);
+  const ÅaÁÂâ = (0 << ((åáå ^ âäÁ) >> 16 & 255)) + (16 << ((åáå ^ âäÁ) >> 8 & 255)) + (8 << ((åáå ^ âäÁ) >> åâ & 255)) + (24 << ((åáå ^ âäÁ) >> 24 & 255));
+  return ÅaÁÂâ;
 }
 ;
 const åãÂ = ÂÄá;
-function áÃÃâä(j, k) {
-  const l = j ^ 13571;
-  const m = (0 << (k >> 16 & 255)) + (8 << (k >> 8 & 255)) + (24 << (k >> áÃ & 255)) + (16 << (k >> 24 & 255));
-  const n = äÁäáÄ(l, m, l, m);
-  const o = äÃAÃÃ(l, m, l, m, l, m);
-  const p = (8 << ((n ^ o) >> 16 & 255)) + (ãa << ((n ^ o) >> 8 & 255)) + (24 << ((n ^ o) >> 24 & áÁã)) + (16 << ((n ^ o) >> 0 & 255));
-  return p;
+function áÃÃâä(âÀÁAA, âáA) {
+  const AÂá = âÀÁAA ^ 13571;
+  const ããÂ = (0 << (âáA >> 16 & 255)) + (8 << (âáA >> 8 & 255)) + (24 << (âáA >> áÃ & 255)) + (16 << (âáA >> 24 & 255));
+  const ÂÁÀ = äÁäáÄ(AÂá, ããÂ, AÂá, ããÂ);
+  const AaÄ = äÃAÃÃ(AÂá, ããÂ, AÂá, ããÂ, AÂá, ããÂ);
+  const aäáåA = (8 << ((ÂÁÀ ^ AaÄ) >> 16 & 255)) + (ãa << ((ÂÁÀ ^ AaÄ) >> 8 & 255)) + (24 << ((ÂÁÀ ^ AaÄ) >> 24 & áÁã)) + (16 << ((ÂÁÀ ^ AaÄ) >> 0 & 255));
+  return aäáåA;
 }
 ;
 const Ââå = âåâ;
-function ÀåAaã(j, k) {
-  AäaÃå(ÅÂá, j, k);
-  const l = aÁÃÃÅ(ÂÁ[Àá], ÂÁ[Áå], ÂÁ[äå], ÂÁ[ãå]);
-  const m = áaaÁã(ÂÁ[ãÂ], ÂÁ[1], ÂÁ[0], ÂÁ[1], ÂÁ[0]);
-  const n = ((188 + (l ^ m)) * 8121 + 28411) % 134456;
-  return n;
+function ÀåAaã(âÀÁAA, âáA) {
+  AäaÃå(ÅÂá, âÀÁAA, âáA);
+  const ÂÅÀAâ = aÁÃÃÅ(ÂÁ[Àá], ÂÁ[Áå], ÂÁ[äå], ÂÁ[ãå]);
+  const ÄÃÂáÄ = áaaÁã(ÂÁ[ãÂ], ÂÁ[1], ÂÁ[0], ÂÁ[1], ÂÁ[0]);
+  const aaÃáÅ = ((188 + (ÂÅÀAâ ^ ÄÃÂáÄ)) * 8121 + 28411) % 134456;
+  return aaÃáÅ;
 }
 ;
 const AáÁÁá = ãaÅ;
@@ -10868,101 +10873,101 @@ const AáaÃa = ÁÀâÁâ;
 const ÅÂääÃ = AâãÂA;
 const ÀaÁÂâ = ãAÅ;
 const åääåÅ = ÅâA;
-function ÁÀã(j, k, l) {
-  const m = (62 + j) % 65451;
-  const n = ~(k & 60125) & k | ~(k & 60125) & 60125;
-  const o = (1013904223 + (l + 46829) * 1664525) % 4294967296;
-  const p = ÄÂâ(m, n, o, m, n);
-  const q = ÃÃÅÂÅ(o, m, n);
-  const r = p ^ 41030;
-  return r;
+function ÁÀã(ÁåáÅá, ÃâáÂá, ãáÄÃä) {
+  const AÄáÁÄ = (62 + ÁåáÅá) % 65451;
+  const ÂãáÃA = ~(ÃâáÂá & 60125) & ÃâáÂá | ~(ÃâáÂá & 60125) & 60125;
+  const aáÅÄÁ = (1013904223 + (ãáÄÃä + 46829) * 1664525) % 4294967296;
+  const áÁÁAä = ÄÂâ(AÄáÁÄ, ÂãáÃA, aáÅÄÁ, AÄáÁÄ, ÂãáÃA);
+  const Ãâáaä = ÃÃÅÂÅ(aáÅÄÁ, AÄáÁÄ, ÂãáÃA);
+  const âäÀäÁ = áÁÁAä ^ 41030;
+  return âäÀäÁ;
 }
 ;
-function âÃäÁÂ(j, k, l) {
-  const m = ((j + 28512) * 214013 + 2531011) % 4294967296;
-  const n = ~(k & 51249) & k | ~(k & 51249) & 51249;
-  const o = (0 << (l >> 16 & 255)) + (16 << (l >> 0 & 255)) + (24 << (l >> 24 & 255)) + (8 << (l >> 8 & 255));
-  const p = äáäÂa(m, n, o, m, n);
-  const q = aåáÁå(o, m);
-  const r = (24 << ((p ^ q) >> 16 & 255)) + (16 << ((p ^ q) >> aÀÃ & 255)) + (8 << ((p ^ q) >> 24 & ãâã)) + (AÄ << ((p ^ q) >> 0 & 255));
-  return r;
+function âÃäÁÂ(ÀåaãÃ, ääÃ, AÂÅ) {
+  const ääAÀá = ((ÀåaãÃ + 28512) * 214013 + 2531011) % 4294967296;
+  const ÃäÀaÅ = ~(ääÃ & 51249) & ääÃ | ~(ääÃ & 51249) & 51249;
+  const ãaÁäá = (0 << (AÂÅ >> 16 & 255)) + (16 << (AÂÅ >> 0 & 255)) + (24 << (AÂÅ >> 24 & 255)) + (8 << (AÂÅ >> 8 & 255));
+  const Ãåâ = äáäÂa(ääAÀá, ÃäÀaÅ, ãaÁäá, ääAÀá, ÃäÀaÅ);
+  const ãAÄ = aåáÁå(ãaÁäá, ääAÀá);
+  const äÁáäA = (24 << ((Ãåâ ^ ãAÄ) >> 16 & 255)) + (16 << ((Ãåâ ^ ãAÄ) >> aÀÃ & 255)) + (8 << ((Ãåâ ^ ãAÄ) >> 24 & ãâã)) + (AÄ << ((Ãåâ ^ ãAÄ) >> 0 & 255));
+  return äÁáäA;
 }
 ;
 const ãÄåÃÀ = ÂAÃ;
-function ÀááÅÀ(j, k) {
-  äÁÂÀÁ(ÅÂá, j, k);
-  const l = ãÄÂÅa(ÂÁ[áÁ], ÂÁ[ÄÂ], ÂÁ[åâ], ÂÁ[Âã], ÂÁ[0], ÂÁ[âá]);
-  const m = ÀåAaã(ÂÁ[0], ÂÁ[1]);
-  const n = ((45 + (l ^ m)) * 48271 + 0) % 2147483647;
-  return n;
+function ÀááÅÀ(ÃÅÃ, aAå) {
+  äÁÂÀÁ(ÅÂá, ÃÅÃ, aAå);
+  const ÀáÁáá = ãÄÂÅa(ÂÁ[áÁ], ÂÁ[ÄÂ], ÂÁ[åâ], ÂÁ[Âã], ÂÁ[0], ÂÁ[âá]);
+  const ÃÄAåa = ÀåAaã(ÂÁ[0], ÂÁ[1]);
+  const ÄaAãá = ((45 + (ÀáÁáá ^ ÃÄAåa)) * 48271 + 0) % 2147483647;
+  return ÄaAãá;
 }
 ;
-function ÄÁÄåÂ(j, k, l, m, n) {
-  aÄâáå(ÅÂá, j, k, l, m, n);
-  const o = ÀááÅÀ(ÂÁ[ÀÄ], ÂÁ[1]);
-  const p = ãåäãÄ(ÂÁ[ÄäÀ], ÂÁ[3], ÂÁ[4], ÂÁ[ÁÀ], ÂÁ[aÅ]);
-  const q = (16 << ((o ^ p) >> 16 & 255)) + (24 << ((o ^ p) >> 8 & 255)) + (8 << ((o ^ p) >> 24 & ÅÀÀ)) + (0 << ((o ^ p) >> 0 & 255));
-  return q;
+function ÄÁÄåÂ(âAãÃÅ, Ããã, ÅÂááÅ, ÅAÅAâ, AÁãaá) {
+  aÄâáå(ÅÂá, âAãÃÅ, Ããã, ÅÂááÅ, ÅAÅAâ, AÁãaá);
+  const áãå = ÀááÅÀ(ÂÁ[ÀÄ], ÂÁ[1]);
+  const ÄÂa = ãåäãÄ(ÂÁ[ÄäÀ], ÂÁ[3], ÂÁ[4], ÂÁ[ÁÀ], ÂÁ[aÅ]);
+  const äÃÂáá = (16 << ((áãå ^ ÄÂa) >> 16 & 255)) + (24 << ((áãå ^ ÄÂa) >> 8 & 255)) + (8 << ((áãå ^ ÄÂa) >> 24 & ÅÀÀ)) + (0 << ((áãå ^ ÄÂa) >> 0 & 255));
+  return äÃÂáá;
 }
 ;
-function áÀÄÁA(j, k) {
-  const l = (j | 19850) & ~(j & 19850);
-  const m = ~(k & 28422) & 28422 | ~(k & 28422) & k;
-  const n = äÁÄ(l, m, l, m);
-  const o = aãAÀå(l, m, l, m, l);
-  const p = (0 << ((n ^ o) >> 24 & 255)) + (24 << ((n ^ o) >> 0 & 255)) + (ÂÄâ << ((n ^ o) >> 16 & 255)) + (ÅáâÃa << ((n ^ o) >> 8 & 255));
-  return p;
+function áÀÄÁA(ÂÀâ, aAA) {
+  const äâå = (ÂÀâ | 19850) & ~(ÂÀâ & 19850);
+  const âáâ = ~(aAA & 28422) & 28422 | ~(aAA & 28422) & aAA;
+  const âÄÃ = äÁÄ(äâå, âáâ, äâå, âáâ);
+  const ÂåA = aãAÀå(äâå, âáâ, äâå, âáâ, äâå);
+  const ãÀÀåä = (0 << ((âÄÃ ^ ÂåA) >> 24 & 255)) + (24 << ((âÄÃ ^ ÂåA) >> 0 & 255)) + (ÂÄâ << ((âÄÃ ^ ÂåA) >> 16 & 255)) + (ÅáâÃa << ((âÄÃ ^ ÂåA) >> 8 & 255));
+  return ãÀÀåä;
 }
 ;
-function ÁÃáAå(j) {
-  return ÄÁääÄ(j, 15700, 22500, 42824, 20282, 43968);
+function ÁÃáAå(äÁå) {
+  return ÄÁääÄ(äÁå, 15700, 22500, 42824, 20282, 43968);
 }
 ;
 const AäÁ = ÃÅÂ;
-function Aåâãa(j, k, l, m) {
-  const n = (0 << (j >> áâAåá & âÁá)) + (16 << (j >> 0 & 255)) + (8 << (j >> 24 & 255)) + (24 << (j >> âÂá & 255));
-  const o = ((k + 29237) * 22695477 + 1) % 4294967296;
-  const p = (1013904223 + (24790 + l) * 1664525) % 4294967296;
-  const q = ~(m & 16701) & m | ~(m & 16701) & 16701;
-  const r = aÅAãå(n, o, p, q);
-  const s = äÁÄ(n, o, p, q);
-  const t = (16 << ((r ^ s) >> 0 & åáÄ)) + (24 << ((r ^ s) >> 8 & 255)) + (0 << ((r ^ s) >> ÂAÅ & 255)) + (8 << ((r ^ s) >> 24 & 255));
-  return t;
+function Aåâãa(ääÀ, âãÄaÄ, aÀAåÁ, ÀÂáÂå) {
+  const åÅäáA = (0 << (ääÀ >> áâAåá & âÁá)) + (16 << (ääÀ >> 0 & 255)) + (8 << (ääÀ >> 24 & 255)) + (24 << (ääÀ >> âÂá & 255));
+  const ãáÁÅÁ = ((âãÄaÄ + 29237) * 22695477 + 1) % 4294967296;
+  const ÂäAâÂ = (1013904223 + (24790 + aÀAåÁ) * 1664525) % 4294967296;
+  const áÂÀãä = ~(ÀÂáÂå & 16701) & ÀÂáÂå | ~(ÀÂáÂå & 16701) & 16701;
+  const áAå = aÅAãå(åÅäáA, ãáÁÅÁ, ÂäAâÂ, áÂÀãä);
+  const áÁA = äÁÄ(åÅäáA, ãáÁÅÁ, ÂäAâÂ, áÂÀãä);
+  const ÁÀÁáA = (16 << ((áAå ^ áÁA) >> 0 & åáÄ)) + (24 << ((áAå ^ áÁA) >> 8 & 255)) + (0 << ((áAå ^ áÁA) >> ÂAÅ & 255)) + (8 << ((áAå ^ áÁA) >> 24 & 255));
+  return ÁÀÁáA;
 }
 ;
-function ÀåÂâá(j, k) {
-  const l = (24 << (j >> 24 & 255)) + (16 << (j >> 8 & 255)) + (8 << (j >> 0 & 255)) + (0 << (j >> 16 & 255));
-  const m = (k | 40117) & ~(k & 40117);
-  const n = âÃäÁÂ(l, m, l);
-  const o = aÅAãå(m, l, m, l);
-  const p = n ^ 2312;
-  return p;
+function ÀåÂâá(ÀAã, ãÃÃ) {
+  const ÄÃÅ = (24 << (ÀAã >> 24 & 255)) + (16 << (ÀAã >> 8 & 255)) + (8 << (ÀAã >> 0 & 255)) + (0 << (ÀAã >> 16 & 255));
+  const áâäÄÁ = (ãÃÃ | 40117) & ~(ãÃÃ & 40117);
+  const áAÀÄÂ = âÃäÁÂ(ÄÃÅ, áâäÄÁ, ÄÃÅ);
+  const ÁAÃaÅ = aÅAãå(áâäÄÁ, ÄÃÅ, áâäÄÁ, ÄÃÅ);
+  const ãaAÀÀ = áAÀÄÂ ^ 2312;
+  return ãaAÀÀ;
 }
 ;
-function äÃAÃÃ(j, k, l, m, n, o) {
-  const p = ((7225 + j) * 1664525 + 1013904223) % 4294967296;
-  const q = (k + 2676) % 65381;
-  const r = l ^ 29250;
-  const s = m ^ 16681;
-  const t = (0 << (n >> 16 & 255)) + (16 << (n >> 24 & 255)) + (24 << (n >> 8 & äãÁ)) + (8 << (n >> 0 & 255));
-  const u = ((o + 35599) * 2147483629 + 2147483587) % 2147483647;
-  const v = äãÅÅá(p, q, r, s);
-  const w = ÂÄÀ(t, u);
-  const x = ((4576 + (v ^ w)) * 1103515245 + 12345) % 2147483648;
-  return x;
+function äÃAÃÃ(ÀãÅäã, ÂÄÁAa, áÁÁÅå, äåÅáã, âaA, åÂÅáã) {
+  const ÅäÃãã = ((7225 + ÀãÅäã) * 1664525 + 1013904223) % 4294967296;
+  const AäáÀã = (ÂÄÁAa + 2676) % 65381;
+  const âãÅÀÂ = áÁÁÅå ^ 29250;
+  const ÄÅÁAÂ = äåÅáã ^ 16681;
+  const ÃÂÂÅÁ = (0 << (âaA >> 16 & 255)) + (16 << (âaA >> 24 & 255)) + (24 << (âaA >> 8 & äãÁ)) + (8 << (âaA >> 0 & 255));
+  const AÀÄÄÃ = ((åÂÅáã + 35599) * 2147483629 + 2147483587) % 2147483647;
+  const aãAÅa = äãÅÅá(ÅäÃãã, AäáÀã, âãÅÀÂ, ÄÅÁAÂ);
+  const ÄÂáÂä = ÂÄÀ(ÃÂÂÅÁ, AÀÄÄÃ);
+  const áÃaáá = ((4576 + (aãAÅa ^ ÄÂáÂä)) * 1103515245 + 12345) % 2147483648;
+  return áÃaáá;
 }
 ;
 const AÄÄäÅ = 6046656;
-function Ãåá(j) {
-  const k = Math.random;
-  const l = [];
-  const m = function () {
-    for (let n = 0; n < 1724; n++) {
-      l.push(n);
+function Ãåá(aãä) {
+  const AÄÄäÅ = Math.random;
+  const ÁÂÄÃÀ = [];
+  const ÁÂÅáÅ = function () {
+    for (let aÁÃÁÃ = 0; aÁÃÁÃ < 1724; aÁÃÁÃ++) {
+      ÁÂÄÃÀ.push(aÁÃÁÃ);
     }
-    return k();
+    return AÄÄäÅ();
   };
-  Math.random = m;
+  Math.random = ÁÂÅáÅ;
 }
 ;
 const aãä = Ãåá + ";let aãä = " + Ãåá + ";";
@@ -10973,16 +10978,16 @@ const ÀåääÂ = ÂÃÅ;
 const áÃâaA = ÃåÀãÁ;
 const aåáAÅ = ÂÀA;
 const ÁáÀäâ = 8245164;
-function åÂaÄå(j) {
-  const k = Math.floor;
-  let l = 0;
-  const m = function (n) {
-    for (let o = 0; o < 4129; o++) {
-      l += o;
+function åÂaÄå(ááÁÄÅ) {
+  const ÁáÀäâ = Math.floor;
+  let áãÅÄÅ = 0;
+  const áÃäÂÅ = function (áÃäÂÅ) {
+    for (let ÄáÅÂä = 0; ÄáÅÂä < 4129; ÄáÅÂä++) {
+      áãÅÄÅ += ÄáÅÂä;
     }
-    return k(n);
+    return ÁáÀäâ(áÃäÂÅ);
   };
-  Math.floor = m;
+  Math.floor = áÃäÂÅ;
 }
 ;
 const ááÁÄÅ = åÂaÄå + ";let ááÁÄÅ = " + åÂaÄå + ";";
@@ -10990,301 +10995,301 @@ const áÃäÂÅ = ááÁÄÅ + "let ÄáÅÂä = 10206145; try { ÄáÅÂä = �
 window.setTimeout(áÃäÂÅ, 0);
 const AAáÃÃ = ÂáâÂá;
 const Äåâåâ = Aåã;
-function ÃÃå(j, k, l, m) {
-  const n = (j | 24083) & ~(j & 24083);
-  const o = ~(k & 57078) & (k | 57078);
-  const p = l ^ 32484;
-  const q = ~(m & 9487) & 9487 | ~(m & 9487) & m;
-  const r = (16 << ((n ^ o) >> 24 & 255)) + (8 << ((n ^ o) >> äáÂ & 255)) + (0 << ((n ^ o) >> 0 & 255)) + (24 << ((n ^ o) >> 8 & 255));
-  const s = ~(r & 55931) & (r | 55931);
-  const t = (8 << ((s ^ q) >> âã & 255)) + (AÄ << ((s ^ q) >> 24 & 255)) + (16 << ((s ^ q) >> 16 & 255)) + (24 << ((s ^ q) >> 8 & 255));
-  return t;
+function ÃÃå(AÂÀaä, Âáääå, ÀaááA, ÁaÀÂå) {
+  const ÄÄÅ = (AÂÀaä | 24083) & ~(AÂÀaä & 24083);
+  const åãã = ~(Âáääå & 57078) & (Âáääå | 57078);
+  const ÁáããÂ = ÀaááA ^ 32484;
+  const ÃAå = ~(ÁaÀÂå & 9487) & 9487 | ~(ÁaÀÂå & 9487) & ÁaÀÂå;
+  const aÅaÅa = (16 << ((ÄÄÅ ^ åãã) >> 24 & 255)) + (8 << ((ÄÄÅ ^ åãã) >> äáÂ & 255)) + (0 << ((ÄÄÅ ^ åãã) >> 0 & 255)) + (24 << ((ÄÄÅ ^ åãã) >> 8 & 255));
+  const ååá = ~(aÅaÅa & 55931) & (aÅaÅa | 55931);
+  const âÃãÅã = (8 << ((ååá ^ ÃAå) >> âã & 255)) + (AÄ << ((ååá ^ ÃAå) >> 24 & 255)) + (16 << ((ååá ^ ÃAå) >> 16 & 255)) + (24 << ((ååá ^ ÃAå) >> 8 & 255));
+  return âÃãÅã;
 }
 ;
-function ÂÂÄÄa(j) {
-  return Ãááåa(j, 15131, 61871, 58928, 29146, 6318);
+function ÂÂÄÄa(äÁå) {
+  return Ãááåa(äÁå, 15131, 61871, 58928, 29146, 6318);
 }
 ;
-function ÁAãÄá(j, k, l, m) {
-  const n = (j | 10145) & ~(j & 10145);
-  const o = ((k + 25747) * 214013 + 2531011) % 4294967296;
-  const p = (24 << (l >> 0 & 255)) + (0 << (l >> 8 & 255)) + (16 << (l >> 16 & ÃÁA)) + (8 << (l >> 24 & âáÄ));
-  const q = ~(m & 46869) & (m | 46869);
-  const r = äAa(n, o, p, q);
-  const s = äAa(n, o, p, q);
-  const t = ~(r & 51292) & 51292 | ~(r & 51292) & r;
-  return t;
+function ÁAãÄá(äÃÄÂä, âaåÃA, ãäã, ÄÁáÄÂ) {
+  const ÁÁaÄÀ = (äÃÄÂä | 10145) & ~(äÃÄÂä & 10145);
+  const áÄÃAa = ((âaåÃA + 25747) * 214013 + 2531011) % 4294967296;
+  const áäAAÃ = (24 << (ãäã >> 0 & 255)) + (0 << (ãäã >> 8 & 255)) + (16 << (ãäã >> 16 & ÃÁA)) + (8 << (ãäã >> 24 & âáÄ));
+  const ÃäÄÁä = ~(ÄÁáÄÂ & 46869) & (ÄÁáÄÂ | 46869);
+  const åÃAáå = äAa(ÁÁaÄÀ, áÄÃAa, áäAAÃ, ÃäÄÁä);
+  const Âåâåå = äAa(ÁÁaÄÀ, áÄÃAa, áäAAÃ, ÃäÄÁä);
+  const ÀÂáÄÃ = ~(åÃAáå & 51292) & 51292 | ~(åÃAáå & 51292) & åÃAáå;
+  return ÀÂáÄÃ;
 }
 ;
-function ÃáÅaa(j, k, l) {
-  const m = (16 << (j >> 0 & äãÁ)) + (8 << (j >> ããA & 255)) + (ãÁ << (j >> 16 & 255)) + (24 << (j >> 24 & 255));
-  const n = (16 << (k >> 16 & 255)) + (24 << (k >> 8 & 255)) + (0 << (k >> 0 & 255)) + (8 << (k >> 24 & 255));
-  const o = (l | 60350) & ~(l & 60350);
-  const p = áÄÂäá(m, n);
-  const q = áÄÂäá(o, m);
-  const r = ~(p & 2218) & (p | 2218);
-  return r;
+function ÃáÅaa(aâÀ, AÀÀ, åaáÃÅ) {
+  const Âaãâá = (16 << (aâÀ >> 0 & äãÁ)) + (8 << (aâÀ >> ããA & 255)) + (ãÁ << (aâÀ >> 16 & 255)) + (24 << (aâÀ >> 24 & 255));
+  const aÅãäÃ = (16 << (AÀÀ >> 16 & 255)) + (24 << (AÀÀ >> 8 & 255)) + (0 << (AÀÀ >> 0 & 255)) + (8 << (AÀÀ >> 24 & 255));
+  const ÀAâåÁ = (åaáÃÅ | 60350) & ~(åaáÃÅ & 60350);
+  const ÁâÂÀã = áÄÂäá(Âaãâá, aÅãäÃ);
+  const aáaäá = áÄÂäá(ÀAâåÁ, Âaãâá);
+  const AåÀää = ~(ÁâÂÀã & 2218) & (ÁâÂÀã | 2218);
+  return AåÀää;
 }
 ;
-function ÃÄÃâA(j, k) {
-  const l = j ^ 6637;
-  const m = ~(k & 59762) & k | ~(k & 59762) & 59762;
-  const n = Aåâãa(l, m, l, m);
-  const o = ÄÂâ(l, m, l, m, l);
-  const p = (12345 + ((n ^ o) + 65259) * 1103515245) % 2147483648;
-  return p;
+function ÃÄÃâA(ÂáÄaÃ, ÁAÄ) {
+  const ÅÀÁ = ÂáÄaÃ ^ 6637;
+  const âäÃ = ~(ÁAÄ & 59762) & ÁAÄ | ~(ÁAÄ & 59762) & 59762;
+  const ãÅÁãÂ = Aåâãa(ÅÀÁ, âäÃ, ÅÀÁ, âäÃ);
+  const ÄAäaa = ÄÂâ(ÅÀÁ, âäÃ, ÅÀÁ, âäÃ, ÅÀÁ);
+  const ááãÂA = (12345 + ((ãÅÁãÂ ^ ÄAäaa) + 65259) * 1103515245) % 2147483648;
+  return ááãÂA;
 }
 ;
-function áÄÂäá(j, k) {
-  const l = ~(j & 48476) & 48476 | ~(j & 48476) & j;
-  const m = ((k + 33018) * 22695477 + 1) % 4294967296;
-  const n = ÅäÃ(l, m, l, m, l);
-  const o = ÁÀã(m, l, m);
-  const p = ~(n & 10439) & 10439 | ~(n & 10439) & n;
-  return p;
+function áÄÂäá(ÅaÅâÃ, âÁAaå) {
+  const ÃÄå = ~(ÅaÅâÃ & 48476) & 48476 | ~(ÅaÅâÃ & 48476) & ÅaÅâÃ;
+  const ÀAá = ((âÁAaå + 33018) * 22695477 + 1) % 4294967296;
+  const áÅÂÂÁ = ÅäÃ(ÃÄå, ÀAá, ÃÄå, ÀAá, ÃÄå);
+  const aÁáÁÄ = ÁÀã(ÀAá, ÃÄå, ÀAá);
+  const AåÂÀÂ = ~(áÅÂÂÁ & 10439) & 10439 | ~(áÅÂÂÁ & 10439) & áÅÂÂÁ;
+  return AåÂÀÂ;
 }
 ;
-function ÁåÅÀÁ(j, k, l, m) {
-  const n = j ^ 44002;
-  const o = (808 + k) % 65290;
-  const p = (8 << (l >> 24 & 255)) + (24 << (l >> Àá & 255)) + (16 << (l >> âÂá & 255)) + (0 << (l >> 16 & 255));
-  const q = ~(m & 21965) & (m | 21965);
-  const r = aäå(n, o, p, q, n, o);
-  const s = aÁåâã(p, q);
-  const t = (12345 + (6618 + (r ^ s)) * 1103515245) % 2147483648;
-  return t;
+function ÁåÅÀÁ(âÂÂãa, AÀÀáÃ, aâÃ, ÃÅAaÀ) {
+  const ÂåáÃá = âÂÂãa ^ 44002;
+  const ÀáäãÀ = (808 + AÀÀáÃ) % 65290;
+  const äââÂÅ = (8 << (aâÃ >> 24 & 255)) + (24 << (aâÃ >> Àá & 255)) + (16 << (aâÃ >> âÂá & 255)) + (0 << (aâÃ >> 16 & 255));
+  const ãáÃaå = ~(ÃÅAaÀ & 21965) & (ÃÅAaÀ | 21965);
+  const ÅÀÀäá = aäå(ÂåáÃá, ÀáäãÀ, äââÂÅ, ãáÃaå, ÂåáÃá, ÀáäãÀ);
+  const åÁáAá = aÁåâã(äââÂÅ, ãáÃaå);
+  const áÃÀÁÂ = (12345 + (6618 + (ÅÀÀäá ^ åÁáAá)) * 1103515245) % 2147483648;
+  return áÃÀÁÂ;
 }
 ;
 const ÁÁÀãÀ = ÂaÂ;
-function aãAÀå(j, k, l, m, n) {
-  const o = ~(j & 64080) & 64080 | ~(j & 64080) & j;
-  const p = k ^ 44038;
-  const q = (16 << (l >> 8 & 255)) + (0 << (l >> 24 & 255)) + (8 << (l >> 16 & 255)) + (24 << (l >> 0 & 255));
-  const r = (0 << (m >> 16 & Äáä)) + (8 << (m >> áÃ & 255)) + (16 << (m >> 24 & Àãã)) + (24 << (m >> 8 & 255));
-  const s = n ^ 49480;
-  const t = ÂÅÅÅÄ(o, p, q, r, s, o);
-  const u = aäå(p, q, r, s, o, p);
-  const v = ~(t & 58058) & (t | 58058);
-  return v;
+function aãAÀå(ÃâÅ, âÃÄáå, ããå, ãaä, aaãÁA) {
+  const ãAããÄ = ~(ÃâÅ & 64080) & 64080 | ~(ÃâÅ & 64080) & ÃâÅ;
+  const ââáAÅ = âÃÄáå ^ 44038;
+  const Aäáää = (16 << (ããå >> 8 & 255)) + (0 << (ããå >> 24 & 255)) + (8 << (ããå >> 16 & 255)) + (24 << (ããå >> 0 & 255));
+  const ÃáÀáÁ = (0 << (ãaä >> 16 & Äáä)) + (8 << (ãaä >> áÃ & 255)) + (16 << (ãaä >> 24 & Àãã)) + (24 << (ãaä >> 8 & 255));
+  const AaáÄá = aaãÁA ^ 49480;
+  const áÅaåá = ÂÅÅÅÄ(ãAããÄ, ââáAÅ, Aäáää, ÃáÀáÁ, AaáÄá, ãAããÄ);
+  const ÅáÅÃÁ = aäå(ââáAÅ, Aäáää, ÃáÀáÁ, AaáÄá, ãAããÄ, ââáAÅ);
+  const áãaÀá = ~(áÅaåá & 58058) & (áÅaåá | 58058);
+  return áãaÀá;
 }
 ;
-function äÁÄ(j, k, l, m) {
-  const n = (24 << (j >> 0 & âáÄ)) + (0 << (j >> 16 & 255)) + (8 << (j >> 8 & ÃÁA)) + (ÂÃÅ << (j >> 24 & 255));
-  const o = (16 << (k >> ÃäÀ & 255)) + (24 << (k >> 24 & 255)) + (8 << (k >> âÂÂ & ãaÂ)) + (0 << (k >> ÁÀ & áâÅ));
-  const p = l ^ 54935;
-  const q = (ãÁ << (m >> 8 & 255)) + (16 << (m >> 16 & 255)) + (24 << (m >> 0 & 255)) + (8 << (m >> 24 & 255));
-  const r = ÅäÃ(n, o, p, q, n);
-  const s = ÄÂâ(o, p, q, n, o);
-  const t = ((30250 + (r ^ s)) * 1664525 + 1013904223) % 4294967296;
-  return t;
+function äÁÄ(Áåá, Àâa, ÀåáAá, äÁÅ) {
+  const ÁÅaäÁ = (24 << (Áåá >> 0 & âáÄ)) + (0 << (Áåá >> 16 & 255)) + (8 << (Áåá >> 8 & ÃÁA)) + (ÂÃÅ << (Áåá >> 24 & 255));
+  const ÅáÅÄÄ = (16 << (Àâa >> ÃäÀ & 255)) + (24 << (Àâa >> 24 & 255)) + (8 << (Àâa >> âÂÂ & ãaÂ)) + (0 << (Àâa >> ÁÀ & áâÅ));
+  const ÅaÁåa = ÀåáAá ^ 54935;
+  const áâáâä = (ãÁ << (äÁÅ >> 8 & 255)) + (16 << (äÁÅ >> 16 & 255)) + (24 << (äÁÅ >> 0 & 255)) + (8 << (äÁÅ >> 24 & 255));
+  const ããÁÁA = ÅäÃ(ÁÅaäÁ, ÅáÅÄÄ, ÅaÁåa, áâáâä, ÁÅaäÁ);
+  const ÁåÄaá = ÄÂâ(ÅáÅÄÄ, ÅaÁåa, áâáâä, ÁÅaäÁ, ÅáÅÄÄ);
+  const aäÄåâ = ((30250 + (ããÁÁA ^ ÁåÄaá)) * 1664525 + 1013904223) % 4294967296;
+  return aäÄåâ;
 }
 ;
-function Ãááåa(j, k, l, m, n, o) {
-  const p = (16 << (j >> 8 & 255)) + (ÁÅÀ << (j >> 24 & Äáä)) + (0 << (j >> 16 & 255)) + (24 << (j >> 0 & 255));
-  const q = ~(k & 48537) & k | ~(k & 48537) & 48537;
-  const r = (19864 + l) % 65508;
-  const s = (m | 52365) & ~(m & 52365);
-  const t = (0 << (n >> 24 & 255)) + (16 << (n >> 0 & 255)) + (24 << (n >> 8 & 255)) + (AáÁÁá << (n >> 16 & 255));
-  const u = ~(o & 18775) & (o | 18775);
-  const v = âÁâÃÃ(p, q);
-  const w = aåáÁå(r, s);
-  const x = ~(v & 742) & (v | 742);
-  return x;
+function Ãááåa(ÅÃÀ, aÅå, ááÁåã, ãÁåáa, ÃÅa, ÃÀÀÄÃ) {
+  const áÃåáå = (16 << (ÅÃÀ >> 8 & 255)) + (ÁÅÀ << (ÅÃÀ >> 24 & Äáä)) + (0 << (ÅÃÀ >> 16 & 255)) + (24 << (ÅÃÀ >> 0 & 255));
+  const Aaãáâ = ~(aÅå & 48537) & aÅå | ~(aÅå & 48537) & 48537;
+  const AÂAAÀ = (19864 + ááÁåã) % 65508;
+  const aÂÅäÂ = (ãÁåáa | 52365) & ~(ãÁåáa & 52365);
+  const áaááá = (0 << (ÃÅa >> 24 & 255)) + (16 << (ÃÅa >> 0 & 255)) + (24 << (ÃÅa >> 8 & 255)) + (AáÁÁá << (ÃÅa >> 16 & 255));
+  const AÂÂÂâ = ~(ÃÀÀÄÃ & 18775) & (ÃÀÀÄÃ | 18775);
+  const ÀÃäÁÁ = âÁâÃÃ(áÃåáå, Aaãáâ);
+  const ÂåÁáÂ = aåáÁå(AÂAAÀ, aÂÅäÂ);
+  const ÂÂÁäÁ = ~(ÀÃäÁÁ & 742) & (ÀÃäÁÁ | 742);
+  return ÂÂÁäÁ;
 }
 ;
 const ÀÄáÂå = ÅåÂ;
 const ÂäÃÅÃ = áÀÄ;
 const äâåáâ = ÁÀâÁâ;
 const ÂãÄ = Äáä;
-function ÅÁaãâ(j, k, l, m, n) {
-  áâÄÁá(ÅÂá, j, k, l, m, n);
-  const o = ÄáAáÄ(ÂÁ[0], ÂÁ[äA], ÂÁ[2], ÂÁ[3], ÂÁ[ÄAÄ]);
-  const p = Áãa(ÂÁ[åâ], ÂÁ[1], ÂÁ[ÄÂÅ]);
-  const q = ((171 + (o ^ p)) * 16807 + 0) % 2147483647;
-  return q;
+function ÅÁaãâ(ÁáÁÁÂ, ÀÃA, aãâáã, ÀÅÅãa, ÂÀaaá) {
+  áâÄÁá(ÅÂá, ÁáÁÁÂ, ÀÃA, aãâáã, ÀÅÅãa, ÂÀaaá);
+  const ÀáãÂÄ = ÄáAáÄ(ÂÁ[0], ÂÁ[äA], ÂÁ[2], ÂÁ[3], ÂÁ[ÄAÄ]);
+  const ÀâÅÁä = Áãa(ÂÁ[åâ], ÂÁ[1], ÂÁ[ÄÂÅ]);
+  const âAåÃa = ((171 + (ÀáãÂÄ ^ ÀâÅÁä)) * 16807 + 0) % 2147483647;
+  return âAåÃa;
 }
 ;
 var âÄá = function () {
-  var j;
-  function k() {
-    j = áÅ.ÄÁã(423, 276, "img/loading1.png");
+  var ÁÃÃ;
+  function ÁÀÄ() {
+    ÁÃÃ = áÅ.ÄÁã(423, 276, "img/loading1.png");
   }
   ;
-  var l;
-  var m = new ÁA.ÀÄÄ();
-  var n = new ÂÄA.äåå();
-  var o = 800;
-  var p = ãa;
-  function q(C) {
-    return Ää.ÁÃ.ãÀÃ(C, Ää.ÁÃ.ÃåÁaâ, 0.05);
+  var áåÅ;
+  var Àã = new ÁA.ÀÄÄ();
+  var aã = new ÂÄA.äåå();
+  var AÁÃ = 800;
+  var áÁâ = ãa;
+  function ÃÃa(ÃÀ) {
+    return Ää.ÁÃ.ãÀÃ(ÃÀ, Ää.ÁÃ.ÃåÁaâ, 0.05);
   }
-  var r = 800;
-  var s = 0;
-  function t(C) {
-    return Ää.ÁÃ.ãÀÃ(C, Ää.ÁÃ.ÀÅA, 0.05);
+  var áÃÃ = 800;
+  var âäã = 0;
+  function ÂáÀ(ÃÀ) {
+    return Ää.ÁÃ.ãÀÃ(ÃÀ, Ää.ÁÃ.ÀÅA, 0.05);
   }
-  var u = áÁ;
-  var v = Aa;
-  var w = undefined;
-  function x(C) {
-    l = C;
-    v = o;
-    u = o;
-    w = q;
-    p = åÀ;
+  var ÅÄa = áÁ;
+  var áÃÁ = Aa;
+  var äÁá = undefined;
+  function aâä(Äâã) {
+    áåÅ = Äâã;
+    áÃÁ = AÁÃ;
+    ÅÄa = AÁÃ;
+    äÁá = ÃÃa;
+    áÁâ = åÀ;
   }
   ;
-  function y() {
-    if (B() === 0) {
+  function Áá() {
+    if (ÀÅá() === 0) {
       return;
     }
     AÅ.clearRect(0, 0, aãA, äää);
-    j.Áá();
+    ÁÃÃ.Áá();
   }
   ;
-  function z() {
+  function ÃÂÅ() {
     áá.ãÃÄ(âÄá);
-    v = r;
-    u = r;
-    w = t;
-    s = 1;
-    A();
+    áÃÁ = áÃÃ;
+    ÅÄa = áÃÃ;
+    äÁá = ÂáÀ;
+    âäã = 1;
+    âÂ();
   }
   ;
-  function A() {
-    var C = 0;
-    var D = 0;
-    if (v > 0) {
-      D = äää;
-      var E = w(1 - v / u);
-      if (ãå === E) {
-        v = åâ;
+  function âÂ() {
+    var ÄäÃ = 0;
+    var äÃÄ = 0;
+    if (áÃÁ > 0) {
+      äÃÄ = äää;
+      var transition = äÁá(1 - áÃÁ / ÅÄa);
+      if (ãå === transition) {
+        áÃÁ = åâ;
       }
-      if (p === 1) {
-        E *= -1;
+      if (áÁâ === 1) {
+        transition *= -1;
       } else {
-        E = Àâ - Math.abs(E);
+        transition = Àâ - Math.abs(transition);
       }
-      C *= E;
-      D *= E;
+      ÄäÃ *= transition;
+      äÃÄ *= transition;
     }
-    j.áâ.x = åäÅ - Math.floor(ÄÀ * 211) + C;
-    j.áâ.y = Math.max(Àá, ÂáÅ - Math.floor(ÄÀ * 138)) + D;
+    ÁÃÃ.áâ.x = åäÅ - Math.floor(ÄÀ * 211) + ÄäÃ;
+    ÁÃÃ.áâ.y = Math.max(Àá, ÂáÅ - Math.floor(ÄÀ * 138)) + äÃÄ;
   }
   ;
-  function B() {
-    if (p === 1) {
-      A();
-      if (v < 0) {
-        p = 0;
-        l.ÃÂÅ();
+  function ÀÅá() {
+    if (áÁâ === 1) {
+      âÂ();
+      if (áÃÁ < 0) {
+        áÁâ = 0;
+        áåÅ.ÃÂÅ();
         return 0;
       }
-      v -= ÀÀ;
-    } else if (s === ÁÅ) {
-      A();
-      if (v < 0) {
-        s = 0;
-        const H = "https://token.devast.io/";
-        const I = "https://devast.io/";
-        âÄá.ãAA = function (L) {
+      áÃÁ -= ÀÀ;
+    } else if (âäã === ÁÅ) {
+      âÂ();
+      if (áÃÁ < 0) {
+        âäã = 0;
+        const ÃäÄÅâ = "https://token.devast.io/";
+        const ááÃÀÀ = "https://devast.io/";
+        âÄá.ãAA = function (ÅAä) {
           Äåâ = location.href;
-          L = L.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-          var M = "[\\?&]" + L + "=([^&#]*)";
-          var N = new RegExp(M);
-          var O = N.exec(Äåâ);
-          if (O === null) {
+          ÅAä = ÅAä.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+          var ÀAÃÄå = "[\\?&]" + ÅAä + "=([^&#]*)";
+          var ÅãÁÄÅ = new RegExp(ÀAÃÄå);
+          var ÃÁÃäÅ = ÅãÁÄÅ.exec(Äåâ);
+          if (ÃÁÃäÅ === null) {
             return null;
           } else {
-            return O[1];
+            return ÃÁÃäÅ[1];
           }
         };
-        function J() {
-          var L = áÂ.ÃÁÁ;
+        function Åaââa() {
+          var ÃÁÁ = áÂ.ÃÁÁ;
           äâ.regions = [];
           äâ.äAÂ = [];
           äâ.ãÀä = [];
-          var M = [];
-          var N = [];
-          var O = Aa;
-          var P = "<select id=\"servers\"><option value=\"auto\">Auto Select Server</option>";
-          for (var Q = 0; L.length > Q; Q++) {
-            var R = L[Q][4];
-            var S = L[Q][AÀÁ];
-            var T = L[Q][6];
-            O += S;
-            if (T == "ghoul") {
-              äâ.ãÀä.push(Q);
+          var regions = [];
+          var ÁáåÄA = [];
+          var âÅÃ = Aa;
+          var AÁä = "<select id=\"servers\"><option value=\"auto\">Auto Select Server</option>";
+          for (var ä = 0; ÃÁÁ.length > ä; ä++) {
+            var ÁÂa = ÃÁÁ[ä][4];
+            var ãâA = ÃÁÁ[ä][AÀÁ];
+            var ÂÀå = ÃÁÁ[ä][6];
+            âÅÃ += ãâA;
+            if (ÂÀå == "ghoul") {
+              äâ.ãÀä.push(ä);
               continue;
             }
-            if (T == "private") {
-              äâ.äAÂ.push(Q);
+            if (ÂÀå == "private") {
+              äâ.äAÂ.push(ä);
               continue;
             }
-            if (T == "br") {
-              if (äâ.regions[R] === undefined) {
-                äâ.regions[R] = [];
+            if (ÂÀå == "br") {
+              if (äâ.regions[ÁÂa] === undefined) {
+                äâ.regions[ÁÂa] = [];
               }
-              äâ.regions[R].push(Q);
+              äâ.regions[ÁÂa].push(ä);
               continue;
             }
-            for (var U = 0; M.length > U; U++) {
-              if (M[U] === R) {
-                N[U] += S;
-                U = -1;
+            for (var åã = 0; regions.length > åã; åã++) {
+              if (regions[åã] === ÁÂa) {
+                ÁáåÄA[åã] += ãâA;
+                åã = -1;
                 break;
               }
             }
-            if (U !== -âa) {
-              M.push(R);
-              N.push(S);
+            if (åã !== -âa) {
+              regions.push(ÁÂa);
+              ÁáåÄA.push(ãâA);
             }
           }
-          var V = ãâ;
-          var W = ÅÁ;
-          for (Q = ÅÁ; M.length > Q; Q++) {
-            R = M[Q];
-            P += "<option disabled>" + M[Q] + " - " + N[Q] + " players</option>";
-            V++;
-            var X = äA;
-            for (U = 0; L.length > U; U++) {
-              if (L[U][aää] === R && L[U][6] === "survival") {
-                P += "<option value=\"" + L[U][4] + L[U][âã] + "\">" + K(M[Q]) + " " + X++ + " - " + L[U][5] + " players</option>";
-                if (U === áÂ.áâÀ) {
-                  W = V;
+          var ÀÁÂ = ãâ;
+          var åÀÃaÅ = ÅÁ;
+          for (ä = ÅÁ; regions.length > ä; ä++) {
+            ÁÂa = regions[ä];
+            AÁä += "<option disabled>" + regions[ä] + " - " + ÁáåÄA[ä] + " players</option>";
+            ÀÁÂ++;
+            var ãã = äA;
+            for (åã = 0; ÃÁÁ.length > åã; åã++) {
+              if (ÃÁÁ[åã][aää] === ÁÂa && ÃÁÁ[åã][6] === "survival") {
+                AÁä += "<option value=\"" + ÃÁÁ[åã][4] + ÃÁÁ[åã][âã] + "\">" + ÅÃAáá(regions[ä]) + " " + ãã++ + " - " + ÃÁÁ[åã][5] + " players</option>";
+                if (åã === áÂ.áâÀ) {
+                  åÀÃaÅ = ÀÁÂ;
                 }
-                V++;
+                ÀÁÂ++;
               }
             }
           }
           äâ.áÀåAá = "<select id=\"servers\"><option value=\"auto\">Auto Select Server</option>";
-          for (var Q in äâ.regions) {
-            var V = ÁÀ;
-            for (var Y = 0; Y < äâ.regions[Q].length; Y++) {
-              V += L[äâ.regions[Q][Y]][ÃÀÁ];
+          for (var ä in äâ.regions) {
+            var ÀÁÂ = ÁÀ;
+            for (var åÃÄ = 0; åÃÄ < äâ.regions[ä].length; åÃÄ++) {
+              ÀÁÂ += ÃÁÁ[äâ.regions[ä][åÃÄ]][ÃÀÁ];
             }
           }
-          äâ.äAÂ = äâ.äAÂ.sort(function (af, ag) {
-            return Number(L[ag][ÃáÅ]) - Number(L[af][5]);
+          äâ.äAÂ = äâ.äAÂ.sort(function (Aäa, Ã) {
+            return Number(ÃÁÁ[Ã][ÃáÅ]) - Number(ÃÁÁ[Aäa][5]);
           });
           äâ.ÅáåäÂ = "<select id=\"servers\"><option value=\"auto\">Auto Select Server</option>";
-          for (var Q in äâ.äAÂ) {
-            const af = L[äâ.äAÂ[Q]];
-            const ag = af[8];
-            if (ag === "private") {
+          for (var ä in äâ.äAÂ) {
+            const áAä = ÃÁÁ[äâ.äAÂ[ä]];
+            const ÂÀÅ = áAä[8];
+            if (ÂÀÅ === "private") {
               continue;
             }
-            äâ.ÅáåäÂ += "<option value=\"" + af[4] + af[åâ] + "\">" + K(af[åÁá]) + " - " + ag + " - " + af[5] + " players</option>";
+            äâ.ÅáåäÂ += "<option value=\"" + áAä[4] + áAä[åâ] + "\">" + ÅÃAáá(áAä[åÁá]) + " - " + ÂÀÅ + " - " + áAä[5] + " players</option>";
           }
           äâ.ãÂÁaa = "<select id=\"servers\"><option value=\"auto\">Auto Select Server</option>";
-          for (var Q in äâ.ãÀä) {
-            äâ.ãÂÁaa += "<option value=\"" + L[äâ.ãÀä[Q]][4] + L[äâ.ãÀä[Q]][ÄÁ] + "\">" + L[äâ.ãÀä[Q]][4] + " - " + L[äâ.ãÀä[Q]][ÃÀã] + " players</option>";
+          for (var ä in äâ.ãÀä) {
+            äâ.ãÂÁaa += "<option value=\"" + ÃÁÁ[äâ.ãÀä[ä]][4] + ÃÁÁ[äâ.ãÀä[ä]][ÄÁ] + "\">" + ÃÁÁ[äâ.ãÀä[ä]][4] + " - " + ÃÁÁ[äâ.ãÀä[ä]][ÃÀã] + " players</option>";
           }
-          P += "<option disabled>All servers - " + O + " players</option></select>";
-          äâ.áÀåAá += "<option disabled>All servers - " + O + " players</option></select>";
-          äâ.ÅáåäÂ += "<option disabled>All servers - " + O + " players</option></select>";
-          äâ.ãÂÁaa += "<option disabled>All servers - " + O + " players</option></select>";
-          document.getElementById("serverList").innerHTML = P;
+          AÁä += "<option disabled>All servers - " + âÅÃ + " players</option></select>";
+          äâ.áÀåAá += "<option disabled>All servers - " + âÅÃ + " players</option></select>";
+          äâ.ÅáåäÂ += "<option disabled>All servers - " + âÅÃ + " players</option></select>";
+          äâ.ãÂÁaa += "<option disabled>All servers - " + âÅÃ + " players</option></select>";
+          document.getElementById("serverList").innerHTML = AÁä;
           document.getElementById("servers").selectedIndex = 0;
           Aá.â.aâå = ÂA;
           if (âÄá.ãAA("admin") !== null || âÄá.ãAA("member") !== null || âÄá.ãAA("moderator") !== null) {
@@ -11293,101 +11298,103 @@ var âÄá = function () {
               document.getElementById("chatInput").maxLength = 1000000;
             }
             document.getElementById("nickname").innerHTML += "<input id=\"passwordInput\" type=\"password\" placeholder=\"Password\" maxLength=\"16\">";
-            var Z = Âáá.getItem("password");
-            if (Z !== null) {
-              document.getElementById("passwordInput").value = Z;
+            var ÄAä = Âáá.getItem("password");
+            if (ÄAä !== null) {
+              document.getElementById("passwordInput").value = ÄAä;
             }
           }
-          var R = âÄá.ãAA("region");
-          var a0 = âÄá.ãAA("name");
-          if (a0) {
-            for (let an = ÀÄ; an < áÂ.ÃÁÁ.length; an++) {
-              const ap = áÂ.ÃÁÁ[an];
-              if ((!R || R === ap[ãåÁ]) && a0 === ap[0]) {
-                áÂ.áâÀ = ap;
+          var ÁÂa = âÄá.ãAA("region");
+          var name = âÄá.ãAA("name");
+          if (name) {
+            for (let ä = ÀÄ; ä < áÂ.ÃÁÁ.length; ä++) {
+              const áAä = áÂ.ÃÁÁ[ä];
+              if ((!ÁÂa || ÁÂa === áAä[ãåÁ]) && name === áAä[0]) {
+                áÂ.áâÀ = áAä;
               }
             }
           }
         }
         ;
-        function K(L) {
-          return L.charAt(AÄ).toUpperCase() + L.slice(aÅ);
+        function ÅÃAáá(åÀA) {
+          return åÀA.charAt(AÄ).toUpperCase() + åÀA.slice(aÅ);
         }
         ;
-        áÂ.AáÁAá(I + "list", function () {
-          J();
+        áÂ.AáÁAá(ááÃÀÀ + "list", function () {
+          Åaââa();
           âÄá.aâä(äâ);
         });
         áÂ.äÅáåá = function () {
-          áÂ.åÁáÀÃ(H + "syn", function () {
+          áÂ.åÁáÀÃ(ÃäÄÅâ + "syn", function () {
             áÂ.aáÂâä(document.getElementById("nicknameInput").value, ÄÁ);
           });
         };
-        var C = äâä[aÅÅ].ãÄÄ;
-        var D = ÂÅÂ[aÅÅ].ãÄÄ;
-        for (var E = AÄ; C.length > E; E++) {
-          C[E].À = áá.ÃA(C[E].src, C[E].À);
-          D[E].À = áá.ÃA(D[E].src, D[E].À);
+        var ÀÁá = äâä[aÅÅ].ãÄÄ;
+        var ÂååAA = ÂÅÂ[aÅÅ].ãÄÄ;
+        for (var ä = AÄ; ÀÁá.length > ä; ä++) {
+          ÀÁá[ä].À = áá.ÃA(ÀÁá[ä].src, ÀÁá[ä].À);
+          ÂååAA[ä].À = áá.ÃA(ÂååAA[ä].src, ÂååAA[ä].À);
         }
       }
-      v -= ÀÀ;
+      áÃÁ -= ÀÀ;
     }
     return 1;
   }
   ;
   return {
-    aâä: x,
-    ÁÀÄ: k,
-    ÃÂÅ: z,
-    âÂ: A,
-    Áá: y
+    //getChatActive: zxcnemo,
+    //22
+    aâä: aâä,
+    ÁÀÄ: ÁÀÄ,
+    ÃÂÅ: ÃÂÅ,
+    âÂ: âÂ,
+    Áá: Áá
   };
 }();
 var äâ = function () {
-  function j(aP) {}
+  function Àäå(Âá) {}
   ;
-  function k() {
-    m();
+  function âAâ() {
+    ÂÂÅ();
   }
   ;
-  function l(aP) {
-    var aQ;
+  function ÂâÁ(âÅããÄ) {
+    var ÀÂÅ;
     if (äâ.ÂÀå === Aá.ÄÅá) {
-      aQ = "survival";
+      ÀÂÅ = "survival";
     } else if (Aá.aÄÀ === äâ.ÂÀå) {
-      aQ = "ghoul";
+      ÀÂÅ = "ghoul";
     } else if (Aá.ÄáÃ === äâ.ÂÀå) {
-      aQ = "br";
+      ÀÂÅ = "br";
     } else if (Aá.ÃÁÂ === äâ.ÂÀå) {
-      aQ = "private";
+      ÀÂÅ = "private";
     } else {
       throw new Error("Unknown game mode", äâ.ÂÀå);
     }
-    var aR = document.getElementById("servers").value;
+    var AáÃAa = document.getElementById("servers").value;
     if (áÂ.ÄÀä || áÂ.state === áÂ.ÀÁÄ.ãAá) {
       return;
     }
     áÂ.ÄÀä = ÁÀâÁâ;
-    if (âÄá.ãAA("name")) ;else if (aR === "auto") {
-      for (let b0 = 0; b0 < áÂ.ÄãA.length; b0++) {
-        const b2 = [];
-        const b3 = áÂ.ÄãA[b0];
-        for (let b4 = Aa; áÂ.ÃÁÁ.length > b4; b4++) {
-          const b5 = áÂ.ÃÁÁ[b4];
-          if (b5[AaÂ] === aQ && b3 === b5[ÂÃå]) {
-            b2.push(b5);
+    if (âÄá.ãAA("name")) ;else if (AáÃAa === "auto") {
+      for (let åã = 0; åã < áÂ.ÄãA.length; åã++) {
+        const åââÄÅ = [];
+        const ÃáÅÂa = áÂ.ÄãA[åã];
+        for (let ä = Aa; áÂ.ÃÁÁ.length > ä; ä++) {
+          const áAä = áÂ.ÃÁÁ[ä];
+          if (áAä[AaÂ] === ÀÂÅ && ÃáÅÂa === áAä[ÂÃå]) {
+            åââÄÅ.push(áAä);
           }
         }
-        áÂ.áâÀ = b2[Math.floor(Math.random() * b2.length)];
+        áÂ.áâÀ = åââÄÅ[Math.floor(Math.random() * åââÄÅ.length)];
         if (áÂ.áâÀ !== undefined) {
           break;
         }
       }
     } else {
-      for (let b9 = 0; áÂ.ÃÁÁ.length > b9; b9++) {
-        const bb = áÂ.ÃÁÁ[b9];
-        if (aR === bb[4] + bb[0]) {
-          áÂ.áâÀ = bb;
+      for (let ä = 0; áÂ.ÃÁÁ.length > ä; ä++) {
+        const áAä = áÂ.ÃÁÁ[ä];
+        if (AáÃAa === áAä[4] + áAä[0]) {
+          áÂ.áâÀ = áAä;
           break;
         }
       }
@@ -11395,25 +11402,25 @@ var äâ = function () {
     áÂ.äÅáåá();
   }
   ;
-  function m() {
-    aH(ÀÅ);
+  function ÂÂÅ() {
+    aâä(ÀÅ);
   }
   ;
-  var n = ãa;
-  function o(aP, aQ, aR, aS, aT, aU) {
-    var aV = ÅÀ.get(0, n, n, aP);
-    äÂÃ(aV, äå, n, n, aP, aQ, aR, aQ, aR, (aT << åâa) + (aU << 10), aS, 1, 0);
-    n++;
+  var ÄÃA = ãa;
+  function áåÁ(AÀ, ã, áã, Äã, äÃÄäa, åáÂÂá) {
+    var Ãä = ÅÀ.get(0, ÄÃA, ÄÃA, AÀ);
+    äÂÃ(Ãä, äå, ÄÃA, ÄÃA, AÀ, ã, áã, ã, áã, (äÃÄäa << åâa) + (åáÂÂá << 10), Äã, 1, 0);
+    ÄÃA++;
   }
   ;
-  function p(aP, aQ, aR, aS, aT, aU) {
-    var aV = ÅÀ.get(0, n, n, aP);
-    äÂÃ(aV, áÃ, n, n, aP, aQ, aR, aQ, aR, (aS << AÀâ) + (aU << ÅÂå), Àá, aT, aU);
-    n++;
+  function ÀÀÂ(AÀ, ã, áã, Áä, Âá, Åâ) {
+    var Ãä = ÅÀ.get(0, ÄÃA, ÄÃA, AÀ);
+    äÂÃ(Ãä, áÃ, ÄÃA, ÄÃA, AÀ, ã, áã, ã, áã, (Áä << AÀâ) + (Åâ << ÅÂå), Àá, Âá, Åâ);
+    ÄÃA++;
   }
   ;
-  var q = 0;
-  var r = {
+  var áÄÃ = 0;
+  var ááÁÃá = {
     ãáÁÀA: [{
       ÅAä: "Yuukun",
       button: ["img/yuukun0out.png", "img/yuukun0in.png", "img/yuukun0click.png"],
@@ -11433,934 +11440,934 @@ var äâ = function () {
       Äåâ: "https://www.youtube.com/watch?v=Jpgx-d3qHzs"
     }]
   };
-  var s = r.ãáÁÀA;
-  var t = navigator.language || navigator.userLanguage;
-  if (-åÀ !== t.toLowerCase().indexOf("fr")) {
-    s = r.ÃäãÁÁ;
+  var áäåâÅ = ááÁÃá.ãáÁÀA;
+  var äáAÄá = navigator.language || navigator.userLanguage;
+  if (-åÀ !== äáAÄá.toLowerCase().indexOf("fr")) {
+    áäåâÅ = ááÁÃá.ÃäãÁÁ;
   }
-  var u = s[Math.floor(s.length * Math.random())];
-  var v = [áÅ.åáa(u.ÅAä, "'Viga', sans-serif", "#FFFFFF", 30, 150), áÅ.åáa(u.ÅAä, "'Viga', sans-serif", "#C5B03C", 30, 150), áÅ.åáa(u.ÅAä, "'Viga', sans-serif", "#9B800D", 30, 150)];
-  v[åâ].á = Áå;
-  v[aÅ].á = åÀ;
-  v[2].á = 1;
-  var w = áÅ.åá(v[0].ãâä, v[áÁ].ÅÀä, undefined, v);
-  var x = áÅ.åá(120, 67, u.button);
-  var y = {
+  var âåÅ = áäåâÅ[Math.floor(áäåâÅ.length * Math.random())];
+  var äAä = [áÅ.åáa(âåÅ.ÅAä, "'Viga', sans-serif", "#FFFFFF", 30, 150), áÅ.åáa(âåÅ.ÅAä, "'Viga', sans-serif", "#C5B03C", 30, 150), áÅ.åáa(âåÅ.ÅAä, "'Viga', sans-serif", "#9B800D", 30, 150)];
+  äAä[åâ].á = Áå;
+  äAä[aÅ].á = åÀ;
+  äAä[2].á = 1;
+  var ááÀ = áÅ.åá(äAä[0].ãâä, äAä[áÁ].ÅÀä, undefined, äAä);
+  var Åáá = áÅ.åá(120, 67, âåÅ.button);
+  var ÅâÂ = {
     À: null
   };
-  var z;
-  var A;
-  var B;
-  var C;
-  var D;
-  var E;
-  var F;
-  var G;
-  var H;
-  var I;
-  var J;
-  var K;
-  var L;
-  var M;
-  var N;
-  var O;
-  var P;
-  var Q;
-  var R;
-  var S;
-  var T;
-  var U;
-  var V;
-  var W;
-  var X;
-  var Y;
-  var Z;
-  var a0;
-  var a1;
-  var a2;
-  var a3;
-  var a4;
-  var a5;
-  var a6;
-  var a7;
-  var a8;
-  var a9;
-  var aa;
-  var ab;
-  var ac;
-  var ad;
-  var ae;
-  var af;
-  var ag;
-  var ah;
-  var ai;
-  var aj;
-  var ak;
-  var al;
-  var am;
-  var an;
-  function ao() {
-    äâ.ÂâÁ = l;
+  var åâA;
+  var ÀÅå;
+  var áÄa;
+  var Àâå;
+  var AÀÂ;
+  var áäá;
+  var åäâÃÂ;
+  var äÄã;
+  var âÅÂ;
+  var ÃÁÁ;
+  var ãÂÄ;
+  var ãÃÅ;
+  var AäÄ;
+  var áäåäå;
+  var Ãaá;
+  var ãåã;
+  var åâá;
+  var åÄäÁA;
+  var ÄâÁ;
+  var ÂÃÀ;
+  var ÅÅA;
+  var äÄÁ;
+  var ÂåÄ;
+  var áÅA;
+  var Àâä;
+  var ÀáÂ;
+  var ÅäÀ;
+  var ÀÀä;
+  var ÃÄâ;
+  var ãåÅ;
+  var åÃã;
+  var âãÀ;
+  var ÂÃâ;
+  var âaå;
+  var aäÅ;
+  var ÅáÃ;
+  var ÄÃa;
+  var äÄäÃa;
+  var ÁÂA;
+  var åãÀ;
+  var äAÂ;
+  var ÁÃÀ;
+  var ÃÃAÄá;
+  var ÂãÃ;
+  var áÁÅ;
+  var åÅÂAÅ;
+  var áÀÃâÅ;
+  var aaâÂa;
+  var ããáäá;
+  var AÃAåa;
+  var ÁÀäåã;
+  function ÁÀÄ() {
+    äâ.ÂâÁ = ÂâÁ;
     äâ.áÁÃ = aÅ;
     äâ.âÀá = Àá;
     try {
       äâ.ÂÄÁ = window.Widget.isBlocked;
-    } catch (aS) {}
+    } catch (âãå) {}
     äâ.ÂÀå = åâ;
     äâ.äáÃ = 1;
     äâ.åAa = 0;
     äâ.ÄÅÁ = 0;
-    document.getElementById("nicknameInput").value = Âáá.getItem("nickname", B);
+    document.getElementById("nicknameInput").value = Âáá.getItem("nickname", áÄa);
     Äå.ãaÁ(Äå.áÅä.title, 1000, áÁá.Âáä);
     ÅÀ.äaÃ();
     ÀÂ.reset(Äá);
-    n = 0;
-    o(ÂÁA, 200, 0, 127, áÀA.ÂÄÃ, AÂÂ);
-    o(åãá, 400, ââÄ, 127, áÀA.AáÂÂã, 2);
-    o(åÂá, 100, 100, 127, áÀA.äÂã, 0);
-    p(aÃÃ, 900, 500, áÃ, 33, Â.ÃÀâ);
-    p(ãåâ, 800, 400, ãâ, 1, Â.Åå);
-    o(åÂá, 1100, 300, ÄÄá, áÀA.äÂã, âÃ);
-    o(åÂá, 800, 200, 127, áÀA.äÂã, Äåã);
-    o(åÂá, 700, ÂÅÅ, 127, áÀA.äÂã, Äâa);
-    o(åÂá, 1200, ÀÄ, 127, áÀA.äÂã, 0);
-    o(åÂá, 1300, 100, 127, áÀA.äÂã, 4);
-    o(åÂá, 1300, 300, 127, áÀA.äÂã, ÄÂÅ);
-    o(åÂá, 800, 500, 127, áÀA.äÂã, 4);
-    o(åãá, 1000, 200, 127, áÀA.AáÂÂã, âã);
-    o(åÂá, 700, 600, 127, áÀA.äÂã, 0);
-    o(åÂá, 500, 400, 127, áÀA.äÂã, 2);
-    o(ÂÁA, 500, 700, 127, áÀA.ÂÄÃ, 3);
-    o(ÂÁA, 1000, 300, 127, áÀA.ÂÄÃ, 4);
-    o(åÂá, 1300, 500, 100, áÀA.äÂã, 2);
-    o(åÂá, 1200, 700, 127, áÀA.äÂã, ÅAa);
-    o(åÂá, 1300, 700, 127, áÀA.äÂã, äå);
-    o(ÂÁA, 800, 600, 127, áÀA.ÂÄÃ, 5);
-    o(åÂá, 500, 600, 127, áÀA.äÂã, 4);
-    o(ÂÁA, 200, 400, 127, áÀA.âåäÁá, 0);
-    o(ÂÁA, 400, 500, 50, áÀA.ÂÁaÁÂ, 3);
-    o(åÂá, äÃa, 400, 190, áÀA.äÂã, 2);
-    o(åÂá, 100, 500, 190, áÀA.äÂã, åÄa);
-    o(åÂá, Aåá, 600, 127, áÀA.äÂã, 4);
-    o(åÂá, 0, 500, 127, áÀA.äÂã, 1);
-    o(åÂá, 200, 300, 50, áÀA.äÂã, ÃaÂ);
-    o(åÂá, 400, 200, 10, áÀA.äÂã, ÄÀã);
-    o(åÂá, 500, 200, âáÁ, áÀA.äÂã, Áå);
-    o(åÂá, ÀãÅ, 800, ÂåÂ, áÀA.äÂã, 0);
-    o(åÂá, 400, 800, 10, áÀA.äÂã, Âã);
-    o(åÂá, 700, 800, ÃÃÅ, áÀA.äÂã, ÃÃÃ);
-    o(ÂÁA, 900, 700, 50, áÀA.ÂÁaÁÂ, 4);
+    ÄÃA = 0;
+    áåÁ(ÂÁA, 200, 0, 127, áÀA.ÂÄÃ, AÂÂ);
+    áåÁ(åãá, 400, ââÄ, 127, áÀA.AáÂÂã, 2);
+    áåÁ(åÂá, 100, 100, 127, áÀA.äÂã, 0);
+    ÀÀÂ(aÃÃ, 900, 500, áÃ, 33, Â.ÃÀâ);
+    ÀÀÂ(ãåâ, 800, 400, ãâ, 1, Â.Åå);
+    áåÁ(åÂá, 1100, 300, ÄÄá, áÀA.äÂã, âÃ);
+    áåÁ(åÂá, 800, 200, 127, áÀA.äÂã, Äåã);
+    áåÁ(åÂá, 700, ÂÅÅ, 127, áÀA.äÂã, Äâa);
+    áåÁ(åÂá, 1200, ÀÄ, 127, áÀA.äÂã, 0);
+    áåÁ(åÂá, 1300, 100, 127, áÀA.äÂã, 4);
+    áåÁ(åÂá, 1300, 300, 127, áÀA.äÂã, ÄÂÅ);
+    áåÁ(åÂá, 800, 500, 127, áÀA.äÂã, 4);
+    áåÁ(åãá, 1000, 200, 127, áÀA.AáÂÂã, âã);
+    áåÁ(åÂá, 700, 600, 127, áÀA.äÂã, 0);
+    áåÁ(åÂá, 500, 400, 127, áÀA.äÂã, 2);
+    áåÁ(ÂÁA, 500, 700, 127, áÀA.ÂÄÃ, 3);
+    áåÁ(ÂÁA, 1000, 300, 127, áÀA.ÂÄÃ, 4);
+    áåÁ(åÂá, 1300, 500, 100, áÀA.äÂã, 2);
+    áåÁ(åÂá, 1200, 700, 127, áÀA.äÂã, ÅAa);
+    áåÁ(åÂá, 1300, 700, 127, áÀA.äÂã, äå);
+    áåÁ(ÂÁA, 800, 600, 127, áÀA.ÂÄÃ, 5);
+    áåÁ(åÂá, 500, 600, 127, áÀA.äÂã, 4);
+    áåÁ(ÂÁA, 200, 400, 127, áÀA.âåäÁá, 0);
+    áåÁ(ÂÁA, 400, 500, 50, áÀA.ÂÁaÁÂ, 3);
+    áåÁ(åÂá, äÃa, 400, 190, áÀA.äÂã, 2);
+    áåÁ(åÂá, 100, 500, 190, áÀA.äÂã, åÄa);
+    áåÁ(åÂá, Aåá, 600, 127, áÀA.äÂã, 4);
+    áåÁ(åÂá, 0, 500, 127, áÀA.äÂã, 1);
+    áåÁ(åÂá, 200, 300, 50, áÀA.äÂã, ÃaÂ);
+    áåÁ(åÂá, 400, 200, 10, áÀA.äÂã, ÄÀã);
+    áåÁ(åÂá, 500, 200, âáÁ, áÀA.äÂã, Áå);
+    áåÁ(åÂá, ÀãÅ, 800, ÂåÂ, áÀA.äÂã, 0);
+    áåÁ(åÂá, 400, 800, 10, áÀA.äÂã, Âã);
+    áåÁ(åÂá, 700, 800, ÃÃÅ, áÀA.äÂã, ÃÃÃ);
+    áåÁ(ÂÁA, 900, 700, 50, áÀA.ÂÁaÁÂ, 4);
     if (äã === âÃ) {
-      z = áÅ.ÄÁã(650, 312, "img/logo-homepage-mobile2.png");
+      åâA = áÅ.ÄÁã(650, 312, "img/logo-homepage-mobile2.png");
     } else {
-      z = áÅ.ÄÁã(650, 312, "img/logo-homepage4.png");
+      åâA = áÅ.ÄÁã(650, 312, "img/logo-homepage4.png");
     }
     if (äã === âá) {
-      A = áÅ.åá(0, ãÁ);
+      ÀÅå = áÅ.åá(0, ãÁ);
     } else {
-      A = áÅ.åá(94, 40, ["img/more-io-games-out.png", "img/more-io-games-in.png", "img/more-io-games-click.png"]);
+      ÀÅå = áÅ.åá(94, 40, ["img/more-io-games-out.png", "img/more-io-games-in.png", "img/more-io-games-click.png"]);
     }
-    B = document.getElementById("nickname");
-    C = B.style;
-    D = {
+    áÄa = document.getElementById("nickname");
+    Àâå = áÄa.style;
+    AÀÂ = {
       x: 0,
       y: 0
     };
-    B.addEventListener("keyup", function (aX) {
-      if ((at | aw) === 1) {
+    áÄa.addEventListener("keyup", function (Åá) {
+      if ((áÁâ | âäã) === 1) {
         return;
       }
-      if (äÂÀ === aX.keyCode) {
-        l();
+      if (äÂÀ === Åá.keyCode) {
+        ÂâÁ();
       }
     }, ÁáÀ);
-    E = áÅ.åá(136, 57, ["img/play-button-out.png", "img/play-button-in.png", "img/play-button-click.png"]);
-    F = document.getElementById("terms");
-    G = F.style;
-    H = {
+    áäá = áÅ.åá(136, 57, ["img/play-button-out.png", "img/play-button-in.png", "img/play-button-click.png"]);
+    åäâÃÂ = document.getElementById("terms");
+    äÄã = åäâÃÂ.style;
+    âÅÂ = {
       y: 0,
       x: 0
     };
-    I = document.getElementById("serverList");
-    J = I.style;
-    K = {
+    ÃÁÁ = document.getElementById("serverList");
+    ãÂÄ = ÃÁÁ.style;
+    ãÃÅ = {
       x: 0,
       y: AÂ
     };
-    I.addEventListener("mouseover", function (aX) {
-      if ((at | aw) === 1) {
+    ÃÁÁ.addEventListener("mouseover", function (Åá) {
+      if ((áÁâ | âäã) === 1) {
         return;
       }
     }, false);
-    I.addEventListener("mousedown", function (aX) {
-      if ((at | aw) === 1) {
+    ÃÁÁ.addEventListener("mousedown", function (Åá) {
+      if ((áÁâ | âäã) === 1) {
         return;
       }
     }, false);
-    I.addEventListener("mouseup", function (aX) {
-      if ((at | aw) === 1) {
+    ÃÁÁ.addEventListener("mouseup", function (Åá) {
+      if ((áÁâ | âäã) === 1) {
         return;
       }
     }, false);
     if (äã === 1) {
-      L = áÅ.ÄÁã(ÄÁ, ãÁ);
+      AäÄ = áÅ.ÄÁã(ÄÁ, ãÁ);
     } else {
-      L = áÅ.ÄÁã(230, 235, "img/changelogBox.png");
+      AäÄ = áÅ.ÄÁã(230, 235, "img/changelogBox.png");
     }
-    M = document.getElementById("changelog");
-    N = M.style;
-    O = {
+    áäåäå = document.getElementById("changelog");
+    Ãaá = áäåäå.style;
+    ãåã = {
       x: 0,
       y: 0
     };
     if (äã === 1) {
-      P = áÅ.ÄÁã(ãÂ, 0);
+      åâá = áÅ.ÄÁã(ãÂ, 0);
     } else {
-      P = áÅ.ÄÁã(230, 355, "img/commandsBox.png");
+      åâá = áÅ.ÄÁã(230, 355, "img/commandsBox.png");
     }
-    Q = document.getElementById("howtoplay");
-    R = Q.style;
-    S = {
+    åÄäÁA = document.getElementById("howtoplay");
+    ÄâÁ = åÄäÁA.style;
+    ÂÃÀ = {
       x: ãa,
       y: 0
     };
     if (äã === ãå) {
-      T = áÅ.ÄÁã(äå, Aa);
+      ÅÅA = áÅ.ÄÁã(äå, Aa);
     } else {
-      T = áÅ.ÄÁã(123, 55, "img/gameMade.png");
+      ÅÅA = áÅ.ÄÁã(123, 55, "img/gameMade.png");
     }
     if (åÀ === äã) {
-      U = áÅ.åá(äå, 0);
+      äÄÁ = áÅ.åá(äå, 0);
     } else {
-      U = áÅ.åá(40, 38, ["img/twitter-button-out.png", "img/twitter-button-in.png", "img/twitter-button-click.png"]);
+      äÄÁ = áÅ.åá(40, 38, ["img/twitter-button-out.png", "img/twitter-button-in.png", "img/twitter-button-click.png"]);
     }
     if (ÀA === äã) {
-      V = áÅ.åá(ãÁ, ãÂ);
+      ÂåÄ = áÅ.åá(ãÁ, ãÂ);
     } else {
-      V = áÅ.åá(40, 38, ["img/facebook-button-out.png", "img/facebook-button-in.png", "img/facebook-button-click.png"]);
+      ÂåÄ = áÅ.åá(40, 38, ["img/facebook-button-out.png", "img/facebook-button-in.png", "img/facebook-button-click.png"]);
     }
     if (âÃ === äã) {
-      W = áÅ.åá(Aa, ÄÁ);
+      áÅA = áÅ.åá(Aa, ÄÁ);
     } else {
-      W = áÅ.åá(40, 38, ["img/youtube-button-out.png", "img/youtube-button-in.png", "img/youtube-button-click.png"]);
+      áÅA = áÅ.åá(40, 38, ["img/youtube-button-out.png", "img/youtube-button-in.png", "img/youtube-button-click.png"]);
     }
     if (Äá === äã) {
-      X = áÅ.åá(åâ, äå);
+      Àâä = áÅ.åá(åâ, äå);
     } else {
-      X = áÅ.åá(40, 38, ["img/tiktok-button-out.png", "img/tiktok-button-in.png", "img/tiktok-button-click.png"]);
+      Àâä = áÅ.åá(40, 38, ["img/tiktok-button-out.png", "img/tiktok-button-in.png", "img/tiktok-button-click.png"]);
     }
     if (ãå === äã) {
-      Y = áÅ.åá(0, 0);
+      ÀáÂ = áÅ.åá(0, 0);
     } else {
-      Y = áÅ.åá(54, 54, ["img/home-reddit-button-out.png", "img/home-reddit-button-in.png", "img/home-reddit-button-click.png"]);
+      ÀáÂ = áÅ.åá(54, 54, ["img/home-reddit-button-out.png", "img/home-reddit-button-in.png", "img/home-reddit-button-click.png"]);
     }
     if (äã === 1) {
-      Z = áÅ.åá(ãä, ãä);
+      ÅäÀ = áÅ.åá(ãä, ãä);
     } else {
-      Z = áÅ.åá(54, 54, ["img/home-discord-button-out.png", "img/home-discord-button-in.png", "img/home-discord-button-click.png"]);
+      ÅäÀ = áÅ.åá(54, 54, ["img/home-discord-button-out.png", "img/home-discord-button-in.png", "img/home-discord-button-click.png"]);
     }
-    a0 = áÅ.åá(93, 51, ["img/survivalmode-button-out.png", "img/survivalmode-button-in.png", "img/survivalmode-button-click.png"]);
-    a1 = áÅ.åá(93, 51, ["img/battle-royale-button-out.png", "img/battle-royale-button-in.png", "img/battle-royale-button-click.png"]);
-    a2 = áÅ.åá(93, 51, ["img/ghoul-mode-button-out.png", "img/ghoul-mode-button-in.png", "img/ghoul-mode-button-click.png"]);
-    a3 = áÅ.åá(68, 34, ["img/private-server-button-out.png", "img/private-server-button-in.png", "img/private-server-button-click.png"]);
-    a4 = áÅ.åá(68, 34, ["img/public-server-button-out.png", "img/public-server-button-in.png", "img/public-server-button-click.png"]);
+    ÀÀä = áÅ.åá(93, 51, ["img/survivalmode-button-out.png", "img/survivalmode-button-in.png", "img/survivalmode-button-click.png"]);
+    ÃÄâ = áÅ.åá(93, 51, ["img/battle-royale-button-out.png", "img/battle-royale-button-in.png", "img/battle-royale-button-click.png"]);
+    ãåÅ = áÅ.åá(93, 51, ["img/ghoul-mode-button-out.png", "img/ghoul-mode-button-in.png", "img/ghoul-mode-button-click.png"]);
+    åÃã = áÅ.åá(68, 34, ["img/private-server-button-out.png", "img/private-server-button-in.png", "img/private-server-button-click.png"]);
+    âãÀ = áÅ.åá(68, 34, ["img/public-server-button-out.png", "img/public-server-button-in.png", "img/public-server-button-click.png"]);
     if (Áå === äã) {
-      a5 = áÅ.ÄÁã(ãÁ, 0);
+      ÂÃâ = áÅ.ÄÁã(ãÁ, 0);
     } else {
-      a5 = áÅ.ÄÁã(171, 432, "img/featured.png");
+      ÂÃâ = áÅ.ÄÁã(171, 432, "img/featured.png");
     }
     if (Àâ === äã) {
-      a6 = áÅ.åá(0, Àá);
+      âaå = áÅ.åá(0, Àá);
     } else {
-      a6 = áÅ.åá(60, 60, ["img/home-limaxio-out.png", "img/home-limaxio-in.png", "img/home-limaxio-click.png"]);
+      âaå = áÅ.åá(60, 60, ["img/home-limaxio-out.png", "img/home-limaxio-in.png", "img/home-limaxio-click.png"]);
     }
     if (äã === ãâ) {
-      a7 = áÅ.åá(âã, 0);
+      aäÅ = áÅ.åá(âã, 0);
     } else {
-      a7 = áÅ.åá(60, 60, ["img/home-oibio-out.png", "img/home-oibio-in.png", "img/home-oibio-click.png"]);
+      aäÅ = áÅ.åá(60, 60, ["img/home-oibio-out.png", "img/home-oibio-in.png", "img/home-oibio-click.png"]);
     }
     if (äã === 1) {
-      a8 = áÅ.åá(ÀÄ, 0);
+      ÅáÃ = áÅ.åá(ÀÄ, 0);
     } else {
-      a8 = áÅ.åá(60, 60, ["img/home-starveio-out.png", "img/home-starveio-in.png", "img/home-starveio-click.png"]);
+      ÅáÃ = áÅ.åá(60, 60, ["img/home-starveio-out.png", "img/home-starveio-in.png", "img/home-starveio-click.png"]);
     }
     if (âá === äã) {
-      a9 = áÅ.åá(0, 0);
+      ÄÃa = áÅ.åá(0, 0);
     } else {
-      a9 = áÅ.åá(60, 60, ["img/home-nendio-out.png", "img/home-nendio-in.png", "img/home-nendio-click.png"]);
+      ÄÃa = áÅ.åá(60, 60, ["img/home-nendio-out.png", "img/home-nendio-in.png", "img/home-nendio-click.png"]);
     }
-    aa = document.getElementById("featuredVideo");
-    ab = aa.style;
-    ac = {
+    äÄäÃa = document.getElementById("featuredVideo");
+    ÁÂA = äÄäÃa.style;
+    åãÀ = {
       y: 0,
       x: AÄ
     };
     if (äã === 1) {
-      ad = áÅ.åá(áÃ, ÄÁ);
+      äAÂ = áÅ.åá(áÃ, ÄÁ);
     } else {
-      ad = áÅ.åá(86, 48, ["img/privateserver-button-out.png", "img/privateserver-button-in.png", "img/privateserver-button-click.png"]);
+      äAÂ = áÅ.åá(86, 48, ["img/privateserver-button-out.png", "img/privateserver-button-in.png", "img/privateserver-button-click.png"]);
     }
     if (ÁÅ === äã) {
-      ae = áÅ.åá(âã, ÅÁ);
+      ÁÃÀ = áÅ.åá(âã, ÅÁ);
     } else {
-      ae = áÅ.åá(52, 42, ["img/map-editor-button-out.png", "img/map-editor-button-in.png", "img/map-editor-button-click.png"]);
+      ÁÃÀ = áÅ.åá(52, 42, ["img/map-editor-button-out.png", "img/map-editor-button-in.png", "img/map-editor-button-click.png"]);
     }
-    af = document.getElementById("bebebaba");
-    ag = af.style;
-    ah = {
+    ÃÃAÄá = document.getElementById("bebebaba");
+    ÂãÃ = ÃÃAÄá.style;
+    áÁÅ = {
       x: 0,
       y: 0
     };
-    ai = document.getElementById("preroll");
-    aj = ai.style;
-    ak = {
+    åÅÂAÅ = document.getElementById("preroll");
+    áÀÃâÅ = åÅÂAÅ.style;
+    aaâÂa = {
       y: ãä,
       x: 0
     };
-    al = document.getElementById("footer");
-    am = al.style;
-    an = {
+    ããáäá = document.getElementById("footer");
+    AÃAåa = ããáäá.style;
+    ÁÀäåã = {
       x: 0,
       y: ãä
     };
   }
   ;
-  var ap;
-  var aq = new ÁA.ÀÄÄ();
-  var ar = new ÂÄA.äåå();
-  var as = 800;
-  var at = ÄÁ;
-  function au(aQ) {
-    return Ää.ÁÃ.ãÀÃ(aQ, Ää.ÁÃ.ÃåÁaâ, 0.05);
+  var áåÅ;
+  var Àã = new ÁA.ÀÄÄ();
+  var aã = new ÂÄA.äåå();
+  var AÁÃ = 800;
+  var áÁâ = ÄÁ;
+  function ÃÃa(ÃÀ) {
+    return Ää.ÁÃ.ãÀÃ(ÃÀ, Ää.ÁÃ.ÃåÁaâ, 0.05);
   }
-  var av = 2000;
-  var aw = 0;
-  function ax(aQ) {
-    return Ää.ÁÃ.ãÀÃ(aQ, Ää.ÁÃ.ÀÅA, 0.05);
+  var áÃÃ = 2000;
+  var âäã = 0;
+  function ÂáÀ(ÃÀ) {
+    return Ää.ÁÃ.ãÀÃ(ÃÀ, Ää.ÁÃ.ÀÅA, 0.05);
   }
-  var ay = 0;
-  var az = ãÁ;
-  var aA = âÂa;
-  function aB(aQ) {
-    if (aQ.touches.length > 0) {
-      ÁA.Âãå(aq, aQ, aQ.touches[AÄ]);
-      aD(aq);
+  var ÅÄa = 0;
+  var áÃÁ = ãÁ;
+  var äÁá = âÂa;
+  function áãÃ(Åá) {
+    if (Åá.touches.length > 0) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[AÄ]);
+      aÂÀ(Àã);
     }
   }
   ;
-  function aC() {
+  function Äåä() {
     if (äã === ãÁ) {
-      window.removeEventListener("mousedown", aK, ãäÀ);
+      window.removeEventListener("mousedown", aAá, ãäÀ);
     }
     if (äã === AÂ) {
-      window.removeEventListener("mouseup", aE, false);
+      window.removeEventListener("mouseup", ÃåA, false);
     }
     if (AÄ === äã) {
-      window.removeEventListener("mousemove", aD, ÁáÀ);
+      window.removeEventListener("mousemove", aÂÀ, ÁáÀ);
     }
     if (äã === 1) {
-      window.removeEventListener("touchstart", aG, aÃÂ);
+      window.removeEventListener("touchstart", AÀÅ, aÃÂ);
     }
     if (Äá === äã) {
-      window.removeEventListener("touchend", aF, ãäÀ);
+      window.removeEventListener("touchend", äÄä, ãäÀ);
     }
     if (äã === 1) {
-      window.removeEventListener("touchcancel", aO, åâÁ);
+      window.removeEventListener("touchcancel", AAÅ, åâÁ);
     }
     if (äã === Äá) {
-      window.removeEventListener("touchmove", aB, false);
+      window.removeEventListener("touchmove", áãÃ, false);
     }
   }
   ;
-  function aD(aQ) {
-    ÁA.ÄAá(aQ, ÁA.âââ);
-    var aR = 0;
-    if (A.Åa() === 1) {
-      aR = Áå;
+  function aÂÀ(Åá) {
+    ÁA.ÄAá(Åá, ÁA.âââ);
+    var åÄ = 0;
+    if (ÀÅå.Åa() === 1) {
+      åÄ = Áå;
     }
-    if (E.Åa() === 1) {
-      aR = ÁÅ;
+    if (áäá.Åa() === 1) {
+      åÄ = ÁÅ;
     }
-    if (U.Åa() === Äá) {
-      aR = 1;
+    if (äÄÁ.Åa() === Äá) {
+      åÄ = 1;
     }
-    if (âa === V.Åa()) {
-      aR = 1;
+    if (âa === ÂåÄ.Åa()) {
+      åÄ = 1;
     }
-    if (W.Åa() === 1) {
-      aR = âá;
+    if (áÅA.Åa() === 1) {
+      åÄ = âá;
     }
-    if (X.Åa() === 1) {
-      aR = 1;
+    if (Àâä.Åa() === 1) {
+      åÄ = 1;
     }
-    if (Y.Åa() === 1) {
-      aR = äA;
+    if (ÀáÂ.Åa() === 1) {
+      åÄ = äA;
     }
-    if (Z.Åa() === 1) {
-      aR = ãâ;
+    if (ÅäÀ.Åa() === 1) {
+      åÄ = ãâ;
     }
-    if (a0.Åa() === 1) {
-      aR = 1;
+    if (ÀÀä.Åa() === 1) {
+      åÄ = 1;
     }
-    if (Áå === a1.Åa()) {
-      aR = 1;
+    if (Áå === ÃÄâ.Åa()) {
+      åÄ = 1;
     }
-    if (a2.Åa() === 1) {
-      aR = 1;
+    if (ãåÅ.Åa() === 1) {
+      åÄ = 1;
     }
-    if (âá === a3.Åa()) {
-      aR = 1;
+    if (âá === åÃã.Åa()) {
+      åÄ = 1;
     }
-    if (a4.Åa() === ÁÅ) {
-      aR = 1;
+    if (âãÀ.Åa() === ÁÅ) {
+      åÄ = 1;
     }
-    if (a6.Åa() === ÁÅ) {
-      aR = ÄÂ;
+    if (âaå.Åa() === ÁÅ) {
+      åÄ = ÄÂ;
     }
-    if (a7.Åa() === 1) {
-      aR = Äá;
+    if (aäÅ.Åa() === 1) {
+      åÄ = Äá;
     }
-    if (a8.Åa() === 1) {
-      aR = 1;
+    if (ÅáÃ.Åa() === 1) {
+      åÄ = 1;
     }
-    if (a9.Åa() === âa) {
-      aR = åÀ;
+    if (ÄÃa.Åa() === âa) {
+      åÄ = åÀ;
     }
-    if (ad.Åa() === ÀA) {
-      aR = ãå;
+    if (äAÂ.Åa() === ÀA) {
+      åÄ = ãå;
     }
-    if (ae.Åa() === 1) {
-      aR = 1;
+    if (ÁÃÀ.Åa() === 1) {
+      åÄ = 1;
     }
-    x.Åa();
-    w.Åa();
+    Åáá.Åa();
+    ááÀ.Åa();
   }
   ;
-  function aE(aQ) {
-    ÁA.ÄAá(aQ, ÁA.ÅÁá);
-    var aR = 0;
-    if (A.Åa() === 1) {
-      aR = 1;
-      var aS = window.open("https://webgames.io", "_blank");
+  function ÃåA(Åá) {
+    ÁA.ÄAá(Åá, ÁA.ÅÁá);
+    var åÄ = 0;
+    if (ÀÅå.Åa() === 1) {
+      åÄ = 1;
+      var ÁáÃ = window.open("https://webgames.io", "_blank");
     }
-    if (E.Åa() === åä) {
-      aR = ÀA;
-      l();
+    if (áäá.Åa() === åä) {
+      åÄ = ÀA;
+      ÂâÁ();
       Äå.âå(Äå.AA.play, äA, ãÂ);
     }
-    if (U.Åa() === 1) {
-      aR = åÀ;
-      var aS = window.open("https://twitter.com/LapaMauve", "_blank");
+    if (äÄÁ.Åa() === 1) {
+      åÄ = åÀ;
+      var ÁáÃ = window.open("https://twitter.com/LapaMauve", "_blank");
     }
-    if (ÀA === V.Åa()) {
-      aR = 1;
-      var aS = window.open("https://www.facebook.com/LapaMauve/", "_blank");
+    if (ÀA === ÂåÄ.Åa()) {
+      åÄ = 1;
+      var ÁáÃ = window.open("https://www.facebook.com/LapaMauve/", "_blank");
     }
-    if (W.Åa() === 1) {
-      aR = 1;
-      var aS = window.open("https://www.youtube.com/channel/UCirbDxZKLP2e7UJqeUBXmFQ", "_blank");
+    if (áÅA.Åa() === 1) {
+      åÄ = 1;
+      var ÁáÃ = window.open("https://www.youtube.com/channel/UCirbDxZKLP2e7UJqeUBXmFQ", "_blank");
     }
-    if (X.Åa() === 1) {
-      aR = 1;
-      var aS = window.open("https://tiktok.com/@lapamauve", "_blank");
+    if (Àâä.Åa() === 1) {
+      åÄ = 1;
+      var ÁáÃ = window.open("https://tiktok.com/@lapamauve", "_blank");
     }
-    if (ÁÅ === Y.Åa()) {
-      aR = Áå;
-      var aS = window.open("https://www.reddit.com/r/devastio/", "_blank");
+    if (ÁÅ === ÀáÂ.Åa()) {
+      åÄ = Áå;
+      var ÁáÃ = window.open("https://www.reddit.com/r/devastio/", "_blank");
     }
-    if (Z.Åa() === 1) {
-      aR = 1;
-      var aS = window.open("https://discord.com/invite/njg9j9sYBC", "_blank");
+    if (ÅäÀ.Åa() === 1) {
+      åÄ = 1;
+      var ÁáÃ = window.open("https://discord.com/invite/njg9j9sYBC", "_blank");
     }
-    if (âa === a0.Åa()) {
-      aR = 1;
+    if (âa === ÀÀä.Åa()) {
+      åÄ = 1;
       if (åâ !== äâ.ÂÀå) {
         if ((áÂ.state & ÀÁÄ.Ãåã) === 0 && ÁÀ === (áÂ.state & ÀÁÄ.ãAá)) {
           äâ.ÂÀå = 0;
           Äå.âå(Äå.AA.button, 1, 0);
-          a4.show();
-          a3.show();
+          âãÀ.show();
+          åÃã.show();
           document.getElementById("serverList").innerHTML = äâ.Ãaä;
           document.getElementById("servers").selectedIndex = äâ.äÃã;
-          aL();
+          âÂ();
         }
       }
     }
-    if (a1.Åa() === ãå) {
-      aR = Äá;
+    if (ÃÄâ.Åa() === ãå) {
+      åÄ = Äá;
       if (ãa && ÀA !== äâ.ÂÀå && äâ.äáÃ === 1) {
         if ((áÂ.state & ÀÁÄ.Ãåã) === ÄÁ && (áÂ.state & ÀÁÄ.ãAá) === ãä) {
           äâ.Áåa = 0;
           äâ.ÂÀå = Aá.ÄáÃ;
           Äå.âå(Äå.AA.button, 1, 0);
-          a4.aÄÅ();
-          a3.aÄÅ();
+          âãÀ.aÄÅ();
+          åÃã.aÄÅ();
           äâ.Ãaä = document.getElementById("serverList").innerHTML;
           äâ.äÃã = document.getElementById("servers").selectedIndex;
           document.getElementById("serverList").innerHTML = äâ.áÀåAá;
-          var aT = ÅÁ;
-          var aU = 0;
-          for (var aV in äâ.regions) {
-            if (aV === áÂ.ÃÁÁ[äâ.äÃã][äÅÂ]) {
-              äâ.Áåa = Math.floor(Math.random() * äâ.regions[aV].length);
-              aU = aT;
+          var åã = ÅÁ;
+          var áaA = 0;
+          for (var ä in äâ.regions) {
+            if (ä === áÂ.ÃÁÁ[äâ.äÃã][äÅÂ]) {
+              äâ.Áåa = Math.floor(Math.random() * äâ.regions[ä].length);
+              áaA = åã;
               break;
             }
-            aT++;
+            åã++;
           }
-          document.getElementById("servers").selectedIndex = aU;
-          aL();
+          document.getElementById("servers").selectedIndex = áaA;
+          âÂ();
         }
       }
     }
-    if (åä === a2.Åa()) {
-      aR = âa;
+    if (åä === ãåÅ.Åa()) {
+      åÄ = âa;
       if (Áå !== äâ.ÂÀå && ÄÂ === äâ.äáÃ) {
         if ((áÂ.state & ÀÁÄ.Ãåã) === 0 && (áÂ.state & ÀÁÄ.ãAá) === 0) {
           äâ.Áåa = ãä;
           äâ.ÂÀå = Aá.aÄÀ;
           Äå.âå(Äå.AA.button, âÃ, äå);
-          a4.aÄÅ();
-          a3.aÄÅ();
+          âãÀ.aÄÅ();
+          åÃã.aÄÅ();
           äâ.Ãaä = document.getElementById("serverList").innerHTML;
           äâ.äÃã = document.getElementById("servers").selectedIndex;
           document.getElementById("serverList").innerHTML = äâ.ãÂÁaa;
-          var aU = Math.floor(Math.random() * 1);
-          document.getElementById("servers").selectedIndex = aU;
-          aL();
+          var áaA = Math.floor(Math.random() * 1);
+          document.getElementById("servers").selectedIndex = áaA;
+          âÂ();
         }
       }
     }
-    if (a3.Åa() === 1) {
-      aR = 1;
+    if (åÃã.Åa() === 1) {
+      åÄ = 1;
       if (äâ.äáÃ !== 0 && äâ.ÂÀå === áÁ) {
         if ((áÂ.state & ÀÁÄ.Ãåã) === 0 && (áÂ.state & ÀÁÄ.ãAá) === 0) {
           äâ.Áåa = 0;
           äâ.äáÃ = AÄ;
           Äå.âå(Äå.AA.button, 1, åâ);
-          a0.aÄÅ();
-          a1.aÄÅ();
-          a2.aÄÅ();
+          ÀÀä.aÄÅ();
+          ÃÄâ.aÄÅ();
+          ãåÅ.aÄÅ();
           äâ.Ãaä = document.getElementById("serverList").innerHTML;
           äâ.äÃã = document.getElementById("servers").selectedIndex;
           document.getElementById("serverList").innerHTML = äâ.ÅáåäÂ;
           äâ.Áåa = ãä;
           document.getElementById("servers").selectedIndex = 0;
-          aL();
+          âÂ();
         }
       }
     }
-    if (a4.Åa() === 1) {
-      aR = aÅ;
+    if (âãÀ.Åa() === 1) {
+      åÄ = aÅ;
       if (äâ.äáÃ !== 1 && äâ.ÂÀå === áÃ) {
         if (áÁ === (áÂ.state & ÀÁÄ.Ãåã) && áÃ === (áÂ.state & ÀÁÄ.ãAá)) {
           äâ.äáÃ = Áå;
           äâ.ÂÀå = ÁÀ;
           Äå.âå(Äå.AA.button, 1, ãä);
-          a0.show();
-          a2.show();
+          ÀÀä.show();
+          ãåÅ.show();
           document.getElementById("serverList").innerHTML = äâ.Ãaä;
           document.getElementById("servers").selectedIndex = äâ.äÃã;
-          aL();
+          âÂ();
         }
       }
     }
-    if (Àâ === a6.Åa()) {
-      aR = 1;
-      var aS = window.open("http://limax.io", "_blank");
+    if (Àâ === âaå.Åa()) {
+      åÄ = 1;
+      var ÁáÃ = window.open("http://limax.io", "_blank");
     }
-    if (ãâ === a7.Åa()) {
-      aR = 1;
-      var aS = window.open("http://oib.io", "_blank");
+    if (ãâ === aäÅ.Åa()) {
+      åÄ = 1;
+      var ÁáÃ = window.open("http://oib.io", "_blank");
     }
-    if (ãâ === a8.Åa()) {
-      aR = 1;
-      var aS = window.open("http://starve.io", "_blank");
+    if (ãâ === ÅáÃ.Åa()) {
+      åÄ = 1;
+      var ÁáÃ = window.open("http://starve.io", "_blank");
     }
-    if (a9.Åa() === âá) {
-      aR = 1;
-      var aS = window.open("https://nend.io", "_blank");
+    if (ÄÃa.Åa() === âá) {
+      åÄ = 1;
+      var ÁáÃ = window.open("https://nend.io", "_blank");
     }
-    if (ad.Åa() === âÃ) {
-      aR = 1;
-      var aS = window.open("https://devast.io/private-server", "_blank");
+    if (äAÂ.Åa() === âÃ) {
+      åÄ = 1;
+      var ÁáÃ = window.open("https://devast.io/private-server", "_blank");
     }
-    if (ae.Åa() === 1) {
-      aR = Áå;
+    if (ÁÃÀ.Åa() === 1) {
+      åÄ = Áå;
       äâ.aâä(Âaã);
       Äå.âå(Äå.AA.play, 1, 0);
     }
-    if (x.Åa() === 1 || w.Åa() === 1) {
-      var aS = window.open(u.Äåâ, "_blank");
+    if (Åáá.Åa() === 1 || ááÀ.Åa() === 1) {
+      var ÁáÃ = window.open(âåÅ.Äåâ, "_blank");
     }
   }
   ;
-  function aF(aQ) {
-    aE(aq);
+  function äÄä(Åá) {
+    ÃåA(Àã);
   }
   ;
-  function aG(aQ) {
-    if (aQ.touches.length > 0) {
-      ÁA.Âãå(aq, aQ, aQ.touches[ÀÄ]);
-      aK(aq);
+  function AÀÅ(Åá) {
+    if (Åá.touches.length > 0) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[ÀÄ]);
+      aAá(Àã);
     }
   }
   ;
-  function aH(aQ) {
-    ap = aQ;
-    aC();
-    az = as;
-    ay = as;
-    aA = au;
-    at = 1;
+  function aâä(Äâã) {
+    áåÅ = Äâã;
+    Äåä();
+    áÃÁ = AÁÃ;
+    ÅÄa = AÁÃ;
+    äÁá = ÃÃa;
+    áÁâ = 1;
   }
   ;
-  function aI() {
+  function ÅÂâ() {
     if (äã === 0) {
-      window.addEventListener("mousedown", aK, false);
+      window.addEventListener("mousedown", aAá, false);
     }
     if (ãÁ === äã) {
-      window.addEventListener("mouseup", aE, ÅaÅ);
+      window.addEventListener("mouseup", ÃåA, ÅaÅ);
     }
     if (äã === 0) {
-      window.addEventListener("mousemove", aD, aÃÂ);
+      window.addEventListener("mousemove", aÂÀ, aÃÂ);
     }
     if (Àâ === äã) {
-      window.addEventListener("touchstart", aG, åâÁ);
+      window.addEventListener("touchstart", AÀÅ, åâÁ);
     }
     if (ÁÅ === äã) {
-      window.addEventListener("touchend", aF, false);
+      window.addEventListener("touchend", äÄä, false);
     }
     if (äã === äA) {
-      window.addEventListener("touchcancel", aO, åâÁ);
+      window.addEventListener("touchcancel", AAÅ, åâÁ);
     }
     if (äã === 1) {
-      window.addEventListener("touchmove", aB, false);
+      window.addEventListener("touchmove", áãÃ, false);
     }
   }
   ;
-  function aJ() {
-    if (at === 1) {
-      aL();
-      if (az < ãa) {
-        at = ÄÁ;
-        A.Äâ(áÅ.Àå);
-        C.display = "none";
-        E.Äâ(áÅ.Àå);
-        G.display = "none";
-        J.display = "none";
-        N.display = "none";
-        R.display = "none";
-        U.Äâ(áÅ.Àå);
-        V.Äâ(áÅ.Àå);
-        W.Äâ(áÅ.Àå);
-        X.Äâ(áÅ.Àå);
-        Y.Äâ(áÅ.Àå);
-        Z.Äâ(áÅ.Àå);
-        a0.Äâ(áÅ.Àå);
-        a1.Äâ(áÅ.Àå);
-        a2.Äâ(áÅ.Àå);
-        a3.Äâ(áÅ.Àå);
-        a4.Äâ(áÅ.Àå);
-        a6.Äâ(áÅ.Àå);
-        a7.Äâ(áÅ.Àå);
-        a8.Äâ(áÅ.Àå);
-        a9.Äâ(áÅ.Àå);
-        ab.display = "none";
-        ad.Äâ(áÅ.Àå);
-        ae.Äâ(áÅ.Àå);
-        ag.display = "none";
-        aj.display = "none";
-        am.display = "none";
-        ap.ÃÂÅ();
+  function ÀÅá() {
+    if (áÁâ === 1) {
+      âÂ();
+      if (áÃÁ < ãa) {
+        áÁâ = ÄÁ;
+        ÀÅå.Äâ(áÅ.Àå);
+        Àâå.display = "none";
+        áäá.Äâ(áÅ.Àå);
+        äÄã.display = "none";
+        ãÂÄ.display = "none";
+        Ãaá.display = "none";
+        ÄâÁ.display = "none";
+        äÄÁ.Äâ(áÅ.Àå);
+        ÂåÄ.Äâ(áÅ.Àå);
+        áÅA.Äâ(áÅ.Àå);
+        Àâä.Äâ(áÅ.Àå);
+        ÀáÂ.Äâ(áÅ.Àå);
+        ÅäÀ.Äâ(áÅ.Àå);
+        ÀÀä.Äâ(áÅ.Àå);
+        ÃÄâ.Äâ(áÅ.Àå);
+        ãåÅ.Äâ(áÅ.Àå);
+        åÃã.Äâ(áÅ.Àå);
+        âãÀ.Äâ(áÅ.Àå);
+        âaå.Äâ(áÅ.Àå);
+        aäÅ.Äâ(áÅ.Àå);
+        ÅáÃ.Äâ(áÅ.Àå);
+        ÄÃa.Äâ(áÅ.Àå);
+        ÁÂA.display = "none";
+        äAÂ.Äâ(áÅ.Àå);
+        ÁÃÀ.Äâ(áÅ.Àå);
+        ÂãÃ.display = "none";
+        áÀÃâÅ.display = "none";
+        AÃAåa.display = "none";
+        áåÅ.ÃÂÅ();
         return 0;
       }
-      az -= ÀÀ;
-    } else if (aÅ === aw) {
-      aL();
-      if (ÄÁ > az) {
-        aw = 0;
+      áÃÁ -= ÀÀ;
+    } else if (aÅ === âäã) {
+      âÂ();
+      if (ÄÁ > áÃÁ) {
+        âäã = 0;
         if (Aá.â.aâå !== 1) {
-          ag.display = "inline-block";
+          ÂãÃ.display = "inline-block";
         }
         document.getElementById("bod").style.backgroundColor = "#46664d";
-        aI();
+        ÅÂâ();
       }
-      az -= ÀÀ;
+      áÃÁ -= ÀÀ;
     }
     return 1;
   }
   ;
-  function aK(aQ) {
-    ÁA.ÄAá(aQ, ÁA.Àãa);
-    var aR = 0;
-    if (A.Åa() === 1) {
-      aR = Âã;
+  function aAá(Åá) {
+    ÁA.ÄAá(Åá, ÁA.Àãa);
+    var åÄ = 0;
+    if (ÀÅå.Åa() === 1) {
+      åÄ = Âã;
     }
-    if (E.Åa() === Âã) {
-      aR = 1;
+    if (áäá.Åa() === Âã) {
+      åÄ = 1;
     }
-    if (ãâ === U.Åa()) {
-      aR = 1;
+    if (ãâ === äÄÁ.Åa()) {
+      åÄ = 1;
     }
-    if (V.Åa() === 1) {
-      aR = Áå;
+    if (ÂåÄ.Åa() === 1) {
+      åÄ = Áå;
     }
-    if (W.Åa() === 1) {
-      aR = 1;
+    if (áÅA.Åa() === 1) {
+      åÄ = 1;
     }
-    if (X.Åa() === 1) {
-      aR = 1;
+    if (Àâä.Åa() === 1) {
+      åÄ = 1;
     }
-    if (Y.Åa() === 1) {
-      aR = ÄÂ;
+    if (ÀáÂ.Åa() === 1) {
+      åÄ = ÄÂ;
     }
-    if (Z.Åa() === 1) {
-      aR = ãå;
+    if (ÅäÀ.Åa() === 1) {
+      åÄ = ãå;
     }
-    if (a0.Åa() === 1) {
-      aR = 1;
+    if (ÀÀä.Åa() === 1) {
+      åÄ = 1;
     }
-    if (a1.Åa() === 1) {
-      aR = âá;
+    if (ÃÄâ.Åa() === 1) {
+      åÄ = âá;
     }
-    if (äA === a2.Åa()) {
-      aR = 1;
+    if (äA === ãåÅ.Åa()) {
+      åÄ = 1;
     }
-    if (Âã === a3.Åa()) {
-      aR = ÀA;
+    if (Âã === åÃã.Åa()) {
+      åÄ = ÀA;
     }
-    if (a4.Åa() === âá) {
-      aR = 1;
+    if (âãÀ.Åa() === âá) {
+      åÄ = 1;
     }
-    if (a6.Åa() === 1) {
-      aR = 1;
+    if (âaå.Åa() === 1) {
+      åÄ = 1;
     }
-    if (a7.Åa() === ÂA) {
-      aR = Âã;
+    if (aäÅ.Åa() === ÂA) {
+      åÄ = Âã;
     }
-    if (a8.Åa() === ÄÂ) {
-      aR = Âã;
+    if (ÅáÃ.Åa() === ÄÂ) {
+      åÄ = Âã;
     }
-    if (a9.Åa() === 1) {
-      aR = 1;
+    if (ÄÃa.Åa() === 1) {
+      åÄ = 1;
     }
-    if (ÄÂ === ad.Åa()) {
-      aR = 1;
+    if (ÄÂ === äAÂ.Åa()) {
+      åÄ = 1;
     }
-    if (ae.Åa() === 1) {
-      aR = 1;
+    if (ÁÃÀ.Åa() === 1) {
+      åÄ = 1;
     }
-    x.Åa();
-    w.Åa();
+    Åáá.Åa();
+    ááÀ.Åa();
   }
   ;
-  function aL() {
-    var aQ = ÀÄ;
-    var aR = 0;
-    if (az > âã) {
-      aR = äää;
-      var aS = aA(1 - az / ay);
-      if (aS === Äá) {
-        az = 0;
+  function âÂ() {
+    var ÄäÃ = ÀÄ;
+    var äÃÄ = 0;
+    if (áÃÁ > âã) {
+      äÃÄ = äää;
+      var transition = äÁá(1 - áÃÁ / ÅÄa);
+      if (transition === Äá) {
+        áÃÁ = 0;
       }
-      if (aw === 1) {
-        aS = Áå - Math.abs(aS);
+      if (âäã === 1) {
+        transition = Áå - Math.abs(transition);
       }
-      aQ *= aS;
-      aR *= aS;
+      ÄäÃ *= transition;
+      äÃÄ *= transition;
     }
-    z.áâ.x = åäÅ - Math.floor(ÄÀ * 325) + Math.floor(ÄÀ * (äã === 0 ? -30 : -70)) - aQ;
-    z.áâ.y = Math.max(áÁ, ÂáÅ - Math.floor(ÄÀ * 156) + Math.floor(ÄÀ * (äã === Aa ? -150 : -150))) - aR;
-    A.áâ.x = Math.floor(ÄÀ * ÀáA) + aQ;
-    A.áâ.y = äää - Math.floor(ÄÀ * 40) + Math.floor(ÄÀ * -äÂá) + aR;
-    D.x = åäÅ - Math.floor(ÄÀ * 96) + Math.floor((ãÂ === äã ? -7 : -35.5) * ÄÀ) - aQ;
-    C.left = D.x + "px";
-    D.y = z.áâ.y + Math.floor(ÄÀ * 143);
-    C.top = D.y + "px";
-    E.áâ.x = z.áâ.x + Math.floor(ÄÀ * 290);
-    E.áâ.y = z.áâ.y + Math.floor(ÄÀ * 235);
-    H.x = aãA - 152 + aQ;
-    G.left = H.x + "px";
-    H.y = äää - ÀÃä + aR;
-    G.top = H.y + "px";
-    K.x = åäÅ - Math.floor(ÄÀ * 100) + Math.floor((äã === 0 ? 5 : -35) * ÄÀ) - aQ;
-    J.left = K.x + "px";
-    K.y = D.y + Math.floor(ÄÀ * 45);
-    J.top = K.y + "px";
-    L.áâ.x = aãA - Math.floor(ÄÀ * 230) + Math.floor(ÄÀ * 7) - aQ;
-    L.áâ.y = -aR;
-    O.x = aãA - 200 + Math.floor(ÄÀ * ããã) - aQ;
-    N.left = O.x + "px";
-    O.y = Math.floor(ÄÀ * 18) - aR;
-    N.top = O.y + "px";
-    P.áâ.x = L.áâ.x;
-    P.áâ.y = L.áâ.y + Math.floor(ÄÀ * 230);
-    S.x = aãA - 200 + Math.floor(åÃA * ÄÀ) - aQ;
-    R.left = S.x + "px";
-    S.y = O.y + Math.floor(ÄÀ * 217);
-    R.top = S.y + "px";
-    T.áâ.x = Math.floor(ÄÀ * ÃAâ) - aQ;
-    T.áâ.y = Math.floor(ÃáÅ * ÄÀ) - aR;
-    U.áâ.x = T.áâ.x + Math.floor(ÄÀ * -ÃáÅ);
-    U.áâ.y = T.áâ.y + Math.floor(ÄÀ * 55);
-    V.áâ.x = U.áâ.x + Math.floor(ÄÀ * 45);
-    V.áâ.y = U.áâ.y;
-    W.áâ.x = V.áâ.x + Math.floor(ÄÀ * 45);
-    W.áâ.y = U.áâ.y;
-    X.áâ.x = W.áâ.x + Math.floor(ÄÀ * 45);
-    X.áâ.y = U.áâ.y;
-    Y.áâ.x = z.áâ.x + Math.floor(ÄÀ * 26);
-    Y.áâ.y = z.áâ.y + Math.floor(ÄÀ * 36);
-    Z.áâ.x = Y.áâ.x + Math.floor(ÄÀ * 83.5);
-    Z.áâ.y = Y.áâ.y;
-    a0.áâ.x = E.áâ.x + Math.floor(ÄÀ * 213);
-    a0.áâ.y = E.áâ.y + Math.floor(ÄÀ * -98);
-    a1.áâ.x = a0.áâ.x;
-    a1.áâ.y = a0.áâ.y + Math.floor(ÄÀ * 60);
-    a2.áâ.x = a0.áâ.x;
-    a2.áâ.y = a0.áâ.y + Math.floor(ÄÀ * 60);
-    a3.áâ.x = E.áâ.x + Math.floor(ÄÀ * -126);
-    a3.áâ.y = E.áâ.y + Math.floor(ÄÀ * -58);
-    a4.áâ.x = a3.áâ.x;
-    a4.áâ.y = a3.áâ.y + Math.floor(ÄÀ * -37);
-    a5.áâ.x = U.áâ.x;
-    a5.áâ.y = U.áâ.y + Math.floor(ÄÀ * 50);
-    a6.áâ.x = U.áâ.x + Math.floor(ÄÀ * 21.5);
-    a6.áâ.y = U.áâ.y + Math.floor(ÄÀ * 72);
-    a7.áâ.x = a6.áâ.x;
-    a7.áâ.y = a6.áâ.y + Math.floor(ÄÀ * 70);
-    a8.áâ.x = a7.áâ.x;
-    a8.áâ.y = a7.áâ.y + Math.floor(ÄÀ * 69);
-    a9.áâ.x = a8.áâ.x;
-    a9.áâ.y = a8.áâ.y + Math.floor(ÄÀ * 69);
-    ac.x = Math.floor(ÄÀ * 40) - aQ;
-    ab.left = ac.x + "px";
-    ac.y = Math.floor(ÄÀ * 417) - aR;
-    ab.top = ac.y + "px";
-    ad.áâ.x = a4.áâ.x + Math.floor(ÄÀ * -120);
-    ad.áâ.y = a4.áâ.y + Math.floor(ÄÀ * 41);
-    ae.áâ.x = ad.áâ.x + Math.floor(ÄÀ * -8.5);
-    ae.áâ.y = ad.áâ.y + Math.floor(ÄÀ * -53);
-    ah.x = åäÅ - Math.floor(ÄÀ * 325);
-    ag.left = ah.x + "px";
-    ah.y = D.y + Math.floor(ÄÀ * 130);
-    ag.top = ah.y + "px";
-    var aT = Math.min(ÄÀ, 1);
-    document.getElementById("bebebaba").style.top = Math.floor(D.y + aR + 170) + "px";
+    åâA.áâ.x = åäÅ - Math.floor(ÄÀ * 325) + Math.floor(ÄÀ * (äã === 0 ? -30 : -70)) - ÄäÃ;
+    åâA.áâ.y = Math.max(áÁ, ÂáÅ - Math.floor(ÄÀ * 156) + Math.floor(ÄÀ * (äã === Aa ? -150 : -150))) - äÃÄ;
+    ÀÅå.áâ.x = Math.floor(ÄÀ * ÀáA) + ÄäÃ;
+    ÀÅå.áâ.y = äää - Math.floor(ÄÀ * 40) + Math.floor(ÄÀ * -äÂá) + äÃÄ;
+    AÀÂ.x = åäÅ - Math.floor(ÄÀ * 96) + Math.floor((ãÂ === äã ? -7 : -35.5) * ÄÀ) - ÄäÃ;
+    Àâå.left = AÀÂ.x + "px";
+    AÀÂ.y = åâA.áâ.y + Math.floor(ÄÀ * 143);
+    Àâå.top = AÀÂ.y + "px";
+    áäá.áâ.x = åâA.áâ.x + Math.floor(ÄÀ * 290);
+    áäá.áâ.y = åâA.áâ.y + Math.floor(ÄÀ * 235);
+    âÅÂ.x = aãA - 152 + ÄäÃ;
+    äÄã.left = âÅÂ.x + "px";
+    âÅÂ.y = äää - ÀÃä + äÃÄ;
+    äÄã.top = âÅÂ.y + "px";
+    ãÃÅ.x = åäÅ - Math.floor(ÄÀ * 100) + Math.floor((äã === 0 ? 5 : -35) * ÄÀ) - ÄäÃ;
+    ãÂÄ.left = ãÃÅ.x + "px";
+    ãÃÅ.y = AÀÂ.y + Math.floor(ÄÀ * 45);
+    ãÂÄ.top = ãÃÅ.y + "px";
+    AäÄ.áâ.x = aãA - Math.floor(ÄÀ * 230) + Math.floor(ÄÀ * 7) - ÄäÃ;
+    AäÄ.áâ.y = -äÃÄ;
+    ãåã.x = aãA - 200 + Math.floor(ÄÀ * ããã) - ÄäÃ;
+    Ãaá.left = ãåã.x + "px";
+    ãåã.y = Math.floor(ÄÀ * 18) - äÃÄ;
+    Ãaá.top = ãåã.y + "px";
+    åâá.áâ.x = AäÄ.áâ.x;
+    åâá.áâ.y = AäÄ.áâ.y + Math.floor(ÄÀ * 230);
+    ÂÃÀ.x = aãA - 200 + Math.floor(åÃA * ÄÀ) - ÄäÃ;
+    ÄâÁ.left = ÂÃÀ.x + "px";
+    ÂÃÀ.y = ãåã.y + Math.floor(ÄÀ * 217);
+    ÄâÁ.top = ÂÃÀ.y + "px";
+    ÅÅA.áâ.x = Math.floor(ÄÀ * ÃAâ) - ÄäÃ;
+    ÅÅA.áâ.y = Math.floor(ÃáÅ * ÄÀ) - äÃÄ;
+    äÄÁ.áâ.x = ÅÅA.áâ.x + Math.floor(ÄÀ * -ÃáÅ);
+    äÄÁ.áâ.y = ÅÅA.áâ.y + Math.floor(ÄÀ * 55);
+    ÂåÄ.áâ.x = äÄÁ.áâ.x + Math.floor(ÄÀ * 45);
+    ÂåÄ.áâ.y = äÄÁ.áâ.y;
+    áÅA.áâ.x = ÂåÄ.áâ.x + Math.floor(ÄÀ * 45);
+    áÅA.áâ.y = äÄÁ.áâ.y;
+    Àâä.áâ.x = áÅA.áâ.x + Math.floor(ÄÀ * 45);
+    Àâä.áâ.y = äÄÁ.áâ.y;
+    ÀáÂ.áâ.x = åâA.áâ.x + Math.floor(ÄÀ * 26);
+    ÀáÂ.áâ.y = åâA.áâ.y + Math.floor(ÄÀ * 36);
+    ÅäÀ.áâ.x = ÀáÂ.áâ.x + Math.floor(ÄÀ * 83.5);
+    ÅäÀ.áâ.y = ÀáÂ.áâ.y;
+    ÀÀä.áâ.x = áäá.áâ.x + Math.floor(ÄÀ * 213);
+    ÀÀä.áâ.y = áäá.áâ.y + Math.floor(ÄÀ * -98);
+    ÃÄâ.áâ.x = ÀÀä.áâ.x;
+    ÃÄâ.áâ.y = ÀÀä.áâ.y + Math.floor(ÄÀ * 60);
+    ãåÅ.áâ.x = ÀÀä.áâ.x;
+    ãåÅ.áâ.y = ÀÀä.áâ.y + Math.floor(ÄÀ * 60);
+    åÃã.áâ.x = áäá.áâ.x + Math.floor(ÄÀ * -126);
+    åÃã.áâ.y = áäá.áâ.y + Math.floor(ÄÀ * -58);
+    âãÀ.áâ.x = åÃã.áâ.x;
+    âãÀ.áâ.y = åÃã.áâ.y + Math.floor(ÄÀ * -37);
+    ÂÃâ.áâ.x = äÄÁ.áâ.x;
+    ÂÃâ.áâ.y = äÄÁ.áâ.y + Math.floor(ÄÀ * 50);
+    âaå.áâ.x = äÄÁ.áâ.x + Math.floor(ÄÀ * 21.5);
+    âaå.áâ.y = äÄÁ.áâ.y + Math.floor(ÄÀ * 72);
+    aäÅ.áâ.x = âaå.áâ.x;
+    aäÅ.áâ.y = âaå.áâ.y + Math.floor(ÄÀ * 70);
+    ÅáÃ.áâ.x = aäÅ.áâ.x;
+    ÅáÃ.áâ.y = aäÅ.áâ.y + Math.floor(ÄÀ * 69);
+    ÄÃa.áâ.x = ÅáÃ.áâ.x;
+    ÄÃa.áâ.y = ÅáÃ.áâ.y + Math.floor(ÄÀ * 69);
+    åãÀ.x = Math.floor(ÄÀ * 40) - ÄäÃ;
+    ÁÂA.left = åãÀ.x + "px";
+    åãÀ.y = Math.floor(ÄÀ * 417) - äÃÄ;
+    ÁÂA.top = åãÀ.y + "px";
+    äAÂ.áâ.x = âãÀ.áâ.x + Math.floor(ÄÀ * -120);
+    äAÂ.áâ.y = âãÀ.áâ.y + Math.floor(ÄÀ * 41);
+    ÁÃÀ.áâ.x = äAÂ.áâ.x + Math.floor(ÄÀ * -8.5);
+    ÁÃÀ.áâ.y = äAÂ.áâ.y + Math.floor(ÄÀ * -53);
+    áÁÅ.x = åäÅ - Math.floor(ÄÀ * 325);
+    ÂãÃ.left = áÁÅ.x + "px";
+    áÁÅ.y = AÀÂ.y + Math.floor(ÄÀ * 130);
+    ÂãÃ.top = áÁÅ.y + "px";
+    var AâÅ = Math.min(ÄÀ, 1);
+    document.getElementById("bebebaba").style.top = Math.floor(AÀÂ.y + äÃÄ + 170) + "px";
     if (âÄá.ãAA("name") !== null) {
-      J.display = "none";
-      a0.áâ.y = -500;
-      a1.áâ.y = -500;
-      a2.áâ.y = -500;
-      a3.áâ.y = -500;
-      a4.áâ.y = -500;
+      ãÂÄ.display = "none";
+      ÀÀä.áâ.y = -500;
+      ÃÄâ.áâ.y = -500;
+      ãåÅ.áâ.y = -500;
+      åÃã.áâ.y = -500;
+      âãÀ.áâ.y = -500;
       if (âÄá.ãAA("admin") !== null) {
-        af.display = "none";
+        ÃÃAÄá.display = "none";
       }
     }
-    var aU = D.y + aR + ÄÀ * 170;
+    var áâ = AÀÂ.y + äÃÄ + ÄÀ * 170;
     document.getElementById("bebebaba").style.left = "0";
     document.getElementById("bebebaba").style.right = "0";
     document.getElementById("bebebaba").style.aáÁåÃ = "auto";
-    document.getElementById("bebebaba").style.top = Math.floor(aU + (aT * 250 - 250) / 2) + "px";
-    document.getElementById("bebebaba").style.transform = "scale(" + aT + ")";
-    var aV = document.getElementById("nicknameInput").style;
-    var aW = Math.floor(ÄÀ * 220);
-    var aX = Math.floor(ÄÀ * 35);
-    aX = aX + "px";
-    aW = aW + "px";
-    C.width = aW;
-    C.height = aX;
-    aV.borderWidth = Math.floor(ÄÀ * 3) + "px";
-    aV.width = aW;
-    aV.height = aX;
-    aV.fontSize = Math.floor(ÄÀ * 18) + "px";
+    document.getElementById("bebebaba").style.top = Math.floor(áâ + (AâÅ * 250 - 250) / 2) + "px";
+    document.getElementById("bebebaba").style.transform = "scale(" + AâÅ + ")";
+    var ÅAA = document.getElementById("nicknameInput").style;
+    var ÅÅ = Math.floor(ÄÀ * 220);
+    var Âå = Math.floor(ÄÀ * 35);
+    Âå = Âå + "px";
+    ÅÅ = ÅÅ + "px";
+    Àâå.width = ÅÅ;
+    Àâå.height = Âå;
+    ÅAA.borderWidth = Math.floor(ÄÀ * 3) + "px";
+    ÅAA.width = ÅÅ;
+    ÅAA.height = Âå;
+    ÅAA.fontSize = Math.floor(ÄÀ * 18) + "px";
     if (document.getElementById("passwordInput") !== null) {
-      var aY = document.getElementById("passwordInput").style;
-      var aW = Math.floor(ÄÀ * 220);
-      var aX = Math.floor(ÄÀ * 35);
-      var aZ = Math.floor(åäÅ - aW / 2) + "px";
-      aX = aX + "px";
-      aW = aW + "px";
-      aY.width = aW;
-      aY.height = aX;
-      aY.left = aZ;
-      aY.borderWidth = Math.floor(ÄÀ * 3) + "px";
-      aY.width = aW;
-      aY.height = aX;
-      aY.fontSize = Math.floor(ÄÀ * 18) + "px";
-      aY.marginTop = Math.floor(ÄÀ * 4) + "px";
+      var Ãáa = document.getElementById("passwordInput").style;
+      var ÅÅ = Math.floor(ÄÀ * 220);
+      var Âå = Math.floor(ÄÀ * 35);
+      var áÄã = Math.floor(åäÅ - ÅÅ / 2) + "px";
+      Âå = Âå + "px";
+      ÅÅ = ÅÅ + "px";
+      Ãáa.width = ÅÅ;
+      Ãáa.height = Âå;
+      Ãáa.left = áÄã;
+      Ãáa.borderWidth = Math.floor(ÄÀ * 3) + "px";
+      Ãáa.width = ÅÅ;
+      Ãáa.height = Âå;
+      Ãáa.fontSize = Math.floor(ÄÀ * 18) + "px";
+      Ãáa.marginTop = Math.floor(ÄÀ * 4) + "px";
     }
-    aW = Math.floor(ÄÀ * 200);
-    aX = Math.floor(ÄÀ * 28);
-    aX = aX + "px";
-    aW = aW + "px";
-    J.width = aW;
-    J.height = aX;
-    J.backgroundSize = Math.floor(ÄÀ * 17) + "px";
-    var b0 = document.getElementById("servers").style;
-    aW = Math.floor(ÄÀ * 230) + "px";
-    aX = Math.floor(ÄÀ * 28) + "px";
-    b0.width = aW;
-    b0.height = aX;
-    b0.fontSize = Math.floor(Ãáâ * ÄÀ) + "px";
-    aW = Math.floor(ÄÀ * 185);
-    aX = Math.floor(Âåaäá * ÄÀ);
-    aZ = Math.floor(aãA - aW) + "px";
-    aX = aX + "px";
-    aW = aW + "px";
-    áâå = Math.floor(äää - ÄÀ * 18) + aR + "px";
-    G.width = aW;
-    G.height = aX;
-    G.left = aZ;
-    G.top = áâå;
-    G.fontSize = Math.floor(åáAáã * ÄÀ) + "px";
-    aW = Math.floor(ÄÀ * 197);
-    aX = Math.floor(ÄÀ * 250);
-    aZ = Math.floor(aãA - ÄÀ * 205) + "px";
-    aX = aX + "px";
-    aW = aW + "px";
-    N.width = aW;
-    N.height = aX;
-    N.left = aZ;
-    N.fontSize = Math.floor(ÄÀ * 11) + "px";
-    N.borderRadius = Math.floor(ÄÀ * 5) + "px";
-    N.paddingTop = Math.floor(ÄÀ * 18) + "px";
-    var b1 = document.getElementById("changelogTitle").style;
-    aW = Math.floor(ÄÀ * 197) + "px";
-    aX = Math.floor(ÄÀ * 23) + "px";
-    b1.width = aW;
-    b1.height = aX;
-    b1.fontSize = Math.floor(ÄÀ * 16) + "px";
-    b1.paddingTop = Math.floor(ÄÀ * 8) + "px";
-    b1.paddingBottom = Math.floor(ÄÀ * Aa) + "px";
-    b1.marginBottom = Math.floor(ÄÀ * -2) + "px";
-    b1.marginTop = Math.floor(ÄÀ * -22) + "px";
-    b1.borderRadius = Math.floor(AÀâ * ÄÀ) + "px " + Math.floor(ÄÀ * 5) + "px " + Math.floor(ÄÀ * âã) + "px " + Math.floor(Àá * ÄÀ) + "px";
-    var b2 = document.getElementById("changelogImg").style;
-    aW = Math.floor(ÄÀ * 175) + "px";
-    aX = Math.floor(ÄÀ * 80) + "px";
-    b2.width = aW;
-    b2.height = aX;
-    b2.marginBottom = Math.floor(ÄÀ * 10) + "px";
-    var b3 = document.getElementById("changelogText").style;
-    b3.fontSize = Math.floor(ÄÀ * 10) + "px";
-    b3.padding = Math.floor(ÄÀ * ÃAä) + "px";
-    b3.paddingTop = Math.floor(åÄá * ÄÀ) + "px";
-    aW = Math.floor(ÄÀ * 197);
-    aX = Math.floor(ÄÀ * 347);
-    aZ = Math.floor(aãA - ÄÀ * 205) + "px";
+    ÅÅ = Math.floor(ÄÀ * 200);
+    Âå = Math.floor(ÄÀ * 28);
+    Âå = Âå + "px";
+    ÅÅ = ÅÅ + "px";
+    ãÂÄ.width = ÅÅ;
+    ãÂÄ.height = Âå;
+    ãÂÄ.backgroundSize = Math.floor(ÄÀ * 17) + "px";
+    var âaâÄÅ = document.getElementById("servers").style;
+    ÅÅ = Math.floor(ÄÀ * 230) + "px";
+    Âå = Math.floor(ÄÀ * 28) + "px";
+    âaâÄÅ.width = ÅÅ;
+    âaâÄÅ.height = Âå;
+    âaâÄÅ.fontSize = Math.floor(Ãáâ * ÄÀ) + "px";
+    ÅÅ = Math.floor(ÄÀ * 185);
+    Âå = Math.floor(Âåaäá * ÄÀ);
+    áÄã = Math.floor(aãA - ÅÅ) + "px";
+    Âå = Âå + "px";
+    ÅÅ = ÅÅ + "px";
+    áâå = Math.floor(äää - ÄÀ * 18) + äÃÄ + "px";
+    äÄã.width = ÅÅ;
+    äÄã.height = Âå;
+    äÄã.left = áÄã;
+    äÄã.top = áâå;
+    äÄã.fontSize = Math.floor(åáAáã * ÄÀ) + "px";
+    ÅÅ = Math.floor(ÄÀ * 197);
+    Âå = Math.floor(ÄÀ * 250);
+    áÄã = Math.floor(aãA - ÄÀ * 205) + "px";
+    Âå = Âå + "px";
+    ÅÅ = ÅÅ + "px";
+    Ãaá.width = ÅÅ;
+    Ãaá.height = Âå;
+    Ãaá.left = áÄã;
+    Ãaá.fontSize = Math.floor(ÄÀ * 11) + "px";
+    Ãaá.borderRadius = Math.floor(ÄÀ * 5) + "px";
+    Ãaá.paddingTop = Math.floor(ÄÀ * 18) + "px";
+    var ÄAã = document.getElementById("changelogTitle").style;
+    ÅÅ = Math.floor(ÄÀ * 197) + "px";
+    Âå = Math.floor(ÄÀ * 23) + "px";
+    ÄAã.width = ÅÅ;
+    ÄAã.height = Âå;
+    ÄAã.fontSize = Math.floor(ÄÀ * 16) + "px";
+    ÄAã.paddingTop = Math.floor(ÄÀ * 8) + "px";
+    ÄAã.paddingBottom = Math.floor(ÄÀ * Aa) + "px";
+    ÄAã.marginBottom = Math.floor(ÄÀ * -2) + "px";
+    ÄAã.marginTop = Math.floor(ÄÀ * -22) + "px";
+    ÄAã.borderRadius = Math.floor(AÀâ * ÄÀ) + "px " + Math.floor(ÄÀ * 5) + "px " + Math.floor(ÄÀ * âã) + "px " + Math.floor(Àá * ÄÀ) + "px";
+    var ÂÄåáA = document.getElementById("changelogImg").style;
+    ÅÅ = Math.floor(ÄÀ * 175) + "px";
+    Âå = Math.floor(ÄÀ * 80) + "px";
+    ÂÄåáA.width = ÅÅ;
+    ÂÄåáA.height = Âå;
+    ÂÄåáA.marginBottom = Math.floor(ÄÀ * 10) + "px";
+    var ÁÂÃâá = document.getElementById("changelogText").style;
+    ÁÂÃâá.fontSize = Math.floor(ÄÀ * 10) + "px";
+    ÁÂÃâá.padding = Math.floor(ÄÀ * ÃAä) + "px";
+    ÁÂÃâá.paddingTop = Math.floor(åÄá * ÄÀ) + "px";
+    ÅÅ = Math.floor(ÄÀ * 197);
+    Âå = Math.floor(ÄÀ * 347);
+    áÄã = Math.floor(aãA - ÄÀ * 205) + "px";
     ÁáÁåÀ = Math.floor(äää - ÄÀ * 125) + "px";
-    aX = aX + "px";
-    aW = aW + "px";
-    R.width = aW;
-    R.height = aX;
-    R.left = aZ;
-    R.bottom = ÁáÁåÀ;
-    R.fontSize = Math.floor(ÄÀ * 13) + "px";
-    R.marginTop = Math.floor(ÄÀ * 0) + "px";
-    R.paddingTop = Math.floor(ÄÀ * 18) + "px";
+    Âå = Âå + "px";
+    ÅÅ = ÅÅ + "px";
+    ÄâÁ.width = ÅÅ;
+    ÄâÁ.height = Âå;
+    ÄâÁ.left = áÄã;
+    ÄâÁ.bottom = ÁáÁåÀ;
+    ÄâÁ.fontSize = Math.floor(ÄÀ * 13) + "px";
+    ÄâÁ.marginTop = Math.floor(ÄÀ * 0) + "px";
+    ÄâÁ.paddingTop = Math.floor(ÄÀ * 18) + "px";
     document.getElementById("featuredVideo").style.fontSize = Math.floor(ÄÀ * 13) + "px";
     document.getElementById("mainCommands").style.marginTop = Math.floor(ÄÀ * 55) + "px";
     document.getElementById("secondCommands").style.marginTop = Math.floor(ÄÀ * 55) + "px";
@@ -12376,285 +12383,287 @@ var äâ = function () {
     document.getElementById("craftCommands").style.paddingRight = Math.floor(ÄÀ * 18) + "px";
     document.getElementById("mapCommands").style.paddingLeft = Math.floor(ãÁÅ * ÄÀ) + "px";
     document.getElementById("mapCommands").style.paddingRight = Math.floor(ÄÀ * aÃå) + "px";
-    var b4 = document.getElementById("howtoplayTitle").style;
-    aW = Math.floor(ÄÀ * 197) + "px";
-    aX = Math.floor(ÄÀ * 23) + "px";
-    b4.width = aW;
-    b4.height = aX;
-    b4.fontSize = Math.floor(ÄÀ * 16) + "px";
-    b4.paddingTop = Math.floor(ÄÀ * ÀÄ) + "px";
-    b4.paddingBottom = Math.floor(âäÃâã * ÄÀ) + "px";
-    b4.marginBottom = Math.floor(ÄÀ * ãÁÅ) + "px";
-    b4.marginTop = Math.floor(ÄÀ * ãÂ) + "px";
-    b4.borderRadius = Math.floor(ÄÀ * 5) + "px " + Math.floor(ÃáÅ * ÄÀ) + "px " + Math.floor(ÄÀ * 0) + "px " + Math.floor(ãÁ * ÄÀ) + "px";
-    var b5 = document.getElementById("howtoplayText").style;
-    b5.fontSize = Math.floor(ÄÀ * áÃâaA) + "px";
-    b5.aáÁåÃ = Math.floor(ÄÀ * AâÃ) + "px";
-    b5.height = Math.floor(ÄÀ * 52) + "px";
-    var b6 = document.getElementById("howtoplayCommands").style;
-    aW = Math.floor(ÄÀ * 197) + "px";
-    aX = Math.floor(ÄÀ * 23) + "px";
-    b6.width = aW;
-    b6.height = aX;
-    b6.fontSize = Math.floor(ÄÀ * ÂÄÄ) + "px";
-    b6.paddingTop = Math.floor(ÄÀ * 13) + "px";
-    b6.paddingBottom = Math.floor(ÄÀ * 13) + "px";
-    b6.marginBottom = Math.floor(áÀÄ * ÄÀ) + "px";
-    b6.marginTop = Math.floor(ÄÀ * åÀÅ) + "px";
+    var äÂÁ = document.getElementById("howtoplayTitle").style;
+    ÅÅ = Math.floor(ÄÀ * 197) + "px";
+    Âå = Math.floor(ÄÀ * 23) + "px";
+    äÂÁ.width = ÅÅ;
+    äÂÁ.height = Âå;
+    äÂÁ.fontSize = Math.floor(ÄÀ * 16) + "px";
+    äÂÁ.paddingTop = Math.floor(ÄÀ * ÀÄ) + "px";
+    äÂÁ.paddingBottom = Math.floor(âäÃâã * ÄÀ) + "px";
+    äÂÁ.marginBottom = Math.floor(ÄÀ * ãÁÅ) + "px";
+    äÂÁ.marginTop = Math.floor(ÄÀ * ãÂ) + "px";
+    äÂÁ.borderRadius = Math.floor(ÄÀ * 5) + "px " + Math.floor(ÃáÅ * ÄÀ) + "px " + Math.floor(ÄÀ * 0) + "px " + Math.floor(ãÁ * ÄÀ) + "px";
+    var äÄâÃA = document.getElementById("howtoplayText").style;
+    äÄâÃA.fontSize = Math.floor(ÄÀ * áÃâaA) + "px";
+    äÄâÃA.aáÁåÃ = Math.floor(ÄÀ * AâÃ) + "px";
+    äÄâÃA.height = Math.floor(ÄÀ * 52) + "px";
+    var ãåÀ = document.getElementById("howtoplayCommands").style;
+    ÅÅ = Math.floor(ÄÀ * 197) + "px";
+    Âå = Math.floor(ÄÀ * 23) + "px";
+    ãåÀ.width = ÅÅ;
+    ãåÀ.height = Âå;
+    ãåÀ.fontSize = Math.floor(ÄÀ * ÂÄÄ) + "px";
+    ãåÀ.paddingTop = Math.floor(ÄÀ * 13) + "px";
+    ãåÀ.paddingBottom = Math.floor(ÄÀ * 13) + "px";
+    ãåÀ.marginBottom = Math.floor(áÀÄ * ÄÀ) + "px";
+    ãåÀ.marginTop = Math.floor(ÄÀ * åÀÅ) + "px";
   }
   ;
-  function aM() {
-    áÂ.Àäå = j;
-    áÂ.âAâ = k;
+  function ÃÂÅ() {
+    áÂ.Àäå = Àäå;
+    áÂ.âAâ = âAâ;
     Aá.â.aÅÁ = áÃ;
     Aá.â.id = 0;
     ÀÂ.áÅÁ(åâ);
     ÀÂ.aaÀ();
     if (äâ.ÂÀå === äA) {
-      a4.aÄÅ();
-      a3.aÄÅ();
+      âãÀ.aÄÅ();
+      åÃã.aÄÅ();
     }
-    äâ.ÂãÃ = ag;
+    äâ.ÂãÃ = ÂãÃ;
     if (äã === Äá) {
-      w.aÄÅ();
-      x.aÄÅ();
-      ae.aÄÅ();
+      ááÀ.aÄÅ();
+      Åáá.aÄÅ();
+      ÁÃÀ.aÄÅ();
     }
     áá.ãÃÄ(äâ);
-    az = av;
-    ay = av;
-    aA = ax;
-    aw = 1;
-    aL();
-    C.display = "inline-block";
+    áÃÁ = áÃÃ;
+    ÅÄa = áÃÃ;
+    äÁá = ÂáÀ;
+    âäã = 1;
+    âÂ();
+    Àâå.display = "inline-block";
     if (äã === 0) {
-      G.display = "inline-block";
+      äÄã.display = "inline-block";
     }
-    J.display = "inline-block";
+    ãÂÄ.display = "inline-block";
     if (äã === 0) {
-      N.display = "inline-block";
+      Ãaá.display = "inline-block";
     }
     if (ÁÀ === äã) {
-      R.display = "inline-block";
+      ÄâÁ.display = "inline-block";
     }
     if (äã === âã) {
-      ab.display = "inline-block";
+      ÁÂA.display = "inline-block";
     }
   }
   ;
-  function aN() {
-    if (aJ() === 0) {
+  function Áá() {
+    if (ÀÅá() === 0) {
       return;
     }
     AÅ.clearRect(ÀÄ, 0, aãA, äää);
     ÀÂ.åãA();
-    if (Aa < az) {
-      q = aA(ÄÂ - az / ay);
-      if (aw === 1) {
-        q = 1 - Math.abs(q);
+    if (Aa < áÃÁ) {
+      áÄÃ = äÁá(ÄÂ - áÃÁ / ÅÄa);
+      if (âäã === 1) {
+        áÄÃ = 1 - Math.abs(áÄÃ);
       }
-      q = ÁÅ - q;
+      áÄÃ = ÁÅ - áÄÃ;
     }
-    AÅ.globalAlpha = q * 0.3;
+    AÅ.globalAlpha = áÄÃ * 0.3;
     AÅ.fillStyle = "#000000";
     AÅ.fillRect(ÅÁ, 0, aãA, äää);
     AÅ.globalAlpha = 1;
     if (äâ.ÂÀå === Aá.ÄÅá) {
-      a0.Äâ(áÅ.Áåâ);
+      ÀÀä.Äâ(áÅ.Áåâ);
     } else if (Aá.ÄáÃ === äâ.ÂÀå) {
-      a1.Äâ(áÅ.Áåâ);
+      ÃÄâ.Äâ(áÅ.Áåâ);
     } else if (Aá.aÄÀ === äâ.ÂÀå) {
-      a2.Äâ(áÅ.Áåâ);
+      ãåÅ.Äâ(áÅ.Áåâ);
     } else if (äâ.ÂÀå === Aá.ÃÁÂ) {
-      a2.Äâ(áÅ.Áåâ);
+      ãåÅ.Äâ(áÅ.Áåâ);
     }
     if (Aá.ÃÁÂ === äâ.ÂÀå) {
-      a3.Äâ(áÅ.Áåâ);
+      åÃã.Äâ(áÅ.Áåâ);
     } else {
-      a4.Äâ(áÅ.Áåâ);
+      âãÀ.Äâ(áÅ.Áåâ);
     }
-    z.Áá();
-    A.Áá();
-    E.Áá();
-    L.Áá();
-    P.Áá();
-    T.Áá();
-    U.Áá();
-    V.Áá();
-    W.Áá();
-    X.Áá();
-    Y.Áá();
-    Z.Áá();
-    a0.Áá();
-    a2.Áá();
-    a3.Áá();
-    a4.Áá();
-    a5.Áá();
-    a6.Áá();
-    a7.Áá();
-    a8.Áá();
-    a9.Áá();
-    ad.Áá();
-    ae.Áá();
-    if (y.À === null) {
-      y.À = áÅ.åáa("0." + ÄAáÃâ[ÄÁ] + "." + ÄAáÃâ[1], "'Viga', sans-serif", "#d6ddde", 24, 400, ãÅâ, ÀaÁ, 25, âåã, ÁâÃ, undefined, undefined, "#2b3c3e", 8);
-      y.À.á = ÀA;
+    åâA.Áá();
+    ÀÅå.Áá();
+    áäá.Áá();
+    AäÄ.Áá();
+    åâá.Áá();
+    ÅÅA.Áá();
+    äÄÁ.Áá();
+    ÂåÄ.Áá();
+    áÅA.Áá();
+    Àâä.Áá();
+    ÀáÂ.Áá();
+    ÅäÀ.Áá();
+    ÀÀä.Áá();
+    ãåÅ.Áá();
+    åÃã.Áá();
+    âãÀ.Áá();
+    ÂÃâ.Áá();
+    âaå.Áá();
+    aäÅ.Áá();
+    ÅáÃ.Áá();
+    ÄÃa.Áá();
+    äAÂ.Áá();
+    ÁÃÀ.Áá();
+    if (ÅâÂ.À === null) {
+      ÅâÂ.À = áÅ.åáa("0." + ÄAáÃâ[ÄÁ] + "." + ÄAáÃâ[1], "'Viga', sans-serif", "#d6ddde", 24, 400, ãÅâ, ÀaÁ, 25, âåã, ÁâÃ, undefined, undefined, "#2b3c3e", 8);
+      ÅâÂ.À.á = ÀA;
     }
-    áá.ÄA(y, z.áâ.x / ÄÀ + 484.5, z.áâ.y / ÄÀ + 124, 0, ÅÁ, 0, 1);
-    x.áâ.x = a5.áâ.x + ÄÀ * 27;
-    x.áâ.y = a5.áâ.y + ÄÀ * 329;
-    x.Áá();
-    w.áâ.x = a5.áâ.x + ÄÀ * 34;
-    w.áâ.y = a5.áâ.y + ÄÀ * 399;
-    w.Áá();
+    áá.ÄA(ÅâÂ, åâA.áâ.x / ÄÀ + 484.5, åâA.áâ.y / ÄÀ + 124, 0, ÅÁ, 0, 1);
+    Åáá.áâ.x = ÂÃâ.áâ.x + ÄÀ * 27;
+    Åáá.áâ.y = ÂÃâ.áâ.y + ÄÀ * 329;
+    Åáá.Áá();
+    ááÀ.áâ.x = ÂÃâ.áâ.x + ÄÀ * 34;
+    ááÀ.áâ.y = ÂÃâ.áâ.y + ÄÀ * 399;
+    ááÀ.Áá();
     ÀÂ.ÀâÁáÀ();
     áÁá.äåã();
   }
   ;
-  function aO(aQ) {
-    if (aQ.touches.length > 0) {
-      ÁA.Âãå(aq, aQ, aQ.touches[0]);
-      aE(aq);
+  function AAÅ(Åá) {
+    if (Åá.touches.length > 0) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[0]);
+      ÃåA(Àã);
     }
   }
   ;
   return {
-    aâä: aH,
-    ÁÀÄ: ao,
-    ÃÂÅ: aM,
-    âÂ: aL,
-    Áá: aN
+    // getChatActive: zxcnemo,
+
+    aâä: aâä,
+    ÁÀÄ: ÁÀÄ,
+    ÃÂÅ: ÃÂÅ,
+    âÂ: âÂ,
+    Áá: Áá
   };
 }();
 const AâAäâ = ÄÅÀ;
 const AáÀãa = ÄÁÀ;
 const åAA = ãaÅ;
 var ÀÅ = function () {
-  function j() {}
+  function âAâ() {}
   ;
-  function k() {
-    return p & s;
+  function åÀå() {
+    return Áäå & Àaä;
   }
   ;
-  function l() {
-    return p;
+  function ÃâáÃâ() {
+    return Áäå;
   }
   ;
-  function m(bu) {
-    console.log("onError", bu);
+  function Àäå(Âá) {
+    console.log("onError", Âá);
     if (âa === Aá.ÂÀå) {
-      bt(ãåååÁ);
+      aâä(ãåååÁ);
     } else {
-      bt(äÀÄaA);
+      aâä(äÀÄaA);
     }
   }
   ;
-  var n = null;
-  var o = 0;
-  var p = ÁÀ;
-  var q = 0;
-  var r = 0;
-  var s = ãa;
-  var t = ÁÀ;
-  var u = 0;
-  var v = ÄÁ;
-  function w(bu) {
-    x();
-    p = 1;
-    if (bu === åä) {
-      s = 1;
-    } else if (bu === 2) {
-      t = Áå;
+  var ÀÁA = null;
+  var áäâ = 0;
+  var Áäå = ÁÀ;
+  var Àaá = 0;
+  var ÃäÃ = 0;
+  var Àaä = ãa;
+  var ÁÄA = ÁÀ;
+  var ÂÅÀ = 0;
+  var ÅÄÀ = ÄÁ;
+  function äÄäÄå(ÂãÁ) {
+    ÂÁÃ();
+    Áäå = 1;
+    if (ÂãÁ === åä) {
+      Àaä = 1;
+    } else if (ÂãÁ === 2) {
+      ÁÄA = Áå;
     }
   }
   ;
-  function x() {
-    p = Aa;
-    M.Äâ(áÅ.Àå);
-    q = åâ;
-    r = AÂ;
-    s = ÅÁ;
-    t = âã;
-    u = 0;
+  function ÂÁÃ() {
+    Áäå = Aa;
+    äAÁ.Äâ(áÅ.Àå);
+    Àaá = åâ;
+    ÃäÃ = AÂ;
+    Àaä = ÅÁ;
+    ÁÄA = âã;
+    ÂÅÀ = 0;
     Aá.aaÁ();
   }
   ;
-  var y = áÅ.åá(63, 28, ["img/addteam-button-out.png", "img/addteam-button-in.png", "img/addteam-button-click.png"]);
-  var z = áÅ.åá(44, 33, ["img/leave-button-out.png", "img/leave-button-in.png", "img/leave-button-click.png"]);
-  var A = áÅ.åá(44, 33, ["img/lockteam-button-out.png", "img/lockteam-button-in.png", "img/lockteam-button-click.png"]);
-  var B = áÅ.åá(44, 33, ["img/unlockteam-button-out.png", "img/unlockteam-button-in.png", "img/unlockteam-button-click.png"]);
-  var C = áÅ.åá(44, 33, ["img/delete-button-out.png", "img/delete-button-in.png", "img/delete-button-click.png"]);
-  var D = áÅ.åá(44, 33, ["img/delete-button-out.png", "img/delete-button-in.png", "img/delete-button-click.png"]);
-  var E = áÅ.åá(44, 33, ["img/join-button-out.png", "img/join-button-in.png", "img/join-button-click.png"]);
-  var F = áÅ.åá(71, 46, ["img/craft-button-out.png", "img/craft-button-in.png", "img/craft-button-click.png"]);
-  var G = áÅ.åá(71, 46, ["img/cancel-craft-button-out.png", "img/cancel-craft-button-in.png", "img/cancel-craft-button-click.png"]);
-  var H = áÅ.åá(71, 46, ["img/unlock-button-out.png", "img/unlock-button-in.png", "img/unlock-button-click.png"]);
-  var I = áÅ.åá(64, 63, ["img/bag-button-out.png", "img/bag-button-in.png", "img/bag-button-click.png"]);
-  I.open = 0;
-  var J = [];
-  var K = [];
-  var L = Aa;
-  var M = áÅ.åá(43, 43, ["img/close-box-out.png", "img/close-box-in.png", "img/close-box-click.png"]);
-  var N = [áá.ÃA("img/high-particules-out.png"), áá.ÃA("img/high-particules-in.png"), áá.ÃA("img/high-particules-click.png")];
-  var O = [áá.ÃA("img/join-button-out.png"), áá.ÃA("img/join-button-in.png"), áá.ÃA("img/join-button-click.png")];
-  var P = [áá.ÃA("img/remove-button-out.png"), áá.ÃA("img/remove-button-in.png"), áá.ÃA("img/remove-button-click.png")];
-  var Q = áÅ.åá(54, 42, null, N);
-  var R = [áá.ÃA("img/low-particules-out.png"), áá.ÃA("img/low-particules-in.png"), áá.ÃA("img/low-particules-click.png")];
-  var S = áÅ.åá(54, 42, null, R);
-  var T = [áá.ÃA("img/no-particules-out.png"), áá.ÃA("img/no-particules-in.png"), áá.ÃA("img/no-particules-click.png")];
-  var U = áÅ.åá(54, 42, null, T);
-  var V = [áá.ÃA("img/fuel-button-out.png"), áá.ÃA("img/fuel-button-in.png"), áá.ÃA("img/fuel-button-click.png")];
-  var W = áÅ.åá(46, 46, null, V);
-  var X = [áá.ÃA("img/fuel1-button-out.png"), áá.ÃA("img/fuel1-button-in.png"), áá.ÃA("img/fuel1-button-click.png")];
-  var Y = áÅ.åá(46, 46, null, X);
-  var Z = [áá.ÃA("img/energy-cells-button-out.png"), áá.ÃA("img/energy-cells-button-in.png"), áá.ÃA("img/energy-cells-button-click.png")];
-  var a0 = áÅ.åá(46, 46, null, Z);
-  var a1 = [áá.ÃA("img/high-resolution-out.png"), áá.ÃA("img/high-resolution-in.png"), áá.ÃA("img/high-resolution-click.png")];
-  var a2 = áÅ.åá(54, 42, null, a1);
-  var a3 = [áá.ÃA("img/medium-resolution-out.png"), áá.ÃA("img/medium-resolution-in.png"), áá.ÃA("img/medium-resolution-click.png")];
-  var a4 = áÅ.åá(54, 42, null, a3);
-  var a5 = [áá.ÃA("img/low-resolution-out.png"), áá.ÃA("img/low-resolution-in.png"), áá.ÃA("img/low-resolution-click.png")];
-  var a6 = áÅ.åá(54, 42, null, a5);
-  var a7 = [áá.ÃA("img/azerty-button-out.png"), áá.ÃA("img/azerty-button-in.png"), áá.ÃA("img/azerty-button-click.png")];
-  var a8 = áÅ.åá(81, 33, null, a7);
-  var a9 = [áá.ÃA("img/qwerty-button-out.png"), áá.ÃA("img/qwerty-button-in.png"), áá.ÃA("img/qwerty-button-click.png")];
-  var aa = áÅ.åá(87, 33, null, a9);
-  var ab = [áá.ÃA("img/sound-on-out.png"), áá.ÃA("img/sound-on-in.png"), áá.ÃA("img/sound-on-click.png")];
-  var ac = [áá.ÃA("img/sound-off-out.png"), áá.ÃA("img/sound-off-in.png"), áá.ÃA("img/sound-off-click.png")];
-  var ad = áÅ.åá(51, 36, null, ab);
-  var ae = áÅ.åá(51, 36, null, ac);
-  var af = áÅ.åá(51, 36, null, ab);
-  var ag = áÅ.åá(51, 36, null, ac);
-  var ah = [];
-  var ai = -âá;
-  var aj = -Áå;
-  var ak = áá.ÃA("img/inv-empty.png");
-  var al = [ak, ak, ak];
-  var am = [];
-  var an = [];
-  var ao = [];
-  var ap = [];
-  var aq = [];
-  var ar = [];
-  var as = [];
-  var at = [];
-  var au = áÅ.åá(58, 58, null, al);
-  var av = [];
-  var aw = [];
-  var ax = 0;
-  var ay = AÄ;
-  var az = 0;
-  var aA = 0;
-  var aB = 0;
-  var aC = 0;
-  var aD = 0;
-  var aE = 0;
-  function aF() {
+  var aÅâ = áÅ.åá(63, 28, ["img/addteam-button-out.png", "img/addteam-button-in.png", "img/addteam-button-click.png"]);
+  var ÄâÄ = áÅ.åá(44, 33, ["img/leave-button-out.png", "img/leave-button-in.png", "img/leave-button-click.png"]);
+  var Aaå = áÅ.åá(44, 33, ["img/lockteam-button-out.png", "img/lockteam-button-in.png", "img/lockteam-button-click.png"]);
+  var ÁÃÄ = áÅ.åá(44, 33, ["img/unlockteam-button-out.png", "img/unlockteam-button-in.png", "img/unlockteam-button-click.png"]);
+  var âÁå = áÅ.åá(44, 33, ["img/delete-button-out.png", "img/delete-button-in.png", "img/delete-button-click.png"]);
+  var ÂAa = áÅ.åá(44, 33, ["img/delete-button-out.png", "img/delete-button-in.png", "img/delete-button-click.png"]);
+  var aäÀ = áÅ.åá(44, 33, ["img/join-button-out.png", "img/join-button-in.png", "img/join-button-click.png"]);
+  var ÅÅÄ = áÅ.åá(71, 46, ["img/craft-button-out.png", "img/craft-button-in.png", "img/craft-button-click.png"]);
+  var ÅÅa = áÅ.åá(71, 46, ["img/cancel-craft-button-out.png", "img/cancel-craft-button-in.png", "img/cancel-craft-button-click.png"]);
+  var AÂã = áÅ.åá(71, 46, ["img/unlock-button-out.png", "img/unlock-button-in.png", "img/unlock-button-click.png"]);
+  var áÁa = áÅ.åá(64, 63, ["img/bag-button-out.png", "img/bag-button-in.png", "img/bag-button-click.png"]);
+  áÁa.open = 0;
+  var ÃãÁ = [];
+  var âÀÃ = [];
+  var ãÃå = Aa;
+  var äAÁ = áÅ.åá(43, 43, ["img/close-box-out.png", "img/close-box-in.png", "img/close-box-click.png"]);
+  var aÀAâå = [áá.ÃA("img/high-particules-out.png"), áá.ÃA("img/high-particules-in.png"), áá.ÃA("img/high-particules-click.png")];
+  var aÃåãã = [áá.ÃA("img/join-button-out.png"), áá.ÃA("img/join-button-in.png"), áá.ÃA("img/join-button-click.png")];
+  var ÁÂÁãá = [áá.ÃA("img/remove-button-out.png"), áá.ÃA("img/remove-button-in.png"), áá.ÃA("img/remove-button-click.png")];
+  var ÂÀä = áÅ.åá(54, 42, null, aÀAâå);
+  var ÀãÃåÁ = [áá.ÃA("img/low-particules-out.png"), áá.ÃA("img/low-particules-in.png"), áá.ÃA("img/low-particules-click.png")];
+  var äaÁ = áÅ.åá(54, 42, null, ÀãÃåÁ);
+  var äáÀÅA = [áá.ÃA("img/no-particules-out.png"), áá.ÃA("img/no-particules-in.png"), áá.ÃA("img/no-particules-click.png")];
+  var ãAÃ = áÅ.åá(54, 42, null, äáÀÅA);
+  var âáÀãÄ = [áá.ÃA("img/fuel-button-out.png"), áá.ÃA("img/fuel-button-in.png"), áá.ÃA("img/fuel-button-click.png")];
+  var ÅÃÃ = áÅ.åá(46, 46, null, âáÀãÄ);
+  var ÄAãáÂ = [áá.ÃA("img/fuel1-button-out.png"), áá.ÃA("img/fuel1-button-in.png"), áá.ÃA("img/fuel1-button-click.png")];
+  var åAâ = áÅ.åá(46, 46, null, ÄAãáÂ);
+  var áAaÅA = [áá.ÃA("img/energy-cells-button-out.png"), áá.ÃA("img/energy-cells-button-in.png"), áá.ÃA("img/energy-cells-button-click.png")];
+  var åÅå = áÅ.åá(46, 46, null, áAaÅA);
+  var aAÁäÀ = [áá.ÃA("img/high-resolution-out.png"), áá.ÃA("img/high-resolution-in.png"), áá.ÃA("img/high-resolution-click.png")];
+  var aaá = áÅ.åá(54, 42, null, aAÁäÀ);
+  var AáäÂa = [áá.ÃA("img/medium-resolution-out.png"), áá.ÃA("img/medium-resolution-in.png"), áá.ÃA("img/medium-resolution-click.png")];
+  var ãâá = áÅ.åá(54, 42, null, AáäÂa);
+  var ááaâÁ = [áá.ÃA("img/low-resolution-out.png"), áá.ÃA("img/low-resolution-in.png"), áá.ÃA("img/low-resolution-click.png")];
+  var Áaâ = áÅ.åá(54, 42, null, ááaâÁ);
+  var ÅåÀäâ = [áá.ÃA("img/azerty-button-out.png"), áá.ÃA("img/azerty-button-in.png"), áá.ÃA("img/azerty-button-click.png")];
+  var ÄÃÄ = áÅ.åá(81, 33, null, ÅåÀäâ);
+  var ÂääãA = [áá.ÃA("img/qwerty-button-out.png"), áá.ÃA("img/qwerty-button-in.png"), áá.ÃA("img/qwerty-button-click.png")];
+  var ãáâ = áÅ.åá(87, 33, null, ÂääãA);
+  var ÄãÁ = [áá.ÃA("img/sound-on-out.png"), áá.ÃA("img/sound-on-in.png"), áá.ÃA("img/sound-on-click.png")];
+  var Aáa = [áá.ÃA("img/sound-off-out.png"), áá.ÃA("img/sound-off-in.png"), áá.ÃA("img/sound-off-click.png")];
+  var âäÄ = áÅ.åá(51, 36, null, ÄãÁ);
+  var ÂÅã = áÅ.åá(51, 36, null, Aáa);
+  var âÀÄ = áÅ.åá(51, 36, null, ÄãÁ);
+  var Aåâ = áÅ.åá(51, 36, null, Aáa);
+  var AâåÅä = [];
+  var åÂâ = -âá;
+  var âAÀ = -Áå;
+  var Aåa = áá.ÃA("img/inv-empty.png");
+  var âÀÁ = [Aåa, Aåa, Aåa];
+  var ãÃä = [];
+  var áãá = [];
+  var ÃÄá = [];
+  var äåá = [];
+  var âåå = [];
+  var áAA = [];
+  var ÂÂÃ = [];
+  var äÁâ = [];
+  var åÄÁ = áÅ.åá(58, 58, null, âÀÁ);
+  var ÃÁã = [];
+  var ÀÁÃ = [];
+  var aãÄ = 0;
+  var äAÄ = AÄ;
+  var ÁÂå = 0;
+  var AáÂ = 0;
+  var Âaa = 0;
+  var ãÀá = 0;
+  var ÀÅÃ = 0;
+  var ÂÂa = 0;
+  function ÃäÂÃÁ() {
     áÂ.âÂ();
     if (ÀÀ > 5000) {
       áÂ.áÂÄ("[20]");
     }
-    if (o === AÄ) {
+    if (áäâ === AÄ) {
       áÂ.AåáÂá();
       áÂ.åÃâÂã();
     }
@@ -12663,10 +12672,10 @@ var ÀÅ = function () {
     } else {
       áÂ.åÂåâÂ();
     }
-    aG();
+    âÁäÀÃ();
   }
   ;
-  function aG() {
+  function âÁäÀÃ() {
     if (ÁA.Àãa === ÁA.state && ãa === Aá.â.click) {
       if (Aá.â.aÅÁ === äA) {
         Aá.â.click = -1;
@@ -12682,13 +12691,13 @@ var ÀÅ = function () {
       }
     } else if (ÁA.state === ÁA.ÅÁá) {
       if (Aá.â.aÅÁ === 1) {
-        L = ÁÀ;
+        ãÃå = ÁÀ;
         Aá.â.click = ÁÀ;
       } else if (âá === Aá.â.click) {
-        L = ÀÄ;
+        ãÃå = ÀÄ;
         Aá.â.click = 0;
         áÂ.áãaÃâ();
-      } else if (âá === L) {
+      } else if (âá === ãÃå) {
         Aá.â.click = 1;
         Aá.AÁÂ = -ÄÂ;
         áÂ.Åaá();
@@ -12696,331 +12705,331 @@ var ÀÅ = function () {
     }
   }
   ;
-  var aH;
-  var aI;
-  var aJ;
-  var aK;
-  var aL;
-  var aM;
-  var aN;
-  var aO;
-  var aP;
-  var aQ;
-  var aR;
-  var aS;
-  var aT;
-  var aU;
-  var aV;
-  var aW;
-  var aX;
-  var aY;
-  var aZ;
-  function b0() {
-    n = document.getElementById("chatInput");
-    var bu = 68;
-    var bv = äâä[âAä].âåÂÀa + AÂA;
-    for (ä = ãä; ä < bv; ä++) {
-      am.push(áÅ.åá(bu, bu, null, al));
+  var AÀa;
+  var ÅÄÄ;
+  var ÁÃA;
+  var ÃÃA;
+  var áÃâ;
+  var âåä;
+  var âäÅ;
+  var Àáä;
+  var ÁÄÂ;
+  var AäA;
+  var AâÀ;
+  var ÃÂá;
+  var ÀÃÃ;
+  var ââá;
+  var äaâ;
+  var åaÀ;
+  var ÀÀÀÂÁ;
+  var Åãã;
+  var AÅã;
+  function ÁÀÄ() {
+    ÀÁA = document.getElementById("chatInput");
+    var áÅå = 68;
+    var Aå = äâä[âAä].âåÂÀa + AÂA;
+    for (ä = ãä; ä < Aå; ä++) {
+      ãÃä.push(áÅ.åá(áÅå, áÅå, null, âÀÁ));
     }
     for (ä = 0; ãåÁ > ä; ä++) {
-      at.push(áÅ.åá(bu, bu, null, al));
+      äÁâ.push(áÅ.åá(áÅå, áÅå, null, âÀÁ));
     }
-    bu = 49;
+    áÅå = 49;
     for (ä = 0; ä < 35; ä++) {
-      an.push(áÅ.åá(bu, bu, null, al));
+      áãá.push(áÅ.åá(áÅå, áÅå, null, âÀÁ));
     }
-    bu = 40;
+    áÅå = 40;
     for (ä = ãa; ä < Åâã; ä++) {
-      ao.push(áÅ.åá(bu, bu, null, al));
+      ÃÄá.push(áÅ.åá(áÅå, áÅå, null, âÀÁ));
     }
     for (ä = äå; ä < aÀÄ; ä++) {
-      ap.push(áÅ.åá(bu, bu, null, al));
+      äåá.push(áÅ.åá(áÅå, áÅå, null, âÀÁ));
     }
     for (ä = ãa; ä < ÁÁa; ä++) {
-      aq.push(áÅ.åá(bu, bu, null, al));
+      âåå.push(áÅ.åá(áÅå, áÅå, null, âÀÁ));
     }
     for (ä = 0; ÅåÂ > ä; ä++) {
-      as.push(áÅ.åá(29, 27, null, P));
+      ÂÂÃ.push(áÅ.åá(29, 27, null, ÁÂÁãá));
     }
     for (ä = 0; äââÅá > ä; ä++) {
-      ar.push(áÅ.åá(44, 33, null, O));
+      áAA.push(áÅ.åá(44, 33, null, aÃåãã));
     }
-    ÀÅ.äAÁ = x;
-    ÀÅ.ÀÂáAä = w;
-    ÀÅ.ãÃä = am;
-    ÀÅ.áãá = an;
-    ÀÅ.ÃÄá = ao;
-    ÀÅ.åÄÁ = au;
-    ÀÅ.äåá = ap;
-    ÀÅ.âåå = aq;
-    ÀÅ.äÁâ = at;
-    ÀÅ.ÂÂÃ = as;
-    ÀÅ.join = ar;
-    ÀÅ.åÀå = k;
-    ÀÅ.ÃâáÃâ = l;
+    ÀÅ.äAÁ = ÂÁÃ;
+    ÀÅ.ÀÂáAä = äÄäÄå;
+    ÀÅ.ãÃä = ãÃä;
+    ÀÅ.áãá = áãá;
+    ÀÅ.ÃÄá = ÃÄá;
+    ÀÅ.åÄÁ = åÄÁ;
+    ÀÅ.äåá = äåá;
+    ÀÅ.âåå = âåå;
+    ÀÅ.äÁâ = äÁâ;
+    ÀÅ.ÂÂÃ = ÂÂÃ;
+    ÀÅ.join = áAA;
+    ÀÅ.åÀå = åÀå;
+    ÀÅ.ÃâáÃâ = ÃâáÃâ;
     ÀÅ.aÄA = "";
-    ÀÅ.ÃAâåÃ = E;
-    ÀÅ.âääAå = D;
-    ÀÅ.ÃÁã = av;
-    ÀÅ.ÀÁÃ = aw;
+    ÀÅ.ÃAâåÃ = aäÀ;
+    ÀÅ.âääAå = ÂAa;
+    ÀÅ.ÃÁã = ÃÁã;
+    ÀÅ.ÀÁÃ = ÀÁÃ;
     ÀÅ.åÅÃ = AÂ;
     ÀÅ.ÃaÀ = ÀÄ;
     ÀÅ.ÃÄã = 0;
     ÀÅ.Âaá = 0;
     ÀÅ.âaâÃÂ = 0;
     ÀÅ.åaáaÅ = 0;
-    J[aá.ãÃA] = áÅ.åá(42, 42, ["img/building-button-out.png", "img/building-button-in.png", "img/building-button-click.png"]);
-    J[aá.ÁaÃ] = áÅ.åá(42, 42, ["img/skill-button-out.png", "img/skill-button-in.png", "img/skill-button-click.png"]);
-    J[aá.ÁÂá] = áÅ.åá(42, 42, ["img/clothe-button-out.png", "img/clothe-button-in.png", "img/clothe-button-click.png"]);
-    J[aá.ååÃ] = áÅ.åá(42, 42, ["img/plant-button-out.png", "img/plant-button-in.png", "img/plant-button-click.png"]);
-    J[aá.âÁA] = áÅ.åá(42, 42, ["img/medecine-button-out.png", "img/medecine-button-in.png", "img/medecine-button-click.png"]);
-    J[aá.AÄã] = áÅ.åá(42, 42, ["img/resources-button-out.png", "img/resources-button-in.png", "img/resources-button-click.png"]);
-    J[aá.ÄÅá] = áÅ.åá(42, 42, ["img/survival-button-out.png", "img/survival-button-in.png", "img/survival-button-click.png"]);
-    J[aá.ÅÀA] = áÅ.åá(42, 42, ["img/tool-button-out.png", "img/tool-button-in.png", "img/tool-button-click.png"]);
-    J[aá.ÀAÀ] = áÅ.åá(42, 42, ["img/weapon-button-out.png", "img/weapon-button-in.png", "img/weapon-button-click.png"]);
-    J[aá.aâã] = áÅ.åá(42, 42, ["img/cable-button-out.png", "img/cable-button-in.png", "img/cable-button-click.png"]);
-    K[ää.ÁáÂ] = áÅ.åá(42, 42, ["img/own-button-out.png", "img/own-button-in.png", "img/own-button-click.png"]);
-    K[ää.ÂÅå] = áÅ.åá(42, 42, ["img/fire-button-out.png", "img/fire-button-in.png", "img/fire-button-click.png"]);
-    K[ää.Åå] = áÅ.åá(42, 42, ["img/workbench1-button-out.png", "img/workbench1-button-in.png", "img/workbench1-button-click.png"]);
-    K[ää.åÃÁ] = áÅ.åá(42, 42, ["img/bbq-button-out.png", "img/bbq-button-in.png", "img/bbq-button-click.png"]);
-    K[ää.ÀäÁ] = áÅ.åá(42, 42, ["img/composter-button-out.png", "img/composter-button-in.png", "img/composter-button-click.png"]);
-    K[ää.åÃâ] = áÅ.åá(42, 42, ["img/weaving-machine-button-out.png", "img/weaving-machine-button-in.png", "img/weaving-machine-button-click.png"]);
-    K[ää.áÁÄ] = áÅ.åá(42, 42, ["img/welding-machine-button-out.png", "img/welding-machine-button-in.png", "img/welding-machine-button-click.png"]);
-    K[ää.ÄáÁ] = áÅ.åá(42, 42, ["img/workbench2-button-out.png", "img/workbench2-button-in.png", "img/workbench2-button-click.png"]);
-    K[ää.AáÅ] = áÅ.åá(42, 42, ["img/smelter-button-out.png", "img/smelter-button-in.png", "img/smelter-button-click.png"]);
-    K[ää.ÅÂA] = áÅ.åá(42, 42, ["img/workbench3-button-out.png", "img/workbench3-button-in.png", "img/workbench3-button-click.png"]);
-    K[ää.âáå] = áÅ.åá(42, 42, ["img/agitator-button-out.png", "img/agitator-button-in.png", "img/agitator-button-click.png"]);
-    K[ää.ááA] = áÅ.åá(42, 42, ["img/extractor-button-out.png", "img/extractor-button-in.png", "img/extractor-button-click.png"]);
-    K[ää.ããá] = áÅ.åá(42, 42, ["img/feeder-button-out.png", "img/feeder-button-in.png", "img/feeder-button-click.png"]);
-    aH = áÅ.ÄÁã(255, 174, "img/profile-player2.png");
-    aI = áÅ.ÄÁã(269, 267, "img/settings-box.png");
-    aJ = áÅ.ÄÁã(162, 165, "img/chest-box4.png");
-    aK = áÅ.ÄÁã(595, 405, "img/craftbox2.png");
-    aL = áÅ.ÄÁã(412, 412, "img/borderBigMinimap2.png");
-    aM = áÅ.ÄÁã(128, 128, "img/minimap.png");
-    aN = áÅ.ÄÁã(233, 246, "img/leaderboard.png");
-    aO = áÅ.ÄÁã(516, 275, "img/jointeam-box.png");
-    aP = áÅ.ÄÁã(513, 150, "img/memberteam-box.png");
-    aQ = áÅ.åá(40, 40, ["img/full-screen-out.png", "img/full-screen-in.png", "img/full-screen-click.png"]);
-    aR = áÅ.åá(64, 63, ["img/craftbox-button-out.png", "img/craftbox-button-in.png", "img/craftbox-button-click.png"]);
-    aS = áÅ.åá(40, 40, ["img/settings-out.png", "img/settings-in.png", "img/settings-click.png"]);
-    aT = áÅ.åá(40, 40, ["img/minimap-button-out.png", "img/minimap-button-in.png", "img/minimap-button-click.png"]);
-    aU = áÅ.åá(40, 40, ["img/team-button-out.png", "img/team-button-in.png", "img/team-button-click.png"]);
-    aV = áÅ.åá(34, 33, ["img/close-leaderboard-out.png", "img/close-leaderboard-in.png", "img/close-leaderboard-click.png"]);
-    aW = áÅ.åá(34, 33, ["img/open-leaderboard-out.png", "img/open-leaderboard-in.png", "img/open-leaderboard-click.png"]);
-    aX = document.getElementById("chat");
-    aY = aX.style;
-    aZ = {
+    ÃãÁ[aá.ãÃA] = áÅ.åá(42, 42, ["img/building-button-out.png", "img/building-button-in.png", "img/building-button-click.png"]);
+    ÃãÁ[aá.ÁaÃ] = áÅ.åá(42, 42, ["img/skill-button-out.png", "img/skill-button-in.png", "img/skill-button-click.png"]);
+    ÃãÁ[aá.ÁÂá] = áÅ.åá(42, 42, ["img/clothe-button-out.png", "img/clothe-button-in.png", "img/clothe-button-click.png"]);
+    ÃãÁ[aá.ååÃ] = áÅ.åá(42, 42, ["img/plant-button-out.png", "img/plant-button-in.png", "img/plant-button-click.png"]);
+    ÃãÁ[aá.âÁA] = áÅ.åá(42, 42, ["img/medecine-button-out.png", "img/medecine-button-in.png", "img/medecine-button-click.png"]);
+    ÃãÁ[aá.AÄã] = áÅ.åá(42, 42, ["img/resources-button-out.png", "img/resources-button-in.png", "img/resources-button-click.png"]);
+    ÃãÁ[aá.ÄÅá] = áÅ.åá(42, 42, ["img/survival-button-out.png", "img/survival-button-in.png", "img/survival-button-click.png"]);
+    ÃãÁ[aá.ÅÀA] = áÅ.åá(42, 42, ["img/tool-button-out.png", "img/tool-button-in.png", "img/tool-button-click.png"]);
+    ÃãÁ[aá.ÀAÀ] = áÅ.åá(42, 42, ["img/weapon-button-out.png", "img/weapon-button-in.png", "img/weapon-button-click.png"]);
+    ÃãÁ[aá.aâã] = áÅ.åá(42, 42, ["img/cable-button-out.png", "img/cable-button-in.png", "img/cable-button-click.png"]);
+    âÀÃ[ää.ÁáÂ] = áÅ.åá(42, 42, ["img/own-button-out.png", "img/own-button-in.png", "img/own-button-click.png"]);
+    âÀÃ[ää.ÂÅå] = áÅ.åá(42, 42, ["img/fire-button-out.png", "img/fire-button-in.png", "img/fire-button-click.png"]);
+    âÀÃ[ää.Åå] = áÅ.åá(42, 42, ["img/workbench1-button-out.png", "img/workbench1-button-in.png", "img/workbench1-button-click.png"]);
+    âÀÃ[ää.åÃÁ] = áÅ.åá(42, 42, ["img/bbq-button-out.png", "img/bbq-button-in.png", "img/bbq-button-click.png"]);
+    âÀÃ[ää.ÀäÁ] = áÅ.åá(42, 42, ["img/composter-button-out.png", "img/composter-button-in.png", "img/composter-button-click.png"]);
+    âÀÃ[ää.åÃâ] = áÅ.åá(42, 42, ["img/weaving-machine-button-out.png", "img/weaving-machine-button-in.png", "img/weaving-machine-button-click.png"]);
+    âÀÃ[ää.áÁÄ] = áÅ.åá(42, 42, ["img/welding-machine-button-out.png", "img/welding-machine-button-in.png", "img/welding-machine-button-click.png"]);
+    âÀÃ[ää.ÄáÁ] = áÅ.åá(42, 42, ["img/workbench2-button-out.png", "img/workbench2-button-in.png", "img/workbench2-button-click.png"]);
+    âÀÃ[ää.AáÅ] = áÅ.åá(42, 42, ["img/smelter-button-out.png", "img/smelter-button-in.png", "img/smelter-button-click.png"]);
+    âÀÃ[ää.ÅÂA] = áÅ.åá(42, 42, ["img/workbench3-button-out.png", "img/workbench3-button-in.png", "img/workbench3-button-click.png"]);
+    âÀÃ[ää.âáå] = áÅ.åá(42, 42, ["img/agitator-button-out.png", "img/agitator-button-in.png", "img/agitator-button-click.png"]);
+    âÀÃ[ää.ááA] = áÅ.åá(42, 42, ["img/extractor-button-out.png", "img/extractor-button-in.png", "img/extractor-button-click.png"]);
+    âÀÃ[ää.ããá] = áÅ.åá(42, 42, ["img/feeder-button-out.png", "img/feeder-button-in.png", "img/feeder-button-click.png"]);
+    AÀa = áÅ.ÄÁã(255, 174, "img/profile-player2.png");
+    ÅÄÄ = áÅ.ÄÁã(269, 267, "img/settings-box.png");
+    ÁÃA = áÅ.ÄÁã(162, 165, "img/chest-box4.png");
+    ÃÃA = áÅ.ÄÁã(595, 405, "img/craftbox2.png");
+    áÃâ = áÅ.ÄÁã(412, 412, "img/borderBigMinimap2.png");
+    âåä = áÅ.ÄÁã(128, 128, "img/minimap.png");
+    âäÅ = áÅ.ÄÁã(233, 246, "img/leaderboard.png");
+    Àáä = áÅ.ÄÁã(516, 275, "img/jointeam-box.png");
+    ÁÄÂ = áÅ.ÄÁã(513, 150, "img/memberteam-box.png");
+    AäA = áÅ.åá(40, 40, ["img/full-screen-out.png", "img/full-screen-in.png", "img/full-screen-click.png"]);
+    AâÀ = áÅ.åá(64, 63, ["img/craftbox-button-out.png", "img/craftbox-button-in.png", "img/craftbox-button-click.png"]);
+    ÃÂá = áÅ.åá(40, 40, ["img/settings-out.png", "img/settings-in.png", "img/settings-click.png"]);
+    ÀÃÃ = áÅ.åá(40, 40, ["img/minimap-button-out.png", "img/minimap-button-in.png", "img/minimap-button-click.png"]);
+    ââá = áÅ.åá(40, 40, ["img/team-button-out.png", "img/team-button-in.png", "img/team-button-click.png"]);
+    äaâ = áÅ.åá(34, 33, ["img/close-leaderboard-out.png", "img/close-leaderboard-in.png", "img/close-leaderboard-click.png"]);
+    åaÀ = áÅ.åá(34, 33, ["img/open-leaderboard-out.png", "img/open-leaderboard-in.png", "img/open-leaderboard-click.png"]);
+    ÀÀÀÂÁ = document.getElementById("chat");
+    Åãã = ÀÀÀÂÁ.style;
+    AÅã = {
       x: ÁÀ,
       y: äå
     };
   }
   ;
-  var b1;
-  var b2 = new ÁA.ÀÄÄ();
-  var b3 = new ÂÄA.äåå();
-  var b4 = 2000;
-  var b5 = 0;
-  var b6 = Ää.ÁÃ.AÃa;
-  var b7 = 1000;
-  var b8 = ÅÁ;
-  var b9 = Ää.ÁÃ.ÃaÅ;
-  var ba = ÁÀ;
-  var bb = 0;
-  var bc = undefined;
-  function bd(bu) {
-    var bv = Math.floor(bu.changedTouches[åâ].clientX * áá.options.ååA);
-    var bw = Math.floor(bu.changedTouches[0].clientY * áá.options.ÂAÁ);
-    if (aE === 1) {
-      aE = 0;
-    } else if (äA === p) {
-      bm(b2);
-    } else if (aB === 1 && bv >= åäÅ) {
-      aB = 0;
-      b2.clientX = aC;
-      b2.clientY = aD;
-      bm(b2);
+  var áåÅ;
+  var Àã = new ÁA.ÀÄÄ();
+  var aã = new ÂÄA.äåå();
+  var AÁÃ = 2000;
+  var áÁâ = 0;
+  var ÃÃa = Ää.ÁÃ.AÃa;
+  var áÃÃ = 1000;
+  var âäã = ÅÁ;
+  var ÂáÀ = Ää.ÁÃ.ÃaÅ;
+  var ÅÄa = ÁÀ;
+  var áÃÁ = 0;
+  var äÁá = undefined;
+  function äÄä(Åá) {
+    var ááa = Math.floor(Åá.changedTouches[åâ].clientX * áá.options.ååA);
+    var áaá = Math.floor(Åá.changedTouches[0].clientY * áá.options.ÂAÁ);
+    if (ÂÂa === 1) {
+      ÂÂa = 0;
+    } else if (äA === Áäå) {
+      ÃåA(Àã);
+    } else if (Âaa === 1 && ááa >= åäÅ) {
+      Âaa = 0;
+      Àã.clientX = ãÀá;
+      Àã.clientY = ÀÅÃ;
+      ÃåA(Àã);
       return;
-    } else if (ãa === Aá.â.Âáâ.ÀâÅ && åäÅ > bv && bw < äää - ÄÀ * 70) {
-      if (bv < ÄÀ * 240 && bw < ÄÀ * 160) {
-        bm(b2);
+    } else if (ãa === Aá.â.Âáâ.ÀâÅ && åäÅ > ááa && áaá < äää - ÄÀ * 70) {
+      if (ááa < ÄÀ * 240 && áaá < ÄÀ * 160) {
+        ÃåA(Àã);
       }
     } else {
-      bm(b2);
+      ÃåA(Àã);
     }
-    if (äå !== ax) {
-      if (ax & 1) {
-        b3.charCode = 37;
-        bk(b3);
+    if (äå !== aãÄ) {
+      if (aãÄ & 1) {
+        aã.charCode = 37;
+        ÅãÁ(aã);
       }
-      if (ax & 2) {
-        b3.charCode = 39;
-        bk(b3);
+      if (aãÄ & 2) {
+        aã.charCode = 39;
+        ÅãÁ(aã);
       }
-      if (ax & 4) {
-        b3.charCode = 38;
-        bk(b3);
+      if (aãÄ & 4) {
+        aã.charCode = 38;
+        ÅãÁ(aã);
       }
-      if (ax & ããã) {
-        b3.charCode = 40;
-        bk(b3);
+      if (aãÄ & ããã) {
+        aã.charCode = 40;
+        ÅãÁ(aã);
       }
-      ax = AÂ;
+      aãÄ = AÂ;
     }
   }
   ;
-  function be(bu) {}
+  function AAÅ(Åá) {}
   ;
-  function bf(bu) {
-    ÁA.ÄAá(bu, ÁA.Àãa);
-    var bv = AÄ;
-    if (aQ.Åa() === 1) {
-      bv = 1;
+  function aAá(Åá) {
+    ÁA.ÄAá(Åá, ÁA.Àãa);
+    var åÄ = AÄ;
+    if (AäA.Åa() === 1) {
+      åÄ = 1;
     }
-    if (âá === aR.Åa()) {
-      bv = 1;
+    if (âá === AâÀ.Åa()) {
+      åÄ = 1;
     }
-    if (aS.Åa() === âÃ) {
-      bv = aÅ;
+    if (ÃÂá.Åa() === âÃ) {
+      åÄ = aÅ;
     }
-    if (Áå === aT.Åa()) {
-      bv = 1;
+    if (Áå === ÀÃÃ.Åa()) {
+      åÄ = 1;
     }
-    if (aU.Åa() === 1) {
-      bv = ÀA;
+    if (ââá.Åa() === 1) {
+      åÄ = ÀA;
     }
-    if (aV.Åa() === ÄÂ) {
-      bv = Äá;
+    if (äaâ.Åa() === ÄÂ) {
+      åÄ = Äá;
     }
-    if (aW.Åa() === äA) {
-      bv = 1;
+    if (åaÀ.Åa() === äA) {
+      åÄ = 1;
     }
     if (âã !== Aá.â.aãÅ) {
-      if (E.Åa() === 1 || D.Åa() === Âã) {
-        bv = äA;
+      if (aäÀ.Åa() === 1 || ÂAa.Åa() === Âã) {
+        åÄ = äA;
       }
     }
-    if (p === 1) {
-      M.Åa();
-      if (r === ÁÅ) {
-        a8.Åa();
-        aa.Åa();
-        a2.Åa();
-        a4.Åa();
-        a6.Åa();
-        ad.Åa();
-        ae.Åa();
-        af.Åa();
-        ag.Åa();
-        S.Åa();
-        Q.Åa();
-        U.Åa();
-      } else if (åÀ === s) {
+    if (Áäå === 1) {
+      äAÁ.Åa();
+      if (ÃäÃ === ÁÅ) {
+        ÄÃÄ.Åa();
+        ãáâ.Åa();
+        aaá.Åa();
+        ãâá.Åa();
+        Áaâ.Åa();
+        âäÄ.Åa();
+        ÂÅã.Åa();
+        âÀÄ.Åa();
+        Aåâ.Åa();
+        äaÁ.Åa();
+        ÂÀä.Åa();
+        ãAÃ.Åa();
+      } else if (åÀ === Àaä) {
         if (Aá.â.ãåÄ === -1) {
           if (Aá.â.âáä === ÄÁ || ÀA === Aá.â.Aáá) {
-            F.Åa();
+            ÅÅÄ.Åa();
           } else {
-            G.Åa();
+            ÅÅa.Åa();
           }
           if ((Aá.â.ÄaA === ää.ÂÅå || Aá.â.ÄaA === ää.åÃÁ || Aá.â.ÄaA === ää.ÀäÁ) && ÃÁA !== Aá.â.aä.Ââ) {
-            W.Åa();
+            ÅÃÃ.Åa();
           } else if ((ää.AáÅ === Aá.â.ÄaA || ää.ááA === Aá.â.ÄaA || ää.âáå === Aá.â.ÄaA) && Aá.â.aä.Ââ !== 255) {
-            Y.Åa();
+            åAâ.Åa();
           } else if (ää.ããá === Aá.â.ÄaA && Aá.â.aä.Ââ !== Àãã) {
-            a0.Åa();
+            åÅå.Åa();
           }
         } else {
-          H.Åa();
+          AÂã.Åa();
         }
-        for (var bw = âã; bw < J.length; bw++) {
-          J[bw].Åa();
+        for (var ä = âã; ä < ÃãÁ.length; ä++) {
+          ÃãÁ[ä].Åa();
         }
-        for (bw = 0; K.length > bw; bw++) {
-          if (Aá.â.ÂaA === bw || bw === 0) {
-            K[bw].Åa();
+        for (ä = 0; âÀÃ.length > ä; ä++) {
+          if (Aá.â.ÂaA === ä || ä === 0) {
+            âÀÃ[ä].Åa();
           }
         }
-        var bx = Aá.â.ãÀÅ;
-        for (var bw = ÄÁ; bx > bw; bw++) {
-          an[bw].Åa();
+        var Aå = Aá.â.ãÀÅ;
+        for (var ä = ÄÁ; Aå > ä; ä++) {
+          áãá[ä].Åa();
         }
-        bx = Aá.â.åÂa;
-        for (bw = áÁ; bx > bw; bw++) {
-          ao[bw].Åa();
+        Aå = Aá.â.åÂa;
+        for (ä = áÁ; Aå > ä; ä++) {
+          ÃÄá[ä].Åa();
         }
         if (Aá.â.Aáá === åä) {
-          for (bw = äå; Aá.â.aä.Aå > bw; bw++) {
-            ap[bw].Åa();
+          for (ä = äå; Aá.â.aä.Aå > ä; ä++) {
+            äåá[ä].Åa();
           }
         }
-        bx = Aá.â.âÁÃ;
-        for (bw = 0; bw < bx; bw++) {
-          aq[bw].Åa();
+        Aå = Aá.â.âÁÃ;
+        for (ä = 0; ä < Aå; ä++) {
+          âåå[ä].Åa();
         }
-        au.Åa();
+        åÄÁ.Åa();
       }
     }
-    var by = Aá.â.ãÃä;
-    var bx = by.length;
-    if (bx > 10 && I.Åa() === 1) {
-      bv = Àâ;
+    var áä = Aá.â.ãÃä;
+    var Aå = áä.length;
+    if (Aå > 10 && áÁa.Åa() === 1) {
+      åÄ = Àâ;
     }
-    for (var bw = ÅÁ; bx > bw; bw++) {
-      if (bw > ãÀâÁã && I.open === 0) {
+    for (var ä = ÅÁ; Aå > ä; ä++) {
+      if (ä > ãÀâÁã && áÁa.open === 0) {
         break;
       }
-      if (am[bw].Åa() === Áå) {
-        bv = Âã;
-        if (by[bw][0] !== 0) {
-          var bz = Aá.â.Âáâ;
-          if (bz.ÀâÅ === 0) {
-            bz.ÀâÅ = 1;
-            bz.x = ÁA.x;
-            bz.y = ÁA.y;
-            bz.id = bw;
+      if (ãÃä[ä].Åa() === Áå) {
+        åÄ = Âã;
+        if (áä[ä][0] !== 0) {
+          var Âáâ = Aá.â.Âáâ;
+          if (Âáâ.ÀâÅ === 0) {
+            Âáâ.ÀâÅ = 1;
+            Âáâ.x = ÁA.x;
+            Âáâ.y = ÁA.y;
+            Âáâ.id = ä;
           }
         }
-      } else if (t === 1) {
-        var bA = Aá.â.äÁâ;
-        for (var bB = 0; bB < åäá; bB++) {
-          if (ÅÁ !== bA[bB][0]) {
-            at[bB].Åa();
+      } else if (ÁÄA === 1) {
+        var Ãåä = Aá.â.äÁâ;
+        for (var åÃÄ = 0; åÃÄ < åäá; åÃÄ++) {
+          if (ÅÁ !== Ãåä[åÃÄ][0]) {
+            äÁâ[åÃÄ].Åa();
           }
         }
-      } else if (u === aÅ) {
+      } else if (ÂÅÀ === aÅ) {
         if (-ãâ === Aá.â.Aâ) {
-          y.Åa();
-          var bC = AÂ;
-          for (var bw = åâ; bw < ar.length; bw++) {
-            if (ÅÁ !== Aá.Ááä[bw].ãaã) {
-              ar[bC].Åa();
-              bC++;
+          aÅâ.Åa();
+          var åã = AÂ;
+          for (var ä = åâ; ä < áAA.length; ä++) {
+            if (ÅÁ !== Aá.Ááä[ä].ãaã) {
+              áAA[åã].Åa();
+              åã++;
             }
           }
         } else if (Aá.â.Aäá === âá) {
-          A.Åa();
-          B.Åa();
-          C.Åa();
-          var bC = 0;
-          var bD = Aá.Ááä[Aá.â.Aâ];
-          for (var bw = 0; Aá.ÂÅ.length > bw; bw++) {
-            if (bw === Aá.â.id) {
-              bC++;
+          Aaå.Åa();
+          ÁÃÄ.Åa();
+          âÁå.Åa();
+          var åã = 0;
+          var Aâ = Aá.Ááä[Aá.â.Aâ];
+          for (var ä = 0; Aá.ÂÅ.length > ä; ä++) {
+            if (ä === Aá.â.id) {
+              åã++;
               continue;
             }
-            var bE = Aá.ÂÅ[bw];
-            if (bD.id === bE.Aâ && bE.åÂå === bD.äâÂ) {
-              as[bC].Åa();
-              bC++;
+            var â = Aá.ÂÅ[ä];
+            if (Aâ.id === â.Aâ && â.åÂå === Aâ.äâÂ) {
+              ÂÂÃ[åã].Åa();
+              åã++;
             }
           }
         } else {
-          z.Åa();
+          ÄâÄ.Åa();
         }
       }
     }
-    if (bv === 0 && âã === p) {
-      L = ãå;
+    if (åÄ === 0 && âã === Áäå) {
+      ãÃå = ãå;
       if (Aá.â.click === -1) {
         Aá.â.click = áÃ;
       }
@@ -13029,315 +13038,315 @@ var ÀÅ = function () {
     }
   }
   ;
-  function bg(bu) {
-    var bv = AÄ;
-    for (var bw = ÁÀ; bu.touches.length > bw; bw++) {
-      ÁA.Âãå(b2, bu, bu.touches[bw]);
-      if (äå !== I.open) {
-        var bx = ÁA.state;
-        ÁA.ÄAá(b2, ÁA.Àãa);
-        ÁA.state = bx;
-        var by = Aá.â.ãÃä;
-        var bz = 0;
-        for (var bA = ãÄä; by.length > bA; bA++) {
-          if (by[bA][áÁ] !== 0) {
-            if (am[bA].Åa() === Àâ) {
-              bz = 1;
+  function AÀÅ(Åá) {
+    var ÃäÂ = AÄ;
+    for (var áÅa = ÁÀ; Åá.touches.length > áÅa; áÅa++) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[áÅa]);
+      if (äå !== áÁa.open) {
+        var AÂÅâÄ = ÁA.state;
+        ÁA.ÄAá(Àã, ÁA.Àãa);
+        ÁA.state = AÂÅâÄ;
+        var áä = Aá.â.ãÃä;
+        var aÄâ = 0;
+        for (var ä = ãÄä; áä.length > ä; ä++) {
+          if (áä[ä][áÁ] !== 0) {
+            if (ãÃä[ä].Åa() === Àâ) {
+              aÄâ = 1;
               break;
             }
           }
         }
-        if (bz === 1) {
-          bf(b2);
+        if (aÄâ === 1) {
+          aAá(Àã);
           continue;
         }
       }
-      if (ÄÁ === Aá.â.Âáâ.ÀâÅ && ÀÄ === p) {
-        var bB = Math.floor(áá.options.ååA * b2.clientX);
-        var bC = Math.floor(áá.options.ÂAÁ * b2.clientY);
+      if (ÄÁ === Aá.â.Âáâ.ÀâÅ && ÀÄ === Áäå) {
+        var ááa = Math.floor(áá.options.ååA * Àã.clientX);
+        var áaá = Math.floor(áá.options.ÂAÁ * Àã.clientY);
         switch (Aá.â.AÁÂ) {
           case Åaa:
-            if (Aá.â.ÄaÃ === 1 && ÀÅ.âaâÃÂ < bB && bC > ÀÅ.åaáaÅ && ÀÅ.âaâÃÂ + ÀÅ.ÃÄã > bB && ÀÅ.åaáaÅ + ÀÅ.Âaá > bC) {
-              aE = ãå;
-              b3.keyCode = 70;
-              b3.charCode = 70;
-              bk(b3);
+            if (Aá.â.ÄaÃ === 1 && ÀÅ.âaâÃÂ < ááa && áaá > ÀÅ.åaáaÅ && ÀÅ.âaâÃÂ + ÀÅ.ÃÄã > ááa && ÀÅ.åaáaÅ + ÀÅ.Âaá > áaá) {
+              ÂÂa = ãå;
+              aã.keyCode = 70;
+              aã.charCode = 70;
+              ÅãÁ(aã);
               continue;
             }
           case 0:
-            if (ÀÅ.åÅÃ < bB && ÀÅ.ÃaÀ < bC && ÀÅ.åÅÃ + ÀÅ.ÃÄã > bB && bC < ÀÅ.ÃaÀ + ÀÅ.Âaá) {
-              aE = 1;
-              b3.keyCode = 69;
-              b3.charCode = 69;
-              bk(b3);
+            if (ÀÅ.åÅÃ < ááa && ÀÅ.ÃaÀ < áaá && ÀÅ.åÅÃ + ÀÅ.ÃÄã > ááa && áaá < ÀÅ.ÃaÀ + ÀÅ.Âaá) {
+              ÂÂa = 1;
+              aã.keyCode = 69;
+              aã.charCode = 69;
+              ÅãÁ(aã);
               continue;
             }
             break;
         }
-        if (äää - ÄÀ * 70 > bC) {
-          var bD = ãÂÁ * 1.5;
-          var bE = ãÂÁ / 4;
-          if (bB < åäÅ) {
-            var bF = ÄÀ * 30;
-            ay = áâA.angle(åäÅ - bD, ÂáÅ + bE, bB, bC);
-            az = Math.min(áâA.ÃÂ(bB, bC, åäÅ - bD, ÂáÅ + bE), 25);
-            if (bB < åäÅ - bD - bF) {
-              ax |= Äá;
-              b3.charCode = 37;
-              b3.keyCode = 37;
-              bs(b3);
-            } else if (åäÅ - bD + bF < bB) {
-              ax |= 2;
-              b3.charCode = 39;
-              b3.keyCode = 39;
-              bs(b3);
+        if (äää - ÄÀ * 70 > áaá) {
+          var ÀAä = ãÂÁ * 1.5;
+          var áÀä = ãÂÁ / 4;
+          if (ááa < åäÅ) {
+            var ÁÂã = ÄÀ * 30;
+            äAÄ = áâA.angle(åäÅ - ÀAä, ÂáÅ + áÀä, ááa, áaá);
+            ÁÂå = Math.min(áâA.ÃÂ(ááa, áaá, åäÅ - ÀAä, ÂáÅ + áÀä), 25);
+            if (ááa < åäÅ - ÀAä - ÁÂã) {
+              aãÄ |= Äá;
+              aã.charCode = 37;
+              aã.keyCode = 37;
+              áAÅ(aã);
+            } else if (åäÅ - ÀAä + ÁÂã < ááa) {
+              aãÄ |= 2;
+              aã.charCode = 39;
+              aã.keyCode = 39;
+              áAÅ(aã);
             }
-            if (bC < ÂáÅ + bE - bF) {
-              ax |= ÄAÄ;
-              b3.charCode = 38;
-              b3.keyCode = 38;
-              bs(b3);
-            } else if (ÂáÅ + bE + bF < bC) {
-              ax |= 8;
-              b3.charCode = 40;
-              b3.keyCode = 40;
-              bs(b3);
+            if (áaá < ÂáÅ + áÀä - ÁÂã) {
+              aãÄ |= ÄAÄ;
+              aã.charCode = 38;
+              aã.keyCode = 38;
+              áAÅ(aã);
+            } else if (ÂáÅ + áÀä + ÁÂã < áaá) {
+              aãÄ |= 8;
+              aã.charCode = 40;
+              aã.keyCode = 40;
+              áAÅ(aã);
             }
-          } else if (aãA - ÄÀ * 40 > bB || bC > ÄÀ * 40) {
-            bv = ãâ;
-            b2.clientX -= bD / áá.options.ååA;
-            b2.clientY -= bE / áá.options.ååA;
+          } else if (aãA - ÄÀ * 40 > ááa || áaá > ÄÀ * 40) {
+            ÃäÂ = ãâ;
+            Àã.clientX -= ÀAä / áá.options.ååA;
+            Àã.clientY -= áÀä / áá.options.ååA;
             if (Aá.â.aÅÁ === 1) {
-              var bG = Date.now();
-              if (bG - aA < 1000) {
-                aB = 1;
-                aC = b2.clientX;
-                aD = b2.clientY;
-                bf(b2);
+              var aaâ = Date.now();
+              if (aaâ - AáÂ < 1000) {
+                Âaa = 1;
+                ãÀá = Àã.clientX;
+                ÀÅÃ = Àã.clientY;
+                aAá(Àã);
               }
-              aA = bG;
+              AáÂ = aaâ;
             } else {
-              aB = ÄÂ;
-              aC = b2.clientX;
-              aD = b2.clientY;
-              bf(b2);
+              Âaa = ÄÂ;
+              ãÀá = Àã.clientX;
+              ÀÅÃ = Àã.clientY;
+              aAá(Àã);
             }
           }
           continue;
         }
       }
-      if (bv === áÃ && ax === áÃ) {
-        bf(b2);
-        bv = 1;
+      if (ÃäÂ === áÃ && aãÄ === áÃ) {
+        aAá(Àã);
+        ÃäÂ = 1;
       }
     }
   }
   ;
-  function bh() {
+  function Äåä() {
     if (ãä === äã) {
-      window.removeEventListener("mousedown", bf, ÄÃÀ);
+      window.removeEventListener("mousedown", aAá, ÄÃÀ);
     }
     if (äã === ÀÄ) {
-      window.removeEventListener("mouseup", bm, false);
+      window.removeEventListener("mouseup", ÃåA, false);
     }
     if (äã === Aa) {
-      window.removeEventListener("mousemove", bo, false);
+      window.removeEventListener("mousemove", aÂÀ, false);
     }
     if (äã === 0) {
-      window.removeEventListener("keyup", bk, ãÂäáä);
+      window.removeEventListener("keyup", ÅãÁ, ãÂäáä);
     }
     if (åâ === äã) {
-      window.removeEventListener("keydown", bs, false);
+      window.removeEventListener("keydown", áAÅ, false);
     }
     if (Áå === äã) {
-      window.removeEventListener("touchstart", bg, ÅAÁ);
+      window.removeEventListener("touchstart", AÀÅ, ÅAÁ);
     }
     if (åä === äã) {
-      window.removeEventListener("touchend", bd, false);
+      window.removeEventListener("touchend", äÄä, false);
     }
     if (äã === 1) {
-      window.removeEventListener("touchcancel", be, ÄAÁÃÃ);
+      window.removeEventListener("touchcancel", AAÅ, ÄAÁÃÃ);
     }
     if (äã === 1) {
-      window.removeEventListener("touchmove", bi, Áââ);
+      window.removeEventListener("touchmove", áãÃ, Áââ);
     }
   }
   ;
-  function bi(bu) {
-    var bv = 0;
-    var bw = ãa;
-    for (var bx = 0; bx < bu.touches.length; bx++) {
-      ÁA.Âãå(b2, bu, bu.touches[bx]);
-      if (I.open !== ÁÀ) {
-        var by = Aá.â.ãÃä;
-        var bz = åâ;
-        for (var bA = 10; bA < by.length; bA++) {
-          if (by[bA][ãä] !== ãa) {
-            if (am[bA].Åa() === åä) {
-              bz = 1;
+  function áãÃ(Åá) {
+    var ÃäÂ = 0;
+    var åÁå = ãa;
+    for (var áÅa = 0; áÅa < Åá.touches.length; áÅa++) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[áÅa]);
+      if (áÁa.open !== ÁÀ) {
+        var áä = Aá.â.ãÃä;
+        var aÄâ = åâ;
+        for (var ä = 10; ä < áä.length; ä++) {
+          if (áä[ä][ãä] !== ãa) {
+            if (ãÃä[ä].Åa() === åä) {
+              aÄâ = 1;
               break;
             }
           }
         }
-        if (ÁÅ === bz) {
-          bo(b2);
+        if (ÁÅ === aÄâ) {
+          aÂÀ(Àã);
           continue;
         }
       }
-      if (Aá.â.Âáâ.ÀâÅ === 0 && p === 0) {
-        var bB = Math.floor(áá.options.ååA * b2.clientX);
-        var bC = Math.floor(b2.clientY * áá.options.ÂAÁ);
-        if (äää - ÄÀ * 70 > bC) {
-          var bD = ãÂÁ * 1.5;
-          var bE = ãÂÁ / 4;
-          if (bB < åäÅ) {
-            bw = ÂA;
-            var bF = 0;
-            var bG = ÄÀ * 30;
-            ay = áâA.angle(åäÅ - bD, ÂáÅ + bE, bB, bC);
-            az = Math.min(áâA.ÃÂ(bB, bC, åäÅ - bD, ÂáÅ + bE), 25);
-            if (åäÅ - bD - bG > bB) {
-              bF |= ÄÂ;
-            } else if (bB > åäÅ - bD + bG) {
-              bF |= 2;
+      if (Aá.â.Âáâ.ÀâÅ === 0 && Áäå === 0) {
+        var ááa = Math.floor(áá.options.ååA * Àã.clientX);
+        var áaá = Math.floor(Àã.clientY * áá.options.ÂAÁ);
+        if (äää - ÄÀ * 70 > áaá) {
+          var ÀAä = ãÂÁ * 1.5;
+          var áÀä = ãÂÁ / 4;
+          if (ááa < åäÅ) {
+            åÁå = ÂA;
+            var áãÀ = 0;
+            var ÁÂã = ÄÀ * 30;
+            äAÄ = áâA.angle(åäÅ - ÀAä, ÂáÅ + áÀä, ááa, áaá);
+            ÁÂå = Math.min(áâA.ÃÂ(ááa, áaá, åäÅ - ÀAä, ÂáÅ + áÀä), 25);
+            if (åäÅ - ÀAä - ÁÂã > ááa) {
+              áãÀ |= ÄÂ;
+            } else if (ááa > åäÅ - ÀAä + ÁÂã) {
+              áãÀ |= 2;
             }
-            if (bC < ÂáÅ + bE + -bG) {
-              bF |= ÄAÄ;
-            } else if (ÂáÅ + bE + bG < bC) {
-              bF |= 8;
+            if (áaá < ÂáÅ + áÀä + -ÁÂã) {
+              áãÀ |= ÄAÄ;
+            } else if (ÂáÅ + áÀä + ÁÂã < áaá) {
+              áãÀ |= 8;
             }
-            if ((bF & 1) === 1 && (ax & 1) !== 1) {
-              b3.charCode = 37;
-              bs(b3);
-            } else if (Âã !== (bF & 1) && (ax & ãå) === 1) {
-              b3.charCode = 37;
-              bk(b3);
+            if ((áãÀ & 1) === 1 && (aãÄ & 1) !== 1) {
+              aã.charCode = 37;
+              áAÅ(aã);
+            } else if (Âã !== (áãÀ & 1) && (aãÄ & ãå) === 1) {
+              aã.charCode = 37;
+              ÅãÁ(aã);
             }
-            if ((bF & ãÄá) === ÅÂÂ && (ax & 2) !== 2) {
-              b3.charCode = 39;
-              bs(b3);
-            } else if (ÄÀã !== (bF & 2) && ÄäÀ === (ax & aâA)) {
-              b3.charCode = 39;
-              bk(b3);
+            if ((áãÀ & ãÄá) === ÅÂÂ && (aãÄ & 2) !== 2) {
+              aã.charCode = 39;
+              áAÅ(aã);
+            } else if (ÄÀã !== (áãÀ & 2) && ÄäÀ === (aãÄ & aâA)) {
+              aã.charCode = 39;
+              ÅãÁ(aã);
             }
-            if ((bF & 4) === 4 && åÁá !== (ax & ÃaÂ)) {
-              b3.charCode = 38;
-              bs(b3);
-            } else if ((bF & åÃÃ) !== 4 && (ax & ÃÄâÂÅ) === 4) {
-              b3.charCode = 38;
-              bk(b3);
+            if ((áãÀ & 4) === 4 && åÁá !== (aãÄ & ÃaÂ)) {
+              aã.charCode = 38;
+              áAÅ(aã);
+            } else if ((áãÀ & åÃÃ) !== 4 && (aãÄ & ÃÄâÂÅ) === 4) {
+              aã.charCode = 38;
+              ÅãÁ(aã);
             }
-            if ((bF & 8) === 8 && (ax & ááä) !== 8) {
-              b3.charCode = 40;
-              bs(b3);
-            } else if ((bF & 8) !== 8 && (ax & 8) === Àaã) {
-              b3.charCode = 40;
-              bk(b3);
+            if ((áãÀ & 8) === 8 && (aãÄ & ááä) !== 8) {
+              aã.charCode = 40;
+              áAÅ(aã);
+            } else if ((áãÀ & 8) !== 8 && (aãÄ & 8) === Àaã) {
+              aã.charCode = 40;
+              ÅãÁ(aã);
             }
-            ax = bF;
+            aãÄ = áãÀ;
             continue;
-          } else if (aãA - ÄÀ * 40 > bB || ÄÀ * 40 < bC) {
-            bv = ÁÅ;
-            b2.clientX -= bD / áá.options.ååA;
-            b2.clientY -= bE / áá.options.ååA;
-            aC = b2.clientX;
-            aD = b2.clientY;
-            bo(b2);
+          } else if (aãA - ÄÀ * 40 > ááa || ÄÀ * 40 < áaá) {
+            ÃäÂ = ÁÅ;
+            Àã.clientX -= ÀAä / áá.options.ååA;
+            Àã.clientY -= áÀä / áá.options.ååA;
+            ãÀá = Àã.clientX;
+            ÀÅÃ = Àã.clientY;
+            aÂÀ(Àã);
           }
         }
       }
-      if (bv === 0 && ax === 0) {
-        bo(b2);
-        bv = 1;
+      if (ÃäÂ === 0 && aãÄ === 0) {
+        aÂÀ(Àã);
+        ÃäÂ = 1;
       }
     }
-    if (ãÂ === bw && ax !== 0) {
-      if (ax & 1) {
-        b3.charCode = 37;
-        bk(b3);
+    if (ãÂ === åÁå && aãÄ !== 0) {
+      if (aãÄ & 1) {
+        aã.charCode = 37;
+        ÅãÁ(aã);
       }
-      if (ax & ããÄ) {
-        b3.charCode = 39;
-        bk(b3);
+      if (aãÄ & ããÄ) {
+        aã.charCode = 39;
+        ÅãÁ(aã);
       }
-      if (ax & 4) {
-        b3.charCode = 38;
-        bk(b3);
+      if (aãÄ & 4) {
+        aã.charCode = 38;
+        ÅãÁ(aã);
       }
-      if (ax & aÀÃ) {
-        b3.charCode = 40;
-        bk(b3);
+      if (aãÄ & aÀÃ) {
+        aã.charCode = 40;
+        ÅãÁ(aã);
       }
-      ax = ÁÀ;
+      aãÄ = ÁÀ;
     }
   }
   ;
-  function bj() {
-    return o;
+  function zxcnemo() {
+    return áäâ;
   }
-  function bk(bu) {
-    ÂÄA.ÅÃa(bu);
-    if (u === 1 && Aá.â.Aâ === -Áå) {
-      if (âÂá === bu.keyCode && ÀÅ.aÄA.length > 0) {
+  function ÅãÁ(Åá) {
+    ÂÄA.ÅÃa(Åá);
+    if (ÂÅÀ === 1 && Aá.â.Aâ === -Áå) {
+      if (âÂá === Åá.keyCode && ÀÅ.aÄA.length > 0) {
         ÀÅ.aÄA = ÀÅ.aÄA.substring(0, ÀÅ.aÄA.length - 1);
-        bu.preventDefault();
+        Åá.preventDefault();
         return;
-      } else if (bu.keyCode >= 65 && bu.keyCode <= 90 || bu.keyCode >= 48 && bu.keyCode <= 57) {
+      } else if (Åá.keyCode >= 65 && Åá.keyCode <= 90 || Åá.keyCode >= 48 && Åá.keyCode <= 57) {
         if (ÀÅ.aÄA.length < 5) {
-          ÀÅ.aÄA += String.fromCharCode(bu.keyCode);
+          ÀÅ.aÄA += String.fromCharCode(Åá.keyCode);
         }
       }
-    } else if (Äá === o && bu.keyCode === 27) {
-      o = ÀÄ;
-      aY.display = "none";
-    } else if (ÃAÁAa === bu.keyCode) {
-      if (Àâ === o) {
-        if (n.value.length > 0) {
-          if (Aá.â.aâå === âá && n.value[0] === "!") {
-            if (n.value === "!pos") {
+    } else if (Äá === áäâ && Åá.keyCode === 27) {
+      áäâ = ÀÄ;
+      Åãã.display = "none";
+    } else if (ÃAÁAa === Åá.keyCode) {
+      if (Àâ === áäâ) {
+        if (ÀÁA.value.length > 0) {
+          if (Aá.â.aâå === âá && ÀÁA.value[0] === "!") {
+            if (ÀÁA.value === "!pos") {
               Aá.ÂÅ[Aá.â.id].text.push(Math.floor(Aá.â.x / ÁAÅ) + ":" + Math.floor(Aá.â.y / Åáa));
             } else {
-              var bv = n.value.split("!");
-              for (var bw = 1; bv.length > bw; bw++) {
-                var bx = "!" + bv[bw];
-                if (bx.indexOf("public") === -aÅ) {
-                  bx = bx.split(" ").join("");
+              var åAäáÁ = ÀÁA.value.split("!");
+              for (var ä = 1; åAäáÁ.length > ä; ä++) {
+                var åãÅ = "!" + åAäáÁ[ä];
+                if (åãÅ.indexOf("public") === -aÅ) {
+                  åãÅ = åãÅ.split(" ").join("");
                 }
-                áÂ.ÀÄã(bx);
-                if (Äâä >= bw) {
-                  Aá.ÂÅ[Aá.â.id].text.push(bx);
+                áÂ.ÀÄã(åãÅ);
+                if (Äâä >= ä) {
+                  Aá.ÂÅ[Aá.â.id].text.push(åãÅ);
                 }
               }
             }
           } else {
-            var by = áÂ.ÀÄã(n.value);
-            if (by !== 0) {
-              Aá.ÂÅ[Aá.â.id].text.push("I am muted during " + Math.floor(by / 1000) + " seconds");
+            var åÁ = áÂ.ÀÄã(ÀÁA.value);
+            if (åÁ !== 0) {
+              Aá.ÂÅ[Aá.â.id].text.push("I am muted during " + Math.floor(åÁ / 1000) + " seconds");
             } else {
-              Aá.ÂÅ[Aá.â.id].text.push(n.value);
+              Aá.ÂÅ[Aá.â.id].text.push(ÀÁA.value);
             }
           }
         }
-        o = Aa;
-        n.value = "";
-        aY.display = "none";
+        áäâ = Aa;
+        ÀÁA.value = "";
+        Åãã.display = "none";
       } else {
-        o = âa;
-        aY.display = "inline-block";
-        n.focus();
+        áäâ = âa;
+        Åãã.display = "inline-block";
+        ÀÁA.focus();
       }
-    } else if (o === 0) {
-      if (bu.keyCode === 77) {
-        if (q === 0) {
-          x();
-          p = ÄÂ;
-          q = 1;
+    } else if (áäâ === 0) {
+      if (Åá.keyCode === 77) {
+        if (Àaá === 0) {
+          ÂÁÃ();
+          Áäå = ÄÂ;
+          Àaá = 1;
           Äå.âå(Äå.AA.open, 1, AÄ);
         } else {
-          x();
+          ÂÁÃ();
           Äå.âå(Äå.AA.open, âa, äå);
         }
-      } else if (bu.keyCode === 69 || bu.keyCode === 32) {
+      } else if (Åá.keyCode === 69 || Åá.keyCode === 32) {
         switch (Aá.â.AÁÂ) {
           case AÄ:
             áÂ.áÂÄ(JSON.stringify([áÀAäå, Aá.â.ãÂÀ]));
@@ -13346,90 +13355,90 @@ var ÀÅ = function () {
             áÂ.áÂÄ(JSON.stringify([Aá.â.áÄå, Aá.â.áÂA, Aá.â.ÃÄÄ]));
             break;
         }
-      } else if (bu.keyCode === 70) {
+      } else if (Åá.keyCode === 70) {
         if (äA === Aá.â.ÄaÃ) {
           áÂ.áÂÄ(JSON.stringify([ääã, Aá.â.ãÂÀ]));
         }
-      } else if (bu.keyCode === 82) {
+      } else if (Åá.keyCode === 82) {
         if (Aá.â.aÅÁ === aÅ) {
           Aá.â.ÀÃÁ = (Aá.â.ÀÃÁ + 1) % 4;
         } else {
           áÂ.áÂÄ(JSON.stringify([13]));
         }
-      } else if (bu.keyCode >= 49 && bu.keyCode <= 57) {
+      } else if (Åá.keyCode >= 49 && Åá.keyCode <= 57) {
         if (Aá.â.Âáâ.ÀâÅ !== 1) {
-          var bw = bu.keyCode - 49;
-          var bz = Aá.â.ãÃä;
-          if (bz.length > bw) {
-            var bA = bz[bw][0];
-            var bB = bz[bw][åÀ];
-            var bC = bz[bw][2];
-            var bD = bz[bw][3];
-            if (bu.altKey) {
-              áÂ.áÂÄ(JSON.stringify([9, bA, bB, bC, bD]));
+          var ä = Åá.keyCode - 49;
+          var áä = Aá.â.ãÃä;
+          if (áä.length > ä) {
+            var Åã = áä[ä][0];
+            var ãÀ = áä[ä][åÀ];
+            var áÃÀ = áä[ä][2];
+            var ÅäÁ = áä[ä][3];
+            if (Åá.altKey) {
+              áÂ.áÂÄ(JSON.stringify([9, Åã, ãÀ, áÃÀ, ÅäÁ]));
               Äå.âå(Äå.AA.ÅÁâåÄ, 1, âã);
-            } else if (bu.ctrlKey) {
+            } else if (Åá.ctrlKey) {
               Äå.âå(Äå.AA.Âáâ, 0.6, äå);
-              áÂ.áÂÄ(JSON.stringify([áÃâaA, bA, bB, bC]));
+              áÂ.áÂÄ(JSON.stringify([áÃâaA, Åã, ãÀ, áÃÀ]));
             } else {
-              áÂ.áÂÄ(JSON.stringify([ããA, bA, bB, bC, bD]));
+              áÂ.áÂÄ(JSON.stringify([ããA, Åã, ãÀ, áÃÀ, ÅäÁ]));
             }
           }
         }
-      } else if (bu.keyCode === 67 && Aá.â.ÀÃã === 0) {
-        if (s === 0) {
-          x();
-          p = 1;
-          s = aÅ;
+      } else if (Åá.keyCode === 67 && Aá.â.ÀÃã === 0) {
+        if (Àaä === 0) {
+          ÂÁÃ();
+          Áäå = 1;
+          Àaä = aÅ;
           Aá.áÀa(ää.ÁáÂ);
           Äå.âå(Äå.AA.open, 1, ãÂ);
         } else {
           Äå.âå(Äå.AA.open, 1, ãa);
-          x();
+          ÂÁÃ();
         }
-      } else if (bu.keyCode === 27 && p === ÁÅ) {
+      } else if (Åá.keyCode === 27 && Áäå === ÁÅ) {
         Äå.âå(Äå.AA.open, âá, 0);
-        x();
+        ÂÁÃ();
       }
     }
   }
   ;
-  function bl() {
-    if (b5 === 1) {
-      bn();
-      if (bb < 0) {
-        b5 = ãÁ;
-        aQ.Äâ(áÅ.Àå);
-        aR.Äâ(áÅ.Àå);
-        aS.Äâ(áÅ.Àå);
-        aT.Äâ(áÅ.Àå);
-        aU.Äâ(áÅ.Àå);
-        aV.Äâ(áÅ.Àå);
-        aW.Äâ(áÅ.Àå);
-        aY.display = "none";
-        b1.ÃÂÅ();
+  function ÀÅá() {
+    if (áÁâ === 1) {
+      âÂ();
+      if (áÃÁ < 0) {
+        áÁâ = ãÁ;
+        AäA.Äâ(áÅ.Àå);
+        AâÀ.Äâ(áÅ.Àå);
+        ÃÂá.Äâ(áÅ.Àå);
+        ÀÃÃ.Äâ(áÅ.Àå);
+        ââá.Äâ(áÅ.Àå);
+        äaâ.Äâ(áÅ.Àå);
+        åaÀ.Äâ(áÅ.Àå);
+        Åãã.display = "none";
+        áåÅ.ÃÂÅ();
         return 0;
       }
-      bb -= ÀÀ;
-    } else if (b8 === 1) {
-      bn();
-      if (bb < 0) {
-        b8 = åâ;
+      áÃÁ -= ÀÀ;
+    } else if (âäã === 1) {
+      âÂ();
+      if (áÃÁ < 0) {
+        âäã = åâ;
         Aá.â.aAÀ = Date.now();
-        br();
+        ÅÂâ();
       }
-      bb -= ÀÀ;
+      áÃÁ -= ÀÀ;
     }
     return 1;
   }
   ;
-  function bm(bu) {
-    ÁA.ÄAá(bu, ÁA.ÅÁá);
-    var bv = Àá;
-    if (Àâ === aQ.Åa()) {
-      bv = 1;
-      if (v === 0) {
-        v = 1;
+  function ÃåA(Åá) {
+    ÁA.ÄAá(Åá, ÁA.ÅÁá);
+    var åÄ = Àá;
+    if (Àâ === AäA.Åa()) {
+      åÄ = 1;
+      if (ÅÄÀ === 0) {
+        ÅÄÀ = 1;
         áá.áåå();
         if (Àá === Aá.åÄÃ) {
           âÃä.style.backgroundColor = "#3D5942";
@@ -13438,185 +13447,185 @@ var ÀÅ = function () {
         }
         Äå.âå(Äå.AA.button, 1, 0);
       } else {
-        v = 0;
+        ÅÄÀ = 0;
         áá.ÁÀA();
         Äå.âå(Äå.AA.button, 1, 0);
       }
     }
-    if (aR.Åa() === 1) {
-      bv = 1;
+    if (AâÀ.Åa() === 1) {
+      åÄ = 1;
       if (Aá.â.ÀÃã === 0) {
-        if (s === 0) {
-          x();
-          p = 1;
-          s = 1;
+        if (Àaä === 0) {
+          ÂÁÃ();
+          Áäå = 1;
+          Àaä = 1;
           Aá.áÀa(ää.ÁáÂ);
           Äå.âå(Äå.AA.open, 1, 0);
           return;
         } else {
-          x();
+          ÂÁÃ();
           Äå.âå(Äå.AA.open, åä, Aa);
           return;
         }
       }
     }
-    if (aS.Åa() === ÂA) {
-      bv = 1;
-      if (r === 0) {
-        x();
-        p = Âã;
-        r = äA;
+    if (ÃÂá.Åa() === ÂA) {
+      åÄ = 1;
+      if (ÃäÃ === 0) {
+        ÂÁÃ();
+        Áäå = Âã;
+        ÃäÃ = äA;
         Äå.âå(Äå.AA.open, 1, 0);
         return;
       } else {
-        x();
+        ÂÁÃ();
         Äå.âå(Äå.AA.open, 1, AÂ);
         return;
       }
     }
-    if (aT.Åa() === 1) {
-      bv = ÀA;
-      if (q === 0) {
-        x();
-        p = 1;
-        q = âÃ;
+    if (ÀÃÃ.Åa() === 1) {
+      åÄ = ÀA;
+      if (Àaá === 0) {
+        ÂÁÃ();
+        Áäå = 1;
+        Àaá = âÃ;
         Äå.âå(Äå.AA.open, 1, 0);
         return;
       } else {
-        x();
+        ÂÁÃ();
         Äå.âå(Äå.AA.open, âÃ, Àá);
         return;
       }
     }
-    if (aU.Åa() === Áå) {
-      bv = 1;
-      if (AÄ === u) {
-        x();
-        p = Àâ;
-        u = ãâ;
+    if (ââá.Åa() === Áå) {
+      åÄ = 1;
+      if (AÄ === ÂÅÀ) {
+        ÂÁÃ();
+        Áäå = Àâ;
+        ÂÅÀ = ãâ;
         Äå.âå(Äå.AA.open, âa, 0);
         return;
       } else {
-        x();
+        ÂÁÃ();
         Äå.âå(Äå.AA.open, 1, ÀÄ);
         return;
       }
     }
-    if (aV.Åa() === âa) {
-      bv = âá;
-      aV.aÄÅ();
-      aW.show();
+    if (äaâ.Åa() === âa) {
+      åÄ = âá;
+      äaâ.aÄÅ();
+      åaÀ.show();
       Âáá.setItem("showLeaderboard", "0");
       Äå.âå(Äå.AA.button, 1, ãÁ);
       return;
     }
-    if (aW.Åa() === 1) {
-      bv = ãå;
-      aW.aÄÅ();
-      aV.show();
+    if (åaÀ.Åa() === 1) {
+      åÄ = ãå;
+      åaÀ.aÄÅ();
+      äaâ.show();
       Âáá.setItem("showLeaderboard", "1");
       Äå.âå(Äå.AA.button, aÅ, 0);
       return;
     }
-    var bw = Aá.â.Âáâ;
+    var Âáâ = Aá.â.Âáâ;
     if (Aá.â.aãÅ !== 0) {
-      if (äA === E.Åa()) {
+      if (äA === aäÀ.Åa()) {
         áÂ.áÂÄ(JSON.stringify([31, Aá.â.aãÅ]));
         Äå.âå(Äå.AA.button, 1, 0);
         Aá.ÂÅa();
         return;
       }
-      if (D.Åa() === aÅ) {
+      if (ÂAa.Åa() === aÅ) {
         Äå.âå(Äå.AA.button, äA, 0);
         Aá.ÂÅa();
         return;
       }
     }
-    if (p === âa) {
-      if (M.Åa() === 1) {
-        x();
+    if (Áäå === âa) {
+      if (äAÁ.Åa() === 1) {
+        ÂÁÃ();
         Äå.âå(Äå.AA.open, âa, ÅÁ);
         return;
       }
-      if (r === ãâ) {
-        aa.Äâ(áÅ.Àå);
-        a8.Äâ(áÅ.Àå);
-        a2.Äâ(áÅ.Àå);
-        a4.Äâ(áÅ.Àå);
-        a6.Äâ(áÅ.Àå);
-        ad.Äâ(áÅ.Àå);
-        ae.Äâ(áÅ.Àå);
-        af.Äâ(áÅ.Àå);
-        ag.Äâ(áÅ.Àå);
-        Q.Äâ(áÅ.Àå);
-        S.Äâ(áÅ.Àå);
-        U.Äâ(áÅ.Àå);
-        if (a8.Åa() === 1) {
+      if (ÃäÃ === ãâ) {
+        ãáâ.Äâ(áÅ.Àå);
+        ÄÃÄ.Äâ(áÅ.Àå);
+        aaá.Äâ(áÅ.Àå);
+        ãâá.Äâ(áÅ.Àå);
+        Áaâ.Äâ(áÅ.Àå);
+        âäÄ.Äâ(áÅ.Àå);
+        ÂÅã.Äâ(áÅ.Àå);
+        âÀÄ.Äâ(áÅ.Àå);
+        Aåâ.Äâ(áÅ.Àå);
+        ÂÀä.Äâ(áÅ.Àå);
+        äaÁ.Äâ(áÅ.Àå);
+        ãAÃ.Äâ(áÅ.Àå);
+        if (ÄÃÄ.Åa() === 1) {
           ÂÄA.ÅÁÂ();
           Äå.âå(Äå.AA.button, âÃ, Aa);
           return;
-        } else if (aa.Åa() === 1) {
+        } else if (ãáâ.Åa() === 1) {
           ÂÄA.ÅAÂ();
           Äå.âå(Äå.AA.button, äA, ãä);
           return;
-        } else if (a2.Åa() === ãå) {
+        } else if (aaá.Åa() === ãå) {
           áá.ÅäÄ(1);
           Äå.âå(Äå.AA.button, äA, 0);
           return;
-        } else if (a4.Åa() === 1) {
+        } else if (ãâá.Åa() === 1) {
           áá.ÅäÄ(Áâá);
           Äå.âå(Äå.AA.button, ÀA, åâ);
           return;
-        } else if (ÀA === a6.Åa()) {
+        } else if (ÀA === Áaâ.Åa()) {
           áá.ÅäÄ(ÂÀá);
           Äå.âå(Äå.AA.button, åä, 0);
           return;
-        } else if (ad.Åa() === 1) {
+        } else if (âäÄ.Åa() === 1) {
           Äå.áÂã(1);
           Äå.âå(Äå.AA.button, ãâ, 0);
           return;
-        } else if (åÀ === ae.Åa()) {
+        } else if (åÀ === ÂÅã.Åa()) {
           Äå.áÂã(Aa);
           Äå.âå(Äå.AA.button, Äá, 0);
           return;
-        } else if (af.Åa() === 1) {
+        } else if (âÀÄ.Åa() === 1) {
           Äå.Ååå(1);
           Äå.âå(Äå.AA.button, 1, 0);
           return;
-        } else if (äA === ag.Åa()) {
+        } else if (äA === Aåâ.Åa()) {
           Äå.Ååå(0);
           Äå.âå(Äå.AA.button, 1, ÁÀ);
           return;
-        } else if (S.Åa() === 1) {
+        } else if (äaÁ.Åa() === 1) {
           ÀÂ.ãaÄ(Áå);
           Äå.âå(Äå.AA.button, 1, 0);
           return;
-        } else if (Q.Åa() === ÂA) {
+        } else if (ÂÀä.Åa() === ÂA) {
           ÀÂ.ãaÄ(ããÄ);
           Äå.âå(Äå.AA.button, âÃ, 0);
           return;
-        } else if (U.Åa() === 1) {
+        } else if (ãAÃ.Åa() === 1) {
           ÀÂ.ãaÄ(0);
           Äå.âå(Äå.AA.button, ÄÂ, áÁ);
           return;
         }
-        var bx = aI.áâ;
-        if (bx.x > ÁA.ááa || bx.x + ÄÀ * 234 < ÁA.ááa || bx.y > ÁA.áaá || bx.y + ÄÀ * 232 < ÁA.áaá) {
-          x();
+        var ÄÄå = ÅÄÄ.áâ;
+        if (ÄÄå.x > ÁA.ááa || ÄÄå.x + ÄÀ * 234 < ÁA.ááa || ÄÄå.y > ÁA.áaá || ÄÄå.y + ÄÀ * 232 < ÁA.áaá) {
+          ÂÁÃ();
           Äå.âå(Äå.AA.open, 1, 0);
           return;
         }
-      } else if (ÄÂ === q) {
-        var by = aL.áâ;
-        if (by.x > ÁA.ááa || ÁA.ááa > by.x + ÄÀ * 412 || ÁA.áaá < by.y || ÁA.áaá > by.y + ÄÀ * 412) {
-          x();
+      } else if (ÄÂ === Àaá) {
+        var ÀÁã = áÃâ.áâ;
+        if (ÀÁã.x > ÁA.ááa || ÁA.ááa > ÀÁã.x + ÄÀ * 412 || ÁA.áaá < ÀÁã.y || ÁA.áaá > ÀÁã.y + ÄÀ * 412) {
+          ÂÁÃ();
           Äå.âå(Äå.AA.open, âá, 0);
           return;
         }
-      } else if (s === Àâ) {
+      } else if (Àaä === Àâ) {
         if (Aá.â.ãåÄ === -1) {
           if (Aá.â.âáä === 0 || Aá.â.Aáá === ÁÅ) {
-            if (Aá.â.Ååã[Aá.â.ÅÀá] === 1 && F.Åa() === 1) {
+            if (Aá.â.Ååã[Aá.â.ÅÀá] === 1 && ÅÅÄ.Åa() === 1) {
               if (Áå === Aá.â.Aáá) {
                 if (Aá.â.aä.Ââ !== 0 && Aá.â.aä.Aå < 4) {
                   áÂ.áÂÄ(JSON.stringify([ÀåÄ, Aá.â.åââ]));
@@ -13626,538 +13635,538 @@ var ÀÅ = function () {
                 áÂ.áÂÄ(JSON.stringify([22, Aá.â.åââ]));
                 Äå.âå(Äå.AA.áãá, 0.8, ãa);
               }
-              F.Äâ(áÅ.Àå);
+              ÅÅÄ.Äâ(áÅ.Àå);
             }
-          } else if (G.Åa() === 1) {
+          } else if (ÅÅa.Åa() === 1) {
             áÂ.áÂÄ(JSON.stringify([23]));
             Aá.â.âáä = ÄÁ;
-            G.Äâ(áÅ.Àå);
+            ÅÅa.Äâ(áÅ.Àå);
             Äå.âå(Äå.AA.button, 1, ÅÁ);
           }
-        } else if (H.Åa() === Áå) {
+        } else if (AÂã.Åa() === Áå) {
           if (Aá.â.Ååã[Aá.â.ÅÀá] === 1) {
             áÂ.áÂÄ(JSON.stringify([21, Aá.â.åââ]));
             Äå.âå(Äå.AA.ááå, åä, 0);
           }
         }
-        if (J[aá.ÁaÃ].Åa() === Âã) {
+        if (ÃãÁ[aá.ÁaÃ].Åa() === Âã) {
           Aá.äââ(aá.ÁaÃ);
           Äå.âå(Äå.AA.button, Àâ, 0);
-        } else if (J[aá.ãÃA].Åa() === 1) {
+        } else if (ÃãÁ[aá.ãÃA].Åa() === 1) {
           Aá.äââ(aá.ãÃA);
           Äå.âå(Äå.AA.button, ÄÂ, 0);
-        } else if (J[aá.ÁÂá].Åa() === 1) {
+        } else if (ÃãÁ[aá.ÁÂá].Åa() === 1) {
           Aá.äââ(aá.ÁÂá);
           Äå.âå(Äå.AA.button, ãâ, 0);
-        } else if (J[aá.ååÃ].Åa() === 1) {
+        } else if (ÃãÁ[aá.ååÃ].Åa() === 1) {
           Aá.äââ(aá.ååÃ);
           Äå.âå(Äå.AA.button, Àâ, 0);
-        } else if (åÀ === J[aá.âÁA].Åa()) {
+        } else if (åÀ === ÃãÁ[aá.âÁA].Åa()) {
           Aá.äââ(aá.âÁA);
           Äå.âå(Äå.AA.button, ÂA, ÅÁ);
-        } else if (J[aá.AÄã].Åa() === âá) {
+        } else if (ÃãÁ[aá.AÄã].Åa() === âá) {
           Aá.äââ(aá.AÄã);
           Äå.âå(Äå.AA.button, ÀA, 0);
-        } else if (ãå === J[aá.aâã].Åa()) {
+        } else if (ãå === ÃãÁ[aá.aâã].Åa()) {
           Aá.äââ(aá.aâã);
           Äå.âå(Äå.AA.button, åÀ, 0);
-        } else if (J[aá.ÄÅá].Åa() === 1) {
+        } else if (ÃãÁ[aá.ÄÅá].Åa() === 1) {
           Aá.äââ(aá.ÄÅá);
           Äå.âå(Äå.AA.button, 1, 0);
-        } else if (J[aá.ÅÀA].Åa() === âá) {
+        } else if (ÃãÁ[aá.ÅÀA].Åa() === âá) {
           Aá.äââ(aá.ÅÀA);
           Äå.âå(Äå.AA.button, Àâ, 0);
-        } else if (J[aá.ÀAÀ].Åa() === 1) {
+        } else if (ÃãÁ[aá.ÀAÀ].Åa() === 1) {
           Aá.äââ(aá.ÀAÀ);
           Äå.âå(Äå.AA.button, äA, áÃ);
-        } else if (K[ää.ÁáÂ].Åa() === 1) {
+        } else if (âÀÃ[ää.ÁáÂ].Åa() === 1) {
           Aá.áÀa(ää.ÁáÂ);
           Äå.âå(Äå.AA.button, 1, 0);
-        } else if (K[ää.ÂÅå].Åa() === 1 || K[ää.åÃÁ].Åa() === 1 || äA === K[ää.ÀäÁ].Åa()) {
+        } else if (âÀÃ[ää.ÂÅå].Åa() === 1 || âÀÃ[ää.åÃÁ].Åa() === 1 || äA === âÀÃ[ää.ÀäÁ].Åa()) {
           áÂ.áÂÄ(JSON.stringify([Aá.â.áÄå, Aá.â.áÂA, Aá.â.ÃÄÄ]));
           Äå.âå(Äå.AA.button, 1, 0);
-        } else if (K[ää.Åå].Åa() === 1) {
+        } else if (âÀÃ[ää.Åå].Åa() === 1) {
           áÂ.áÂÄ(JSON.stringify([Aá.â.áÄå, Aá.â.áÂA, Aá.â.ÃÄÄ]));
           Äå.âå(Äå.AA.button, Áå, AÂ);
-        } else if (K[ää.áÁÄ].Åa() === 1) {
+        } else if (âÀÃ[ää.áÁÄ].Åa() === 1) {
           áÂ.áÂÄ(JSON.stringify([Aá.â.áÄå, Aá.â.áÂA, Aá.â.ÃÄÄ]));
           Äå.âå(Äå.AA.button, 1, 0);
-        } else if (K[ää.åÃâ].Åa() === åä) {
+        } else if (âÀÃ[ää.åÃâ].Åa() === åä) {
           áÂ.áÂÄ(JSON.stringify([Aá.â.áÄå, Aá.â.áÂA, Aá.â.ÃÄÄ]));
           Äå.âå(Äå.AA.button, Âã, ãä);
-        } else if (K[ää.ÄáÁ].Åa() === 1) {
+        } else if (âÀÃ[ää.ÄáÁ].Åa() === 1) {
           áÂ.áÂÄ(JSON.stringify([Aá.â.áÄå, Aá.â.áÂA, Aá.â.ÃÄÄ]));
           Äå.âå(Äå.AA.button, 1, 0);
-        } else if (K[ää.ÅÂA].Åa() === 1 || åÀ === K[ää.ããá].Åa()) {
+        } else if (âÀÃ[ää.ÅÂA].Åa() === 1 || åÀ === âÀÃ[ää.ããá].Åa()) {
           áÂ.áÂÄ(JSON.stringify([Aá.â.áÄå, Aá.â.áÂA, Aá.â.ÃÄÄ]));
           Äå.âå(Äå.AA.button, Àâ, 0);
-        } else if (K[ää.AáÅ].Åa() === 1 || Àâ === K[ää.ááA].Åa() || åä === K[ää.âáå].Åa()) {
+        } else if (âÀÃ[ää.AáÅ].Åa() === 1 || Àâ === âÀÃ[ää.ááA].Åa() || åä === âÀÃ[ää.âáå].Åa()) {
           áÂ.áÂÄ(JSON.stringify([Aá.â.áÄå, Aá.â.áÂA, Aá.â.ÃÄÄ]));
           Äå.âå(Äå.AA.button, 1, 0);
         } else {
-          var bz = Aá.â.ãÀÅ;
-          for (var bA = 0; bz > bA; bA++) {
-            if (ÂA === an[bA].Åa()) {
-              Aá.â.ÅÀá = bA;
-              Aá.âãâ(Aá.â.âÀÃ[bA]);
+          var Aå = Aá.â.ãÀÅ;
+          for (var ä = 0; Aå > ä; ä++) {
+            if (ÂA === áãá[ä].Åa()) {
+              Aá.â.ÅÀá = ä;
+              Aá.âãâ(Aá.â.âÀÃ[ä]);
               Äå.âå(Äå.AA.button, âÃ, áÁ);
               return;
             }
           }
-          bz = Aá.â.åÂa;
-          for (bA = áÁ; bA < bz; bA++) {
-            if (ao[bA].Åa() === ÂA) {
+          Aå = Aá.â.åÂa;
+          for (ä = áÁ; ä < Aå; ä++) {
+            if (ÃÄá[ä].Åa() === ÂA) {
               return;
             }
           }
           if (Aá.â.Aáá === Âã) {
-            for (bA = 0; bA < Aá.â.aä.Aå; bA++) {
-              if (ap[bA].Åa() === 1) {
-                áÂ.áÂÄ(JSON.stringify([ÀÅã, bA]));
+            for (ä = 0; ä < Aá.â.aä.Aå; ä++) {
+              if (äåá[ä].Åa() === 1) {
+                áÂ.áÂÄ(JSON.stringify([ÀÅã, ä]));
                 Äå.âå(Äå.AA.button, 1, 0);
                 return;
               }
             }
             if (Aá.â.ÄaA === ää.ÂÅå || ää.åÃÁ === Aá.â.ÄaA || Aá.â.ÄaA === ää.ÀäÁ) {
-              if (Aá.â.aä.Ââ !== 255 && W.Åa() === aÅ) {
+              if (Aá.â.aä.Ââ !== 255 && ÅÃÃ.Åa() === aÅ) {
                 áÂ.áÂÄ(JSON.stringify([24]));
                 Äå.âå(Äå.AA.button, ãâ, äå);
                 return;
               }
             } else if (Aá.â.ÄaA === ää.AáÅ || Aá.â.ÄaA === ää.ááA || Aá.â.ÄaA === ää.âáå) {
-              if (ÃÁA !== Aá.â.aä.Ââ && åÀ === Y.Åa()) {
+              if (ÃÁA !== Aá.â.aä.Ââ && åÀ === åAâ.Åa()) {
                 áÂ.áÂÄ(JSON.stringify([24]));
                 Äå.âå(Äå.AA.button, 1, Àá);
                 return;
               }
             } else if (ää.ÅÂA === Aá.â.ÄaA || ää.ããá === Aá.â.ÄaA) {
-              if (Aá.â.aä.Ââ !== 255 && a0.Åa() === äA) {
+              if (Aá.â.aä.Ââ !== 255 && åÅå.Åa() === äA) {
                 áÂ.áÂÄ(JSON.stringify([24]));
                 Äå.âå(Äå.AA.button, 1, ãa);
                 return;
               }
             }
           }
-          var bB = aK.áâ;
-          if (bw.ÀâÅ !== 1 && !bu.ctrlKey && (bB.x > ÁA.ááa || bB.x + ÄÀ * 595 < ÁA.ááa || ÁA.áaá < bB.y || ÁA.áaá > bB.y + ÄÀ * 325)) {
-            x();
+          var åÀä = ÃÃA.áâ;
+          if (Âáâ.ÀâÅ !== 1 && !Åá.ctrlKey && (åÀä.x > ÁA.ááa || åÀä.x + ÄÀ * 595 < ÁA.ááa || ÁA.áaá < åÀä.y || ÁA.áaá > åÀä.y + ÄÀ * 325)) {
+            ÂÁÃ();
             Äå.âå(Äå.AA.open, 1, AÂ);
             return;
           }
         }
-      } else if (äA === t) {
-        var bC = Aá.â.äÁâ;
-        for (var bD = AÄ; bD < 4; bD++) {
-          if (bC[bD][ãä] !== 0 && at[bD].Åa() === âá) {
-            áÂ.áÂÄ(JSON.stringify([27, bD]));
+      } else if (äA === ÁÄA) {
+        var Ãåä = Aá.â.äÁâ;
+        for (var åÃÄ = AÄ; åÃÄ < 4; åÃÄ++) {
+          if (Ãåä[åÃÄ][ãä] !== 0 && äÁâ[åÃÄ].Åa() === âá) {
+            áÂ.áÂÄ(JSON.stringify([27, åÃÄ]));
             Äå.âå(Äå.AA.Âáâ, 1, 0);
             return;
           }
         }
-      } else if (aÅ === u) {
+      } else if (aÅ === ÂÅÀ) {
         if (Aá.â.Aâ === -1) {
-          if (y.Åa() === 1 && äA === Aá.â.áaå && Date.now() - Aá.â.ãÁâ > 30500) {
+          if (aÅâ.Åa() === 1 && äA === Aá.â.áaå && Date.now() - Aá.â.ãÁâ > 30500) {
             áÂ.áÂÄ(JSON.stringify([28, ÀÅ.aÄA]));
             Äå.âå(Äå.AA.button, 1, 0);
             Aá.â.ãÁâ = Date.now();
           }
           if (Date.now() - Aá.â.äåâ > 10500) {
-            var bE = âã;
-            for (var bA = ÀÄ; ar.length > bA; bA++) {
-              if (Aá.Ááä[bA].ãaã !== 0) {
-                if (Àâ === ar[bE].Åa()) {
-                  áÂ.áÂÄ(JSON.stringify([30, bA]));
+            var åã = âã;
+            for (var ä = ÀÄ; áAA.length > ä; ä++) {
+              if (Aá.Ááä[ä].ãaã !== 0) {
+                if (Àâ === áAA[åã].Åa()) {
+                  áÂ.áÂÄ(JSON.stringify([30, ä]));
                   Äå.âå(Äå.AA.button, Áå, áÃ);
                   Aá.â.äåâ = Date.now();
                 }
-                bE++;
+                åã++;
               }
             }
           }
         } else if (Äá === Aá.â.Aäá) {
-          if (aÅ === A.Åa() && AÂ === Aá.â.AÃA) {
+          if (aÅ === Aaå.Åa() && AÂ === Aá.â.AÃA) {
             áÂ.áÂÄ(JSON.stringify([33]));
             Aá.â.AÃA = 1;
             Äå.âå(Äå.AA.button, 1, 0);
             return;
           }
-          if (B.Åa() === 1 && Aá.â.AÃA === 1) {
+          if (ÁÃÄ.Åa() === 1 && Aá.â.AÃA === 1) {
             áÂ.áÂÄ(JSON.stringify([34]));
             Aá.â.AÃA = åâ;
             Äå.âå(Äå.AA.button, 1, 0);
             return;
           }
-          if (C.Åa() === 1) {
+          if (âÁå.Åa() === 1) {
             áÂ.áÂÄ(JSON.stringify([29]));
             Äå.âå(Äå.AA.button, 1, 0);
             return;
           }
-          var bE = äå;
-          var bF = Aá.Ááä[Aá.â.Aâ];
-          for (var bA = ÅÁ; Aá.ÂÅ.length > bA; bA++) {
-            if (bA === Aá.â.id) {
-              bE++;
+          var åã = äå;
+          var Aâ = Aá.Ááä[Aá.â.Aâ];
+          for (var ä = ÅÁ; Aá.ÂÅ.length > ä; ä++) {
+            if (ä === Aá.â.id) {
+              åã++;
               continue;
             }
-            var bG = Aá.ÂÅ[bA];
-            if (bG.Aâ === bF.id && bG.åÂå === bF.äâÂ) {
-              if (as[bE].Åa() === Âã) {
-                áÂ.áÂÄ(JSON.stringify([32, bG.id]));
+            var â = Aá.ÂÅ[ä];
+            if (â.Aâ === Aâ.id && â.åÂå === Aâ.äâÂ) {
+              if (ÂÂÃ[åã].Åa() === Âã) {
+                áÂ.áÂÄ(JSON.stringify([32, â.id]));
                 Äå.âå(Äå.AA.button, 1, 0);
                 return;
               }
-              bE++;
+              åã++;
             }
           }
-        } else if (z.Åa() === 1) {
+        } else if (ÄâÄ.Åa() === 1) {
           áÂ.áÂÄ(JSON.stringify([35, Aá.â.id]));
           Äå.âå(Äå.AA.button, Àâ, 0);
           return;
         }
       }
     }
-    var bH = Aá.â.ãÃä;
-    var bz = bH.length;
-    var bI = ÅÁ;
-    if (bz > 10 && I.Åa() === âa) {
-      I.open = (I.open + ãå) % ÄÂÅ;
-      if (I.open === âÃ) {
+    var áä = Aá.â.ãÃä;
+    var Aå = áä.length;
+    var âåÁâÃ = ÅÁ;
+    if (Aå > 10 && áÁa.Åa() === âa) {
+      áÁa.open = (áÁa.open + ãå) % ÄÂÅ;
+      if (áÁa.open === âÃ) {
         Äå.âå(Äå.AA.AäÄåá, 0.08, ãa);
       } else {
         Äå.âå(Äå.AA.ÂÁÁAÄ, 0.08, áÃ);
       }
     }
-    for (var bA = ÀÄ; bz > bA; bA++) {
-      if (bA > ÀÄáÂå && I.open === ÅÁ) {
+    for (var ä = ÀÄ; Aå > ä; ä++) {
+      if (ä > ÀÄáÂå && áÁa.open === ÅÁ) {
         break;
       }
-      if (am[bA].Åa() === 1) {
-        bI = 1;
-        var bJ = bH[bA][0];
-        var bK = bH[bA][1];
-        var bL = bH[bA][Äåã];
-        var bM = bH[bA][3];
-        var bN = ÁÁ[bJ];
-        if (bw.ÀâÅ === 1) {
-          if (bw.id !== bA) {
-            if (bH[bw.id][Àá] === bH[bA][0]) {
-              if (bN.stack > bH[bA][Áå] && bN.stack > bH[bw.id][ÀA]) {
-                áÂ.áÂÄ(JSON.stringify([10, bH[bw.id][AÂ], bH[bw.id][1], bH[bw.id][2], bH[bA][åÀ], bH[bA][Aäã]]));
+      if (ãÃä[ä].Åa() === 1) {
+        âåÁâÃ = 1;
+        var Åã = áä[ä][0];
+        var ãÀ = áä[ä][1];
+        var áÃÀ = áä[ä][Äåã];
+        var ÅäÁ = áä[ä][3];
+        var AÀ = ÁÁ[Åã];
+        if (Âáâ.ÀâÅ === 1) {
+          if (Âáâ.id !== ä) {
+            if (áä[Âáâ.id][Àá] === áä[ä][0]) {
+              if (AÀ.stack > áä[ä][Áå] && AÀ.stack > áä[Âáâ.id][ÀA]) {
+                áÂ.áÂÄ(JSON.stringify([10, áä[Âáâ.id][AÂ], áä[Âáâ.id][1], áä[Âáâ.id][2], áä[ä][åÀ], áä[ä][Aäã]]));
                 Aá.â.Âáâ.ÀâÅ = 0;
                 Äå.âå(Äå.AA.Âáâ, Áå, Àá);
                 return;
               }
             }
-            bH[bA][0] = bH[bw.id][áÃ];
-            bH[bA][1] = bH[bw.id][ãâ];
-            bH[bA][Åaa] = bH[bw.id][2];
-            bH[bA][3] = bH[bw.id][åaÂ];
-            bH[bw.id][0] = bJ;
-            bH[bw.id][1] = bK;
-            bH[bw.id][2] = bL;
-            bH[bw.id][3] = bM;
-            if (bJ !== ãa) {
-              ÀÅ.ãÃä[bw.id].ÁÁÃ(ÁÁ[bJ].Áã.src, ÁÁ[bJ].Áã.À);
+            áä[ä][0] = áä[Âáâ.id][áÃ];
+            áä[ä][1] = áä[Âáâ.id][ãâ];
+            áä[ä][Åaa] = áä[Âáâ.id][2];
+            áä[ä][3] = áä[Âáâ.id][åaÂ];
+            áä[Âáâ.id][0] = Åã;
+            áä[Âáâ.id][1] = ãÀ;
+            áä[Âáâ.id][2] = áÃÀ;
+            áä[Âáâ.id][3] = ÅäÁ;
+            if (Åã !== ãa) {
+              ÀÅ.ãÃä[Âáâ.id].ÁÁÃ(ÁÁ[Åã].Áã.src, ÁÁ[Åã].Áã.À);
             }
-            ÀÅ.ãÃä[bA].ÁÁÃ(ÁÁ[bH[bA][ÅÁ]].Áã.src, ÁÁ[bH[bA][0]].Áã.À);
+            ÀÅ.ãÃä[ä].ÁÁÃ(ÁÁ[áä[ä][ÅÁ]].Áã.src, ÁÁ[áä[ä][0]].Áã.À);
             Aá.â.Âáâ.ÀâÅ = Àá;
             Äå.âå(Äå.AA.Âáâ, 1, 0);
             return;
           }
           Aá.â.Âáâ.ÀâÅ = 0;
         }
-        if (AÂ !== bJ) {
-          if (t === åÀ && bu.which !== 3) {
-            áÂ.áÂÄ(JSON.stringify([26, bJ, bK, bL, bM]));
+        if (AÂ !== Åã) {
+          if (ÁÄA === åÀ && Åá.which !== 3) {
+            áÂ.áÂÄ(JSON.stringify([26, Åã, ãÀ, áÃÀ, ÅäÁ]));
             Äå.âå(Äå.AA.Âáâ, 1, 0);
-          } else if (bu.which === Äâa) {
-            áÂ.áÂÄ(JSON.stringify([åáA, bJ, bK, bL, bM]));
+          } else if (Åá.which === Äâa) {
+            áÂ.áÂÄ(JSON.stringify([åáA, Åã, ãÀ, áÃÀ, ÅäÁ]));
             Äå.âå(Äå.AA.ÅÁâåÄ, Àâ, äå);
-          } else if (bu.ctrlKey) {
+          } else if (Åá.ctrlKey) {
             Äå.âå(Äå.AA.Âáâ, 0.6, ÅÁ);
-            áÂ.áÂÄ(JSON.stringify([åäã, bJ, bK, bL]));
+            áÂ.áÂÄ(JSON.stringify([åäã, Åã, ãÀ, áÃÀ]));
           } else {
-            áÂ.áÂÄ(JSON.stringify([8, bJ, bK, bL, bM]));
+            áÂ.áÂÄ(JSON.stringify([8, Åã, ãÀ, áÃÀ, ÅäÁ]));
           }
         }
       }
     }
-    if (t === 1 && ãÁ === bI) {
-      var bO = aJ.áâ;
-      if (bO.x > ÁA.ááa || bO.x + ÄÀ * 161 < ÁA.ááa || bO.y > ÁA.áaá || ÁA.áaá > bO.y + ÄÀ * 165) {
-        x();
+    if (ÁÄA === 1 && ãÁ === âåÁâÃ) {
+      var ÁÄa = ÁÃA.áâ;
+      if (ÁÄa.x > ÁA.ááa || ÁÄa.x + ÄÀ * 161 < ÁA.ááa || ÁÄa.y > ÁA.áaá || ÁA.áaá > ÁÄa.y + ÄÀ * 165) {
+        ÂÁÃ();
         Äå.âå(Äå.AA.open, 1, ÄÁ);
       }
     }
-    if (bw.ÀâÅ === 1) {
-      var bA = bw.id;
-      áÂ.áÂÄ(JSON.stringify([ÅÃáãÅ, bH[bA][áÃ], bH[bA][Áå], bH[bA][Aäã], bH[bA][3]]));
+    if (Âáâ.ÀâÅ === 1) {
+      var ä = Âáâ.id;
+      áÂ.áÂÄ(JSON.stringify([ÅÃáãÅ, áä[ä][áÃ], áä[ä][Áå], áä[ä][Aäã], áä[ä][3]]));
       Äå.âå(Äå.AA.ÅÁâåÄ, ÁÅ, 0);
     }
-    bw.ÀâÅ = 0;
+    Âáâ.ÀâÅ = 0;
   }
   ;
-  function bn() {
-    var bu = áÁ;
-    var bv = 0;
-    if (bb > 0) {
-      bv = äää;
-      var bw = bc(åä - bb / ba);
-      if (âa === bw) {
-        bb = ÁÀ;
+  function âÂ() {
+    var ÄäÃ = áÁ;
+    var äÃÄ = 0;
+    if (áÃÁ > 0) {
+      äÃÄ = äää;
+      var transition = äÁá(åä - áÃÁ / ÅÄa);
+      if (âa === transition) {
+        áÃÁ = ÁÀ;
       }
-      if (b8 === ÁÅ) {
-        bw = åä - Math.abs(bw);
+      if (âäã === ÁÅ) {
+        transition = åä - Math.abs(transition);
       }
-      bu *= bw;
-      bv *= bw;
+      ÄäÃ *= transition;
+      äÃÄ *= transition;
     }
-    aH.áâ.x = Math.floor(ÄÀ * 5) + bu;
-    aH.áâ.y = äää - Math.floor(ÄÀ * 174) + Math.floor(-AâÁ * ÄÀ) + bv;
-    aI.áâ.x = åäÅ - Math.floor(ÄÀ * 134) + bu;
-    aI.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 133)) + bv;
-    aJ.áâ.x = åäÅ - Math.floor(ÄÀ * 81) + bu;
-    aJ.áâ.y = Math.max(áÁ, ÂáÅ - Math.floor(ÄÀ * 82)) + bv;
-    aK.áâ.x = åäÅ - Math.floor(ÄÀ * 297) + bu;
-    aK.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 202)) + bv;
-    aL.áâ.x = åäÅ - Math.floor(ÄÀ * 206) + bu;
-    aL.áâ.y = Math.max(áÁ, ÂáÅ - Math.floor(ÄÀ * 206)) + bv;
-    aM.áâ.x = Math.floor(ÄÀ * 5) - bu;
-    aM.áâ.y = Math.floor(ÄÀ * 5) - bv;
-    aN.áâ.x = aãA - Math.floor(ÄÀ * 233) + Math.floor(ÄÀ * -6) - bu;
-    aN.áâ.y = Math.floor(ÄÀ * ÃÀÁ) - bv;
-    aO.áâ.x = åäÅ - Math.floor(ÄÀ * 258) - bu;
-    aO.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 137)) - bv;
-    aP.áâ.x = åäÅ - Math.floor(ÄÀ * 256) - bu;
-    aP.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 75)) - bv;
-    aQ.áâ.x = aM.áâ.x + Math.floor(ÄÀ * 126);
-    aQ.áâ.y = aM.áâ.y;
-    aR.áâ.x = aQ.áâ.x + Math.floor(ÄÀ * 50);
-    aR.áâ.y = aQ.áâ.y;
-    aS.áâ.x = aQ.áâ.x;
-    aS.áâ.y = aQ.áâ.y + Math.floor(ÄÀ * 44.5);
-    aT.áâ.x = aS.áâ.x;
-    aT.áâ.y = aS.áâ.y + Math.floor(ÄÀ * 44.5);
-    aU.áâ.x = aM.áâ.x;
-    aU.áâ.y = aM.áâ.y + Math.floor(ÄÀ * 127);
-    aV.áâ.x = aãA - Math.floor(ÄÀ * 34) + Math.floor(ÄÀ * -7) - bu;
-    aV.áâ.y = Math.floor(ÃáÅ * ÄÀ) - bv;
-    aW.áâ.x = aV.áâ.x;
-    aW.áâ.y = aV.áâ.y;
-    aZ.x = åäÅ - Math.floor(ÄÀ * 150) + bu;
-    aY.left = aZ.x + "px";
-    aZ.y = Math.max(0, ÂáÅ - ääã) + Math.floor(ÄÀ * 150) + bv;
-    aY.top = aZ.y + "px";
-    var bx = document.getElementById("chatInput").style;
-    var by = Math.floor(ÄÀ * 250);
-    var bz = Math.floor(ÄÀ * 20);
-    var bA = Math.floor(åäÅ - by / Aäã) + "px";
-    var bB = Math.floor(ÂáÅ - bz / ããÄ + ÄÀ * 85 + bv) + "px";
-    bz = bz + "px";
-    by = by + "px";
-    aY.width = by;
-    aY.height = bz;
-    aY.left = bA;
-    aY.top = bB;
-    bx.width = by;
-    bx.height = bz;
-    bx.fontSize = Math.floor(AãÃäÄ * ÄÀ) + "px";
+    AÀa.áâ.x = Math.floor(ÄÀ * 5) + ÄäÃ;
+    AÀa.áâ.y = äää - Math.floor(ÄÀ * 174) + Math.floor(-AâÁ * ÄÀ) + äÃÄ;
+    ÅÄÄ.áâ.x = åäÅ - Math.floor(ÄÀ * 134) + ÄäÃ;
+    ÅÄÄ.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 133)) + äÃÄ;
+    ÁÃA.áâ.x = åäÅ - Math.floor(ÄÀ * 81) + ÄäÃ;
+    ÁÃA.áâ.y = Math.max(áÁ, ÂáÅ - Math.floor(ÄÀ * 82)) + äÃÄ;
+    ÃÃA.áâ.x = åäÅ - Math.floor(ÄÀ * 297) + ÄäÃ;
+    ÃÃA.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 202)) + äÃÄ;
+    áÃâ.áâ.x = åäÅ - Math.floor(ÄÀ * 206) + ÄäÃ;
+    áÃâ.áâ.y = Math.max(áÁ, ÂáÅ - Math.floor(ÄÀ * 206)) + äÃÄ;
+    âåä.áâ.x = Math.floor(ÄÀ * 5) - ÄäÃ;
+    âåä.áâ.y = Math.floor(ÄÀ * 5) - äÃÄ;
+    âäÅ.áâ.x = aãA - Math.floor(ÄÀ * 233) + Math.floor(ÄÀ * -6) - ÄäÃ;
+    âäÅ.áâ.y = Math.floor(ÄÀ * ÃÀÁ) - äÃÄ;
+    Àáä.áâ.x = åäÅ - Math.floor(ÄÀ * 258) - ÄäÃ;
+    Àáä.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 137)) - äÃÄ;
+    ÁÄÂ.áâ.x = åäÅ - Math.floor(ÄÀ * 256) - ÄäÃ;
+    ÁÄÂ.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 75)) - äÃÄ;
+    AäA.áâ.x = âåä.áâ.x + Math.floor(ÄÀ * 126);
+    AäA.áâ.y = âåä.áâ.y;
+    AâÀ.áâ.x = AäA.áâ.x + Math.floor(ÄÀ * 50);
+    AâÀ.áâ.y = AäA.áâ.y;
+    ÃÂá.áâ.x = AäA.áâ.x;
+    ÃÂá.áâ.y = AäA.áâ.y + Math.floor(ÄÀ * 44.5);
+    ÀÃÃ.áâ.x = ÃÂá.áâ.x;
+    ÀÃÃ.áâ.y = ÃÂá.áâ.y + Math.floor(ÄÀ * 44.5);
+    ââá.áâ.x = âåä.áâ.x;
+    ââá.áâ.y = âåä.áâ.y + Math.floor(ÄÀ * 127);
+    äaâ.áâ.x = aãA - Math.floor(ÄÀ * 34) + Math.floor(ÄÀ * -7) - ÄäÃ;
+    äaâ.áâ.y = Math.floor(ÃáÅ * ÄÀ) - äÃÄ;
+    åaÀ.áâ.x = äaâ.áâ.x;
+    åaÀ.áâ.y = äaâ.áâ.y;
+    AÅã.x = åäÅ - Math.floor(ÄÀ * 150) + ÄäÃ;
+    Åãã.left = AÅã.x + "px";
+    AÅã.y = Math.max(0, ÂáÅ - ääã) + Math.floor(ÄÀ * 150) + äÃÄ;
+    Åãã.top = AÅã.y + "px";
+    var Ááaåå = document.getElementById("chatInput").style;
+    var ÅÅ = Math.floor(ÄÀ * 250);
+    var Âå = Math.floor(ÄÀ * 20);
+    var áÄã = Math.floor(åäÅ - ÅÅ / Aäã) + "px";
+    var áâå = Math.floor(ÂáÅ - Âå / ããÄ + ÄÀ * 85 + äÃÄ) + "px";
+    Âå = Âå + "px";
+    ÅÅ = ÅÅ + "px";
+    Åãã.width = ÅÅ;
+    Åãã.height = Âå;
+    Åãã.left = áÄã;
+    Åãã.top = áâå;
+    Ááaåå.width = ÅÅ;
+    Ááaåå.height = Âå;
+    Ááaåå.fontSize = Math.floor(AãÃäÄ * ÄÀ) + "px";
   }
   ;
-  function bo(bu) {
-    ÁA.ÄAá(bu, ÁA.âââ);
-    var bv = 0;
-    if (aQ.Åa() === Äá) {
-      bv = ÁÅ;
+  function aÂÀ(Åá) {
+    ÁA.ÄAá(Åá, ÁA.âââ);
+    var åÄ = 0;
+    if (AäA.Åa() === Äá) {
+      åÄ = ÁÅ;
     }
-    if (aR.Åa() === 1) {
-      bv = Àâ;
+    if (AâÀ.Åa() === 1) {
+      åÄ = Àâ;
     }
-    if (aS.Åa() === 1) {
-      bv = ãâ;
+    if (ÃÂá.Åa() === 1) {
+      åÄ = ãâ;
     }
-    if (aT.Åa() === åÀ) {
-      bv = âÃ;
+    if (ÀÃÃ.Åa() === åÀ) {
+      åÄ = âÃ;
     }
-    if (aU.Åa() === 1) {
-      bv = âÃ;
+    if (ââá.Åa() === 1) {
+      åÄ = âÃ;
     }
-    if (aV.Åa() === 1) {
-      bv = ãâ;
+    if (äaâ.Åa() === 1) {
+      åÄ = ãâ;
     }
-    if (âá === aW.Åa()) {
-      bv = Áå;
+    if (âá === åaÀ.Åa()) {
+      åÄ = Áå;
     }
     if (ÁÀ !== Aá.â.aãÅ) {
-      E.Åa();
-      D.Åa();
+      aäÀ.Åa();
+      ÂAa.Åa();
     }
-    if (Âã === p) {
-      M.Åa();
-      if (r === âa) {
-        a8.Åa();
-        aa.Åa();
-        a2.Åa();
-        a4.Åa();
-        a6.Åa();
-        ad.Åa();
-        ae.Åa();
-        af.Åa();
-        ag.Åa();
-        S.Åa();
-        Q.Åa();
-        U.Åa();
-      } else if (s === 1) {
+    if (Âã === Áäå) {
+      äAÁ.Åa();
+      if (ÃäÃ === âa) {
+        ÄÃÄ.Åa();
+        ãáâ.Åa();
+        aaá.Åa();
+        ãâá.Åa();
+        Áaâ.Åa();
+        âäÄ.Åa();
+        ÂÅã.Åa();
+        âÀÄ.Åa();
+        Aåâ.Åa();
+        äaÁ.Åa();
+        ÂÀä.Åa();
+        ãAÃ.Åa();
+      } else if (Àaä === 1) {
         if (-åÀ === Aá.â.ãåÄ) {
           if (Aá.â.âáä === 0 || âa === Aá.â.Aáá) {
-            F.Åa();
+            ÅÅÄ.Åa();
           } else {
-            G.Åa();
+            ÅÅa.Åa();
           }
         } else {
-          H.Åa();
+          AÂã.Åa();
         }
-        for (var bw = áÃ; J.length > bw; bw++) {
-          J[bw].Åa();
+        for (var ä = áÃ; ÃãÁ.length > ä; ä++) {
+          ÃãÁ[ä].Åa();
         }
-        for (bw = 0; K.length > bw; bw++) {
-          if (bw === Aá.â.ÂaA || bw === 0) {
-            K[bw].Åa();
+        for (ä = 0; âÀÃ.length > ä; ä++) {
+          if (ä === Aá.â.ÂaA || ä === 0) {
+            âÀÃ[ä].Åa();
           }
         }
-        var bx = Aá.â.ãÀÅ;
-        for (var bw = 0; bx > bw; bw++) {
-          an[bw].Åa();
+        var Aå = Aá.â.ãÀÅ;
+        for (var ä = 0; Aå > ä; ä++) {
+          áãá[ä].Åa();
         }
-        aj = -1;
-        bx = Aá.â.åÂa;
-        for (bw = 0; bx > bw; bw++) {
-          if (ao[bw].Åa() === 1) {
-            aj = bw;
+        âAÀ = -1;
+        Aå = Aá.â.åÂa;
+        for (ä = 0; Aå > ä; ä++) {
+          if (ÃÄá[ä].Åa() === 1) {
+            âAÀ = ä;
           }
         }
         if (âÃ === Aá.â.Aáá) {
-          for (bw = ãä; bw < Aá.â.aä.Aå; bw++) {
-            ap[bw].Åa();
+          for (ä = ãä; ä < Aá.â.aä.Aå; ä++) {
+            äåá[ä].Åa();
           }
           if ((Aá.â.ÄaA === ää.ÂÅå || ää.åÃÁ === Aá.â.ÄaA || Aá.â.ÄaA === ää.ÀäÁ) && Aá.â.aä.Ââ !== ÅÀÀ) {
-            W.Åa();
+            ÅÃÃ.Åa();
           } else if ((ää.AáÅ === Aá.â.ÄaA || ää.ááA === Aá.â.ÄaA || Aá.â.ÄaA === ää.âáå || ää.ããá === Aá.â.ÄaA) && Aá.â.aä.Ââ !== 255) {
-            Y.Åa();
+            åAâ.Åa();
           } else if (ää.ããá === Aá.â.ÄaA && âáÄ !== Aá.â.aä.Ââ) {
-            a0.Åa();
+            åÅå.Åa();
           }
         }
-        bx = Aá.â.âÁÃ;
-        for (bw = 0; bw < bx; bw++) {
-          aq[bw].Åa();
+        Aå = Aá.â.âÁÃ;
+        for (ä = 0; ä < Aå; ä++) {
+          âåå[ä].Åa();
         }
-        au.Åa();
-      } else if (âá === t) {
-        var by = Aá.â.äÁâ;
-        for (var bz = ÅÁ; bz < 4; bz++) {
-          if (AÂ !== by[bz][AÂ]) {
-            at[bz].Åa();
+        åÄÁ.Åa();
+      } else if (âá === ÁÄA) {
+        var Ãåä = Aá.â.äÁâ;
+        for (var åÃÄ = ÅÁ; åÃÄ < 4; åÃÄ++) {
+          if (AÂ !== Ãåä[åÃÄ][AÂ]) {
+            äÁâ[åÃÄ].Åa();
           }
         }
-      } else if (u === 1) {
+      } else if (ÂÅÀ === 1) {
         if (Aá.â.Aâ === -Àâ) {
-          y.Åa();
-          var bA = 0;
-          for (var bw = åâ; bw < ar.length; bw++) {
-            if (Aá.Ááä[bw].ãaã !== ÅÁ) {
-              ar[bA].Åa();
-              bA++;
+          aÅâ.Åa();
+          var åã = 0;
+          for (var ä = åâ; ä < áAA.length; ä++) {
+            if (Aá.Ááä[ä].ãaã !== ÅÁ) {
+              áAA[åã].Åa();
+              åã++;
             }
           }
         } else if (Aá.â.Aäá === 1) {
-          A.Åa();
-          B.Åa();
-          C.Åa();
-          var bA = 0;
-          var bB = Aá.Ááä[Aá.â.Aâ];
-          for (var bw = 0; Aá.ÂÅ.length > bw; bw++) {
-            if (Aá.â.id === bw) {
-              bA++;
+          Aaå.Åa();
+          ÁÃÄ.Åa();
+          âÁå.Åa();
+          var åã = 0;
+          var Aâ = Aá.Ááä[Aá.â.Aâ];
+          for (var ä = 0; Aá.ÂÅ.length > ä; ä++) {
+            if (Aá.â.id === ä) {
+              åã++;
               continue;
             }
-            var bC = Aá.ÂÅ[bw];
-            if (bC.Aâ === bB.id && bC.åÂå === bB.äâÂ) {
-              as[bA].Åa();
-              bA++;
+            var â = Aá.ÂÅ[ä];
+            if (â.Aâ === Aâ.id && â.åÂå === Aâ.äâÂ) {
+              ÂÂÃ[åã].Åa();
+              åã++;
             }
           }
         } else {
-          z.Åa();
+          ÄâÄ.Åa();
         }
       }
     }
-    var bD = Aá.â.ãÃä;
-    var bx = bD.length;
-    ai = -äA;
-    if (bx > 10) {
-      I.Åa();
+    var áä = Aá.â.ãÃä;
+    var Aå = áä.length;
+    åÂâ = -äA;
+    if (Aå > 10) {
+      áÁa.Åa();
     }
-    for (var bw = ÄÁ; bw < bx; bw++) {
-      if (bw > 9 && I.open === 0) {
+    for (var ä = ÄÁ; ä < Aå; ä++) {
+      if (ä > 9 && áÁa.open === 0) {
         break;
       }
-      if (ãa !== bD[bw][Aa]) {
-        if (am[bw].Åa() === 1) {
-          ai = bw;
+      if (ãa !== áä[ä][Aa]) {
+        if (ãÃä[ä].Åa() === 1) {
+          åÂâ = ä;
         }
       }
     }
   }
   ;
-  function bp() {
-    áÂ.Àäå = m;
-    áÂ.âAâ = j;
+  function ÃÂÅ() {
+    áÂ.Àäå = Àäå;
+    áÂ.âAâ = âAâ;
     if (Âáá.getItem("showLeaderboard") === "0") {
-      aV.aÄÅ();
-      aW.show();
+      äaâ.aÄÅ();
+      åaÀ.show();
     } else {
-      aW.aÄÅ();
-      aV.show();
+      åaÀ.aÄÅ();
+      äaâ.show();
     }
     document.getElementById("bod").style.backgroundColor = "#46664D";
-    L = 0;
+    ãÃå = 0;
     äâ.áÁÃ++;
     ÀÅ.aÄA = "";
     ÀÅ.áaå = AÄ;
     áÁá.ÄäÅ();
     if (Aá.ÄáÃ === Aá.ÂÀå) {
-      aU.aÄÅ();
-      aR.show();
+      ââá.aÄÅ();
+      AâÀ.show();
     } else if (Aá.â.ÀÃã > âã) {
       console.log("HERE");
-      aU.aÄÅ();
-      aR.aÄÅ();
+      ââá.aÄÅ();
+      AâÀ.aÄÅ();
     } else {
-      aU.show();
-      aR.show();
+      ââá.show();
+      AâÀ.show();
     }
     áá.ãÃÄ(ÀÅ);
-    bb = b7;
-    ba = b7;
-    bc = b9;
-    b8 = âa;
-    bn();
+    áÃÁ = áÃÃ;
+    ÅÄa = áÃÃ;
+    äÁá = ÂáÀ;
+    âäã = âa;
+    âÂ();
   }
   ;
-  function bq() {
-    if (bl() === áÁ) {
+  function Áá() {
+    if (ÀÅá() === áÁ) {
       return;
     }
-    aF();
+    ÃäÂÃÁ();
     AÅ.clearRect(AÂ, 0, aãA, äää);
     Aá.ÅÃá();
     Aá.aáÁAå();
     ÀÂ.åãA();
     ÀÂ.AÁÂ();
-    ÀáÃ.forEach(function (bS) {
-      if (!bS.À.src) {
-        bS.À.src = bS.src;
+    ÀáÃ.forEach(function (ÀáÃ) {
+      if (!ÀáÃ.À.src) {
+        ÀáÃ.À.src = ÀáÃ.src;
       }
     });
     if (cfg.playerList) {
@@ -14170,111 +14179,111 @@ var ÀÅ = function () {
       AÅ.font = "16px Black Han Sans";
       AÅ.textAlign = "right";
       AÅ.fillStyle = "#fff";
-      var bu = aãA - 50;
-      var bv = äää - 30;
-      AÅ.fillText("People On Server: " + (playerTestArr.filter(bU => bU !== 0).length - 2), bu, bv);
+      var headerY = aãA - 50;
+      var headerX = äää - 30;
+      AÅ.fillText("People On Server: " + (playerTestArr.filter(vz => vz !== 0).length - 2), headerY, headerX);
       AÅ.textAlign = "left";
-      function bT(bU, bV) {
-        AÅ.font = bV;
-        return AÅ.measureText(bU).width;
+      function measureTextWidth(text, font) {
+        AÅ.font = font;
+        return AÅ.measureText(text).width;
       }
-      for (var bw = 1, bx = 0; bw < playerTestArr.length && bx < 120; bw++) {
-        if (typeof playerTestArr[bw] === "string" && bw !== 120) {
-          var by = Math.floor(bx / 30);
-          var bz = bx % 30;
-          var bA = by * Math.floor((aãA - 80) / 4) + 40;
-          var bB = bz * Math.floor((äää - 60) / 30) + 30;
-          var bC = Aá.ÂÅ[bw];
-          var bD = bC.åÃA;
-          var bE = ÀáÃ[bD] && ÀáÃ[bD].À;
-          if (bE && bE.complete) {
-            AÅ.drawImage(bE, bA, bB - 15, 25, 20);
-            bA += 25;
+      for (var playerIndex = 1, displayIndex = 0; playerIndex < playerTestArr.length && displayIndex < 120; playerIndex++) {
+        if (typeof playerTestArr[playerIndex] === "string" && playerIndex !== 120) {
+          var columnIndex = Math.floor(displayIndex / 30);
+          var rowIndex = displayIndex % 30;
+          var posX = columnIndex * Math.floor((aãA - 80) / 4) + 40;
+          var posY = rowIndex * Math.floor((äää - 60) / 30) + 30;
+          var currentPlayer = Aá.ÂÅ[playerIndex];
+          var classType = currentPlayer.åÃA;
+          var classImage = ÀáÃ[classType] && ÀáÃ[classType].À;
+          if (classImage && classImage.complete) {
+            AÅ.drawImage(classImage, posX, posY - 15, 25, 20);
+            posX += 25;
           }
           AÅ.font = "12px Viga";
-          if (bw == Aá.â.id) {
+          if (playerIndex == Aá.â.id) {
             AÅ.fillStyle = "#00FFFF";
-          } else if (Aá.ÂÅ[bC.id].Aâ !== Aá.â.Aâ || Aá.â.Aâ === -1) {
+          } else if (Aá.ÂÅ[currentPlayer.id].Aâ !== Aá.â.Aâ || Aá.â.Aâ === -1) {
             AÅ.fillStyle = "#fff";
           } else {
             AÅ.fillStyle = "#00FF00";
           }
-          var bF = bC.áÄa;
-          var bG = "#" + bC.id;
-          var bH = bF.endsWith(bG);
-          var bI = bH ? bF : bF + " " + bG;
-          AÅ.fillText(bI, bA, bB);
-          bA += bT(bI, "12px Viga") + 10;
+          var playerName = currentPlayer.áÄa;
+          var playerId = "#" + currentPlayer.id;
+          var hasIdSuffix = playerName.endsWith(playerId);
+          var displayName = hasIdSuffix ? playerName : playerName + " " + playerId;
+          AÅ.fillText(displayName, posX, posY);
+          posX += measureTextWidth(displayName, "12px Viga") + 10;
           AÅ.fillStyle = "#FFF200";
-          var bJ = Ää.ÃÃä(bC.Aãá);
-          AÅ.fillText(bJ, bA, bB);
-          bA += bT(bJ, "12px Viga") + 10;
+          var score = Ää.ÃÃä(currentPlayer.Aãá);
+          AÅ.fillText(score, posX, posY);
+          posX += measureTextWidth(score, "12px Viga") + 10;
           AÅ.font = "12px Black Han Sans";
           AÅ.fillStyle = "#ff0000";
-          var bK = Aá.Ááä[bC.Aâ]?.name || "";
-          AÅ.fillText(bK, bA, bB);
-          bA += bT(bK, "12px Black Han Sans") + 10;
-          var bL = Math.max(0, Math.ceil((bC.ÄÀA - ÀÂ.åâå) / 1000));
-          var bM = Math.floor(bL / 60);
-          var bN = bL % 60;
-          var bO = (bM < 10 ? "0" + bM : bM) + ":" + (bN < 10 ? "0" + bN : bN);
+          var teamName = Aá.Ááä[currentPlayer.Aâ]?.name || "";
+          AÅ.fillText(teamName, posX, posY);
+          posX += measureTextWidth(teamName, "12px Black Han Sans") + 10;
+          var timeRemaining = Math.max(0, Math.ceil((currentPlayer.ÄÀA - ÀÂ.åâå) / 1000));
+          var minutes = Math.floor(timeRemaining / 60);
+          var seconds = timeRemaining % 60;
+          var timeFormatted = (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
           AÅ.fillStyle = "rgba(128,0,128,1)";
-          AÅ.fillText(bO, bA, bB);
-          bx++;
+          AÅ.fillText(timeFormatted, posX, posY);
+          displayIndex++;
         }
       }
       AÅ.restore();
     } else {
-      ÀÂ.ÄÄ(aH.áâ.x, aH.áâ.y);
-      ÀÂ.áÅã(aM.áâ.x, aM.áâ.y);
-      ÀÂ.ãÃä(av, aw, ai, I);
-      aH.Áá();
-      aM.Áá();
-      aQ.Áá();
-      aR.Áá();
-      aS.Áá();
-      aT.Áá();
-      aU.Áá();
-      ÀÂ.äÅáÅÀ(aH.áâ.x, aH.áâ.y);
+      ÀÂ.ÄÄ(AÀa.áâ.x, AÀa.áâ.y);
+      ÀÂ.áÅã(âåä.áâ.x, âåä.áâ.y);
+      ÀÂ.ãÃä(ÃÁã, ÀÁÃ, åÂâ, áÁa);
+      AÀa.Áá();
+      âåä.Áá();
+      AäA.Áá();
+      AâÀ.Áá();
+      ÃÂá.Áá();
+      ÀÃÃ.Áá();
+      ââá.Áá();
+      ÀÂ.äÅáÅÀ(AÀa.áâ.x, AÀa.áâ.y);
       if (Aá.ÄáÃ !== Aá.ÂÀå) {
-        if (Aa === aV.áâ.disable) {
-          aN.Áá();
-          ÀÂ.âäÅ(aN.áâ.x, aN.áâ.y);
-          aV.Áá();
+        if (Aa === äaâ.áâ.disable) {
+          âäÅ.Áá();
+          ÀÂ.âäÅ(âäÅ.áâ.x, âäÅ.áâ.y);
+          äaâ.Áá();
         } else {
-          aW.Áá();
+          åaÀ.Áá();
         }
       }
-      if (åä === p) {
-        if (q === Áå) {
-          ÀÂ.aÃáãá(aL, M);
-        } else if (r === aÅ) {
-          ÀÂ.ââáåa(aI, a2, a4, a6, a8, aa, ad, ae, af, ag, M, Q, S, U);
-        } else if (s === 1) {
-          ÀÂ.áãá(aK, M, J, F, G, H, K, au, av, aw, W, Y, a0, aj);
-        } else if (Áå === t) {
-          ÀÂ.äÁâ(aJ, M, av, aw);
-        } else if (u === 1) {
-          ÀÂ.Aâ(M, aO, aP, z, y, A, B, C);
+      if (åä === Áäå) {
+        if (Àaá === Áå) {
+          ÀÂ.aÃáãá(áÃâ, äAÁ);
+        } else if (ÃäÃ === aÅ) {
+          ÀÂ.ââáåa(ÅÄÄ, aaá, ãâá, Áaâ, ÄÃÄ, ãáâ, âäÄ, ÂÅã, âÀÄ, Aåâ, äAÁ, ÂÀä, äaÁ, ãAÃ);
+        } else if (Àaä === 1) {
+          ÀÂ.áãá(ÃÃA, äAÁ, ÃãÁ, ÅÅÄ, ÅÅa, AÂã, âÀÃ, åÄÁ, ÃÁã, ÀÁÃ, ÅÃÃ, åAâ, åÅå, âAÀ);
+        } else if (Áå === ÁÄA) {
+          ÀÂ.äÁâ(ÁÃA, äAÁ, ÃÁã, ÀÁÃ);
+        } else if (ÂÅÀ === 1) {
+          ÀÂ.Aâ(äAÁ, Àáä, ÁÄÂ, ÄâÄ, aÅâ, Aaå, ÁÃÄ, âÁå);
         }
       } else if (Àâ === äã) {
         if (Âã <= ÂÄA.ãÄâ() + ÂÄA.áÃÂ() + ÂÄA.ÅáÁ() + ÂÄA.ÅÃA()) {
           AÅ.globalAlpha = 0.3;
-          var bP = äâA - Aaä * 1.5;
-          var bQ = aåa + Aaä / ÂÃå;
-          áá.äãä(AÅ, bP, bQ, 60);
+          var ã = äâA - Aaä * 1.5;
+          var áã = aåa + Aaä / ÂÃå;
+          áá.äãä(AÅ, ã, áã, 60);
           áá.ÁÁA(AÅ, "#000000");
-          áá.äãä(AÅ, bP + ÄÀ * (az * Math.sin(ay)), bQ + Math.cos(ay) * az * ÄÀ, 30);
+          áá.äãä(AÅ, ã + ÄÀ * (ÁÂå * Math.sin(äAÄ)), áã + Math.cos(äAÄ) * ÁÂå * ÄÀ, 30);
           áá.ÁÁA(AÅ, "#FFFFFF");
           AÅ.globalAlpha = Äá;
         }
-        if (aB === 1) {
+        if (Âaa === 1) {
           AÅ.globalAlpha = 0.3;
-          var bP = äâA + Aaä * 1.5;
-          var bQ = aåa + Aaä / ÅÄã;
-          áá.äãä(AÅ, bP, bQ, 60);
+          var ã = äâA + Aaä * 1.5;
+          var áã = aåa + Aaä / ÅÄã;
+          áá.äãä(AÅ, ã, áã, 60);
           áá.ÁÁA(AÅ, "#000000");
-          áá.äãä(AÅ, bP + ÄÀ * (Math.sin(ÁA.angle) * 25), bQ + ÄÀ * (Math.cos(ÁA.angle) * 25), 30);
+          áá.äãä(AÅ, ã + ÄÀ * (Math.sin(ÁA.angle) * 25), áã + ÄÀ * (Math.cos(ÁA.angle) * 25), 30);
           áá.ÁÁA(AÅ, "#FFFFFF");
           AÅ.globalAlpha = âa;
         }
@@ -14282,807 +14291,807 @@ var ÀÅ = function () {
       áÁá.äåã();
     }
   }
-  function br() {
+  function ÅÂâ() {
     if (äã === 0) {
-      window.addEventListener("mousedown", bf, aÃÂ);
+      window.addEventListener("mousedown", aAá, aÃÂ);
     }
     if (ÀÄ === äã) {
-      window.addEventListener("mouseup", bm, ÁâäâÁ);
+      window.addEventListener("mouseup", ÃåA, ÁâäâÁ);
     }
     if (âã === äã) {
-      window.addEventListener("mousemove", bo, ÅaÅ);
+      window.addEventListener("mousemove", aÂÀ, ÅaÅ);
     }
     if (äã === áÃ) {
-      window.addEventListener("keyup", bk, Ãâä);
+      window.addEventListener("keyup", ÅãÁ, Ãâä);
     }
     if (äã === áÃ) {
-      window.addEventListener("keydown", bs, Áââ);
+      window.addEventListener("keydown", áAÅ, Áââ);
     }
     if (äã === ÀA) {
-      window.addEventListener("touchstart", bg, äÂA);
+      window.addEventListener("touchstart", AÀÅ, äÂA);
     }
     if (äã === 1) {
-      window.addEventListener("touchend", bd, ÅaÅ);
+      window.addEventListener("touchend", äÄä, ÅaÅ);
     }
     if (äã === 1) {
-      window.addEventListener("touchcancel", be, false);
+      window.addEventListener("touchcancel", AAÅ, false);
     }
     if (ãå === äã) {
-      window.addEventListener("touchmove", bi, false);
+      window.addEventListener("touchmove", áãÃ, false);
     }
   }
   ;
-  function bs(bu) {
-    ÂÄA.Áãä(bu);
-    if (bu.keyCode === 37 || bu.keyCode === 38 || bu.keyCode === 39 || bu.keyCode === 40) {
-      bu.preventDefault();
+  function áAÅ(Åá) {
+    ÂÄA.Áãä(Åá);
+    if (Åá.keyCode === 37 || Åá.keyCode === 38 || Åá.keyCode === 39 || Åá.keyCode === 40) {
+      Åá.preventDefault();
       return false;
     }
   }
   ;
-  function bt(bu) {
-    o = 0;
-    x();
+  function aâä(Äâã) {
+    áäâ = 0;
+    ÂÁÃ();
     áÁá.ÂÂÅ();
-    b1 = bu;
-    bh();
-    bb = b4;
-    ba = b4;
-    bc = b6;
-    b5 = 1;
+    áåÅ = Äâã;
+    Äåä();
+    áÃÁ = AÁÃ;
+    ÅÄa = AÁÃ;
+    äÁá = ÃÃa;
+    áÁâ = 1;
   }
   ;
   return {
-    getChatActive: bj,
-    aâä: bt,
-    ÁÀÄ: b0,
-    ÃÂÅ: bp,
-    âÂ: bn,
-    Áá: bq
+    getChatActive: zxcnemo,
+    aâä: aâä,
+    ÁÀÄ: ÁÀÄ,
+    ÃÂÅ: ÃÂÅ,
+    âÂ: âÂ,
+    Áá: Áá
   };
 }();
 const åaÁ = ããÄ;
-function Ããåäá(j, k, l) {
-  ÃÂAÄá(ÅÂá, j, k, l);
-  const m = åãaáå(ÂÁ[0], ÂÁ[ÂA], ÂÁ[Åaa]);
-  const n = ãåäãÄ(ÂÁ[0], ÂÁ[1], ÂÁ[Äåã], ÂÁ[0], ÂÁ[ãâ]);
-  const o = ((133 + (m ^ n)) * 75 + 74) % 65537;
-  return o;
+function Ããåäá(AáãâA, Àáãáâ, ÀáÃåâ) {
+  ÃÂAÄá(ÅÂá, AáãâA, Àáãáâ, ÀáÃåâ);
+  const áäÅäA = åãaáå(ÂÁ[0], ÂÁ[ÂA], ÂÁ[Åaa]);
+  const åáÀÁÀ = ãåäãÄ(ÂÁ[0], ÂÁ[1], ÂÁ[Äåã], ÂÁ[0], ÂÁ[ãâ]);
+  const ÅÁÀâÄ = ((133 + (áäÅäA ^ åáÀÁÀ)) * 75 + 74) % 65537;
+  return ÅÁÀâÄ;
 }
 ;
 var äÀÄaA = function () {
-  function j() {
-    W(ÀÅ);
+  function ÂÂÅ() {
+    aâä(ÀÅ);
   }
   ;
-  function k() {
-    j();
+  function âAâ() {
+    ÂÂÅ();
   }
   ;
-  function l(a6) {}
+  function Àäå(Âá) {}
   ;
-  var m = áÃ;
-  var n = {
+  var áÄÃ = áÃ;
+  var ÂåáâÅ = {
     À: {
       á: 0
     },
     src: "img/adblocker-msg.png"
   };
-  var o = ãä;
-  var p = -1;
-  var q = null;
-  var r = {
+  var ÅaA = ãä;
+  var äÁÃ = -1;
+  var ÄãAãã = null;
+  var ããAÀã = {
     À: null
   };
-  var s = null;
-  var t = {
+  var áÅÁAÂ = null;
+  var áÃÁâa = {
     À: null
   };
-  var u = -1;
-  var v = {
+  var áÀâ = -1;
+  var äåaÄÃ = {
     À: null
   };
-  var w = null;
-  var x = -1;
-  var y = null;
-  var z = {
+  var ÅãA = null;
+  var âÀä = -1;
+  var ÂâÀ = null;
+  var aãá = {
     À: null
   };
-  function A() {
-    var a6 = C.áâ.x;
-    var a7 = C.áâ.y;
-    var a8 = a6 / ÄÀ;
-    var a9 = a7 / ÄÀ;
-    if (w === null || u !== Aá.â.Ãa) {
-      u = Aá.â.Ãa;
-      w = áÅ.åáa(u + "", "'Viga', sans-serif", "#FFFFFF", 38, 400, ÁâÃ, äáÂ, 25, ÅâÃ, ÃÅá, undefined, ÁâÃ, "#000000", ÄAáäÅ);
-      v.À = w;
-      v.À.á = ãâ;
+  function ÅÅäãA() {
+    var ã = äáÄ.áâ.x;
+    var áã = äáÄ.áâ.y;
+    var åáÁ = ã / ÄÀ;
+    var AÁá = áã / ÄÀ;
+    if (ÅãA === null || áÀâ !== Aá.â.Ãa) {
+      áÀâ = Aá.â.Ãa;
+      ÅãA = áÅ.åáa(áÀâ + "", "'Viga', sans-serif", "#FFFFFF", 38, 400, ÁâÃ, äáÂ, 25, ÅâÃ, ÃÅá, undefined, ÁâÃ, "#000000", ÄAáäÅ);
+      äåaÄÃ.À = ÅãA;
+      äåaÄÃ.À.á = ãâ;
     }
-    áá.ÄA(v, a8 + 280, a9 + 117, 0, 0, ÄÁ, âá);
-    if (q === null || Aá.â.level !== p) {
-      p = Aá.â.level;
-      q = áÅ.åáa(p + "", "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, ÄÁÀ, 25, âÂa, undefined, undefined, âÂa, "#000000", ÃãÂ);
-      s = áÅ.åáa(Math.floor(p / 2), "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, AAÀ, 25, ÃÅá, ÂÄá, undefined, undefined, "#000000", 12);
-      r.À = q;
-      r.À.á = 1;
-      t.À = s;
-      t.À.á = aÅ;
+    áá.ÄA(äåaÄÃ, åáÁ + 280, AÁá + 117, 0, 0, ÄÁ, âá);
+    if (ÄãAãã === null || Aá.â.level !== äÁÃ) {
+      äÁÃ = Aá.â.level;
+      ÄãAãã = áÅ.åáa(äÁÃ + "", "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, ÄÁÀ, 25, âÂa, undefined, undefined, âÂa, "#000000", ÃãÂ);
+      áÅÁAÂ = áÅ.åáa(Math.floor(äÁÃ / 2), "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, AAÀ, 25, ÃÅá, ÂÄá, undefined, undefined, "#000000", 12);
+      ããAÀã.À = ÄãAãã;
+      ããAÀã.À.á = 1;
+      áÃÁâa.À = áÅÁAÂ;
+      áÃÁâa.À.á = aÅ;
     }
-    áá.ÄA(r, a8 + 108, a9 + 117, 0, 0, áÃ, Àâ);
-    áá.ÄA(t, a8 + 288, a9 + 147, ÀÄ, 0, 0, âá);
-    if (y === null || x !== Aá.â.aÅÂ) {
-      x = Aá.â.aÅÂ;
-      y = áÅ.åáa(x + "", "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, 16, 25, âÂa, undefined, undefined, ÄåA, "#000000", åáÅ);
-      z.À = y;
-      z.À.á = 1;
+    áá.ÄA(ããAÀã, åáÁ + 108, AÁá + 117, 0, 0, áÃ, Àâ);
+    áá.ÄA(áÃÁâa, åáÁ + 288, AÁá + 147, ÀÄ, 0, 0, âá);
+    if (ÂâÀ === null || âÀä !== Aá.â.aÅÂ) {
+      âÀä = Aá.â.aÅÂ;
+      ÂâÀ = áÅ.åáa(âÀä + "", "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, 16, 25, âÂa, undefined, undefined, ÄåA, "#000000", åáÅ);
+      aãá.À = ÂâÀ;
+      aãá.À.á = 1;
     }
-    áá.ÄA(z, a8 + 453, a9 + 117, ãä, 0, ÄÁ, 1);
-    var aa = ÀÅ.ãÃä;
-    var ab = Aá.â.ãÃä;
-    var ac = ab.length;
-    var ad = ÄÀ * 50;
-    var ae = a7 + ÄÀ * 182;
-    var af = a6 + ÄÀ * 80;
-    var ag = ÄÀ;
+    áá.ÄA(aãá, åáÁ + 453, AÁá + 117, ãä, 0, ÄÁ, 1);
+    var ãÃä = ÀÅ.ãÃä;
+    var áä = Aá.â.ãÃä;
+    var Aå = áä.length;
+    var ÁÂã = ÄÀ * 50;
+    var ãÄ = áã + ÄÀ * 182;
+    var aå = ã + ÄÀ * 80;
+    var ÅäaAA = ÄÀ;
     ÄÀ = ÄÀ - ÄÀ * 0.3;
-    for (var ah = 0; ac > ah; ah++) {
-      var ai = aa[ah];
-      if (Àá !== ab[ah][0]) {
-        ÀÂ.ÃâAÂÀ(ai, ab[ah], af, ae, ÀÅ.ÃÁã, ÀÅ.ÀÁÃ);
+    for (var ä = 0; Aå > ä; ä++) {
+      var äÄ = ãÃä[ä];
+      if (Àá !== áä[ä][0]) {
+        ÀÂ.ÃâAÂÀ(äÄ, áä[ä], aå, ãÄ, ÀÅ.ÃÁã, ÀÅ.ÀÁÃ);
       }
-      af += ad;
+      aå += ÁÂã;
     }
-    ÄÀ = ag;
+    ÄÀ = ÅäaAA;
     if (äâ.ÂÄÁ === ãâ) {
-      var aj = Ää.ÁÃ.ÄáÀ(o > 500 ? (1000 - o) / 500 : o / 500);
+      var Äa = Ää.ÁÃ.ÄáÀ(ÅaA > 500 ? (1000 - ÅaA) / 500 : ÅaA / 500);
       AÅ.globalAlpha = 0.7;
-      áá.ÄA(n, a8 + 288, a9 + 193, ãÁ, 0, ÁÀ, ãå + aj * 0.04);
+      áá.ÄA(ÂåáâÅ, åáÁ + 288, AÁá + 193, ãÁ, 0, ÁÀ, ãå + Äa * 0.04);
       AÅ.globalAlpha = âÃ;
-      o = (o + ÀÀ) % 1000;
+      ÅaA = (ÅaA + ÀÀ) % 1000;
     }
   }
   ;
-  var B = 0;
-  var C;
-  var D;
-  var E;
-  function F() {
-    C = áÅ.ÄÁã(541, 324, "img/scoreboardnew.png");
-    D = áÅ.åá(123, 35, ["img/play-again-button-out.png", "img/play-again-button-in.png", "img/play-again-button-click.png"]);
-    E = áÅ.åá(198, 35, ["img/back-main-page-button-out.png", "img/back-main-page-button-in.png", "img/back-main-page-button-click.png"]);
+  var âÀá = 0;
+  var äáÄ;
+  var äaã;
+  var ÂÅâ;
+  function ÁÀÄ() {
+    äáÄ = áÅ.ÄÁã(541, 324, "img/scoreboardnew.png");
+    äaã = áÅ.åá(123, 35, ["img/play-again-button-out.png", "img/play-again-button-in.png", "img/play-again-button-click.png"]);
+    ÂÅâ = áÅ.åá(198, 35, ["img/back-main-page-button-out.png", "img/back-main-page-button-in.png", "img/back-main-page-button-click.png"]);
   }
   ;
-  var G;
-  var H = new ÁA.ÀÄÄ();
-  var I = new ÂÄA.äåå();
-  var J = 500;
-  var K = 0;
-  function L(a6) {
-    return Ää.ÁÃ.ãÀÃ(a6, Ää.ÁÃ.AÃa, 0.05);
+  var áåÅ;
+  var Àã = new ÁA.ÀÄÄ();
+  var aã = new ÂÄA.äåå();
+  var AÁÃ = 500;
+  var áÁâ = 0;
+  function ÃÃa(ÃÀ) {
+    return Ää.ÁÃ.ãÀÃ(ÃÀ, Ää.ÁÃ.AÃa, 0.05);
   }
-  var M = 500;
-  var N = 0;
-  function O(a6) {
-    return Ää.ÁÃ.ãÀÃ(a6, Ää.ÁÃ.ÃaÅ, 0.05);
+  var áÃÃ = 500;
+  var âäã = 0;
+  function ÂáÀ(ÃÀ) {
+    return Ää.ÁÃ.ãÀÃ(ÃÀ, Ää.ÁÃ.ÃaÅ, 0.05);
   }
-  var P = 0;
-  var Q = 0;
-  var R = undefined;
-  function S(a6) {
-    a0(H);
+  var ÅÄa = 0;
+  var áÃÁ = 0;
+  var äÁá = undefined;
+  function äÄä(Åá) {
+    ÃåA(Àã);
   }
   ;
-  function T(a6) {
-    if (ãä < a6.touches.length) {
-      ÁA.Âãå(H, a6, a6.touches[åâ]);
-      a0(H);
+  function AAÅ(Åá) {
+    if (ãä < Åá.touches.length) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[åâ]);
+      ÃåA(Àã);
     }
   }
   ;
-  function U(a6) {
-    ÁA.ÄAá(a6, ÁA.âââ);
-    var a7 = 0;
-    if (D.Åa() === 1) {
-      a7 = 1;
+  function aÂÀ(Åá) {
+    ÁA.ÄAá(Åá, ÁA.âââ);
+    var åÄ = 0;
+    if (äaã.Åa() === 1) {
+      åÄ = 1;
     }
-    if (E.Åa() === 1) {
-      a7 = ÁÅ;
-    }
-  }
-  ;
-  function V(a6) {
-    ÁA.ÄAá(a6, ÁA.Àãa);
-    var a7 = 0;
-    if (âa === D.Åa()) {
-      a7 = åä;
-    }
-    if (åÀ === E.Åa()) {
-      a7 = 1;
+    if (ÂÅâ.Åa() === 1) {
+      åÄ = ÁÅ;
     }
   }
   ;
-  function W(a6) {
+  function aAá(Åá) {
+    ÁA.ÄAá(Åá, ÁA.Àãa);
+    var åÄ = 0;
+    if (âa === äaã.Åa()) {
+      åÄ = åä;
+    }
+    if (åÀ === ÂÅâ.Åa()) {
+      åÄ = 1;
+    }
+  }
+  ;
+  function aâä(Äâã) {
     äâ.ÂãÃ.display = "none";
-    G = a6;
-    X();
-    Q = J;
-    P = J;
-    R = L;
-    K = ÀA;
+    áåÅ = Äâã;
+    Äåä();
+    áÃÁ = AÁÃ;
+    ÅÄa = AÁÃ;
+    äÁá = ÃÃa;
+    áÁâ = ÀA;
   }
   ;
-  function X() {
+  function Äåä() {
     if (äã === 0) {
-      window.removeEventListener("mousedown", V, false);
+      window.removeEventListener("mousedown", aAá, false);
     }
     if (äã === 0) {
-      window.removeEventListener("mouseup", a0, false);
+      window.removeEventListener("mouseup", ÃåA, false);
     }
     if (äã === 0) {
-      window.removeEventListener("mousemove", U, ÀãAÄå);
+      window.removeEventListener("mousemove", aÂÀ, ÀãAÄå);
     }
     if (äã === 1) {
-      window.removeEventListener("touchstart", a2, false);
+      window.removeEventListener("touchstart", AÀÅ, false);
     }
     if (Äá === äã) {
-      window.removeEventListener("touchend", S, aÃÂ);
+      window.removeEventListener("touchend", äÄä, aÃÂ);
     }
     if (Äá === äã) {
-      window.removeEventListener("touchcancel", T, false);
+      window.removeEventListener("touchcancel", AAÅ, false);
     }
     if (äã === ÁÅ) {
-      window.removeEventListener("touchmove", a4, false);
+      window.removeEventListener("touchmove", áãÃ, false);
     }
   }
   ;
-  function Y() {
-    if (K === 1) {
-      a1();
-      if (Q < 0) {
-        K = ÄÁ;
-        D.Äâ(áÅ.Àå);
-        E.Äâ(áÅ.Àå);
-        G.ÃÂÅ();
+  function ÀÅá() {
+    if (áÁâ === 1) {
+      âÂ();
+      if (áÃÁ < 0) {
+        áÁâ = ÄÁ;
+        äaã.Äâ(áÅ.Àå);
+        ÂÅâ.Äâ(áÅ.Àå);
+        áåÅ.ÃÂÅ();
         return 0;
       }
-      Q -= ÀÀ;
-    } else if (äA === N) {
-      a1();
-      if (ãÂ > Q) {
-        N = ÀÄ;
+      áÃÁ -= ÀÀ;
+    } else if (äA === âäã) {
+      âÂ();
+      if (ãÂ > áÃÁ) {
+        âäã = ÀÄ;
         if (Aá.â.aâå !== 1) {
           äâ.ÂãÃ.display = "inline-block";
         }
         document.getElementById("bod").style.backgroundColor = "#46664d";
-        a3();
+        ÅÂâ();
       }
-      Q -= ÀÀ;
+      áÃÁ -= ÀÀ;
     }
     return âá;
   }
   ;
-  function Z() {
-    if (Y() === ÅÁ) {
+  function Áá() {
+    if (ÀÅá() === ÅÁ) {
       return;
     }
     AÅ.clearRect(0, ãa, aãA, äää);
     ÀÂ.åãA();
-    if (âã < Q) {
-      m = R(1 - Q / P);
-      if (N === 1) {
-        m = ãâ - Math.abs(m);
+    if (âã < áÃÁ) {
+      áÄÃ = äÁá(1 - áÃÁ / ÅÄa);
+      if (âäã === 1) {
+        áÄÃ = ãâ - Math.abs(áÄÃ);
       }
-      m = 1 - m;
+      áÄÃ = 1 - áÄÃ;
     }
-    AÅ.globalAlpha = m * 0.3;
+    AÅ.globalAlpha = áÄÃ * 0.3;
     AÅ.fillStyle = "#000000";
     AÅ.fillRect(áÃ, 0, aãA, äää);
     AÅ.globalAlpha = ãå;
-    C.Áá();
-    E.Áá();
-    A();
+    äáÄ.Áá();
+    ÂÅâ.Áá();
+    ÅÅäãA();
     ÀÂ.ÀâÁáÀ();
     áÁá.äåã();
-    if (B > 0) {
-      B = Math.max(Aa, B - ÀÀ);
-      áá.ÄA(AÁaAÃ[Math.floor(B / 1000)], D.áâ.x / ÄÀ + 61.5, D.áâ.y / ÄÀ + 17.75, 0, 0, ÀÄ, aÅ);
+    if (âÀá > 0) {
+      âÀá = Math.max(Aa, âÀá - ÀÀ);
+      áá.ÄA(AÁaAÃ[Math.floor(âÀá / 1000)], äaã.áâ.x / ÄÀ + 61.5, äaã.áâ.y / ÄÀ + 17.75, 0, 0, ÀÄ, aÅ);
     } else {
-      D.Áá();
+      äaã.Áá();
     }
   }
   ;
-  function a0(a6) {
-    ÁA.ÄAá(a6, ÁA.ÅÁá);
-    var a7 = Àá;
-    if (D.Åa() === 1) {
-      a7 = Áå;
-      if (B <= 0) {
+  function ÃåA(Åá) {
+    ÁA.ÄAá(Åá, ÁA.ÅÁá);
+    var åÄ = Àá;
+    if (äaã.Åa() === 1) {
+      åÄ = Áå;
+      if (âÀá <= 0) {
         äâ.ÂâÁ();
         Äå.âå(Äå.AA.play, aÅ, 0);
       }
       return;
     }
-    if (E.Åa() === 1) {
-      a7 = Àâ;
+    if (ÂÅâ.Åa() === 1) {
+      åÄ = Àâ;
       if ((áÂ.state & áÂ.ÀÁÄ.Ãåã) === 0 && (áÂ.state & áÂ.ÀÁÄ.ãAá) === áÁ) {
-        W(äâ);
+        aâä(äâ);
         Äå.âå(Äå.AA.button, 1, ÁÀ);
         return;
       }
     }
   }
   ;
-  function a1() {
-    var a6 = 0;
-    var a7 = 0;
-    if (Q > 0) {
-      a7 = äää;
-      var a8 = R(ãâ - Q / P);
-      if (a8 === 1) {
-        Q = ÄÁ;
+  function âÂ() {
+    var ÄäÃ = 0;
+    var äÃÄ = 0;
+    if (áÃÁ > 0) {
+      äÃÄ = äää;
+      var transition = äÁá(ãâ - áÃÁ / ÅÄa);
+      if (transition === 1) {
+        áÃÁ = ÄÁ;
       }
-      if (ãâ === N) {
-        a8 = 1 - Math.abs(a8);
+      if (ãâ === âäã) {
+        transition = 1 - Math.abs(transition);
       }
-      a6 *= a8;
-      a7 *= a8;
+      ÄäÃ *= transition;
+      äÃÄ *= transition;
     }
-    C.áâ.x = åäÅ - Math.floor(ÄÀ * 270) - a6;
-    C.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 162) + Math.floor(ÄÀ * -135)) - a7;
-    D.áâ.x = åäÅ - Math.floor(ÄÀ * 61) + Math.floor(ÄÀ * -Ááå) - a6;
-    D.áâ.y = Math.max(0, ÂáÅ - Math.floor(AÃáÂá * ÄÀ) + Math.floor(ÄÀ * -35)) - a7;
-    E.áâ.x = åäÅ - Math.floor(ÄÀ * 99) + Math.floor(ÄÀ * äÃa) - a6;
-    E.áâ.y = D.áâ.y;
-    var a9 = Math.min(ÄÀ, 1);
-    document.getElementById("bebebaba").style.top = Math.floor(ÂáÅ - 125 + a9 * 170) + "px";
-    document.getElementById("bebebaba").style.transform = "scale(" + a9 + ")";
+    äáÄ.áâ.x = åäÅ - Math.floor(ÄÀ * 270) - ÄäÃ;
+    äáÄ.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 162) + Math.floor(ÄÀ * -135)) - äÃÄ;
+    äaã.áâ.x = åäÅ - Math.floor(ÄÀ * 61) + Math.floor(ÄÀ * -Ááå) - ÄäÃ;
+    äaã.áâ.y = Math.max(0, ÂáÅ - Math.floor(AÃáÂá * ÄÀ) + Math.floor(ÄÀ * -35)) - äÃÄ;
+    ÂÅâ.áâ.x = åäÅ - Math.floor(ÄÀ * 99) + Math.floor(ÄÀ * äÃa) - ÄäÃ;
+    ÂÅâ.áâ.y = äaã.áâ.y;
+    var AâÅ = Math.min(ÄÀ, 1);
+    document.getElementById("bebebaba").style.top = Math.floor(ÂáÅ - 125 + AâÅ * 170) + "px";
+    document.getElementById("bebebaba").style.transform = "scale(" + AâÅ + ")";
     document.getElementById("bebebaba").style.left = "0";
     document.getElementById("bebebaba").style.right = "0";
     document.getElementById("bebebaba").style.aáÁåÃ = "auto";
   }
   ;
-  function a2(a6) {
-    if (Àá < a6.touches.length) {
-      ÁA.Âãå(H, a6, a6.touches[ÄÁ]);
-      V(H);
+  function AÀÅ(Åá) {
+    if (Àá < Åá.touches.length) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[ÄÁ]);
+      aAá(Àã);
     }
   }
   ;
-  function a3() {
+  function ÅÂâ() {
     if (ÀÄ === äã) {
-      window.addEventListener("mousedown", V, ÅaÅ);
+      window.addEventListener("mousedown", aAá, ÅaÅ);
     }
     if (äã === ÅÁ) {
-      window.addEventListener("mouseup", a0, äãÂ);
+      window.addEventListener("mouseup", ÃåA, äãÂ);
     }
     if (äã === 0) {
-      window.addEventListener("mousemove", U, ÄÃÀ);
+      window.addEventListener("mousemove", aÂÀ, ÄÃÀ);
     }
     if (äã === âÃ) {
-      window.addEventListener("touchstart", a2, äÂA);
+      window.addEventListener("touchstart", AÀÅ, äÂA);
     }
     if (äã === 1) {
-      window.addEventListener("touchend", S, false);
+      window.addEventListener("touchend", äÄä, false);
     }
     if (äã === 1) {
-      window.addEventListener("touchcancel", T, false);
+      window.addEventListener("touchcancel", AAÅ, false);
     }
     if (äã === åä) {
-      window.addEventListener("touchmove", a4, ÁáÀ);
+      window.addEventListener("touchmove", áãÃ, ÁáÀ);
     }
   }
   ;
-  function a4(a6) {
-    if (a6.touches.length > 0) {
-      ÁA.Âãå(H, a6, a6.touches[0]);
-      U(H);
+  function áãÃ(Åá) {
+    if (Åá.touches.length > 0) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[0]);
+      aÂÀ(Àã);
     }
   }
   ;
-  function a5() {
-    áÂ.Àäå = l;
-    áÂ.âAâ = k;
+  function ÃÂÅ() {
+    áÂ.Àäå = Àäå;
+    áÂ.âAâ = âAâ;
     Aá.â.aÅÁ = 0;
     Aá.â.id = 0;
     ÀÂ.áÅÁ(ÅÁ);
     ÀÂ.aaÀ();
-    for (var a6 = 0; Aá.â.ãÃä.length > a6; a6++) {
-      for (var a7 = 0; a7 < 4; a7++) {
-        Aá.â.ãÃä[a6][a7] = 0;
+    for (var ä = 0; Aá.â.ãÃä.length > ä; ä++) {
+      for (var åã = 0; åã < 4; åã++) {
+        Aá.â.ãÃä[ä][åã] = 0;
       }
     }
-    var a8 = Âaâ[Math.min(Âaâ.length - Äá, Aá.â.level)];
-    for (var a6 = Aa; a8.length > a6; a6++) {
-      var a9 = a8[a6];
-      if (a9.id !== 0) {
-        ÀÅ.ãÃä[a6].ÁÁÃ(ÁÁ[a9.id].Áã.src, ÁÁ[a9.id].Áã.À);
+    var åÁââÄ = Âaâ[Math.min(Âaâ.length - Äá, Aá.â.level)];
+    for (var ä = Aa; åÁââÄ.length > ä; ä++) {
+      var Åã = åÁââÄ[ä];
+      if (Åã.id !== 0) {
+        ÀÅ.ãÃä[ä].ÁÁÃ(ÁÁ[Åã.id].Áã.src, ÁÁ[Åã.id].Áã.À);
       }
-      var aa = Aá.â.ãÃä[a6];
-      aa[1] = a9.ãÀ;
-      aa[Åaa] = AÄ;
-      aa[âÀâ] = a9.ãá;
-      aa[0] = a9.id;
+      var áä = Aá.â.ãÃä[ä];
+      áä[1] = Åã.ãÀ;
+      áä[Åaa] = AÄ;
+      áä[âÀâ] = Åã.ãá;
+      áä[0] = Åã.id;
     }
-    B = 5000;
+    âÀá = 5000;
     if (âÄá.ãAA("admin") === null) {
       try {
         window.Widget.adsRefresh();
-      } catch (ah) {}
+      } catch (âãå) {}
     }
     áá.ãÃÄ(äÀÄaA);
-    Q = M;
-    P = M;
-    R = O;
-    N = Äá;
-    a1();
+    áÃÁ = áÃÃ;
+    ÅÄa = áÃÃ;
+    äÁá = ÂáÀ;
+    âäã = Äá;
+    âÂ();
   }
   ;
   return {
-    aâä: W,
-    ÁÀÄ: F,
-    ÃÂÅ: a5,
-    âÂ: a1,
-    Áá: Z
+    aâä: aâä,
+    ÁÀÄ: ÁÀÄ,
+    ÃÂÅ: ÃÂÅ,
+    âÂ: âÂ,
+    Áá: Áá
   };
 }();
 const ÃÃá = Âãá;
 var ãåååÁ = function () {
-  function j() {
-    l();
+  function âAâ() {
+    ÂÂÅ();
   }
   ;
-  function k(a2) {}
+  function Àäå(Âá) {}
   ;
-  function l() {
-    R(ÀÅ);
+  function ÂÂÅ() {
+    aâä(ÀÅ);
   }
   ;
-  var m = 0;
-  var n = -1;
-  var o = null;
-  var p = {
+  var áÄÃ = 0;
+  var áåÂ = -1;
+  var ÁÅaåã = null;
+  var ããÃAÁ = {
     À: null
   };
-  var q = -âá;
-  var r = {
+  var ÄÁãáâ = -âá;
+  var åááÂá = {
     À: null
   };
-  var s = null;
-  var t = -Äá;
-  var u = null;
-  var v = {
+  var ãáAÁÂ = null;
+  var âÀä = -Äá;
+  var ÂâÀ = null;
+  var aãá = {
     À: null
   };
-  function w() {
-    var a2 = y.áâ.x;
-    var a3 = y.áâ.y;
-    var a4 = a2 / ÄÀ;
-    var a5 = a3 / ÄÀ;
-    if (s === null || q !== Aá.ãâÃ) {
-      q = Aá.ãâÃ;
-      s = áÅ.åáa("#" + Math.max(q, 1), "'Viga', sans-serif", "#FFFFFF", 60, 140, âåã, ÂÃÅ, 25, ÄåA, ÄÂã, undefined, ÃÅá, "#000000", åáÅ);
-      r.À = s;
-      r.À.á = 1;
+  function ÅÅäãA() {
+    var ã = äáÄ.áâ.x;
+    var áã = äáÄ.áâ.y;
+    var åáÁ = ã / ÄÀ;
+    var AÁá = áã / ÄÀ;
+    if (ãáAÁÂ === null || ÄÁãáâ !== Aá.ãâÃ) {
+      ÄÁãáâ = Aá.ãâÃ;
+      ãáAÁÂ = áÅ.åáa("#" + Math.max(ÄÁãáâ, 1), "'Viga', sans-serif", "#FFFFFF", 60, 140, âåã, ÂÃÅ, 25, ÄåA, ÄÂã, undefined, ÃÅá, "#000000", åáÅ);
+      åááÂá.À = ãáAÁÂ;
+      åááÂá.À.á = 1;
     }
-    áá.ÄA(r, a4 + 207, a5 + 93, 0, âã, Aa, âá);
-    if (o === null || n !== Aá.â.aAÀ) {
-      n = Aá.â.aAÀ;
-      var a6 = Math.floor((Date.now() - Aá.â.aAÀ) / 1000);
-      var a7 = Math.floor(a6 / 60);
-      var a8 = a6 % 60;
-      o = áÅ.åáa((a7 < ãÄä ? "0" : "") + a7 + ":" + (åÃA > a8 ? "0" : "") + a8, "'Viga', sans-serif", "#FFFFFF", 38, 400, ÁâÃ, ÂÄÄ, 25, undefined, undefined, undefined, ÂÄá, "#000000", AâAäâ);
-      p.À = o;
-      p.À.á = 1;
+    áá.ÄA(åááÂá, åáÁ + 207, AÁá + 93, 0, âã, Aa, âá);
+    if (ÁÅaåã === null || áåÂ !== Aá.â.aAÀ) {
+      áåÂ = Aá.â.aAÀ;
+      var ãÅAâÄ = Math.floor((Date.now() - Aá.â.aAÀ) / 1000);
+      var aáA = Math.floor(ãÅAâÄ / 60);
+      var ãåÂ = ãÅAâÄ % 60;
+      ÁÅaåã = áÅ.åáa((aáA < ãÄä ? "0" : "") + aáA + ":" + (åÃA > ãåÂ ? "0" : "") + ãåÂ, "'Viga', sans-serif", "#FFFFFF", 38, 400, ÁâÃ, ÂÄÄ, 25, undefined, undefined, undefined, ÂÄá, "#000000", AâAäâ);
+      ããÃAÁ.À = ÁÅaåã;
+      ããÃAÁ.À.á = 1;
     }
-    áá.ÄA(p, a4 + 110, a5 + ÀãÅ, ãÂ, 0, âã, 1);
-    if (u === null || t !== Aá.â.aÅÂ) {
-      t = Aá.â.aÅÂ;
-      u = áÅ.åáa(t + "", "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, ÃäÀ, 25, undefined, undefined, åÅÁ, undefined, "#000000", Aäáåâ);
-      v.À = u;
-      v.À.á = 1;
+    áá.ÄA(ããÃAÁ, åáÁ + 110, AÁá + ÀãÅ, ãÂ, 0, âã, 1);
+    if (ÂâÀ === null || âÀä !== Aá.â.aÅÂ) {
+      âÀä = Aá.â.aÅÂ;
+      ÂâÀ = áÅ.åáa(âÀä + "", "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, ÃäÀ, 25, undefined, undefined, åÅÁ, undefined, "#000000", Aäáåâ);
+      aãá.À = ÂâÀ;
+      aãá.À.á = 1;
     }
-    áá.ÄA(v, a4 + 309, a5 + 100, 0, ÀÄ, 0, 1);
+    áá.ÄA(aãá, åáÁ + 309, AÁá + 100, 0, ÀÄ, 0, 1);
   }
   ;
-  var x = 0;
-  var y;
-  var z;
-  var A;
-  function B() {
-    y = áÅ.ÄÁã(414, 207, "img/scoreboard-br.png");
-    z = áÅ.åá(123, 35, ["img/play-again-button-out.png", "img/play-again-button-in.png", "img/play-again-button-click.png"]);
-    A = áÅ.åá(198, 35, ["img/back-main-page-button-out.png", "img/back-main-page-button-in.png", "img/back-main-page-button-click.png"]);
+  var âÀá = 0;
+  var äáÄ;
+  var äaã;
+  var ÂÅâ;
+  function ÁÀÄ() {
+    äáÄ = áÅ.ÄÁã(414, 207, "img/scoreboard-br.png");
+    äaã = áÅ.åá(123, 35, ["img/play-again-button-out.png", "img/play-again-button-in.png", "img/play-again-button-click.png"]);
+    ÂÅâ = áÅ.åá(198, 35, ["img/back-main-page-button-out.png", "img/back-main-page-button-in.png", "img/back-main-page-button-click.png"]);
   }
   ;
-  var C;
-  var D = new ÁA.ÀÄÄ();
-  var E = new ÂÄA.äåå();
-  var F = 500;
-  var G = 0;
-  function H(a2) {
-    return Ää.ÁÃ.ãÀÃ(a2, Ää.ÁÃ.AÃa, 0.05);
+  var áåÅ;
+  var Àã = new ÁA.ÀÄÄ();
+  var aã = new ÂÄA.äåå();
+  var AÁÃ = 500;
+  var áÁâ = 0;
+  function ÃÃa(ÃÀ) {
+    return Ää.ÁÃ.ãÀÃ(ÃÀ, Ää.ÁÃ.AÃa, 0.05);
   }
-  var I = 500;
-  var J = ÅÁ;
-  function K(a2) {
-    return Ää.ÁÃ.ãÀÃ(a2, Ää.ÁÃ.ÃaÅ, 0.05);
+  var áÃÃ = 500;
+  var âäã = ÅÁ;
+  function ÂáÀ(ÃÀ) {
+    return Ää.ÁÃ.ãÀÃ(ÃÀ, Ää.ÁÃ.ÃaÅ, 0.05);
   }
-  var L = äå;
-  var M = 0;
-  var N = undefined;
-  function O() {
-    áÂ.Àäå = k;
-    áÂ.âAâ = j;
+  var ÅÄa = äå;
+  var áÃÁ = 0;
+  var äÁá = undefined;
+  function ÃÂÅ() {
+    áÂ.Àäå = Àäå;
+    áÂ.âAâ = âAâ;
     Aá.â.aÅÁ = 0;
     Aá.â.id = AÄ;
     ÀÂ.áÅÁ(áÃ);
     ÀÂ.aaÀ();
-    x = 5000;
+    âÀá = 5000;
     try {
       window.Widget.adsRefresh();
-    } catch (a4) {}
+    } catch (âãå) {}
     áá.ãÃÄ(ãåååÁ);
-    M = I;
-    L = I;
-    N = K;
-    J = Àâ;
-    S();
+    áÃÁ = áÃÃ;
+    ÅÄa = áÃÃ;
+    äÁá = ÂáÀ;
+    âäã = Àâ;
+    âÂ();
   }
   ;
-  function P() {
+  function ÅÂâ() {
     if (ÄÁ === äã) {
-      window.addEventListener("mousedown", Q, false);
+      window.addEventListener("mousedown", aAá, false);
     }
     if (äã === 0) {
-      window.addEventListener("mouseup", W, ÅAÁ);
+      window.addEventListener("mouseup", ÃåA, ÅAÁ);
     }
     if (äã === 0) {
-      window.addEventListener("mousemove", U, áÂäÅã);
+      window.addEventListener("mousemove", aÂÀ, áÂäÅã);
     }
     if (äã === 1) {
-      window.addEventListener("touchstart", a0, AâáÄÄ);
+      window.addEventListener("touchstart", AÀÅ, AâáÄÄ);
     }
     if (äã === âa) {
-      window.addEventListener("touchend", X, ãäÀ);
+      window.addEventListener("touchend", äÄä, ãäÀ);
     }
     if (äã === 1) {
-      window.addEventListener("touchcancel", a1, false);
+      window.addEventListener("touchcancel", AAÅ, false);
     }
     if (äã === 1) {
-      window.addEventListener("touchmove", T, AâáÄÄ);
+      window.addEventListener("touchmove", áãÃ, AâáÄÄ);
     }
   }
   ;
-  function Q(a2) {
-    ÁA.ÄAá(a2, ÁA.Àãa);
-    var a3 = âã;
-    if (z.Åa() === 1) {
-      a3 = ãå;
+  function aAá(Åá) {
+    ÁA.ÄAá(Åá, ÁA.Àãa);
+    var åÄ = âã;
+    if (äaã.Åa() === 1) {
+      åÄ = ãå;
     }
-    if (A.Åa() === åÀ) {
-      a3 = ãâ;
+    if (ÂÅâ.Åa() === åÀ) {
+      åÄ = ãâ;
     }
   }
   ;
-  function R(a2) {
+  function aâä(Äâã) {
     äâ.ÂãÃ.display = "none";
-    C = a2;
-    Z();
-    M = F;
-    L = F;
-    N = H;
-    G = 1;
+    áåÅ = Äâã;
+    Äåä();
+    áÃÁ = AÁÃ;
+    ÅÄa = AÁÃ;
+    äÁá = ÃÃa;
+    áÁâ = 1;
   }
   ;
-  function S() {
-    var a2 = 0;
-    var a3 = AÄ;
-    if (M > ÁÀ) {
-      a3 = äää;
-      var a4 = N(1 - M / L);
-      if (a4 === 1) {
-        M = 0;
+  function âÂ() {
+    var ÄäÃ = 0;
+    var äÃÄ = AÄ;
+    if (áÃÁ > ÁÀ) {
+      äÃÄ = äää;
+      var transition = äÁá(1 - áÃÁ / ÅÄa);
+      if (transition === 1) {
+        áÃÁ = 0;
       }
-      if (åä === J) {
-        a4 = 1 - Math.abs(a4);
+      if (åä === âäã) {
+        transition = 1 - Math.abs(transition);
       }
-      a2 *= a4;
-      a3 *= a4;
+      ÄäÃ *= transition;
+      äÃÄ *= transition;
     }
-    y.áâ.x = åäÅ - Math.floor(ÄÀ * 207) - a2;
-    y.áâ.y = Math.max(ãÂ, ÂáÅ - Math.floor(ÄÀ * 103) + Math.floor(ÄÀ * -135)) - a3;
-    z.áâ.x = åäÅ - Math.floor(ÄÀ * 61) + Math.floor(ÄÀ * -100) - a2;
-    z.áâ.y = Math.max(0, ÂáÅ - Math.floor(ãÂáÁa * ÄÀ) + Math.floor(ÄÀ * -70)) - a3;
-    A.áâ.x = åäÅ - Math.floor(ÄÀ * 99) + Math.floor(ÄÀ * 70) - a2;
-    A.áâ.y = z.áâ.y;
-    var a5 = ÄÀ;
-    document.getElementById("bebebaba").style.top = Math.floor(ÂáÅ - 125 + a5 * 130) + "px";
-    document.getElementById("bebebaba").style.transform = "scale(" + a5 + ")";
+    äáÄ.áâ.x = åäÅ - Math.floor(ÄÀ * 207) - ÄäÃ;
+    äáÄ.áâ.y = Math.max(ãÂ, ÂáÅ - Math.floor(ÄÀ * 103) + Math.floor(ÄÀ * -135)) - äÃÄ;
+    äaã.áâ.x = åäÅ - Math.floor(ÄÀ * 61) + Math.floor(ÄÀ * -100) - ÄäÃ;
+    äaã.áâ.y = Math.max(0, ÂáÅ - Math.floor(ãÂáÁa * ÄÀ) + Math.floor(ÄÀ * -70)) - äÃÄ;
+    ÂÅâ.áâ.x = åäÅ - Math.floor(ÄÀ * 99) + Math.floor(ÄÀ * 70) - ÄäÃ;
+    ÂÅâ.áâ.y = äaã.áâ.y;
+    var AâÅ = ÄÀ;
+    document.getElementById("bebebaba").style.top = Math.floor(ÂáÅ - 125 + AâÅ * 130) + "px";
+    document.getElementById("bebebaba").style.transform = "scale(" + AâÅ + ")";
   }
   ;
-  function T(a2) {
-    if (AÂ < a2.touches.length) {
-      ÁA.Âãå(D, a2, a2.touches[0]);
-      U(D);
-    }
-  }
-  ;
-  function U(a2) {
-    ÁA.ÄAá(a2, ÁA.âââ);
-    var a3 = 0;
-    if (âÃ === z.Åa()) {
-      a3 = 1;
-    }
-    if (A.Åa() === âÃ) {
-      a3 = âá;
+  function áãÃ(Åá) {
+    if (AÂ < Åá.touches.length) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[0]);
+      aÂÀ(Àã);
     }
   }
   ;
-  function V() {
-    if (G === Äá) {
-      S();
-      if (M < 0) {
-        G = âã;
-        z.Äâ(áÅ.Àå);
-        A.Äâ(áÅ.Àå);
-        C.ÃÂÅ();
+  function aÂÀ(Åá) {
+    ÁA.ÄAá(Åá, ÁA.âââ);
+    var åÄ = 0;
+    if (âÃ === äaã.Åa()) {
+      åÄ = 1;
+    }
+    if (ÂÅâ.Åa() === âÃ) {
+      åÄ = âá;
+    }
+  }
+  ;
+  function ÀÅá() {
+    if (áÁâ === Äá) {
+      âÂ();
+      if (áÃÁ < 0) {
+        áÁâ = âã;
+        äaã.Äâ(áÅ.Àå);
+        ÂÅâ.Äâ(áÅ.Àå);
+        áåÅ.ÃÂÅ();
         return Aa;
       }
-      M -= ÀÀ;
-    } else if (J === 1) {
-      S();
-      if (M < 0) {
-        J = ãä;
+      áÃÁ -= ÀÀ;
+    } else if (âäã === 1) {
+      âÂ();
+      if (áÃÁ < 0) {
+        âäã = ãä;
         äâ.ÂãÃ.display = "inline-block";
         document.getElementById("bod").style.backgroundColor = "#46664d";
-        P();
+        ÅÂâ();
       }
-      M -= ÀÀ;
+      áÃÁ -= ÀÀ;
     }
     return 1;
   }
   ;
-  function W(a2) {
-    ÁA.ÄAá(a2, ÁA.ÅÁá);
-    var a3 = AÄ;
-    if (ÄÂ === z.Åa()) {
-      a3 = ãâ;
-      if (x <= 0) {
+  function ÃåA(Åá) {
+    ÁA.ÄAá(Åá, ÁA.ÅÁá);
+    var åÄ = AÄ;
+    if (ÄÂ === äaã.Åa()) {
+      åÄ = ãâ;
+      if (âÀá <= 0) {
         äâ.ÂâÁ();
         Äå.âå(Äå.AA.play, 1, ÀÄ);
       }
       return;
     }
-    if (A.Åa() === 1) {
-      a3 = âÃ;
+    if (ÂÅâ.Åa() === 1) {
+      åÄ = âÃ;
       if ((áÂ.state & áÂ.ÀÁÄ.Ãåã) === 0 && ãÁ === (áÂ.state & áÂ.ÀÁÄ.ãAá)) {
-        R(äâ);
+        aâä(äâ);
         Äå.âå(Äå.AA.button, 1, 0);
         return;
       }
     }
   }
   ;
-  function X(a2) {
-    W(D);
+  function äÄä(Åá) {
+    ÃåA(Àã);
   }
   ;
-  function Y() {
-    if (V() === äå) {
+  function Áá() {
+    if (ÀÅá() === äå) {
       return;
     }
     AÅ.clearRect(0, 0, aãA, äää);
     ÀÂ.åãA();
-    if (M > âã) {
-      m = N(ãå - M / L);
-      if (J === 1) {
-        m = ÀA - Math.abs(m);
+    if (áÃÁ > âã) {
+      áÄÃ = äÁá(ãå - áÃÁ / ÅÄa);
+      if (âäã === 1) {
+        áÄÃ = ÀA - Math.abs(áÄÃ);
       }
-      m = Àâ - m;
+      áÄÃ = Àâ - áÄÃ;
     }
-    AÅ.globalAlpha = m * 0.3;
+    AÅ.globalAlpha = áÄÃ * 0.3;
     AÅ.fillStyle = "#000000";
     AÅ.fillRect(0, ÅÁ, aãA, äää);
     AÅ.globalAlpha = âá;
-    y.Áá();
-    A.Áá();
-    w();
+    äáÄ.Áá();
+    ÂÅâ.Áá();
+    ÅÅäãA();
     ÀÂ.ÀâÁáÀ();
     áÁá.äåã();
-    if (x > 0) {
-      x = Math.max(0, x - ÀÀ);
-      áá.ÄA(AÁaAÃ[Math.floor(x / 1000)], z.áâ.x / ÄÀ + 61.5, z.áâ.y / ÄÀ + 17.75, Àá, äå, ãÂ, Áå);
+    if (âÀá > 0) {
+      âÀá = Math.max(0, âÀá - ÀÀ);
+      áá.ÄA(AÁaAÃ[Math.floor(âÀá / 1000)], äaã.áâ.x / ÄÀ + 61.5, äaã.áâ.y / ÄÀ + 17.75, Àá, äå, ãÂ, Áå);
     } else {
-      z.Áá();
+      äaã.Áá();
     }
   }
   ;
-  function Z() {
+  function Äåä() {
     if (äã === 0) {
-      window.removeEventListener("mousedown", Q, false);
+      window.removeEventListener("mousedown", aAá, false);
     }
     if (äã === ÀÄ) {
-      window.removeEventListener("mouseup", W, false);
+      window.removeEventListener("mouseup", ÃåA, false);
     }
     if (äã === áÃ) {
-      window.removeEventListener("mousemove", U, aÃÂ);
+      window.removeEventListener("mousemove", aÂÀ, aÃÂ);
     }
     if (äã === 1) {
-      window.removeEventListener("touchstart", a0, ÄÃÀ);
+      window.removeEventListener("touchstart", AÀÅ, ÄÃÀ);
     }
     if (äã === 1) {
-      window.removeEventListener("touchend", X, false);
+      window.removeEventListener("touchend", äÄä, false);
     }
     if (âá === äã) {
-      window.removeEventListener("touchcancel", a1, false);
+      window.removeEventListener("touchcancel", AAÅ, false);
     }
     if (äã === 1) {
-      window.removeEventListener("touchmove", T, ãÂäáä);
+      window.removeEventListener("touchmove", áãÃ, ãÂäáä);
     }
   }
   ;
-  function a0(a2) {
-    if (a2.touches.length > 0) {
-      ÁA.Âãå(D, a2, a2.touches[áÁ]);
-      Q(D);
+  function AÀÅ(Åá) {
+    if (Åá.touches.length > 0) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[áÁ]);
+      aAá(Àã);
     }
   }
   ;
-  function a1(a2) {
-    if (a2.touches.length > 0) {
-      ÁA.Âãå(D, a2, a2.touches[0]);
-      W(D);
+  function AAÅ(Åá) {
+    if (Åá.touches.length > 0) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[0]);
+      ÃåA(Àã);
     }
   }
   ;
   return {
-    aâä: R,
-    ÁÀÄ: B,
-    ÃÂÅ: O,
-    âÂ: S,
-    Áá: Y
+    aâä: aâä,
+    ÁÀÄ: ÁÀÄ,
+    ÃÂÅ: ÃÂÅ,
+    âÂ: âÂ,
+    Áá: Áá
   };
 }();
 const ÄÀÄäÀ = AâÁ;
-function Áãa(j, k, l) {
-  AÂáÃå(ÅÂá, j, k, l);
-  const m = (54952 + (ÂÁ[0] ^ ÂÁ[âÃ])) % 65351;
-  const n = (8 << ((m ^ ÂÁ[ãÄá]) >> 24 & 255)) + (24 << ((m ^ ÂÁ[2]) >> 0 & 255)) + (16 << ((m ^ ÂÁ[2]) >> 16 & 255)) + (0 << ((m ^ ÂÁ[2]) >> 8 & ÂãÄ));
-  return n;
+function Áãa(AÅÂ, AÄÁ, ÁÂä) {
+  AÂáÃå(ÅÂá, AÅÂ, AÄÁ, ÁÂä);
+  const Aaã = (54952 + (ÂÁ[0] ^ ÂÁ[âÃ])) % 65351;
+  const AåäáA = (8 << ((Aaã ^ ÂÁ[ãÄá]) >> 24 & 255)) + (24 << ((Aaã ^ ÂÁ[2]) >> 0 & 255)) + (16 << ((Aaã ^ ÂÁ[2]) >> 16 & 255)) + (0 << ((Aaã ^ ÂÁ[2]) >> 8 & ÂãÄ));
+  return AåäáA;
 }
 ;
-function åAaAä(j, k, l, m, n, o) {
-  const p = (24 << (j >> ãÂ & 255)) + (8 << (j >> 8 & 255)) + (16 << (j >> 24 & 255)) + (AÄ << (j >> 16 & 255));
-  const q = (8 << (k >> 24 & 255)) + (0 << (k >> 8 & 255)) + (24 << (k >> 0 & åáÄ)) + (16 << (k >> 16 & 255));
-  const r = ~(l & 56508) & (l | 56508);
-  const s = ~(m & 53556) & 53556 | ~(m & 53556) & m;
-  const t = ((n + 35515) * 1664525 + 1013904223) % 4294967296;
-  const u = (2531011 + (o + 16298) * 214013) % 4294967296;
-  const v = ÁÀã(p, q, r);
-  const w = ááaÂÅ(s, t, u, p);
-  const x = v ^ 5189;
-  return x;
+function åAaAä(ÃÅÃ, aAå, äãäaá, AâÁÀä, ÅåãÀÁ, âÅÄãâ) {
+  const åäÅää = (24 << (ÃÅÃ >> ãÂ & 255)) + (8 << (ÃÅÃ >> 8 & 255)) + (16 << (ÃÅÃ >> 24 & 255)) + (AÄ << (ÃÅÃ >> 16 & 255));
+  const aáÄAá = (8 << (aAå >> 24 & 255)) + (0 << (aAå >> 8 & 255)) + (24 << (aAå >> 0 & åáÄ)) + (16 << (aAå >> 16 & 255));
+  const âÅÄÀã = ~(äãäaá & 56508) & (äãäaá | 56508);
+  const ÅÅÁÄâ = ~(AâÁÀä & 53556) & 53556 | ~(AâÁÀä & 53556) & AâÁÀä;
+  const ãäÅAâ = ((ÅåãÀÁ + 35515) * 1664525 + 1013904223) % 4294967296;
+  const áÂáÀá = (2531011 + (âÅÄãâ + 16298) * 214013) % 4294967296;
+  const ãÅAãá = ÁÀã(åäÅää, aáÄAá, âÅÄÀã);
+  const ãÄäÄA = ááaÂÅ(ÅÅÁÄâ, ãäÅAâ, áÂáÀá, åäÅää);
+  const ääaåá = ãÅAãá ^ 5189;
+  return ääaåá;
 }
 ;
-function áaaÁã(j, k, l, m, n) {
-  Ãåáâá(ÅÂá, j, k, l, m, n);
-  const o = âäÂäá(ÂÁ[0], ÂÁ[aÅ], ÂÁ[ÃÃÃ], ÂÁ[ÂâÅ]);
-  const p = ÀãaåÂ(ÂÁ[4], ÂÁ[ãÂ], ÂÁ[1], ÂÁ[2], ÂÁ[äaa], ÂÁ[ãáä]);
-  const q = (o | 29528) & ~(o & 29528);
-  return q;
+function áaaÁã(áâÄ, ÀâââÁ, AåáÀa, áAÄáã, AâåÁá) {
+  Ãåáâá(ÅÂá, áâÄ, ÀâââÁ, AåáÀa, áAÄáã, AâåÁá);
+  const aâAÃÃ = âäÂäá(ÂÁ[0], ÂÁ[aÅ], ÂÁ[ÃÃÃ], ÂÁ[ÂâÅ]);
+  const aáÁáÀ = ÀãaåÂ(ÂÁ[4], ÂÁ[ãÂ], ÂÁ[1], ÂÁ[2], ÂÁ[äaa], ÂÁ[ãáä]);
+  const aÀääÁ = (aâAÃÃ | 29528) & ~(aâAÃÃ & 29528);
+  return aÀääÁ;
 }
 ;
 const åÃÅ = ãÄá;
 const ãáÀâÂ = ããâ;
 const ÂÂáÀÀ = AâãÂA;
 const áãÂ = ãâã;
-function âáãâå(j, k, l, m, n) {
-  ÂÂÃÃÁ(ÅÂá, j, k, l, m, n);
-  const o = ãåäãÄ(ÂÁ[0], ÂÁ[1], ÂÁ[2], ÂÁ[3], ÂÁ[aää]);
-  const p = áÃÂÂA(ÂÁ[AÄ], ÂÁ[âa], ÂÁ[2]);
-  const q = ((175 + (o ^ p)) * 75 + 74) % 65537;
-  return q;
+function âáãâå(ãAÁ, âåÂ, ÄÃá, Äåá, ÀáÅ) {
+  ÂÂÃÃÁ(ÅÂá, ãAÁ, âåÂ, ÄÃá, Äåá, ÀáÅ);
+  const âAÂÁÂ = ãåäãÄ(ÂÁ[0], ÂÁ[1], ÂÁ[2], ÂÁ[3], ÂÁ[aää]);
+  const ãÀÀÅä = áÃÂÂA(ÂÁ[AÄ], ÂÁ[âa], ÂÁ[2]);
+  const áááÂå = ((175 + (âAÂÁÂ ^ ãÀÀÅä)) * 75 + 74) % 65537;
+  return áááÂå;
 }
 ;
 let ÅÂá = undefined;
@@ -15101,27 +15110,27 @@ const Ãâã = äáÂ;
 const ÄÀá = áÄA;
 const ÄãáãÄ = Aåã;
 var Âaã = function () {
-  var j = ãÂ;
-  var k = ÄÁ;
-  var l = åâ;
-  var m = ÁÀ;
-  var n = áá.ÃA("img/inv-empty.png");
-  var o = [n, n, n];
-  var p = [];
-  var q = ÅÁ;
-  function r(b1) {
-    t();
-    j = 1;
-    if (b1 === 1) {
+  var Áäå = ãÂ;
+  var Àaá = ÄÁ;
+  var ÃäÃ = åâ;
+  var ÅÄÀ = ÁÀ;
+  var Aåa = áá.ÃA("img/inv-empty.png");
+  var âÀÁ = [Aåa, Aåa, Aåa];
+  var Àäã = [];
+  var áaâ = ÅÁ;
+  function äÄäÄå(ÂãÁ) {
+    ÂÁÃ();
+    Áäå = 1;
+    if (ÂãÁ === 1) {
       Àaä = ÂA;
-    } else if (b1 === 2) {
+    } else if (ÂãÁ === 2) {
       ÁÄA = åä;
     }
   }
   ;
-  function s() {
-    as.show();
-    at.show();
+  function âÄÅÄâ() {
+    ÃåÃ.show();
+    ÃÃã.show();
     Aá.â.id = ãå;
     Aá.ãâA = 2;
     Aá.ÂÀå = 0;
@@ -15139,364 +15148,364 @@ var Âaã = function () {
     ÅÀ.äaÃ();
     Aá.â.ÀÃÁ = Àá;
     Aá.â.åa = 0;
-    a0 = âã;
-    a1(1, âAä, 550, 550, 5376, 0);
+    ÄÃA = âã;
+    ÂÂÁÃÅ(1, âAä, 550, 550, 5376, 0);
   }
   ;
-  function t() {
-    j = ãä;
-    v.Äâ(áÅ.Àå);
-    k = 0;
-    l = 0;
+  function ÂÁÃ() {
+    Áäå = ãä;
+    äAÁ.Äâ(áÅ.Àå);
+    Àaá = 0;
+    ÃäÃ = 0;
     Àaä = 0;
     ÁÄA = âã;
     ÂÅÀ = 0;
     Aá.aaÁ();
   }
   ;
-  var u = ãa;
-  var v = áÅ.åá(43, 43, ["img/close-box-out.png", "img/close-box-in.png", "img/close-box-click.png"]);
-  var w = [áá.ÃA("img/high-particules-out.png"), áá.ÃA("img/high-particules-in.png"), áá.ÃA("img/high-particules-click.png")];
-  var x = áÅ.åá(54, 42, null, w);
-  var y = [áá.ÃA("img/low-particules-out.png"), áá.ÃA("img/low-particules-in.png"), áá.ÃA("img/low-particules-click.png")];
-  var z = áÅ.åá(54, 42, null, y);
-  var A = [áá.ÃA("img/no-particules-out.png"), áá.ÃA("img/no-particules-in.png"), áá.ÃA("img/no-particules-click.png")];
-  var B = áÅ.åá(54, 42, null, A);
-  var C = [áá.ÃA("img/high-resolution-out.png"), áá.ÃA("img/high-resolution-in.png"), áá.ÃA("img/high-resolution-click.png")];
-  var D = áÅ.åá(54, 42, null, C);
-  var E = [áá.ÃA("img/medium-resolution-out.png"), áá.ÃA("img/medium-resolution-in.png"), áá.ÃA("img/medium-resolution-click.png")];
-  var F = áÅ.åá(54, 42, null, E);
-  var G = [áá.ÃA("img/low-resolution-out.png"), áá.ÃA("img/low-resolution-in.png"), áá.ÃA("img/low-resolution-click.png")];
-  var H = áÅ.åá(54, 42, null, G);
-  var I = [áá.ÃA("img/azerty-button-out.png"), áá.ÃA("img/azerty-button-in.png"), áá.ÃA("img/azerty-button-click.png")];
-  var J = áÅ.åá(81, 33, null, I);
-  var K = [áá.ÃA("img/qwerty-button-out.png"), áá.ÃA("img/qwerty-button-in.png"), áá.ÃA("img/qwerty-button-click.png")];
-  var L = áÅ.åá(87, 33, null, K);
-  var M = [áá.ÃA("img/sound-on-out.png"), áá.ÃA("img/sound-on-in.png"), áá.ÃA("img/sound-on-click.png")];
-  var N = [áá.ÃA("img/sound-off-out.png"), áá.ÃA("img/sound-off-in.png"), áá.ÃA("img/sound-off-click.png")];
-  var O = áÅ.åá(51, 36, null, M);
-  var P = áÅ.åá(51, 36, null, N);
-  var Q = áÅ.åá(51, 36, null, M);
-  var R = áÅ.åá(51, 36, null, N);
-  var S = Aa;
-  var T = 0;
-  var U = 0;
-  var V = 0;
-  var W = 0;
-  var X = ãÁ;
-  var Y = ÅÁ;
-  var Z = 0;
-  var a0 = AÄ;
-  function a1(b1, b2, b3, b4, b5, b6) {
-    var b7 = ÅÀ.get(b1, a0, a0, b2);
-    äÂÃ(b7, b1, a0, a0, b2, b3, b4, b3, b4, b5, AÄ, b6);
-    a0++;
+  var ãÃå = ãa;
+  var äAÁ = áÅ.åá(43, 43, ["img/close-box-out.png", "img/close-box-in.png", "img/close-box-click.png"]);
+  var aÀAâå = [áá.ÃA("img/high-particules-out.png"), áá.ÃA("img/high-particules-in.png"), áá.ÃA("img/high-particules-click.png")];
+  var ÂÀä = áÅ.åá(54, 42, null, aÀAâå);
+  var ÀãÃåÁ = [áá.ÃA("img/low-particules-out.png"), áá.ÃA("img/low-particules-in.png"), áá.ÃA("img/low-particules-click.png")];
+  var äaÁ = áÅ.åá(54, 42, null, ÀãÃåÁ);
+  var äáÀÅA = [áá.ÃA("img/no-particules-out.png"), áá.ÃA("img/no-particules-in.png"), áá.ÃA("img/no-particules-click.png")];
+  var ãAÃ = áÅ.åá(54, 42, null, äáÀÅA);
+  var aAÁäÀ = [áá.ÃA("img/high-resolution-out.png"), áá.ÃA("img/high-resolution-in.png"), áá.ÃA("img/high-resolution-click.png")];
+  var aaá = áÅ.åá(54, 42, null, aAÁäÀ);
+  var AáäÂa = [áá.ÃA("img/medium-resolution-out.png"), áá.ÃA("img/medium-resolution-in.png"), áá.ÃA("img/medium-resolution-click.png")];
+  var ãâá = áÅ.åá(54, 42, null, AáäÂa);
+  var ááaâÁ = [áá.ÃA("img/low-resolution-out.png"), áá.ÃA("img/low-resolution-in.png"), áá.ÃA("img/low-resolution-click.png")];
+  var Áaâ = áÅ.åá(54, 42, null, ááaâÁ);
+  var ÅåÀäâ = [áá.ÃA("img/azerty-button-out.png"), áá.ÃA("img/azerty-button-in.png"), áá.ÃA("img/azerty-button-click.png")];
+  var ÄÃÄ = áÅ.åá(81, 33, null, ÅåÀäâ);
+  var ÂääãA = [áá.ÃA("img/qwerty-button-out.png"), áá.ÃA("img/qwerty-button-in.png"), áá.ÃA("img/qwerty-button-click.png")];
+  var ãáâ = áÅ.åá(87, 33, null, ÂääãA);
+  var ÄãÁ = [áá.ÃA("img/sound-on-out.png"), áá.ÃA("img/sound-on-in.png"), áá.ÃA("img/sound-on-click.png")];
+  var Aáa = [áá.ÃA("img/sound-off-out.png"), áá.ÃA("img/sound-off-in.png"), áá.ÃA("img/sound-off-click.png")];
+  var âäÄ = áÅ.åá(51, 36, null, ÄãÁ);
+  var ÂÅã = áÅ.åá(51, 36, null, Aáa);
+  var âÀÄ = áÅ.åá(51, 36, null, ÄãÁ);
+  var Aåâ = áÅ.åá(51, 36, null, Aáa);
+  var aãÄ = Aa;
+  var äAÄ = 0;
+  var ÁÂå = 0;
+  var AáÂ = 0;
+  var Âaa = 0;
+  var ãÀá = ãÁ;
+  var ÀÅÃ = ÅÁ;
+  var ÂÂa = 0;
+  var ÄÃA = AÄ;
+  function ÂÂÁÃÅ(åÅ, AÀ, ã, áã, ÅÁa, Âá) {
+    var Ãä = ÅÀ.get(åÅ, ÄÃA, ÄÃA, AÀ);
+    äÂÃ(Ãä, åÅ, ÄÃA, ÄÃA, AÀ, ã, áã, ã, áã, ÅÁa, AÄ, Âá);
+    ÄÃA++;
   }
   ;
-  function a2(b1, b2, b3, b4, b5, b6, b7, b8) {
-    var b9 = ÅÀ.get(b1, a0, a0, b2);
-    äÂÃ(b9, b1, a0, a0, b2, b3, b4, b3, b4, (b7 << aÀA) + b5 * 32, äå, b6, b8);
-    var ba = äâä[b2].âÂ;
-    if (ÄåA !== ba) {
-      ba(b9, b3, b4);
+  function AâÃÁâ(åÅ, AÀ, ã, áã, Áä, Âá, Åã, Åâ) {
+    var Ãä = ÅÀ.get(åÅ, ÄÃA, ÄÃA, AÀ);
+    äÂÃ(Ãä, åÅ, ÄÃA, ÄÃA, AÀ, ã, áã, ã, áã, (Åã << aÀA) + Áä * 32, äå, Âá, Åâ);
+    var âÂ = äâä[AÀ].âÂ;
+    if (ÄåA !== âÂ) {
+      âÂ(Ãä, ã, áã);
     }
-    a0++;
+    ÄÃA++;
   }
   ;
-  function a3(b1) {
-    s();
-    b1 = b1.split("!b=");
-    b1.shift();
-    for (var b2 = ÅÁ; b2 < b1.length; b2++) {
-      var b3 = b1[b2].split(":");
-      if (b3.length > äÅÂ) {
-        a5(b3[0], b3[1], b3[åÁâ], b3[Åaa], b3[äÅÂ]);
+  function aaÂÀa(âÂÀ) {
+    âÄÅÄâ();
+    âÂÀ = âÂÀ.split("!b=");
+    âÂÀ.shift();
+    for (var ä = ÅÁ; ä < âÂÀ.length; ä++) {
+      var aä = âÂÀ[ä].split(":");
+      if (aä.length > äÅÂ) {
+        ÀÀÂ(aä[0], aä[1], aä[åÁâ], aä[Åaa], aä[äÅÂ]);
       } else {
-        a5(b3[0], 0, b3[ãÄá], b3[1], b3[ÂÀá]);
+        ÀÀÂ(aä[0], 0, aä[ãÄá], aä[1], aä[ÂÀá]);
       }
     }
   }
   ;
-  function a4(b1) {
-    var b2 = "";
-    var b3 = ÅÀ.åA[b1];
-    var b4 = ÅÀ.border[b1];
-    var b5 = b4.border;
-    for (ä = 0; b5 > ä; ä++) {
-      var b6 = b3[b4.ÁÀá[ä]];
-      var b7 = ÁÁ[b6.ÅÁa >> aÀA];
-      b2 += "!b=" + b7.id + ":";
-      if (b7.Åâ !== 0) {
-        b2 += b6.Åâ + ":";
+  function äãa(AÀ) {
+    var åÀA = "";
+    var áaa = ÅÀ.åA[AÀ];
+    var ÁÂÀ = ÅÀ.border[AÀ];
+    var ÃÄa = ÁÂÀ.border;
+    for (ä = 0; ÃÄa > ä; ä++) {
+      var Ä = áaa[ÁÂÀ.ÁÀá[ä]];
+      var Åã = ÁÁ[Ä.ÅÁa >> aÀA];
+      åÀA += "!b=" + Åã.id + ":";
+      if (Åã.Åâ !== 0) {
+        åÀA += Ä.Åâ + ":";
       }
-      b2 += b6.åã + ":" + b6.ä + ":" + (b6.ÅÁa >> 5 & 3);
+      åÀA += Ä.åã + ":" + Ä.ä + ":" + (Ä.ÅÁa >> 5 & 3);
     }
-    return b2;
+    return åÀA;
   }
   ;
-  function a5(b1, b2, b3, b4, b5) {
-    b1 = Number(b1) >>> ãa;
-    b2 = Number(b2) >>> ÄÁ;
-    b3 = Number(b3) >>> ÄÁ;
-    b4 = Number(b4) >>> 0;
-    b5 = Number(b5) >>> 0;
-    if (b5 > 3 || ÃÁå.height <= b3 || ÃÁå.height <= b4) {
+  function ÀÀÂ(ÀaäÀÂ, Åâ, ä, åã, Áä) {
+    ÀaäÀÂ = Number(ÀaäÀÂ) >>> ãa;
+    Åâ = Number(Åâ) >>> ÄÁ;
+    ä = Number(ä) >>> ÄÁ;
+    åã = Number(åã) >>> 0;
+    Áä = Number(Áä) >>> 0;
+    if (Áä > 3 || ÃÁå.height <= ä || ÃÁå.height <= åã) {
       return;
     }
-    var b6 = ÁÁ[b1];
-    if (b6 === ÅâÃ || b6.Åâ === undefined || b6.Åâ > 0 && b2 >= b6.aä.length) {
+    var aä = ÁÁ[ÀaäÀÂ];
+    if (aä === ÅâÃ || aä.Åâ === undefined || aä.Åâ > 0 && Åâ >= aä.aä.length) {
       return;
     }
-    var b5 = b6.äÂ === 1 ? 0 : b5;
-    var b7 = b6.ÃÄÃ[b5] + 50 + b4 * 100;
-    var b8 = b6.åAÄ[b5] + 50 + ÃÅÂ * b3;
-    var b9 = äå;
-    switch (áÃ === b6.Åâ ? b6.aÃä : b6.Åâ[b2].aÃä) {
+    var Áä = aä.äÂ === 1 ? 0 : Áä;
+    var ã = aä.ÃÄÃ[Áä] + 50 + åã * 100;
+    var áã = aä.åAÄ[Áä] + 50 + ÃÅÂ * ä;
+    var AÀ = äå;
+    switch (áÃ === aä.Åâ ? aä.aÃä : aä.Åâ[Åâ].aÃä) {
       case Aa:
-        b9 = ãåâ;
+        AÀ = ãåâ;
         break;
       case 1:
-        b9 = äÂa;
+        AÀ = äÂa;
         break;
       case 2:
-        b9 = ÂäÅ;
+        AÀ = ÂäÅ;
         break;
       default:
-        b9 = aÃÃ;
+        AÀ = aÃÃ;
         break;
     }
-    a2(1, b9, b7, b8, b5, âá, b6.id, ãÁ === b6.Åâ ? 0 : b2);
+    AâÃÁâ(1, AÀ, ã, áã, Áä, âá, aä.id, ãÁ === aä.Åâ ? 0 : Åâ);
   }
   ;
-  function a6(b1, b2, b3) {
-    var b4 = ÅÀ.åA[b1];
-    var b5 = ÅÀ.border[b1];
-    var b6 = b5.border;
-    for (ä = 0; b6 > ä; ä++) {
-      var b7 = b4[b5.ÁÀá[ä]];
-      if (b7.x >= b2 && b2 + 100 >= b7.x && b3 <= b7.y && b7.y <= b3 + ÀãÅ) {
-        ÅÀ.remove(b7.åÅ, b7.id, b7.äâÂ, b1, b7.ÅÁa);
+  function Aáä(AÀ, ã, áã) {
+    var áaa = ÅÀ.åA[AÀ];
+    var ÁÂÀ = ÅÀ.border[AÀ];
+    var ÃÄa = ÁÂÀ.border;
+    for (ä = 0; ÃÄa > ä; ä++) {
+      var aä = áaa[ÁÂÀ.ÁÀá[ä]];
+      if (aä.x >= ã && ã + 100 >= aä.x && áã <= aä.y && aä.y <= áã + ÀãÅ) {
+        ÅÀ.remove(aä.åÅ, aä.id, aä.äâÂ, AÀ, aä.ÅÁa);
         return;
       }
     }
   }
   ;
-  function a7() {
+  function ÃáÃÁÀ() {
     if (ÁA.state === ÁA.Àãa && Aá.â.click === 0) {
       if (Aá.â.aÅÁ === 1) {
         Aá.â.click = -ÁÅ;
         if (Aá.â.aÀâ === 1) {
           if (Aá.â.äáA !== -åÀ && Aá.â.AAá !== -1 && ÃÁå.width !== Aá.â.äáA && Aá.â.AAá !== ÃÁå.height) {
-            a5(Aá.â.åa, Aá.â.äÅâ, Aá.â.AAá, Aá.â.äáA, Aá.â.ÀÃÁ);
+            ÀÀÂ(Aá.â.åa, Aá.â.äÅâ, Aá.â.AAá, Aá.â.äáA, Aá.â.ÀÃÁ);
           }
         } else {
-          var b1 = Aá.â.äáA * aåÄ;
-          var b2 = Aá.â.AAá * 100;
-          a6(ãåâ, b1, b2);
-          a6(äÂa, b1, b2);
-          a6(ÂäÅ, b1, b2);
-          a6(aÃÃ, b1, b2);
+          var ã = Aá.â.äáA * aåÄ;
+          var áã = Aá.â.AAá * 100;
+          Aáä(ãåâ, ã, áã);
+          Aáä(äÂa, ã, áã);
+          Aáä(ÂäÅ, ã, áã);
+          Aáä(aÃÃ, ã, áã);
         }
       }
     } else if (ÁA.ÅÁá === ÁA.state) {
       if (Aá.â.aÅÁ === 1) {
-        u = 0;
+        ãÃå = 0;
         Aá.â.click = áÃ;
       }
     }
   }
   ;
-  var a8 = Math.sqrt(Aäã) / aâA;
-  function a9() {
-    var b1 = 0;
+  var ÃäÅAÅ = Math.sqrt(Aäã) / aâA;
+  function ÄÂÅåä() {
+    var Àä = 0;
     if (ÂÄA.ãÄâ() === 1) {
-      b1 |= 1;
+      Àä |= 1;
     }
     if (âá === ÂÄA.áÃÂ()) {
-      b1 |= ÄÂÅ;
+      Àä |= ÄÂÅ;
     }
     if (ÂÄA.ÅÃA() === 1) {
-      b1 |= 4;
+      Àä |= 4;
     }
     if (ÂÄA.ÅáÁ() === 1) {
-      b1 |= ÄAâ;
+      Àä |= ÄAâ;
     }
-    if (ÄÁ < b1) {
-      var b2 = Aá.ÂÅ[Áå].åäâ;
-      if (b2 === -1) {
+    if (ÄÁ < Àä) {
+      var åÅ = Aá.ÂÅ[Áå].åäâ;
+      if (åÅ === -1) {
         return;
       }
-      var b3 = ÅÀ.åA[âAä][b2];
-      ÃÅâ = (ÂÄA.ÁAa() === 0 ? ÀÀ * 1.5 : ÀÀ * ÀÁÀÅå) * (b1 & äaa && b1 & 12 ? a8 : aÅ);
-      if (b1 & Äá) {
-        b3.rx = b3.x - ÃÅâ;
-      } else if (b1 & áÂa) {
-        b3.rx = b3.x + ÃÅâ;
+      var â = ÅÀ.åA[âAä][åÅ];
+      ÃÅâ = (ÂÄA.ÁAa() === 0 ? ÀÀ * 1.5 : ÀÀ * ÀÁÀÅå) * (Àä & äaa && Àä & 12 ? ÃäÅAÅ : aÅ);
+      if (Àä & Äá) {
+        â.rx = â.x - ÃÅâ;
+      } else if (Àä & áÂa) {
+        â.rx = â.x + ÃÅâ;
       }
-      if (b1 & ÄäÄ) {
-        b3.ry = b3.y - ÃÅâ;
-      } else if (b1 & ãáä) {
-        b3.ry = b3.y + ÃÅâ;
+      if (Àä & ÄäÄ) {
+        â.ry = â.y - ÃÅâ;
+      } else if (Àä & ãáä) {
+        â.ry = â.y + ÃÅâ;
       }
-      b3.rx = Math.max(Àá, Math.min(b3.rx, ÃÁå.width * 100));
-      b3.ry = Math.max(ÀÄ, Math.min(b3.ry, ÃÁå.height * 100));
-      b3.Åaä = b3.rx;
-      b3.ÂÅä = b3.ry;
+      â.rx = Math.max(Àá, Math.min(â.rx, ÃÁå.width * 100));
+      â.ry = Math.max(ÀÄ, Math.min(â.ry, ÃÁå.height * 100));
+      â.Åaä = â.rx;
+      â.ÂÅä = â.ry;
     }
   }
   ;
-  function aa() {
-    var b1 = ar.áâ.x - ÄÀ * äÂá;
-    var b2 = ar.áâ.y + ÄÀ * 74;
-    var b3 = ÄÀ * 45;
-    for (var b4 = áÃ; b4 < q; b4++) {
-      var b5 = p[b4];
-      b5.áâ.x = b1 + b4 % 8 * b3;
-      b5.áâ.y = b2 + Math.floor(b4 / 8) * b3;
-      b5.Áá();
+  function ÀÄãaä() {
+    var ã = ÅÀÅ.áâ.x - ÄÀ * äÂá;
+    var áã = ÅÀÅ.áâ.y + ÄÀ * 74;
+    var ÁÂã = ÄÀ * 45;
+    for (var ä = áÃ; ä < áaâ; ä++) {
+      var äÄ = Àäã[ä];
+      äÄ.áâ.x = ã + ä % 8 * ÁÂã;
+      äÄ.áâ.y = áã + Math.floor(ä / 8) * ÁÂã;
+      äÄ.Áá();
     }
   }
   ;
-  function ab() {
-    if (ae > ÀÄ) {
-      ae -= ÀÀ;
-      if (ae > 2500) {
-        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ((3000 - ae) / 500);
-      } else if (ae < 500) {
-        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(ae / 500);
+  function áÀAÂa() {
+    if (Ååä > ÀÄ) {
+      Ååä -= ÀÀ;
+      if (Ååä > 2500) {
+        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ((3000 - Ååä) / 500);
+      } else if (Ååä < 500) {
+        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ååä / 500);
       }
-      AÅ.drawImage(ad, aw.áâ.x - ÄÀ * 85, aw.áâ.y - ÄÀ * 40, ad.ãâä * ÄÀ, ad.ÅÀä * ÄÀ);
+      AÅ.drawImage(ÂÂâ, åaÃ.áâ.x - ÄÀ * 85, åaÃ.áâ.y - ÄÀ * 40, ÂÂâ.ãâä * ÄÀ, ÂÂâ.ÅÀä * ÄÀ);
       AÅ.globalAlpha = Àâ;
     }
-    if (af[Aá.â.åäA] === ÂÄá) {
-      af[Aá.â.åäA] = [];
+    if (AÄA[Aá.â.åäA] === ÂÄá) {
+      AÄA[Aá.â.åäA] = [];
     }
-    if (áÄÅ === af[Aá.â.åäA][Aá.â.ÂáÁ]) {
-      af[Aá.â.åäA][Aá.â.ÂáÁ] = áÅ.åáa("(" + Aá.â.åäA + "," + Aá.â.ÂáÁ + ")", "'Viga', sans-serif", "#FFFFFF", 52, 455, "#000000", 22, 22, âÂa, undefined, 0.4, åÅÁ, "#000000", 15.6);
+    if (áÄÅ === AÄA[Aá.â.åäA][Aá.â.ÂáÁ]) {
+      AÄA[Aá.â.åäA][Aá.â.ÂáÁ] = áÅ.åáa("(" + Aá.â.åäA + "," + Aá.â.ÂáÁ + ")", "'Viga', sans-serif", "#FFFFFF", 52, 455, "#000000", 22, 22, âÂa, undefined, 0.4, åÅÁ, "#000000", 15.6);
     }
-    var b1 = af[Aá.â.åäA][Aá.â.ÂáÁ];
-    AÅ.drawImage(b1, ÄÀ * 5, as.áâ.y - ÄÀ * 42, ÄÀ * b1.ãâä, ÄÀ * b1.ÅÀä);
+    var À = AÄA[Aá.â.åäA][Aá.â.ÂáÁ];
+    AÅ.drawImage(À, ÄÀ * 5, ÃåÃ.áâ.y - ÄÀ * 42, ÄÀ * À.ãâä, ÄÀ * À.ÅÀä);
   }
   ;
-  function ac() {
-    if (ãÂ >= ae) {
-      ae = 3000;
-    } else if (ae <= 500) {
-      ae = 3000 - ae;
-    } else if (ae <= 2500) {
-      ae = 2500;
+  function ÅâÃÀa() {
+    if (ãÂ >= Ååä) {
+      Ååä = 3000;
+    } else if (Ååä <= 500) {
+      Ååä = 3000 - Ååä;
+    } else if (Ååä <= 2500) {
+      Ååä = 2500;
     }
-    var b1 = "";
-    b1 += a4(ãåâ);
-    b1 += a4(äÂa);
-    b1 += a4(ÂäÅ);
-    b1 += a4(aÃÃ);
-    var b2 = document.createElement("textarea");
-    b2.value = b1;
-    document.body.appendChild(b2);
-    b2.select();
+    var åÀA = "";
+    åÀA += äãa(ãåâ);
+    åÀA += äãa(äÂa);
+    åÀA += äãa(ÂäÅ);
+    åÀA += äãa(aÃÃ);
+    var âaÂ = document.createElement("textarea");
+    âaÂ.value = åÀA;
+    document.body.appendChild(âaÂ);
+    âaÂ.select();
     document.execCommand("copy");
-    document.body.removeChild(b2);
+    document.body.removeChild(âaÂ);
   }
   ;
-  var ad = null;
-  var ae = âã;
-  var af = [];
-  var ag = ÁÀ;
-  var ah;
-  var ai;
-  var aj;
-  var ak;
-  var al;
-  var am;
-  var an;
-  var ao;
-  var ap;
-  var aq;
-  var ar;
-  var as;
-  var at;
-  var au;
-  var av;
-  var aw;
-  var ax;
-  function ay() {
-    ad = áÅ.åáa("Copied to clipboard", "'Viga', sans-serif", "#FFFFFF", 40, 350, "#000000", 18, 18, undefined, undefined, 0.6);
+  var ÂÂâ = null;
+  var Ååä = âã;
+  var AÄA = [];
+  var ÂaââA = ÁÀ;
+  var ÅÄÄ;
+  var áÃâ;
+  var âåä;
+  var AäA;
+  var ÃÂá;
+  var ÀÃÃ;
+  var AãÁ;
+  var AáÄ;
+  var aAÃ;
+  var Âáa;
+  var ÅÀÅ;
+  var ÃåÃ;
+  var ÃÃã;
+  var ÂaÁ;
+  var ÄAA;
+  var åaÃ;
+  var äâã;
+  function ÁÀÄ() {
+    ÂÂâ = áÅ.åáa("Copied to clipboard", "'Viga', sans-serif", "#FFFFFF", 40, 350, "#000000", 18, 18, undefined, undefined, 0.6);
     for (ä = ãä; ä < 73; ä++) {
-      p.push(áÅ.åá(40, 40, null, o));
+      Àäã.push(áÅ.åá(40, 40, null, âÀÁ));
     }
-    ah = áÅ.ÄÁã(269, 267, "img/settings-box.png");
-    ai = áÅ.ÄÁã(412, 412, "img/borderBigMinimap2.png");
-    aj = áÅ.ÄÁã(128, 128, "img/minimap.png");
-    ak = áÅ.åá(40, 40, ["img/full-screen-out.png", "img/full-screen-in.png", "img/full-screen-click.png"]);
-    al = áÅ.åá(40, 40, ["img/settings-out.png", "img/settings-in.png", "img/settings-click.png"]);
-    am = áÅ.åá(40, 40, ["img/minimap-button-out.png", "img/minimap-button-in.png", "img/minimap-button-click.png"]);
-    an = áÅ.åá(67, 67, ["img/logic-button-out.png", "img/logic-button-in.png", "img/logic-button-click.png"]);
-    ao = áÅ.åá(67, 67, ["img/map-explosive-button-out.png", "img/map-explosive-button-in.png", "img/map-explosive-button-click.png"]);
-    ap = áÅ.åá(67, 67, ["img/map-road-button-out.png", "img/map-road-button-in.png", "img/map-road-button-click.png"]);
-    aq = áÅ.åá(67, 67, ["img/map-furniture-button-out.png", "img/map-furniture-button-in.png", "img/map-furniture-button-click.png"]);
-    ar = áÅ.åá(67, 67, ["img/map-building-button-out.png", "img/map-building-button-in.png", "img/map-building-button-click.png"]);
-    as = áÅ.åá(46.5, 46.5, ["img/zoom-button-out.png", "img/zoom-button-in.png", "img/zoom-button-click.png"]);
-    at = áÅ.åá(46.5, 46.5, ["img/unzoom-button-out.png", "img/unzoom-button-in.png", "img/unzoom-button-click.png"]);
-    au = áÅ.åá(40, 40, ["img/map-delete-button-out.png", "img/map-delete-button-in.png", "img/map-delete-button-click.png"]);
-    av = áÅ.åá(46.5, 46.5, ["img/import-button-out.png", "img/import-button-in.png", "img/import-button-click.png"]);
-    aw = áÅ.åá(46.5, 46.5, ["img/copy-paste-button-out.png", "img/copy-paste-button-in.png", "img/copy-paste-button-click.png"]);
-    ax = áÅ.åá(60, 60, ["img/home-button-out.png", "img/home-button-in.png", "img/home-button-click.png"]);
+    ÅÄÄ = áÅ.ÄÁã(269, 267, "img/settings-box.png");
+    áÃâ = áÅ.ÄÁã(412, 412, "img/borderBigMinimap2.png");
+    âåä = áÅ.ÄÁã(128, 128, "img/minimap.png");
+    AäA = áÅ.åá(40, 40, ["img/full-screen-out.png", "img/full-screen-in.png", "img/full-screen-click.png"]);
+    ÃÂá = áÅ.åá(40, 40, ["img/settings-out.png", "img/settings-in.png", "img/settings-click.png"]);
+    ÀÃÃ = áÅ.åá(40, 40, ["img/minimap-button-out.png", "img/minimap-button-in.png", "img/minimap-button-click.png"]);
+    AãÁ = áÅ.åá(67, 67, ["img/logic-button-out.png", "img/logic-button-in.png", "img/logic-button-click.png"]);
+    AáÄ = áÅ.åá(67, 67, ["img/map-explosive-button-out.png", "img/map-explosive-button-in.png", "img/map-explosive-button-click.png"]);
+    aAÃ = áÅ.åá(67, 67, ["img/map-road-button-out.png", "img/map-road-button-in.png", "img/map-road-button-click.png"]);
+    Âáa = áÅ.åá(67, 67, ["img/map-furniture-button-out.png", "img/map-furniture-button-in.png", "img/map-furniture-button-click.png"]);
+    ÅÀÅ = áÅ.åá(67, 67, ["img/map-building-button-out.png", "img/map-building-button-in.png", "img/map-building-button-click.png"]);
+    ÃåÃ = áÅ.åá(46.5, 46.5, ["img/zoom-button-out.png", "img/zoom-button-in.png", "img/zoom-button-click.png"]);
+    ÃÃã = áÅ.åá(46.5, 46.5, ["img/unzoom-button-out.png", "img/unzoom-button-in.png", "img/unzoom-button-click.png"]);
+    ÂaÁ = áÅ.åá(40, 40, ["img/map-delete-button-out.png", "img/map-delete-button-in.png", "img/map-delete-button-click.png"]);
+    ÄAA = áÅ.åá(46.5, 46.5, ["img/import-button-out.png", "img/import-button-in.png", "img/import-button-click.png"]);
+    åaÃ = áÅ.åá(46.5, 46.5, ["img/copy-paste-button-out.png", "img/copy-paste-button-in.png", "img/copy-paste-button-click.png"]);
+    äâã = áÅ.åá(60, 60, ["img/home-button-out.png", "img/home-button-in.png", "img/home-button-click.png"]);
   }
   ;
-  var az;
-  var aA = new ÁA.ÀÄÄ();
-  var aB = new ÂÄA.äåå();
-  var aC = 1000;
-  var aD = 0;
-  var aE = Ää.ÁÃ.AÃa;
-  var aF = 1000;
-  var aG = ãÂ;
-  var aH = Ää.ÁÃ.ÃaÅ;
-  var aI = 0;
-  var aJ = ÅÁ;
-  var aK = ÄåA;
-  function aL() {
-    if (ÁÅ === aD) {
-      b0();
-      if (aJ < 0) {
-        aD = 0;
-        ak.Äâ(áÅ.Àå);
-        al.Äâ(áÅ.Àå);
-        am.Äâ(áÅ.Àå);
-        an.Äâ(áÅ.Àå);
-        ao.Äâ(áÅ.Àå);
-        ap.Äâ(áÅ.Àå);
-        aq.Äâ(áÅ.Àå);
-        ar.Äâ(áÅ.Àå);
-        as.Äâ(áÅ.Àå);
-        at.Äâ(áÅ.Àå);
-        au.Äâ(áÅ.Àå);
-        av.Äâ(áÅ.Àå);
-        aw.Äâ(áÅ.Àå);
-        ax.Äâ(áÅ.Àå);
-        az.ÃÂÅ();
+  var áåÅ;
+  var Àã = new ÁA.ÀÄÄ();
+  var aã = new ÂÄA.äåå();
+  var AÁÃ = 1000;
+  var áÁâ = 0;
+  var ÃÃa = Ää.ÁÃ.AÃa;
+  var áÃÃ = 1000;
+  var âäã = ãÂ;
+  var ÂáÀ = Ää.ÁÃ.ÃaÅ;
+  var ÅÄa = 0;
+  var áÃÁ = ÅÁ;
+  var äÁá = ÄåA;
+  function ÀÅá() {
+    if (ÁÅ === áÁâ) {
+      âÂ();
+      if (áÃÁ < 0) {
+        áÁâ = 0;
+        AäA.Äâ(áÅ.Àå);
+        ÃÂá.Äâ(áÅ.Àå);
+        ÀÃÃ.Äâ(áÅ.Àå);
+        AãÁ.Äâ(áÅ.Àå);
+        AáÄ.Äâ(áÅ.Àå);
+        aAÃ.Äâ(áÅ.Àå);
+        Âáa.Äâ(áÅ.Àå);
+        ÅÀÅ.Äâ(áÅ.Àå);
+        ÃåÃ.Äâ(áÅ.Àå);
+        ÃÃã.Äâ(áÅ.Àå);
+        ÂaÁ.Äâ(áÅ.Àå);
+        ÄAA.Äâ(áÅ.Àå);
+        åaÃ.Äâ(áÅ.Àå);
+        äâã.Äâ(áÅ.Àå);
+        áåÅ.ÃÂÅ();
         return 0;
       }
-      aJ -= ÀÀ;
-    } else if (aÅ === aG) {
-      b0();
-      if (aJ < 0) {
-        aG = 0;
-        aP();
+      áÃÁ -= ÀÀ;
+    } else if (aÅ === âäã) {
+      âÂ();
+      if (áÃÁ < 0) {
+        âäã = 0;
+        ÅÂâ();
       }
-      aJ -= ÀÀ;
+      áÃÁ -= ÀÀ;
     }
     return 1;
   }
   ;
-  function aM(b1) {
-    ÁA.ÄAá(b1, ÁA.ÅÁá);
-    var b2 = Àá;
-    if (ÀA === ak.Åa()) {
-      b2 = âá;
-      if (m === Aa) {
-        m = 1;
+  function ÃåA(Åá) {
+    ÁA.ÄAá(Åá, ÁA.ÅÁá);
+    var åÄ = Àá;
+    if (ÀA === AäA.Åa()) {
+      åÄ = âá;
+      if (ÅÄÀ === Aa) {
+        ÅÄÀ = 1;
         áá.áåå();
         if (Aá.åÄÃ === 0) {
           âÃä.style.backgroundColor = "#3D5942";
@@ -15505,117 +15514,117 @@ var Âaã = function () {
         }
         Äå.âå(Äå.AA.button, ãå, âã);
       } else {
-        m = 0;
+        ÅÄÀ = 0;
         áá.ÁÀA();
         Äå.âå(Äå.AA.button, 1, AÂ);
       }
     }
-    if (al.Åa() === 1) {
-      b2 = 1;
-      if (áÁ === l) {
-        t();
-        j = 1;
-        l = 1;
+    if (ÃÂá.Åa() === 1) {
+      åÄ = 1;
+      if (áÁ === ÃäÃ) {
+        ÂÁÃ();
+        Áäå = 1;
+        ÃäÃ = 1;
         Äå.âå(Äå.AA.open, 1, Àá);
         return;
       } else {
-        t();
+        ÂÁÃ();
         Äå.âå(Äå.AA.open, 1, áÁ);
         return;
       }
     }
-    if (am.Åa() === âÃ) {
-      b2 = 1;
-      if (k === 0) {
-        t();
-        j = 1;
-        k = Àâ;
+    if (ÀÃÃ.Åa() === âÃ) {
+      åÄ = 1;
+      if (Àaá === 0) {
+        ÂÁÃ();
+        Áäå = 1;
+        Àaá = Àâ;
         Äå.âå(Äå.AA.open, 1, 0);
         return;
       } else {
-        t();
+        ÂÁÃ();
         Äå.âå(Äå.AA.open, 1, 0);
         return;
       }
     }
-    if (an.Åa() === 1) {
-      b2 = ÀA;
-      q = 0;
-      for (var b3 = áââ; ÁÁ.length > b3; b3++) {
-        var b4 = ÁÁ[b3];
-        if (áäã.aâã === b4.behavior) {
-          p[q].ÁÁÃ(b4.Áã.src, b4.Áã.À);
-          p[q].áÃÀ = b4.id;
-          q++;
+    if (AãÁ.Åa() === 1) {
+      åÄ = ÀA;
+      áaâ = 0;
+      for (var ä = áââ; ÁÁ.length > ä; ä++) {
+        var Åã = ÁÁ[ä];
+        if (áäã.aâã === Åã.behavior) {
+          Àäã[áaâ].ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+          Àäã[áaâ].áÃÀ = Åã.id;
+          áaâ++;
         }
       }
       Äå.âå(Äå.AA.button, ãå, AÄ);
     }
-    if (âa === ao.Åa()) {
-      b2 = äA;
-      q = äå;
-      for (var b3 = 1; b3 < ÁÁ.length; b3++) {
-        var b4 = ÁÁ[b3];
-        if (b4.id === Â.AÄÀ || Â.Äâá === b4.id || b4.id === Â.ââã || Â.Áâã === b4.id) {
-          p[q].ÁÁÃ(b4.Áã.src, b4.Áã.À);
-          p[q].áÃÀ = b4.id;
-          q++;
+    if (âa === AáÄ.Åa()) {
+      åÄ = äA;
+      áaâ = äå;
+      for (var ä = 1; ä < ÁÁ.length; ä++) {
+        var Åã = ÁÁ[ä];
+        if (Åã.id === Â.AÄÀ || Â.Äâá === Åã.id || Åã.id === Â.ââã || Â.Áâã === Åã.id) {
+          Àäã[áaâ].ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+          Àäã[áaâ].áÃÀ = Åã.id;
+          áaâ++;
         }
       }
       Äå.âå(Äå.AA.button, 1, ÀÄ);
     }
-    if (ap.Åa() === åä) {
-      b2 = Àâ;
-      q = áÃ;
-      var b5 = ÁÁ[Â.Äãã].Åâ;
-      for (var b3 = Aa; b5.length > b3; b3++) {
-        var b4 = b5[b3];
-        p[q].ÁÁÃ(b4.Áã.src, b4.Áã.À);
-        p[q].áÃÀ = Â.Äãã;
-        p[q].aAÅÅÁ = b3;
-        q++;
+    if (aAÃ.Åa() === åä) {
+      åÄ = Àâ;
+      áaâ = áÃ;
+      var AAÁ = ÁÁ[Â.Äãã].Åâ;
+      for (var ä = Aa; AAÁ.length > ä; ä++) {
+        var Åã = AAÁ[ä];
+        Àäã[áaâ].ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+        Àäã[áaâ].áÃÀ = Â.Äãã;
+        Àäã[áaâ].aAÅÅÁ = ä;
+        áaâ++;
       }
       Äå.âå(Äå.AA.button, 1, 0);
     }
-    if (aq.Åa() === 1) {
-      b2 = 1;
-      q = 0;
-      var b5 = ÁÁ[Â.ÃÁÃ].Åâ;
-      for (var b3 = 0; b3 < b5.length; b3++) {
-        var b4 = b5[b3];
-        p[q].ÁÁÃ(b4.Áã.src, b4.Áã.À);
-        p[q].áÃÀ = Â.ÃÁÃ;
-        p[q].aAÅÅÁ = b3;
-        q++;
+    if (Âáa.Åa() === 1) {
+      åÄ = 1;
+      áaâ = 0;
+      var AAÁ = ÁÁ[Â.ÃÁÃ].Åâ;
+      for (var ä = 0; ä < AAÁ.length; ä++) {
+        var Åã = AAÁ[ä];
+        Àäã[áaâ].ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+        Àäã[áaâ].áÃÀ = Â.ÃÁÃ;
+        Àäã[áaâ].aAÅÅÁ = ä;
+        áaâ++;
       }
       Äå.âå(Äå.AA.button, Äá, ãa);
     }
-    if (âa === ar.Åa()) {
-      b2 = 1;
-      q = Àá;
-      for (var b3 = Áå; ÁÁ.length > b3; b3++) {
-        var b4 = ÁÁ[b3];
-        if (b4.äÂ === âÃ || b4.ÁAä === 1 || ãâ === b4.Áâ || b4.äÁâ === 1 || âá === b4.äÀÅ) {
-          p[q].ÁÁÃ(b4.Áã.src, b4.Áã.À);
-          p[q].áÃÀ = b4.id;
-          q++;
+    if (âa === ÅÀÅ.Åa()) {
+      åÄ = 1;
+      áaâ = Àá;
+      for (var ä = Áå; ÁÁ.length > ä; ä++) {
+        var Åã = ÁÁ[ä];
+        if (Åã.äÂ === âÃ || Åã.ÁAä === 1 || ãâ === Åã.Áâ || Åã.äÁâ === 1 || âá === Åã.äÀÅ) {
+          Àäã[áaâ].ÁÁÃ(Åã.Áã.src, Åã.Áã.À);
+          Àäã[áaâ].áÃÀ = Åã.id;
+          áaâ++;
         }
       }
       Äå.âå(Äå.AA.button, 1, ÁÀ);
     }
-    if (as.Åa() === ãå) {
-      b2 = 1;
+    if (ÃåÃ.Åa() === ãå) {
+      åÄ = 1;
       if (ÀÂ.scale < 1.5) {
         ÀÂ.scale += 0.1;
         Äå.âå(Äå.AA.button, ÄÂ, ÁÀ);
-        at.show();
+        ÃÃã.show();
         if (ÀÂ.scale >= 1.5) {
-          as.aÄÅ();
+          ÃåÃ.aÄÅ();
         }
       }
     }
-    if (âa === at.Åa()) {
-      b2 = áââ;
+    if (âa === ÃÃã.Åa()) {
+      åÄ = áââ;
       if (ÀÂ.scale > -0.95) {
         if (ÀÂ.scale < 0) {
           ÀÂ.scale -= 0.05;
@@ -15623,124 +15632,124 @@ var Âaã = function () {
           ÀÂ.scale -= 0.1;
         }
         Äå.âå(Äå.AA.button, åä, áÃ);
-        as.show();
+        ÃåÃ.show();
         if (ÀÂ.scale <= -0.95) {
-          at.aÄÅ();
+          ÃÃã.aÄÅ();
         }
       }
     }
-    if (au.Åa() === 1) {
-      b2 = 1;
-      s();
+    if (ÂaÁ.Åa() === 1) {
+      åÄ = 1;
+      âÄÅÄâ();
       Äå.âå(Äå.AA.button, 1, 0);
     }
-    if (av.Åa() === 1) {
-      b2 = 1;
+    if (ÄAA.Åa() === 1) {
+      åÄ = 1;
       Äå.âå(Äå.AA.open, âÃ, 0);
-      var b6 = window.prompt("Please enter your code here", "");
+      var âÂÀ = window.prompt("Please enter your code here", "");
       Äå.âå(Äå.AA.open, 1, 0);
-      if (b6 != null && b6 != "") {
-        a3(b6);
+      if (âÂÀ != null && âÂÀ != "") {
+        aaÂÀa(âÂÀ);
       }
     }
-    if (aw.Åa() === 1) {
-      b2 = 1;
+    if (åaÃ.Åa() === 1) {
+      åÄ = 1;
       Äå.âå(Äå.AA.button, 1, 0);
-      ac();
+      ÅâÃÀa();
     }
-    if (ax.Åa() === âa) {
-      b2 = 1;
+    if (äâã.Åa() === âa) {
+      åÄ = 1;
       Âaã.aâä(äâ);
       Äå.âå(Äå.AA.play, âa, ãÂ);
     }
-    if (j === ÄÂ) {
-      if (v.Åa() === 1) {
-        t();
+    if (Áäå === ÄÂ) {
+      if (äAÁ.Åa() === 1) {
+        ÂÁÃ();
         Äå.âå(Äå.AA.open, ÄÂ, ãÂ);
         return;
       }
-      if (l === 1) {
-        L.Äâ(áÅ.Àå);
-        J.Äâ(áÅ.Àå);
-        D.Äâ(áÅ.Àå);
-        F.Äâ(áÅ.Àå);
-        H.Äâ(áÅ.Àå);
-        O.Äâ(áÅ.Àå);
-        P.Äâ(áÅ.Àå);
-        Q.Äâ(áÅ.Àå);
-        R.Äâ(áÅ.Àå);
-        x.Äâ(áÅ.Àå);
-        z.Äâ(áÅ.Àå);
-        B.Äâ(áÅ.Àå);
-        if (J.Åa() === åä) {
+      if (ÃäÃ === 1) {
+        ãáâ.Äâ(áÅ.Àå);
+        ÄÃÄ.Äâ(áÅ.Àå);
+        aaá.Äâ(áÅ.Àå);
+        ãâá.Äâ(áÅ.Àå);
+        Áaâ.Äâ(áÅ.Àå);
+        âäÄ.Äâ(áÅ.Àå);
+        ÂÅã.Äâ(áÅ.Àå);
+        âÀÄ.Äâ(áÅ.Àå);
+        Aåâ.Äâ(áÅ.Àå);
+        ÂÀä.Äâ(áÅ.Àå);
+        äaÁ.Äâ(áÅ.Àå);
+        ãAÃ.Äâ(áÅ.Àå);
+        if (ÄÃÄ.Åa() === åä) {
           ÂÄA.ÅÁÂ();
           Äå.âå(Äå.AA.button, åä, ãÂ);
           return;
-        } else if (L.Åa() === åä) {
+        } else if (ãáâ.Åa() === åä) {
           ÂÄA.ÅAÂ();
           Äå.âå(Äå.AA.button, ÂA, AÂ);
           return;
-        } else if (D.Åa() === 1) {
+        } else if (aaá.Åa() === 1) {
           áá.ÅäÄ(Âã);
           Äå.âå(Äå.AA.button, ãâ, äå);
           return;
-        } else if (ÁÅ === F.Åa()) {
+        } else if (ÁÅ === ãâá.Åa()) {
           áá.ÅäÄ(2);
           Äå.âå(Äå.AA.button, 1, AÄ);
           return;
-        } else if (H.Åa() === 1) {
+        } else if (Áaâ.Åa() === 1) {
           áá.ÅäÄ(3);
           Äå.âå(Äå.AA.button, âÃ, AÄ);
           return;
-        } else if (O.Åa() === äA) {
+        } else if (âäÄ.Åa() === äA) {
           Äå.áÂã(ÁÅ);
           Äå.âå(Äå.AA.button, Âã, ãä);
           return;
-        } else if (P.Åa() === ÀA) {
+        } else if (ÂÅã.Åa() === ÀA) {
           Äå.áÂã(ÀÄ);
           Äå.âå(Äå.AA.button, 1, ãä);
           return;
-        } else if (âÃ === Q.Åa()) {
+        } else if (âÃ === âÀÄ.Åa()) {
           Äå.Ååå(1);
           Äå.âå(Äå.AA.button, 1, ÄÁ);
           return;
-        } else if (R.Åa() === 1) {
+        } else if (Aåâ.Åa() === 1) {
           Äå.Ååå(0);
           Äå.âå(Äå.AA.button, 1, 0);
           return;
-        } else if (z.Åa() === 1) {
+        } else if (äaÁ.Åa() === 1) {
           ÀÂ.ãaÄ(1);
           Äå.âå(Äå.AA.button, ÂA, 0);
           return;
-        } else if (x.Åa() === 1) {
+        } else if (ÂÀä.Åa() === 1) {
           ÀÂ.ãaÄ(ÄÂÅ);
           Äå.âå(Äå.AA.button, Äá, ÀÄ);
           return;
-        } else if (B.Åa() === 1) {
+        } else if (ãAÃ.Åa() === 1) {
           ÀÂ.ãaÄ(0);
           Äå.âå(Äå.AA.button, Àâ, ãa);
           return;
         }
-        var b7 = ah.áâ;
-        if (ÁA.ááa < b7.x || b7.x + ÄÀ * 234 < ÁA.ááa || ÁA.áaá < b7.y || b7.y + ÄÀ * 232 < ÁA.áaá) {
-          t();
+        var ÄÄå = ÅÄÄ.áâ;
+        if (ÁA.ááa < ÄÄå.x || ÄÄå.x + ÄÀ * 234 < ÁA.ááa || ÁA.áaá < ÄÄå.y || ÄÄå.y + ÄÀ * 232 < ÁA.áaá) {
+          ÂÁÃ();
           Äå.âå(Äå.AA.open, 1, 0);
           return;
         }
-      } else if (k === aÅ) {
-        var b8 = ai.áâ;
-        if (ÁA.ááa < b8.x || b8.x + ÄÀ * 412 < ÁA.ááa || ÁA.áaá < b8.y || ÁA.áaá > b8.y + ÄÀ * 412) {
-          t();
+      } else if (Àaá === aÅ) {
+        var ÀÁã = áÃâ.áâ;
+        if (ÁA.ááa < ÀÁã.x || ÀÁã.x + ÄÀ * 412 < ÁA.ááa || ÁA.áaá < ÀÁã.y || ÁA.áaá > ÀÁã.y + ÄÀ * 412) {
+          ÂÁÃ();
           Äå.âå(Äå.AA.open, aÅ, 0);
           return;
         }
       }
     } else {
-      for (var b3 = AÂ; q > b3; b3++) {
-        if (ÀA === p[b3].Åa()) {
+      for (var ä = AÂ; áaâ > ä; ä++) {
+        if (ÀA === Àäã[ä].Åa()) {
           Äå.âå(Äå.AA.button, Àâ, ÀÄ);
-          Aá.â.åa = p[b3].áÃÀ;
-          Aá.â.äÅâ = p[b3].aAÅÅÁ;
+          Aá.â.åa = Àäã[ä].áÃÀ;
+          Aá.â.äÅâ = Àäã[ä].aAÅÅÁ;
           if (Aá.â.åa === Â.Äãã) {
             Aá.â.ÀÃÁ = 0;
           }
@@ -15749,226 +15758,226 @@ var Âaã = function () {
     }
   }
   ;
-  function aN(b1) {
-    var b2 = Math.floor(b1.changedTouches[0].clientX * áá.options.ååA);
-    var b3 = Math.floor(b1.changedTouches[0].clientY * áá.options.ÂAÁ);
-    if (Z === 1) {
-      Z = Àá;
-    } else if (j === 1) {
-      aM(aA);
-    } else if (W === Àâ && åäÅ <= b2) {
-      W = 0;
-      aA.clientX = X;
-      aA.clientY = Y;
-      aM(aA);
+  function AAÅ(Åá) {
+    var ááa = Math.floor(Åá.changedTouches[0].clientX * áá.options.ååA);
+    var áaá = Math.floor(Åá.changedTouches[0].clientY * áá.options.ÂAÁ);
+    if (ÂÂa === 1) {
+      ÂÂa = Àá;
+    } else if (Áäå === 1) {
+      ÃåA(Àã);
+    } else if (Âaa === Àâ && åäÅ <= ááa) {
+      Âaa = 0;
+      Àã.clientX = ãÀá;
+      Àã.clientY = ÀÅÃ;
+      ÃåA(Àã);
       return;
-    } else if (Aá.â.Âáâ.ÀâÅ === 0 && åäÅ > b2 && b3 < äää - ÄÀ * 70) {
-      if (b2 < ÄÀ * 240 && b3 < ÄÀ * 160) {
-        aM(aA);
+    } else if (Aá.â.Âáâ.ÀâÅ === 0 && åäÅ > ááa && áaá < äää - ÄÀ * 70) {
+      if (ááa < ÄÀ * 240 && áaá < ÄÀ * 160) {
+        ÃåA(Àã);
       }
     } else {
-      aM(aA);
+      ÃåA(Àã);
     }
-    if (S !== 0) {
-      if (S & ÀA) {
-        aB.charCode = 37;
-        aO(aB);
+    if (aãÄ !== 0) {
+      if (aãÄ & ÀA) {
+        aã.charCode = 37;
+        ÅãÁ(aã);
       }
-      if (S & 2) {
-        aB.charCode = 39;
-        aO(aB);
+      if (aãÄ & 2) {
+        aã.charCode = 39;
+        ÅãÁ(aã);
       }
-      if (S & åäá) {
-        aB.charCode = 38;
-        aO(aB);
+      if (aãÄ & åäá) {
+        aã.charCode = 38;
+        ÅãÁ(aã);
       }
-      if (S & aÀÃ) {
-        aB.charCode = 40;
-        aO(aB);
+      if (aãÄ & aÀÃ) {
+        aã.charCode = 40;
+        ÅãÁ(aã);
       }
-      S = Àá;
+      aãÄ = Àá;
     }
   }
   ;
-  function aO(b1) {
-    ÂÄA.ÅÃa(b1);
-    if (b1.keyCode === 77) {
-      if (k === 0) {
-        t();
-        j = ãâ;
-        k = 1;
+  function ÅãÁ(Åá) {
+    ÂÄA.ÅÃa(Åá);
+    if (Åá.keyCode === 77) {
+      if (Àaá === 0) {
+        ÂÁÃ();
+        Áäå = ãâ;
+        Àaá = 1;
         Äå.âå(Äå.AA.open, Äá, ãÂ);
       } else {
-        t();
+        ÂÁÃ();
         Äå.âå(Äå.AA.open, ãå, Aa);
       }
-    } else if (b1.keyCode === 27 && j === 1) {
+    } else if (Åá.keyCode === 27 && Áäå === 1) {
       Äå.âå(Äå.AA.open, Áå, âã);
-      t();
-    } else if (b1.keyCode === 82) {
+      ÂÁÃ();
+    } else if (Åá.keyCode === 82) {
       if (Aá.â.aÅÁ === 1 && Aá.â.åa !== Â.Äãã) {
         Aá.â.ÀÃÁ = (Aá.â.ÀÃÁ + äA) % 4;
       }
     }
   }
   ;
-  function aP() {
+  function ÅÂâ() {
     if (ãÂ === äã) {
-      window.addEventListener("mousedown", aY, äãÂ);
+      window.addEventListener("mousedown", aAá, äãÂ);
     }
     if (áÁ === äã) {
-      window.addEventListener("mouseup", aM, ÃáããÂ);
+      window.addEventListener("mouseup", ÃåA, ÃáããÂ);
     }
     if (åâ === äã) {
-      window.addEventListener("mousemove", aX, false);
+      window.addEventListener("mousemove", aÂÀ, false);
     }
     if (äã === 0) {
-      window.addEventListener("keyup", aO, false);
+      window.addEventListener("keyup", ÅãÁ, false);
     }
     if (äã === 0) {
-      window.addEventListener("keydown", aR, false);
+      window.addEventListener("keydown", áAÅ, false);
     }
     if (äã === Âã) {
-      window.addEventListener("touchstart", aS, false);
+      window.addEventListener("touchstart", AÀÅ, false);
     }
     if (äã === 1) {
-      window.addEventListener("touchend", aQ, false);
+      window.addEventListener("touchend", äÄä, false);
     }
     if (äã === 1) {
-      window.addEventListener("touchcancel", aN, äãÂ);
+      window.addEventListener("touchcancel", AAÅ, äãÂ);
     }
     if (äã === 1) {
-      window.addEventListener("touchmove", aW, false);
+      window.addEventListener("touchmove", áãÃ, false);
     }
   }
   ;
-  function aQ(b1) {}
+  function äÄä(Åá) {}
   ;
-  function aR(b1) {
-    ÂÄA.Áãä(b1);
-    if (b1.keyCode === 37 || b1.keyCode === 38 || b1.keyCode === 39 || b1.keyCode === 40) {
-      b1.preventDefault();
+  function áAÅ(Åá) {
+    ÂÄA.Áãä(Åá);
+    if (Åá.keyCode === 37 || Åá.keyCode === 38 || Åá.keyCode === 39 || Åá.keyCode === 40) {
+      Åá.preventDefault();
       return Ãâä;
     }
   }
   ;
-  function aS(b1) {
-    var b2 = åâ;
-    for (var b3 = 0; b1.touches.length > b3; b3++) {
-      ÁA.Âãå(aA, b1, b1.touches[b3]);
-      if (j === ãä) {
-        var b4 = Math.floor(aA.clientX * áá.options.ååA);
-        var b5 = Math.floor(aA.clientY * áá.options.ÂAÁ);
-        if (äää - ÄÀ * 70 > b5) {
-          var b6 = ãÂÁ * 1.5;
-          var b7 = ãÂÁ / ãåÁ;
-          if (åäÅ > b4) {
-            var b8 = ÄÀ * 30;
-            T = áâA.angle(åäÅ - b6, ÂáÅ + b7, b4, b5);
-            U = Math.min(áâA.ÃÂ(b4, b5, åäÅ - b6, ÂáÅ + b7), 25);
-            if (b4 < åäÅ - b6 - b8) {
-              S |= aÅ;
-              aB.charCode = 37;
-              aB.keyCode = 37;
-              aR(aB);
-            } else if (b4 > åäÅ - b6 + b8) {
-              S |= Äåã;
-              aB.charCode = 39;
-              aB.keyCode = 39;
-              aR(aB);
+  function AÀÅ(Åá) {
+    var ÃäÂ = åâ;
+    for (var áÅa = 0; Åá.touches.length > áÅa; áÅa++) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[áÅa]);
+      if (Áäå === ãä) {
+        var ááa = Math.floor(Àã.clientX * áá.options.ååA);
+        var áaá = Math.floor(Àã.clientY * áá.options.ÂAÁ);
+        if (äää - ÄÀ * 70 > áaá) {
+          var ÀAä = ãÂÁ * 1.5;
+          var áÀä = ãÂÁ / ãåÁ;
+          if (åäÅ > ááa) {
+            var ÁÂã = ÄÀ * 30;
+            äAÄ = áâA.angle(åäÅ - ÀAä, ÂáÅ + áÀä, ááa, áaá);
+            ÁÂå = Math.min(áâA.ÃÂ(ááa, áaá, åäÅ - ÀAä, ÂáÅ + áÀä), 25);
+            if (ááa < åäÅ - ÀAä - ÁÂã) {
+              aãÄ |= aÅ;
+              aã.charCode = 37;
+              aã.keyCode = 37;
+              áAÅ(aã);
+            } else if (ááa > åäÅ - ÀAä + ÁÂã) {
+              aãÄ |= Äåã;
+              aã.charCode = 39;
+              aã.keyCode = 39;
+              áAÅ(aã);
             }
-            if (ÂáÅ + b7 - b8 > b5) {
-              S |= ãåÁ;
-              aB.charCode = 38;
-              aB.keyCode = 38;
-              aR(aB);
-            } else if (b5 > ÂáÅ + b7 + b8) {
-              S |= 8;
-              aB.charCode = 40;
-              aB.keyCode = 40;
-              aR(aB);
+            if (ÂáÅ + áÀä - ÁÂã > áaá) {
+              aãÄ |= ãåÁ;
+              aã.charCode = 38;
+              aã.keyCode = 38;
+              áAÅ(aã);
+            } else if (áaá > ÂáÅ + áÀä + ÁÂã) {
+              aãÄ |= 8;
+              aã.charCode = 40;
+              aã.keyCode = 40;
+              áAÅ(aã);
             }
-          } else if (b4 < aãA - ÄÀ * 40 || ÄÀ * 40 < b5) {
-            b2 = ÂA;
-            aA.clientX -= b6 / áá.options.ååA;
-            aA.clientY -= b7 / áá.options.ååA;
+          } else if (ááa < aãA - ÄÀ * 40 || ÄÀ * 40 < áaá) {
+            ÃäÂ = ÂA;
+            Àã.clientX -= ÀAä / áá.options.ååA;
+            Àã.clientY -= áÀä / áá.options.ååA;
             if (Aá.â.aÅÁ === ÁÅ) {
-              var b9 = Date.now();
-              if (b9 - V < 1000) {
-                W = ÀA;
-                X = aA.clientX;
-                Y = aA.clientY;
-                aY(aA);
+              var aaâ = Date.now();
+              if (aaâ - AáÂ < 1000) {
+                Âaa = ÀA;
+                ãÀá = Àã.clientX;
+                ÀÅÃ = Àã.clientY;
+                aAá(Àã);
               }
-              V = b9;
+              AáÂ = aaâ;
             } else {
-              W = ÀA;
-              X = aA.clientX;
-              Y = aA.clientY;
-              aY(aA);
+              Âaa = ÀA;
+              ãÀá = Àã.clientX;
+              ÀÅÃ = Àã.clientY;
+              aAá(Àã);
             }
           }
           continue;
         }
       }
-      if (b2 === 0 && S === äå) {
-        aY(aA);
-        b2 = 1;
+      if (ÃäÂ === 0 && aãÄ === äå) {
+        aAá(Àã);
+        ÃäÂ = 1;
       }
     }
   }
   ;
-  function aT() {
-    if (Aa === aL()) {
+  function Áá() {
+    if (Aa === ÀÅá()) {
       return;
     }
-    a7();
-    a9();
+    ÃáÃÁÀ();
+    ÄÂÅåä();
     AÅ.clearRect(Àá, 0, aãA, äää);
     Aá.ÅÃá();
     ÀÂ.åãA();
-    ÀÂ.áÅã(aj.áâ.x, aj.áâ.y);
-    aj.Áá();
-    ak.Áá();
-    al.Áá();
-    am.Áá();
-    an.Áá();
-    ao.Áá();
-    ap.Áá();
-    aq.Áá();
-    ar.Áá();
-    as.Áá();
-    at.Áá();
-    au.Áá();
-    av.Áá();
-    aw.Áá();
-    ax.Áá();
-    ab();
-    aa();
-    if (j === ÀA) {
-      if (k === Áå) {
-        ÀÂ.aÃáãá(ai, v);
-      } else if (l === 1) {
-        ÀÂ.ââáåa(ah, D, F, H, J, L, O, P, Q, R, v, x, z, B);
+    ÀÂ.áÅã(âåä.áâ.x, âåä.áâ.y);
+    âåä.Áá();
+    AäA.Áá();
+    ÃÂá.Áá();
+    ÀÃÃ.Áá();
+    AãÁ.Áá();
+    AáÄ.Áá();
+    aAÃ.Áá();
+    Âáa.Áá();
+    ÅÀÅ.Áá();
+    ÃåÃ.Áá();
+    ÃÃã.Áá();
+    ÂaÁ.Áá();
+    ÄAA.Áá();
+    åaÃ.Áá();
+    äâã.Áá();
+    áÀAÂa();
+    ÀÄãaä();
+    if (Áäå === ÀA) {
+      if (Àaá === Áå) {
+        ÀÂ.aÃáãá(áÃâ, äAÁ);
+      } else if (ÃäÃ === 1) {
+        ÀÂ.ââáåa(ÅÄÄ, aaá, ãâá, Áaâ, ÄÃÄ, ãáâ, âäÄ, ÂÅã, âÀÄ, Aåâ, äAÁ, ÂÀä, äaÁ, ãAÃ);
       }
     } else if (äã === 1) {
       if (ÂÄA.ãÄâ() + ÂÄA.áÃÂ() + ÂÄA.ÅáÁ() + ÂÄA.ÅÃA() >= 1) {
         AÅ.globalAlpha = 0.3;
-        var b1 = äâA - Aaä * 1.5;
-        var b2 = aåa + Aaä / 4;
-        áá.äãä(AÅ, b1, b2, 60);
+        var ã = äâA - Aaä * 1.5;
+        var áã = aåa + Aaä / 4;
+        áá.äãä(AÅ, ã, áã, 60);
         áá.ÁÁA(AÅ, "#000000");
-        áá.äãä(AÅ, b1 + U * Math.sin(T) * ÄÀ, b2 + ÄÀ * (Math.cos(T) * U), 30);
+        áá.äãä(AÅ, ã + ÁÂå * Math.sin(äAÄ) * ÄÀ, áã + ÄÀ * (Math.cos(äAÄ) * ÁÂå), 30);
         áá.ÁÁA(AÅ, "#FFFFFF");
         AÅ.globalAlpha = âa;
       }
-      if (W === Âã) {
+      if (Âaa === Âã) {
         AÅ.globalAlpha = 0.3;
-        var b1 = äâA + Aaä * 1.5;
-        var b2 = aåa + Aaä / 4;
-        áá.äãä(AÅ, b1, b2, 60);
+        var ã = äâA + Aaä * 1.5;
+        var áã = aåa + Aaä / 4;
+        áá.äãä(AÅ, ã, áã, 60);
         áá.ÁÁA(AÅ, "#000000");
-        áá.äãä(AÅ, b1 + ÄÀ * (Math.sin(ÁA.angle) * 25), b2 + ÄÀ * (Math.cos(ÁA.angle) * 25), 30);
+        áá.äãä(AÅ, ã + ÄÀ * (Math.sin(ÁA.angle) * 25), áã + ÄÀ * (Math.cos(ÁA.angle) * 25), 30);
         áá.ÁÁA(AÅ, "#FFFFFF");
         AÅ.globalAlpha = ÄÂ;
       }
@@ -15976,17 +15985,17 @@ var Âaã = function () {
     áÁá.äåã();
   }
   ;
-  function aU() {
+  function ÃÂÅ() {
     document.getElementById("bod").style.backgroundColor = "#46664D";
-    u = 0;
+    ãÃå = 0;
     áÁá.ÄäÅ();
-    if (áÃ === ag) {
-      ag = 1;
-      var b1 = ÁÁ[Â.Äãã].Åâ;
-      for (var b2 = 0; b1.length > b2; b2++) {
-        var b3 = b1[b2];
-        b3.Áã = {
-          src: [b3.aä.src, "img/useless.png", "img/useless.png"],
+    if (áÃ === ÂaââA) {
+      ÂaââA = 1;
+      var AAÁ = ÁÁ[Â.Äãã].Åâ;
+      for (var ä = 0; AAÁ.length > ä; ä++) {
+        var Åã = AAÁ[ä];
+        Åã.Áã = {
+          src: [Åã.aä.src, "img/useless.png", "img/useless.png"],
           À: [{
             á: ÄÁ
           }, {
@@ -15996,11 +16005,11 @@ var Âaã = function () {
           }]
         };
       }
-      var b1 = ÁÁ[Â.ÃÁÃ].Åâ;
-      for (var b2 = ÁÀ; b2 < b1.length; b2++) {
-        var b3 = b1[b2];
-        b3.Áã = {
-          src: [b3.aä.src, "img/useless.png", "img/useless.png"],
+      var AAÁ = ÁÁ[Â.ÃÁÃ].Åâ;
+      for (var ä = ÁÀ; ä < AAÁ.length; ä++) {
+        var Åã = AAÁ[ä];
+        Åã.Áã = {
+          src: [Åã.aä.src, "img/useless.png", "img/useless.png"],
           À: [{
             á: áÃ
           }, {
@@ -16011,276 +16020,276 @@ var Âaã = function () {
         };
       }
     }
-    s();
+    âÄÅÄâ();
     áá.ãÃÄ(Âaã);
-    aJ = aF;
-    aI = aF;
-    aK = aH;
-    aG = äA;
-    b0();
+    áÃÁ = áÃÃ;
+    ÅÄa = áÃÃ;
+    äÁá = ÂáÀ;
+    âäã = äA;
+    âÂ();
   }
   ;
-  function aV() {
+  function Äåä() {
     if (äã === 0) {
-      window.removeEventListener("mousedown", aY, aÃÂ);
+      window.removeEventListener("mousedown", aAá, aÃÂ);
     }
     if (åâ === äã) {
-      window.removeEventListener("mouseup", aM, Áââ);
+      window.removeEventListener("mouseup", ÃåA, Áââ);
     }
     if (ÁÀ === äã) {
-      window.removeEventListener("mousemove", aX, äãÂ);
+      window.removeEventListener("mousemove", aÂÀ, äãÂ);
     }
     if (äã === åâ) {
-      window.removeEventListener("keyup", aO, ãÂäáä);
+      window.removeEventListener("keyup", ÅãÁ, ãÂäáä);
     }
     if (ÄÁ === äã) {
-      window.removeEventListener("keydown", aR, false);
+      window.removeEventListener("keydown", áAÅ, false);
     }
     if (äã === 1) {
-      window.removeEventListener("touchstart", aS, ÅAÁ);
+      window.removeEventListener("touchstart", AÀÅ, ÅAÁ);
     }
     if (äã === âÃ) {
-      window.removeEventListener("touchend", aQ, äãÂ);
+      window.removeEventListener("touchend", äÄä, äãÂ);
     }
     if (äã === ÀA) {
-      window.removeEventListener("touchcancel", aN, false);
+      window.removeEventListener("touchcancel", AAÅ, false);
     }
     if (äã === ÁÅ) {
-      window.removeEventListener("touchmove", aW, ÃáããÂ);
+      window.removeEventListener("touchmove", áãÃ, ÃáããÂ);
     }
   }
   ;
-  function aW(b1) {
-    var b2 = ãä;
-    var b3 = 0;
-    for (var b4 = ÁÀ; b4 < b1.touches.length; b4++) {
-      ÁA.Âãå(aA, b1, b1.touches[b4]);
-      if (Aá.â.Âáâ.ÀâÅ === 0 && j === áÃ) {
-        var b5 = Math.floor(áá.options.ååA * aA.clientX);
-        var b6 = Math.floor(áá.options.ÂAÁ * aA.clientY);
-        if (b6 < äää - ÄÀ * 70) {
-          var b7 = ãÂÁ * 1.5;
-          var b8 = ãÂÁ / 4;
-          if (åäÅ > b5) {
-            b3 = Äá;
-            var b9 = ãÂ;
-            var ba = ÄÀ * 30;
-            T = áâA.angle(åäÅ - b7, ÂáÅ + b8, b5, b6);
-            U = Math.min(áâA.ÃÂ(b5, b6, åäÅ - b7, ÂáÅ + b8), 25);
-            if (b5 < åäÅ - b7 - ba) {
-              b9 |= äA;
-            } else if (b5 > åäÅ - b7 + ba) {
-              b9 |= ããÄ;
+  function áãÃ(Åá) {
+    var ÃäÂ = ãä;
+    var åÁå = 0;
+    for (var áÅa = ÁÀ; áÅa < Åá.touches.length; áÅa++) {
+      ÁA.Âãå(Àã, Åá, Åá.touches[áÅa]);
+      if (Aá.â.Âáâ.ÀâÅ === 0 && Áäå === áÃ) {
+        var ááa = Math.floor(áá.options.ååA * Àã.clientX);
+        var áaá = Math.floor(áá.options.ÂAÁ * Àã.clientY);
+        if (áaá < äää - ÄÀ * 70) {
+          var ÀAä = ãÂÁ * 1.5;
+          var áÀä = ãÂÁ / 4;
+          if (åäÅ > ááa) {
+            åÁå = Äá;
+            var áãÀ = ãÂ;
+            var ÁÂã = ÄÀ * 30;
+            äAÄ = áâA.angle(åäÅ - ÀAä, ÂáÅ + áÀä, ááa, áaá);
+            ÁÂå = Math.min(áâA.ÃÂ(ááa, áaá, åäÅ - ÀAä, ÂáÅ + áÀä), 25);
+            if (ááa < åäÅ - ÀAä - ÁÂã) {
+              áãÀ |= äA;
+            } else if (ááa > åäÅ - ÀAä + ÁÂã) {
+              áãÀ |= ããÄ;
             }
-            if (b6 < ÂáÅ + b8 + -ba) {
-              b9 |= AÂâ;
-            } else if (b6 > ÂáÅ + b8 + ba) {
-              b9 |= 8;
+            if (áaá < ÂáÅ + áÀä + -ÁÂã) {
+              áãÀ |= AÂâ;
+            } else if (áaá > ÂáÅ + áÀä + ÁÂã) {
+              áãÀ |= 8;
             }
-            if ((b9 & åÀ) === 1 && (S & äA) !== ãâ) {
-              aB.charCode = 37;
-              aR(aB);
-            } else if (äA !== (b9 & Âã) && (S & 1) === 1) {
-              aB.charCode = 37;
-              aO(aB);
+            if ((áãÀ & åÀ) === 1 && (aãÄ & äA) !== ãâ) {
+              aã.charCode = 37;
+              áAÅ(aã);
+            } else if (äA !== (áãÀ & Âã) && (aãÄ & 1) === 1) {
+              aã.charCode = 37;
+              ÅãÁ(aã);
             }
-            if ((b9 & åaÁ) === 2 && (S & 2) !== 2) {
-              aB.charCode = 39;
-              aR(aB);
-            } else if ((b9 & 2) !== 2 && (S & 2) === 2) {
-              aB.charCode = 39;
-              aO(aB);
+            if ((áãÀ & åaÁ) === 2 && (aãÄ & 2) !== 2) {
+              aã.charCode = 39;
+              áAÅ(aã);
+            } else if ((áãÀ & 2) !== 2 && (aãÄ & 2) === 2) {
+              aã.charCode = 39;
+              ÅãÁ(aã);
             }
-            if (åäá === (b9 & âÂÄ) && (S & 4) !== 4) {
-              aB.charCode = 38;
-              aR(aB);
-            } else if ((b9 & aÀÄ) !== ÄAÄ && (S & aää) === 4) {
-              aB.charCode = 38;
-              aO(aB);
+            if (åäá === (áãÀ & âÂÄ) && (aãÄ & 4) !== 4) {
+              aã.charCode = 38;
+              áAÅ(aã);
+            } else if ((áãÀ & aÀÄ) !== ÄAÄ && (aãÄ & aää) === 4) {
+              aã.charCode = 38;
+              ÅãÁ(aã);
             }
-            if ((b9 & 8) === Àaã && AáÁÁá !== (S & 8)) {
-              aB.charCode = 40;
-              aR(aB);
-            } else if (ååÁ !== (b9 & 8) && (S & åAA) === 8) {
-              aB.charCode = 40;
-              aO(aB);
+            if ((áãÀ & 8) === Àaã && AáÁÁá !== (aãÄ & 8)) {
+              aã.charCode = 40;
+              áAÅ(aã);
+            } else if (ååÁ !== (áãÀ & 8) && (aãÄ & åAA) === 8) {
+              aã.charCode = 40;
+              ÅãÁ(aã);
             }
-            S = b9;
+            aãÄ = áãÀ;
             continue;
-          } else if (aãA - ÄÀ * 40 > b5 || b6 > ÄÀ * 40) {
-            b2 = 1;
-            aA.clientX -= b7 / áá.options.ååA;
-            aA.clientY -= b8 / áá.options.ååA;
-            X = aA.clientX;
-            Y = aA.clientY;
-            aX(aA);
+          } else if (aãA - ÄÀ * 40 > ááa || áaá > ÄÀ * 40) {
+            ÃäÂ = 1;
+            Àã.clientX -= ÀAä / áá.options.ååA;
+            Àã.clientY -= áÀä / áá.options.ååA;
+            ãÀá = Àã.clientX;
+            ÀÅÃ = Àã.clientY;
+            aÂÀ(Àã);
           }
         }
       }
-      if (b2 === AÂ && S === äå) {
-        aX(aA);
-        b2 = 1;
+      if (ÃäÂ === AÂ && aãÄ === äå) {
+        aÂÀ(Àã);
+        ÃäÂ = 1;
       }
     }
-    if (b3 === áÁ && S !== 0) {
-      if (S & 1) {
-        aB.charCode = 37;
-        aO(aB);
+    if (åÁå === áÁ && aãÄ !== 0) {
+      if (aãÄ & 1) {
+        aã.charCode = 37;
+        ÅãÁ(aã);
       }
-      if (S & 2) {
-        aB.charCode = 39;
-        aO(aB);
+      if (aãÄ & 2) {
+        aã.charCode = 39;
+        ÅãÁ(aã);
       }
-      if (S & ÁÄã) {
-        aB.charCode = 38;
-        aO(aB);
+      if (aãÄ & ÁÄã) {
+        aã.charCode = 38;
+        ÅãÁ(aã);
       }
-      if (S & 8) {
-        aB.charCode = 40;
-        aO(aB);
+      if (aãÄ & 8) {
+        aã.charCode = 40;
+        ÅãÁ(aã);
       }
-      S = 0;
+      aãÄ = 0;
     }
   }
   ;
-  function aX(b1) {
-    ÁA.ÄAá(b1, ÁA.âââ);
-    var b2 = ãä;
-    if (ãâ === ak.Åa()) {
-      b2 = 1;
+  function aÂÀ(Åá) {
+    ÁA.ÄAá(Åá, ÁA.âââ);
+    var åÄ = ãä;
+    if (ãâ === AäA.Åa()) {
+      åÄ = 1;
     }
-    if (ãâ === al.Åa()) {
-      b2 = 1;
+    if (ãâ === ÃÂá.Åa()) {
+      åÄ = 1;
     }
-    if (am.Åa() === 1) {
-      b2 = 1;
+    if (ÀÃÃ.Åa() === 1) {
+      åÄ = 1;
     }
-    if (an.Åa() === äA) {
-      b2 = 1;
+    if (AãÁ.Åa() === äA) {
+      åÄ = 1;
     }
-    if (ao.Åa() === 1) {
-      b2 = âá;
+    if (AáÄ.Åa() === 1) {
+      åÄ = âá;
     }
-    if (ap.Åa() === 1) {
-      b2 = åä;
+    if (aAÃ.Åa() === 1) {
+      åÄ = åä;
     }
-    if (aq.Åa() === âÃ) {
-      b2 = Äá;
+    if (Âáa.Åa() === âÃ) {
+      åÄ = Äá;
     }
-    if (ar.Åa() === 1) {
-      b2 = 1;
+    if (ÅÀÅ.Åa() === 1) {
+      åÄ = 1;
     }
-    if (as.Åa() === aÅ) {
-      b2 = 1;
+    if (ÃåÃ.Åa() === aÅ) {
+      åÄ = 1;
     }
-    if (at.Åa() === 1) {
-      b2 = 1;
+    if (ÃÃã.Åa() === 1) {
+      åÄ = 1;
     }
-    if (au.Åa() === 1) {
-      b2 = ãå;
+    if (ÂaÁ.Åa() === 1) {
+      åÄ = ãå;
     }
-    if (av.Åa() === 1) {
-      b2 = ÂA;
+    if (ÄAA.Åa() === 1) {
+      åÄ = ÂA;
     }
-    if (ÂA === aw.Åa()) {
-      b2 = ãå;
+    if (ÂA === åaÃ.Åa()) {
+      åÄ = ãå;
     }
-    if (ax.Åa() === ãâ) {
-      b2 = ãå;
+    if (äâã.Åa() === ãâ) {
+      åÄ = ãå;
     }
-    if (j === 1) {
-      v.Åa();
-      if (l === 1) {
-        J.Åa();
-        L.Åa();
-        D.Åa();
-        F.Åa();
-        H.Åa();
-        O.Åa();
-        P.Åa();
-        Q.Åa();
-        R.Åa();
-        z.Åa();
-        x.Åa();
-        B.Åa();
+    if (Áäå === 1) {
+      äAÁ.Åa();
+      if (ÃäÃ === 1) {
+        ÄÃÄ.Åa();
+        ãáâ.Åa();
+        aaá.Åa();
+        ãâá.Åa();
+        Áaâ.Åa();
+        âäÄ.Åa();
+        ÂÅã.Åa();
+        âÀÄ.Åa();
+        Aåâ.Åa();
+        äaÁ.Åa();
+        ÂÀä.Åa();
+        ãAÃ.Åa();
       }
     } else {
-      for (var b3 = 0; b3 < q; b3++) {
-        p[b3].Åa();
+      for (var ä = 0; ä < áaâ; ä++) {
+        Àäã[ä].Åa();
       }
     }
   }
   ;
-  function aY(b1) {
-    ÁA.ÄAá(b1, ÁA.Àãa);
-    var b2 = AÄ;
-    if (ãå === ak.Åa()) {
-      b2 = 1;
+  function aAá(Åá) {
+    ÁA.ÄAá(Åá, ÁA.Àãa);
+    var åÄ = AÄ;
+    if (ãå === AäA.Åa()) {
+      åÄ = 1;
     }
-    if (al.Åa() === ÀA) {
-      b2 = âa;
+    if (ÃÂá.Åa() === ÀA) {
+      åÄ = âa;
     }
-    if (am.Åa() === 1) {
-      b2 = 1;
+    if (ÀÃÃ.Åa() === 1) {
+      åÄ = 1;
     }
-    if (an.Åa() === 1) {
-      b2 = 1;
+    if (AãÁ.Åa() === 1) {
+      åÄ = 1;
     }
-    if (ao.Åa() === 1) {
-      b2 = áââ;
+    if (AáÄ.Åa() === 1) {
+      åÄ = áââ;
     }
-    if (ÂA === ap.Åa()) {
-      b2 = âá;
+    if (ÂA === aAÃ.Åa()) {
+      åÄ = âá;
     }
-    if (aq.Åa() === 1) {
-      b2 = ãå;
+    if (Âáa.Åa() === 1) {
+      åÄ = ãå;
     }
-    if (ar.Åa() === 1) {
-      b2 = Áå;
+    if (ÅÀÅ.Åa() === 1) {
+      åÄ = Áå;
     }
-    if (as.Åa() === 1) {
-      b2 = äA;
+    if (ÃåÃ.Åa() === 1) {
+      åÄ = äA;
     }
-    if (at.Åa() === åä) {
-      b2 = âa;
+    if (ÃÃã.Åa() === åä) {
+      åÄ = âa;
     }
-    if (au.Åa() === Àâ) {
-      b2 = 1;
+    if (ÂaÁ.Åa() === Àâ) {
+      åÄ = 1;
     }
-    if (av.Åa() === 1) {
-      b2 = 1;
+    if (ÄAA.Åa() === 1) {
+      åÄ = 1;
     }
-    if (aÅ === aw.Åa()) {
-      b2 = 1;
+    if (aÅ === åaÃ.Åa()) {
+      åÄ = 1;
     }
-    if (ax.Åa() === 1) {
-      b2 = aÅ;
+    if (äâã.Åa() === 1) {
+      åÄ = aÅ;
     }
-    if (ÂA === j) {
-      v.Åa();
-      if (åÀ === l) {
-        J.Åa();
-        L.Åa();
-        D.Åa();
-        F.Åa();
-        H.Åa();
-        O.Åa();
-        P.Åa();
-        Q.Åa();
-        R.Åa();
-        z.Åa();
-        x.Åa();
-        B.Åa();
+    if (ÂA === Áäå) {
+      äAÁ.Åa();
+      if (åÀ === ÃäÃ) {
+        ÄÃÄ.Åa();
+        ãáâ.Åa();
+        aaá.Åa();
+        ãâá.Åa();
+        Áaâ.Åa();
+        âäÄ.Åa();
+        ÂÅã.Åa();
+        âÀÄ.Åa();
+        Aåâ.Åa();
+        äaÁ.Åa();
+        ÂÀä.Åa();
+        ãAÃ.Åa();
       }
     } else {
-      for (var b3 = 0; q > b3; b3++) {
-        if (p[b3].Åa() === 1) {
-          b2 = ÂA;
+      for (var ä = 0; áaâ > ä; ä++) {
+        if (Àäã[ä].Åa() === 1) {
+          åÄ = ÂA;
         }
       }
     }
-    if (b2 === 0 && j === 0) {
-      u = 1;
+    if (åÄ === 0 && Áäå === 0) {
+      ãÃå = 1;
       if (Aá.â.click === -1) {
         Aá.â.click = Aa;
       }
@@ -16289,74 +16298,75 @@ var Âaã = function () {
     }
   }
   ;
-  function aZ(b1) {
-    t();
+  function aâä(Äâã) {
+    ÂÁÃ();
     áÁá.ÂÂÅ();
-    az = b1;
-    aV();
-    aJ = aC;
-    aI = aC;
-    aK = aE;
-    aD = ãâ;
+    áåÅ = Äâã;
+    Äåä();
+    áÃÁ = AÁÃ;
+    ÅÄa = AÁÃ;
+    äÁá = ÃÃa;
+    áÁâ = ãâ;
   }
   ;
-  function b0() {
-    var b1 = äå;
-    var b2 = Àá;
-    if (aJ > ÁÀ) {
-      b2 = äää;
-      var b3 = aK(ãâ - aJ / aI);
-      if (b3 === 1) {
-        aJ = 0;
+  function âÂ() {
+    var ÄäÃ = äå;
+    var äÃÄ = Àá;
+    if (áÃÁ > ÁÀ) {
+      äÃÄ = äää;
+      var transition = äÁá(ãâ - áÃÁ / ÅÄa);
+      if (transition === 1) {
+        áÃÁ = 0;
       }
-      if (aG === 1) {
-        b3 = ÀA - Math.abs(b3);
+      if (âäã === 1) {
+        transition = ÀA - Math.abs(transition);
       }
-      b1 *= b3;
-      b2 *= b3;
+      ÄäÃ *= transition;
+      äÃÄ *= transition;
     }
-    ah.áâ.x = åäÅ - Math.floor(ÄÀ * 134) + b1;
-    ah.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 133)) + b2;
-    ai.áâ.x = åäÅ - Math.floor(ÄÀ * 206) + b1;
-    ai.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 206)) + b2;
-    aj.áâ.x = Math.floor(ÄÀ * 5) - b1;
-    aj.áâ.y = Math.floor(ÄÀ * 5) - b2;
-    ak.áâ.x = aj.áâ.x + Math.floor(ÄÀ * 126);
-    ak.áâ.y = aj.áâ.y;
-    al.áâ.x = ak.áâ.x;
-    al.áâ.y = ak.áâ.y + Math.floor(ÄÀ * 44.5);
-    am.áâ.x = al.áâ.x;
-    am.áâ.y = al.áâ.y + Math.floor(ÄÀ * 44.5);
-    an.áâ.x = aãA - Math.floor(ÄÀ * 67) + Math.floor(ÄÀ * -AÀÁ) - b1;
-    an.áâ.y = Math.floor(AâÁ * ÄÀ) - b2;
-    ao.áâ.x = an.áâ.x + Math.floor(ÄÀ * -70);
-    ao.áâ.y = Math.floor(AâÁ * ÄÀ) - b2;
-    ap.áâ.x = ao.áâ.x + Math.floor(ÄÀ * -70);
-    ap.áâ.y = Math.floor(ÄÀ * åÄá) - b2;
-    aq.áâ.x = ap.áâ.x + Math.floor(ÄÀ * -70);
-    aq.áâ.y = Math.floor(ÄÀ * 5) - b2;
-    ar.áâ.x = aq.áâ.x + Math.floor(ÄÀ * -70);
-    ar.áâ.y = Math.floor(ÄÀ * 5) - b2;
-    as.áâ.x = Math.floor(ÀäÄ * ÄÀ);
-    as.áâ.y = äää - Math.floor(ÄÀ * 46.5) + Math.floor(-åâa * ÄÀ);
-    at.áâ.x = as.áâ.x + Math.floor(ÄÀ * 50);
-    at.áâ.y = äää - Math.floor(ÄÀ * 46.5) + Math.floor(ÄÀ * -5);
-    au.áâ.x = aj.áâ.x + Math.floor(ÄÀ * 89);
-    au.áâ.y = aj.áâ.y + Math.floor(ÄÀ * 126);
-    av.áâ.x = aãA - Math.floor(ÄÀ * 46.5) + Math.floor(ÄÀ * -5);
-    av.áâ.y = äää - Math.floor(ÄÀ * 46.5) + Math.floor(-Åâã * ÄÀ);
-    aw.áâ.x = av.áâ.x + Math.floor(ÄÀ * -50);
-    aw.áâ.y = äää - Math.floor(ÄÀ * 46.5) + Math.floor(ÄÀ * -AÀâ);
-    ax.áâ.x = aj.áâ.x;
-    ax.áâ.y = aj.áâ.y + Math.floor(ÄÀ * 126);
+    ÅÄÄ.áâ.x = åäÅ - Math.floor(ÄÀ * 134) + ÄäÃ;
+    ÅÄÄ.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 133)) + äÃÄ;
+    áÃâ.áâ.x = åäÅ - Math.floor(ÄÀ * 206) + ÄäÃ;
+    áÃâ.áâ.y = Math.max(0, ÂáÅ - Math.floor(ÄÀ * 206)) + äÃÄ;
+    âåä.áâ.x = Math.floor(ÄÀ * 5) - ÄäÃ;
+    âåä.áâ.y = Math.floor(ÄÀ * 5) - äÃÄ;
+    AäA.áâ.x = âåä.áâ.x + Math.floor(ÄÀ * 126);
+    AäA.áâ.y = âåä.áâ.y;
+    ÃÂá.áâ.x = AäA.áâ.x;
+    ÃÂá.áâ.y = AäA.áâ.y + Math.floor(ÄÀ * 44.5);
+    ÀÃÃ.áâ.x = ÃÂá.áâ.x;
+    ÀÃÃ.áâ.y = ÃÂá.áâ.y + Math.floor(ÄÀ * 44.5);
+    AãÁ.áâ.x = aãA - Math.floor(ÄÀ * 67) + Math.floor(ÄÀ * -AÀÁ) - ÄäÃ;
+    AãÁ.áâ.y = Math.floor(AâÁ * ÄÀ) - äÃÄ;
+    AáÄ.áâ.x = AãÁ.áâ.x + Math.floor(ÄÀ * -70);
+    AáÄ.áâ.y = Math.floor(AâÁ * ÄÀ) - äÃÄ;
+    aAÃ.áâ.x = AáÄ.áâ.x + Math.floor(ÄÀ * -70);
+    aAÃ.áâ.y = Math.floor(ÄÀ * åÄá) - äÃÄ;
+    Âáa.áâ.x = aAÃ.áâ.x + Math.floor(ÄÀ * -70);
+    Âáa.áâ.y = Math.floor(ÄÀ * 5) - äÃÄ;
+    ÅÀÅ.áâ.x = Âáa.áâ.x + Math.floor(ÄÀ * -70);
+    ÅÀÅ.áâ.y = Math.floor(ÄÀ * 5) - äÃÄ;
+    ÃåÃ.áâ.x = Math.floor(ÀäÄ * ÄÀ);
+    ÃåÃ.áâ.y = äää - Math.floor(ÄÀ * 46.5) + Math.floor(-åâa * ÄÀ);
+    ÃÃã.áâ.x = ÃåÃ.áâ.x + Math.floor(ÄÀ * 50);
+    ÃÃã.áâ.y = äää - Math.floor(ÄÀ * 46.5) + Math.floor(ÄÀ * -5);
+    ÂaÁ.áâ.x = âåä.áâ.x + Math.floor(ÄÀ * 89);
+    ÂaÁ.áâ.y = âåä.áâ.y + Math.floor(ÄÀ * 126);
+    ÄAA.áâ.x = aãA - Math.floor(ÄÀ * 46.5) + Math.floor(ÄÀ * -5);
+    ÄAA.áâ.y = äää - Math.floor(ÄÀ * 46.5) + Math.floor(-Åâã * ÄÀ);
+    åaÃ.áâ.x = ÄAA.áâ.x + Math.floor(ÄÀ * -50);
+    åaÃ.áâ.y = äää - Math.floor(ÄÀ * 46.5) + Math.floor(ÄÀ * -AÀâ);
+    äâã.áâ.x = âåä.áâ.x;
+    äâã.áâ.y = âåä.áâ.y + Math.floor(ÄÀ * 126);
   }
   ;
   return {
-    aâä: aZ,
-    ÁÀÄ: ay,
-    ÃÂÅ: aU,
-    âÂ: b0,
-    Áá: aT
+    // getChatActive: zxcnemo,
+    aâä: aâä,
+    ÁÀÄ: ÁÀÄ,
+    ÃÂÅ: ÃÂÅ,
+    âÂ: âÂ,
+    Áá: Áá
   };
 }();
 const ÂÁáââ = ÅäA;
@@ -16595,710 +16605,710 @@ try {
     ÀåÁ.aâÁ = aâÁ;
     ÀåÁ.ÅáÀÃÄ = ÅáÀÃÄ;
   }
-} catch (dnE) {}
-function ÅäÃ(j, k, l, m, n) {
-  const o = ~(j & 37408) & 37408 | ~(j & 37408) & j;
-  const p = ((21450 + k) * 1103515245 + 12345) % 2147483648;
-  const q = (16 << (l >> 0 & 255)) + (0 << (l >> 8 & 255)) + (8 << (l >> 16 & 255)) + (24 << (l >> 24 & 255));
-  const r = ((32564 + m) * 22695477 + 1) % 4294967296;
-  const s = n ^ 46633;
-  const t = äAa(o, p, q, r);
-  const u = ÁAãÄá(s, o, p, q);
-  const v = (16 << ((t ^ u) >> 8 & ÃÁA)) + (0 << ((t ^ u) >> 24 & 255)) + (24 << ((t ^ u) >> 16 & 255)) + (8 << ((t ^ u) >> 0 & 255));
-  return v;
+} catch (âãå) {}
+function ÅäÃ(áâÄáÃ, ÄáâÃä, áÀå, ãÃåÁâ, ááÂáâ) {
+  const åáäÂä = ~(áâÄáÃ & 37408) & 37408 | ~(áâÄáÃ & 37408) & áâÄáÃ;
+  const áååÄá = ((21450 + ÄáâÃä) * 1103515245 + 12345) % 2147483648;
+  const ÄÀáAÁ = (16 << (áÀå >> 0 & 255)) + (0 << (áÀå >> 8 & 255)) + (8 << (áÀå >> 16 & 255)) + (24 << (áÀå >> 24 & 255));
+  const âÁaáA = ((32564 + ãÃåÁâ) * 22695477 + 1) % 4294967296;
+  const ÂâÃâÂ = ááÂáâ ^ 46633;
+  const âåA = äAa(åáäÂä, áååÄá, ÄÀáAÁ, âÁaáA);
+  const âÄã = ÁAãÄá(ÂâÃâÂ, åáäÂä, áååÄá, ÄÀáAÁ);
+  const ÀáaÄÃ = (16 << ((âåA ^ âÄã) >> 8 & ÃÁA)) + (0 << ((âåA ^ âÄã) >> 24 & 255)) + (24 << ((âåA ^ âÄã) >> 16 & 255)) + (8 << ((âåA ^ âÄã) >> 0 & 255));
+  return ÀáaÄÃ;
 }
 ;
 var ÀÂ = function () {
-  var j = 100;
-  var k = j / Áâá;
-  var l = 1;
-  var m = 13;
-  var n = 9;
-  var o = 100;
-  var p = 0.025;
-  var q = 0;
-  var r = 0.01;
-  var s = 0.008;
-  var t = 0;
-  var u = 0;
-  var v = 0;
-  var w = 0;
-  var x = 3;
-  var y = âã;
-  var z = ãä;
-  var A = Àá;
-  var B = äå;
-  var C = 450;
-  var D = 410;
-  var E = D;
-  var F = 412 / Àaã;
-  var G = 0;
-  var H = "img/borderBigMinimap2.png";
-  var I = "img/arrow-minimap.png";
-  var J = "img/arrow-minimap2.png";
-  var K = "img/house-icon.png";
-  var L = "img/city-icon.png";
-  var M = "img/inv-empty.png";
-  var N = "img/loot.png";
-  var O = "img/loot-mobile.png";
-  var P = "img/loot2.png";
-  var Q = "img/timer.png";
-  var R = "img/craft-grid.png";
-  var S = "img/timer-arrow.png";
-  var T = "img/timer-lights.png";
-  var U = "img/hint-rotate.png";
-  var V = "img/day-unusable.png";
-  var W = "img/day-unusable.png";
-  var X = "img/day-clock.png";
-  var Y = "img/night-clock.png";
-  var Z = "img/clock-hand.png";
-  var a0 = "img/clock-hand-radiation.png";
-  var a1 = "img/day-clock-hand.png";
-  var a2 = "img/craft-gauge.png";
-  var a3 = "img/stroke-bonus.png";
-  var a4 = "img/wrong-tool.png";
-  var a5 = "img/hand-tool.png";
-  var a6 = "img/arrow-craft.png";
-  var a7 = "img/unlock-skills.png";
-  var a8 = "img/server-full.png";
-  var a9 = "img/server-old.png";
-  var aa = "img/client-old.png";
-  var ab = "img/server-wrong.png";
-  var ac = "img/invitation-box.png";
-  var ad = "img/time-box.png";
-  var ae = "img/rank-box.png";
-  var af = "img/toxic-alert.png";
-  var ag = "img/radiation-alert.png";
-  var ah = 500;
-  var ai = ÃâÂAá;
-  var aj = ããÄ * ai;
-  var ak = 500;
-  var al = Math.floor(ai / ãÄá);
-  var am = Math.floor(al / ÅÂÂ);
-  var an = "img/alert";
-  var ao = 699;
-  var ap = 738;
-  var aq = "#70BD56";
-  var ar = "#e58833";
-  var as = "#55B7BC";
-  var at = "#d7c83a";
-  var au = "#FFFFFF";
-  var av = 3000;
-  var aw = 500;
-  var ax = 2500;
-  var ay = Åaa * Math.PI;
-  var az = Math.PI / 180 * 165;
-  var aA = Math.PI / 2;
-  var aB = Math.PI / Aá.ãäa;
-  var aC = ÀA;
-  var aD = ÄÀã;
-  var aE = 4;
-  var aF = 8;
-  var aG = ÄÁÀ;
-  var aH = 32;
-  var aI = 64;
-  var aJ = 128;
-  var aK = äá;
-  var aL = 1;
-  var aM = åaÁ;
-  var aN = 4;
-  var aO = 8;
-  var aP = 0;
-  var aQ = 1;
-  var aR = åaÁ;
-  var aS = 3;
-  var aT = [[], [], [], []];
-  aT[aP][aK] = åâ;
-  aT[aP][aL] = 3;
-  aT[aP][aM] = ååÄ;
-  aT[aP][aN | aO] = 9;
-  aT[aP][aN] = äÅÂ;
-  aT[aP][aO] = åâa;
-  aT[aP][aL | aN] = 27;
-  aT[aP][aL | aO] = ÀÄÀ;
-  aT[aP][aM | aN] = ÂâÄ;
-  aT[aP][aM | aO] = 28;
-  aT[aP][aL | aN | aO] = 24;
-  aT[aP][aM | aN | aO] = 29;
-  aT[aR][aK] = ÁÀ;
-  aT[aR][aL] = ÂâA;
-  aT[aR][aM] = 6;
-  aT[aR][aN | aO] = 9;
-  aT[aR][aN] = AaÀ;
-  aT[aR][aO] = 5;
-  aT[aR][aL | aN] = 27;
-  aT[aR][aL | aO] = 20;
-  aT[aR][aM | aN] = 7;
-  aT[aR][aM | aO] = 28;
-  aT[aR][aL | aN | aO] = 24;
-  aT[aR][aM | aN | aO] = 29;
-  aT[aQ][aK] = 11;
-  aT[aQ][aL] = ÀaÁÂâ;
-  aT[aQ][aM] = 17;
-  aT[aQ][aN | aO] = 10;
-  aT[aQ][aN] = 19;
-  aT[aQ][aO] = 18;
-  aT[aQ][aL | aN] = 34;
-  aT[aQ][aL | aO] = 22;
-  aT[aQ][aM | aN] = 23;
-  aT[aQ][aM | aO] = 33;
-  aT[aQ][aL | aN | aO] = 35;
-  aT[aQ][aM | aN | aO] = 32;
-  aT[aS][aK] = 11;
-  aT[aS][aL] = 15;
-  aT[aS][aM] = 14;
-  aT[aS][aN | aO] = âäÂ;
-  aT[aS][aN] = 19;
-  aT[aS][aO] = 18;
-  aT[aS][aL | aN] = 37;
-  aT[aS][aL | aO] = 16;
-  aT[aS][aM | aN] = 23;
-  aT[aS][aM | aO] = 38;
-  aT[aS][aL | aN | aO] = 36;
-  aT[aS][aM | aN | aO] = 39;
-  var aU = [];
-  aU[ÅÁ] = ãa;
-  aU[aC] = äaá;
-  aU[aD] = ÃaÂ;
-  aU[aE] = 2;
-  aU[aF] = åÀ;
-  aU[aC | aE] = 17;
-  aU[aC | aD] = 5;
-  aU[aC | aF] = 18;
-  aU[aD | aE] = äáÂ;
-  aU[aD | aF] = 19;
-  aU[aE | aF] = AâÃ;
-  aU[aC | aE | aF] = Äáâ;
-  aU[aC | aE | aD] = 9;
-  aU[aF | aE | aD] = 11;
-  aU[aC | aF | aD] = ãaÅ;
-  aU[aC | aE | aD | aF] = 7;
-  aU[aF | aD | aG] = ÃãÂ;
-  aU[aF | aC | aH] = 13;
-  aU[aE | aC | aJ] = 14;
-  aU[aE | aD | aI] = AäÂâá;
-  aU[aE | aF | aD | aG] = aåáAÅ;
-  aU[aE | aF | aD | aC | aG] = 21;
-  aU[aC | aF | aD | aG] = 22;
-  aU[aE | aF | aD | aC | aI] = 23;
-  aU[aC | aE | aD | aI] = 24;
-  aU[aE | aF | aD | aI] = 25;
-  aU[aE | aF | aC | aJ] = 26;
-  aU[aE | aF | aD | aC | aJ] = 27;
-  aU[aE | aD | aC | aJ] = 28;
-  aU[aF | aD | aC | aH] = 29;
-  aU[aE | aF | aD | aC | aH] = 30;
-  aU[aE | aF | aC | aH] = 31;
-  aU[aE | aF | aD | aC | aH | aG | aJ | aI] = 32;
-  aU[aE | aF | aD | aC | aH | aJ] = 33;
-  aU[aE | aF | aD | aC | aH | aG] = 34;
-  aU[aE | aF | aD | aC | aH | aI] = 35;
-  aU[aE | aF | aD | aC | aG | aJ] = 36;
-  aU[aE | aF | aD | aC | aI | aG] = 37;
-  aU[aE | aF | aD | aC | aI | aJ] = 38;
-  aU[aE | aF | aD | aI | aG] = 39;
-  aU[aE | aF | aC | aJ | aH] = 40;
-  aU[aD | aF | aC | aG | aH] = 41;
-  aU[aD | aE | aC | aI | aJ] = 42;
-  aU[aE | aF | aD | aC | aH | aJ | aI] = 43;
-  aU[aE | aF | aD | aC | aG | aJ | aI] = 44;
-  aU[aE | aF | aD | aC | aH | aG | aI] = 45;
-  aU[aE | aF | aD | aC | aH | aG | aJ] = 46;
-  var aV = ãa;
-  var aW = 1;
-  var aX = 2;
-  var aY = 600;
-  var aZ;
-  var b0;
-  var b1 = âã;
-  var b2 = 0;
-  var b3 = 0;
-  var b4 = 0;
-  var b5 = 0;
-  var b6 = 0;
-  var b7 = 0;
-  var b8 = 0;
-  var b9 = r;
-  var ba = 0;
-  var bb = 0;
-  var bc = [];
-  for (aZ = 0; Äâä > aZ; aZ++) {
-    bc[aZ] = {
+  var ááá = 100;
+  var ãÁä = ááá / Áâá;
+  var ÅAÅÄã = 1;
+  var Ääå = 13;
+  var áAã = 9;
+  var ÅaÄäÅ = 100;
+  var äááÄa = 0.025;
+  var ÃÄAAÃ = 0;
+  var áåâÂÃ = 0.01;
+  var âÀââÀ = 0.008;
+  var áÂÀ = 0;
+  var ÀÄÂ = 0;
+  var ÀaÅâÂ = 0;
+  var aåA = 0;
+  var ÅääãÅ = 3;
+  var âää = âã;
+  var ãaÀáå = ãä;
+  var ÂÁâ = Àá;
+  var âaÃAÁ = äå;
+  var ÀÁäÃä = 450;
+  var aÁÂ = 410;
+  var aÁa = aÁÂ;
+  var ÂãÅ = 412 / Àaã;
+  var ÂAáäå = 0;
+  var ÄaÃáá = "img/borderBigMinimap2.png";
+  var äÀÀáã = "img/arrow-minimap.png";
+  var áÃâÁå = "img/arrow-minimap2.png";
+  var ÃAäÄÀ = "img/house-icon.png";
+  var ÀåaÅÂ = "img/city-icon.png";
+  var åÃÅäÀ = "img/inv-empty.png";
+  var ãÁAÁå = "img/loot.png";
+  var ÃáÅäá = "img/loot-mobile.png";
+  var ÃäÂâÃ = "img/loot2.png";
+  var áåäÅá = "img/timer.png";
+  var áÀÅÂÁ = "img/craft-grid.png";
+  var ÅääaÀ = "img/timer-arrow.png";
+  var ÀáÂaã = "img/timer-lights.png";
+  var aáÂÅA = "img/hint-rotate.png";
+  var âååáÂ = "img/day-unusable.png";
+  var ÃãÄâå = "img/day-unusable.png";
+  var AÄÁâá = "img/day-clock.png";
+  var ÅáåäÁ = "img/night-clock.png";
+  var ÁááÀá = "img/clock-hand.png";
+  var ÂÁÅÂÂ = "img/clock-hand-radiation.png";
+  var âAÃÃA = "img/day-clock-hand.png";
+  var áAáAA = "img/craft-gauge.png";
+  var áÅåâÀ = "img/stroke-bonus.png";
+  var aAÂäA = "img/wrong-tool.png";
+  var ÀÁÀäa = "img/hand-tool.png";
+  var ááãÀä = "img/arrow-craft.png";
+  var ÄÅÂÄá = "img/unlock-skills.png";
+  var áåÁäA = "img/server-full.png";
+  var äåÁåÁ = "img/server-old.png";
+  var ÄãáãÂ = "img/client-old.png";
+  var äãÁáÅ = "img/server-wrong.png";
+  var âÄáaÅ = "img/invitation-box.png";
+  var ÄáÅÄá = "img/time-box.png";
+  var áäÃÄÄ = "img/rank-box.png";
+  var ÁÀÂAÁ = "img/toxic-alert.png";
+  var ãÄÄåA = "img/radiation-alert.png";
+  var ãâäãá = 500;
+  var ÀäÀ = ÃâÂAá;
+  var ÅâÁÅá = ããÄ * ÀäÀ;
+  var ÄAåaÂ = 500;
+  var ÁÁÅ = Math.floor(ÀäÀ / ãÄá);
+  var ÀÂä = Math.floor(ÁÁÅ / ÅÂÂ);
+  var Àãááá = "img/alert";
+  var ãáaÄå = 699;
+  var äãåÂÄ = 738;
+  var áÁâáÀ = "#70BD56";
+  var ãÃÀåÃ = "#e58833";
+  var ÂåáAÄ = "#55B7BC";
+  var áåaaA = "#d7c83a";
+  var ÂáÃÅâ = "#FFFFFF";
+  var âãÁ = 3000;
+  var ÃAäâÀ = 500;
+  var ÃÄÁaÂ = 2500;
+  var áÀÃ = Åaa * Math.PI;
+  var AáÀÀA = Math.PI / 180 * 165;
+  var ãáA = Math.PI / 2;
+  var ÄÂááÅ = Math.PI / Aá.ãäa;
+  var AÁa = ÀA;
+  var áÃã = ÄÀã;
+  var áaÃ = 4;
+  var äÀÄ = 8;
+  var ÀÅÄ = ÄÁÀ;
+  var ÀÂÄ = 32;
+  var ÅÀâ = 64;
+  var AãÂ = 128;
+  var ÃÅã = äá;
+  var ãAä = 1;
+  var Áãá = åaÁ;
+  var AãÄ = 4;
+  var Âää = 8;
+  var aâÅ = 0;
+  var ãÅá = 1;
+  var äâÅ = åaÁ;
+  var áaÄ = 3;
+  var áaÁ = [[], [], [], []];
+  áaÁ[aâÅ][ÃÅã] = åâ;
+  áaÁ[aâÅ][ãAä] = 3;
+  áaÁ[aâÅ][Áãá] = ååÄ;
+  áaÁ[aâÅ][AãÄ | Âää] = 9;
+  áaÁ[aâÅ][AãÄ] = äÅÂ;
+  áaÁ[aâÅ][Âää] = åâa;
+  áaÁ[aâÅ][ãAä | AãÄ] = 27;
+  áaÁ[aâÅ][ãAä | Âää] = ÀÄÀ;
+  áaÁ[aâÅ][Áãá | AãÄ] = ÂâÄ;
+  áaÁ[aâÅ][Áãá | Âää] = 28;
+  áaÁ[aâÅ][ãAä | AãÄ | Âää] = 24;
+  áaÁ[aâÅ][Áãá | AãÄ | Âää] = 29;
+  áaÁ[äâÅ][ÃÅã] = ÁÀ;
+  áaÁ[äâÅ][ãAä] = ÂâA;
+  áaÁ[äâÅ][Áãá] = 6;
+  áaÁ[äâÅ][AãÄ | Âää] = 9;
+  áaÁ[äâÅ][AãÄ] = AaÀ;
+  áaÁ[äâÅ][Âää] = 5;
+  áaÁ[äâÅ][ãAä | AãÄ] = 27;
+  áaÁ[äâÅ][ãAä | Âää] = 20;
+  áaÁ[äâÅ][Áãá | AãÄ] = 7;
+  áaÁ[äâÅ][Áãá | Âää] = 28;
+  áaÁ[äâÅ][ãAä | AãÄ | Âää] = 24;
+  áaÁ[äâÅ][Áãá | AãÄ | Âää] = 29;
+  áaÁ[ãÅá][ÃÅã] = 11;
+  áaÁ[ãÅá][ãAä] = ÀaÁÂâ;
+  áaÁ[ãÅá][Áãá] = 17;
+  áaÁ[ãÅá][AãÄ | Âää] = 10;
+  áaÁ[ãÅá][AãÄ] = 19;
+  áaÁ[ãÅá][Âää] = 18;
+  áaÁ[ãÅá][ãAä | AãÄ] = 34;
+  áaÁ[ãÅá][ãAä | Âää] = 22;
+  áaÁ[ãÅá][Áãá | AãÄ] = 23;
+  áaÁ[ãÅá][Áãá | Âää] = 33;
+  áaÁ[ãÅá][ãAä | AãÄ | Âää] = 35;
+  áaÁ[ãÅá][Áãá | AãÄ | Âää] = 32;
+  áaÁ[áaÄ][ÃÅã] = 11;
+  áaÁ[áaÄ][ãAä] = 15;
+  áaÁ[áaÄ][Áãá] = 14;
+  áaÁ[áaÄ][AãÄ | Âää] = âäÂ;
+  áaÁ[áaÄ][AãÄ] = 19;
+  áaÁ[áaÄ][Âää] = 18;
+  áaÁ[áaÄ][ãAä | AãÄ] = 37;
+  áaÁ[áaÄ][ãAä | Âää] = 16;
+  áaÁ[áaÄ][Áãá | AãÄ] = 23;
+  áaÁ[áaÄ][Áãá | Âää] = 38;
+  áaÁ[áaÄ][ãAä | AãÄ | Âää] = 36;
+  áaÁ[áaÄ][Áãá | AãÄ | Âää] = 39;
+  var AÄá = [];
+  AÄá[ÅÁ] = ãa;
+  AÄá[AÁa] = äaá;
+  AÄá[áÃã] = ÃaÂ;
+  AÄá[áaÃ] = 2;
+  AÄá[äÀÄ] = åÀ;
+  AÄá[AÁa | áaÃ] = 17;
+  AÄá[AÁa | áÃã] = 5;
+  AÄá[AÁa | äÀÄ] = 18;
+  AÄá[áÃã | áaÃ] = äáÂ;
+  AÄá[áÃã | äÀÄ] = 19;
+  AÄá[áaÃ | äÀÄ] = AâÃ;
+  AÄá[AÁa | áaÃ | äÀÄ] = Äáâ;
+  AÄá[AÁa | áaÃ | áÃã] = 9;
+  AÄá[äÀÄ | áaÃ | áÃã] = 11;
+  AÄá[AÁa | äÀÄ | áÃã] = ãaÅ;
+  AÄá[AÁa | áaÃ | áÃã | äÀÄ] = 7;
+  AÄá[äÀÄ | áÃã | ÀÅÄ] = ÃãÂ;
+  AÄá[äÀÄ | AÁa | ÀÂÄ] = 13;
+  AÄá[áaÃ | AÁa | AãÂ] = 14;
+  AÄá[áaÃ | áÃã | ÅÀâ] = AäÂâá;
+  AÄá[áaÃ | äÀÄ | áÃã | ÀÅÄ] = aåáAÅ;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÅÄ] = 21;
+  AÄá[AÁa | äÀÄ | áÃã | ÀÅÄ] = 22;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÅÀâ] = 23;
+  AÄá[AÁa | áaÃ | áÃã | ÅÀâ] = 24;
+  AÄá[áaÃ | äÀÄ | áÃã | ÅÀâ] = 25;
+  AÄá[áaÃ | äÀÄ | AÁa | AãÂ] = 26;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | AãÂ] = 27;
+  AÄá[áaÃ | áÃã | AÁa | AãÂ] = 28;
+  AÄá[äÀÄ | áÃã | AÁa | ÀÂÄ] = 29;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÂÄ] = 30;
+  AÄá[áaÃ | äÀÄ | AÁa | ÀÂÄ] = 31;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÂÄ | ÀÅÄ | AãÂ | ÅÀâ] = 32;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÂÄ | AãÂ] = 33;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÂÄ | ÀÅÄ] = 34;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÂÄ | ÅÀâ] = 35;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÅÄ | AãÂ] = 36;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÅÀâ | ÀÅÄ] = 37;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÅÀâ | AãÂ] = 38;
+  AÄá[áaÃ | äÀÄ | áÃã | ÅÀâ | ÀÅÄ] = 39;
+  AÄá[áaÃ | äÀÄ | AÁa | AãÂ | ÀÂÄ] = 40;
+  AÄá[áÃã | äÀÄ | AÁa | ÀÅÄ | ÀÂÄ] = 41;
+  AÄá[áÃã | áaÃ | AÁa | ÅÀâ | AãÂ] = 42;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÂÄ | AãÂ | ÅÀâ] = 43;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÅÄ | AãÂ | ÅÀâ] = 44;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÂÄ | ÀÅÄ | ÅÀâ] = 45;
+  AÄá[áaÃ | äÀÄ | áÃã | AÁa | ÀÂÄ | ÀÅÄ | AãÂ] = 46;
+  var ÂåÄAÁ = ãa;
+  var aÁäåa = 1;
+  var áAåáa = 2;
+  var ââaåA = 600;
+  var ä;
+  var åã;
+  var äÁ = âã;
+  var ãÅ = 0;
+  var AÃÅ = 0;
+  var ÃÂÀ = 0;
+  var äáÁÃå = 0;
+  var ÁâÃãa = 0;
+  var ÂãÀ = 0;
+  var AAÂ = 0;
+  var aÁáÂã = áåâÂÃ;
+  var âÀÅ = 0;
+  var Ááåáá = 0;
+  var ÅAÁãÁ = [];
+  for (ä = 0; Äâä > ä; ä++) {
+    ÅAÁãÁ[ä] = {
       á: ÁÀ
     };
   }
-  var bd = aX;
-  var be = [];
-  var bf = [];
-  var bg = m;
-  var bh = n;
-  var bi = m * j;
-  var bj = n * j;
-  var bk = [];
-  var bl = {
+  var ãäÅ = áAåáa;
+  var áaÅaA = [];
+  var äa = [];
+  var Åâa = Ääå;
+  var äåÁ = áAã;
+  var åÅáåA = Ääå * ááá;
+  var AáAÄÁ = áAã * ááá;
+  var ÀÃå = [];
+  var äãA = {
     á: 0
   };
-  var bm = {
+  var ÂäÀ = {
     á: ÀÄ
   };
-  var bn = {
+  var ÁÅå = {
     Àä: ÅÁ,
     ÄÁÁ: åâ,
-    src: a6,
+    src: ááãÀä,
     À: {
       á: ÀÄ
     }
   };
-  var bo = {
+  var ÀÀÃ = {
     Àä: ãä,
     ÄÁÁ: ÀÄ,
-    src: a7,
+    src: ÄÅÂÄá,
     À: {
       á: AÄ
     }
   };
-  var bp = {
-    src: ad,
+  var ÃáaåÂ = {
+    src: ÄáÅÄá,
     À: {
       á: ÁÀ
     }
   };
-  var bq = {
-    src: ae,
+  var áÄÀAÀ = {
+    src: áäÃÄÄ,
     À: {
       á: 0
     }
   };
-  var br = {
-    src: af,
+  var ãaåÃÃ = {
+    src: ÁÀÂAÁ,
     À: {
       á: 0
     }
   };
-  var bs = 0;
-  var bt = {
-    src: ag,
+  var aâa = 0;
+  var ÁäÄáÃ = {
+    src: ãÄÄåA,
     À: {
       á: ÁÀ
     }
   };
-  var bu = áÁ;
-  var bv = {
+  var AÂÀ = áÁ;
+  var âÀâÃÁ = {
     À: {
       á: ÁÀ
     },
     src: "img/e-furniture.png"
   };
-  var bw = áá.ÃA("img/toxic-area2.png");
-  var bx = áá.ÃA("img/toxic-area3.png");
-  var by = [];
-  var bz = [];
-  var bA = {
+  var AÃÂ = áá.ÃA("img/toxic-area2.png");
+  var ÅAÀAá = áá.ÃA("img/toxic-area3.png");
+  var åâÂ = [];
+  var ãâÃ = [];
+  var ÂÅÁâÃ = {
     á: AÂ
   };
-  var bB = {
+  var äáå = {
     á: 0
   };
-  var bC = {
+  var ÅAÅ = {
     á: ãä
   };
-  var bD = {
+  var ãAã = {
     á: AÄ
   };
-  var bE = [ãa, 0, âã, 0];
-  var bF = q;
-  var bG = [];
-  var bH = 0;
-  var bI = {
+  var aÄÂ = [ãa, 0, âã, 0];
+  var áAâ = ÃÄAAÃ;
+  var Äãa = [];
+  var ãåA = 0;
+  var AÄÂ = {
     á: 0
   };
-  var bJ = {
+  var ÃÀa = {
     á: áÃ
   };
-  var bK = {
+  var ÀâÁ = {
     á: ãÁ
   };
-  var bL = ak;
-  var bM = {
+  var Åãá = ÄAåaÂ;
+  var ÀÄÃ = {
     á: 0
   };
-  var bN = {
+  var áÃA = {
     á: ãÁ
   };
-  var bO = {
-    src: a3,
+  var Àãåäâ = {
+    src: áÅåâÀ,
     À: {
       á: 0
     }
   };
-  var bP = 0;
-  var bQ = {
-    src: a4,
+  var ÅáÀ = 0;
+  var ÂÅá = {
+    src: aAÂäA,
     À: {
       á: AÄ
     }
   };
-  var bR = {
-    src: a5,
+  var áÀáÄÃ = {
+    src: ÀÁÀäa,
     À: {
       á: 0
     }
   };
-  var bS = 36000;
-  var bT = 36000;
-  var bU = [];
-  for (aZ = 0; aáÃ > aZ; aZ++) {
-    bU[aZ] = [];
-    for (b0 = 0; b0 < 3; b0++) {
-      bU[aZ][b0] = {
+  var ÂaÀâã = 36000;
+  var åAÁAá = 36000;
+  var ÃAÄ = [];
+  for (ä = 0; aáÃ > ä; ä++) {
+    ÃAÄ[ä] = [];
+    for (åã = 0; åã < 3; åã++) {
+      ÃAÄ[ä][åã] = {
         á: 0
       };
     }
   }
-  var bV = [];
-  for (aZ = áÁ; aZ < ããã; aZ++) {
-    bV[aZ] = [];
-    for (b0 = ãä; b0 < 2; b0++) {
-      bV[aZ][b0] = {
+  var ÄÁÁ = [];
+  for (ä = áÁ; ä < ããã; ä++) {
+    ÄÁÁ[ä] = [];
+    for (åã = ãä; åã < 2; åã++) {
+      ÄÁÁ[ä][åã] = {
         á: âã
       };
     }
   }
-  var bW = {
-    src: I,
+  var áÄÃãÃ = {
+    src: äÀÀáã,
     À: {
       á: ãä
     }
   };
-  var bX = {
-    src: J,
+  var ÂÃãáÅ = {
+    src: áÃâÁå,
     À: {
       á: ÁÀ
     }
   };
-  var bY = {
+  var áÅã = {
     á: 0
   };
-  var bZ = {
-    src: K,
+  var ÃäÀaÄ = {
+    src: ÃAäÄÀ,
     À: {
       á: ãÁ
     }
   };
-  var c0 = {
-    src: L,
+  var ÅáÂAÀ = {
+    src: ÀåaÅÂ,
     À: {
       á: 0
     }
   };
-  var c1 = {
-    src: Y,
+  var äåÀ = {
+    src: ÅáåäÁ,
     À: {
       á: Aa
     }
   };
-  var c2 = {
-    src: X,
+  var ÄAÅ = {
+    src: AÄÁâá,
     À: {
       á: 0
     }
   };
-  var c3 = {
-    src: Z,
+  var áÅåÃÄ = {
+    src: ÁááÀá,
     À: {
       á: 0
     }
   };
-  var c4 = {
-    src: a1,
+  var ÃÀÅåâ = {
+    src: âAÃÃA,
     À: {
       á: 0
     }
   };
-  var c5 = {
-    src: a0,
+  var AÂåáã = {
+    src: ÂÁÅÂÂ,
     À: {
       á: 0
     }
   };
-  var c6 = {
-    src: a8,
+  var aÀÄåã = {
+    src: áåÁäA,
     À: {
       á: 0
     }
   };
-  var c7 = {
-    src: a9,
+  var aáäÃÀ = {
+    src: äåÁåÁ,
     À: {
       á: 0
     }
   };
-  var c8 = {
-    src: aa,
+  var ÀåAÅÅ = {
+    src: ÄãáãÂ,
     À: {
       á: 0
     }
   };
-  var c9 = {
-    src: ab,
+  var áãÃAå = {
+    src: äãÁáÅ,
     À: {
       á: äå
     }
   };
-  var ca = {
+  var Àáä = {
     á: áÃ
   };
-  var cb = [];
-  for (aZ = ãä; aZ < 20; aZ++) {
-    cb.push({
+  var áÂåÁá = [];
+  for (ä = ãä; ä < 20; ä++) {
+    áÂåÁá.push({
       á: 0
     });
   }
-  var cc = document.createElement("canvas");
-  var cd = cc.getContext("2d");
-  cc.width = D;
-  cc.height = E;
-  cc.á = áââ;
-  cc.ãâä = cc.width / 2;
-  cc.ÅÀä = cc.height / Äåã;
-  var ce = {
-    À: cc
+  var ÁÃâ = document.createElement("canvas");
+  var åäÄ = ÁÃâ.getContext("2d");
+  ÁÃâ.width = aÁÂ;
+  ÁÃâ.height = aÁa;
+  ÁÃâ.á = áââ;
+  ÁÃâ.ãâä = ÁÃâ.width / 2;
+  ÁÃâ.ÅÀä = ÁÃâ.height / Äåã;
+  var ÅAãäA = {
+    À: ÁÃâ
   };
-  var cf = document.createElement("canvas");
-  var cg = cf.getContext("2d");
-  cf.width = D;
-  cf.height = E;
-  cf.á = 1;
-  cf.ãâä = cc.width / 2;
-  cf.ÅÀä = cc.height / Åaa;
-  var ch = {
-    À: cf
+  var ãÀÂ = document.createElement("canvas");
+  var aåÅ = ãÀÂ.getContext("2d");
+  ãÀÂ.width = aÁÂ;
+  ãÀÂ.height = aÁa;
+  ãÀÂ.á = 1;
+  ãÀÂ.ãâä = ÁÃâ.width / 2;
+  ãÀÂ.ÅÀä = ÁÃâ.height / Åaa;
+  var áÀAáÀ = {
+    À: ãÀÂ
   };
-  var ci = áÃ;
-  function cj() {
+  var ãaå = áÃ;
+  function ãÂAÂá() {
     if (Aá.â.ÁáÅ === 8) {
-      cd.clearRect(åâ, 0, D, E);
-      cg.clearRect(Àá, ãÁ, D, E);
-      for (var ex = ãa; ex < 8; ex++) {
-        for (var ey = ÁÀ; ÂáÄ > ey; ey++) {
-          var ez = Aá.â.ÄAÁ[ex][ey];
-          if (ez === 7) {
-            cd.drawImage(bw, 2 + F * ey, ex * F + aÅ, bw.ãâä, bw.ÅÀä);
+      åäÄ.clearRect(åâ, 0, aÁÂ, aÁa);
+      aåÅ.clearRect(Àá, ãÁ, aÁÂ, aÁa);
+      for (var ä = ãa; ä < 8; ä++) {
+        for (var åã = ÁÀ; ÂáÄ > åã; åã++) {
+          var ÅAå = Aá.â.ÄAÁ[ä][åã];
+          if (ÅAå === 7) {
+            åäÄ.drawImage(AÃÂ, 2 + ÂãÅ * åã, ä * ÂãÅ + aÅ, AÃÂ.ãâä, AÃÂ.ÅÀä);
           } else {
-            cd.drawImage(bx, ÄÂÅ + ey * F, ex * F + 1, bw.ãâä, bw.ÅÀä);
+            åäÄ.drawImage(ÅAÀAá, ÄÂÅ + åã * ÂãÅ, ä * ÂãÅ + 1, AÃÂ.ãâä, AÃÂ.ÅÀä);
           }
         }
       }
     } else {
-      cd.drawImage(cf, áÃ, ÄÁ);
-      cg.clearRect(0, 0, D, E);
-      for (var eA = 0; eA < 12; eA++) {
-        var eB = Aá.â.ÃÁÀ[eA];
-        var ex = eB[0];
-        var ey = eB[1];
-        if (ex === -1) {
+      åäÄ.drawImage(ãÀÂ, áÃ, ÄÁ);
+      aåÅ.clearRect(0, 0, aÁÂ, aÁa);
+      for (var åÃÄ = 0; åÃÄ < 12; åÃÄ++) {
+        var áÄÂ = Aá.â.ÃÁÀ[åÃÄ];
+        var ä = áÄÂ[0];
+        var åã = áÄÂ[1];
+        if (ä === -1) {
           continue;
         }
-        cg.drawImage(bw, 2 + F * ey, F * ex + aÅ, bw.ãâä, bw.ÅÀä);
+        aåÅ.drawImage(AÃÂ, 2 + ÂãÅ * åã, ÂãÅ * ä + aÅ, AÃÂ.ãâä, AÃÂ.ÅÀä);
       }
     }
   }
   ;
-  var ck = document.createElement("canvas");
-  var cl = ck.getContext("2d");
-  ck.width = ao;
-  ck.height = ap;
+  var Áâå = document.createElement("canvas");
+  var ÁäÅ = Áâå.getContext("2d");
+  Áâå.width = ãáaÄå;
+  Áâå.height = äãåÂÄ;
   ÃÃÀ = [];
-  for (var aZ = 0; aZ < 9; aZ++) {
-    ÃÃÀ[aZ] = 0;
+  for (var ä = 0; ä < 9; ä++) {
+    ÃÃÀ[ä] = 0;
   }
-  var cm = 0;
-  for (aZ = 0; aZ < n; aZ++) {
-    be[aZ] = [];
-    for (var b0 = ãa; b0 < m; b0++) {
-      be[aZ][b0] = Aa;
+  var ÂÀ = 0;
+  for (ä = 0; ä < áAã; ä++) {
+    áaÅaA[ä] = [];
+    for (var åã = ãa; åã < Ääå; åã++) {
+      áaÅaA[ä][åã] = Aa;
     }
   }
-  var cn = document.createElement("canvas");
-  var co = cn.getContext("2d");
-  cn.width = 280;
-  cn.height = 148;
-  var cp = -1;
-  var cq = [];
-  var cr = [];
-  var cs = document.createElement("canvas");
-  var ct = cs.getContext("2d");
-  cs.width = 280;
-  cs.height = 50;
-  var cu = -1;
-  var cv = document.createElement("canvas");
-  var cw = cv.getContext("2d");
-  cv.width = 420;
-  cv.height = 148;
-  var cx = -1;
-  function cy(eA, eB) {
-    var eC = eA.ä;
-    var eD = eA.åã;
-    var eE = bf[eC][eD];
-    if (eE.ÂÀ === cm) {
-      if (eE.ä < 3) {
-        var eF = eE.b[eE.ä];
-        eE.ä += 1;
-        eF.type = eA.type;
-        eF.ÁÀá = eB;
+  var âÃå = document.createElement("canvas");
+  var ÅÀâaÅ = âÃå.getContext("2d");
+  âÃå.width = 280;
+  âÃå.height = 148;
+  var ÃáãÂå = -1;
+  var ãaá = [];
+  var áÂÄÄá = [];
+  var åáâ = document.createElement("canvas");
+  var áãâaä = åáâ.getContext("2d");
+  åáâ.width = 280;
+  åáâ.height = 50;
+  var ááÃÀá = -1;
+  var ÂÁÅ = document.createElement("canvas");
+  var AÃã = ÂÁÅ.getContext("2d");
+  ÂÁÅ.width = 420;
+  ÂÁÅ.height = 148;
+  var ÂáaÂÄ = -1;
+  function ÀAäáÀ(Ä, ÁÀá) {
+    var ä = Ä.ä;
+    var åã = Ä.åã;
+    var ÂÃ = äa[ä][åã];
+    if (ÂÃ.ÂÀ === ÂÀ) {
+      if (ÂÃ.ä < 3) {
+        var Ã = ÂÃ.b[ÂÃ.ä];
+        ÂÃ.ä += 1;
+        Ã.type = Ä.type;
+        Ã.ÁÀá = ÁÀá;
       }
     } else {
-      eE.ÂÀ = cm;
-      var eF = eE.b[0];
-      eE.ä = ÄÂ;
-      eF.type = eA.type;
-      eF.ÁÀá = eB;
+      ÂÃ.ÂÀ = ÂÀ;
+      var Ã = ÂÃ.b[0];
+      ÂÃ.ä = ÄÂ;
+      Ã.type = Ä.type;
+      Ã.ÁÀá = ÁÀá;
     }
   }
   ;
-  function cz(eA, eB, eC) {
-    e9 = document.getElementById("bod").onresize;
+  function ÂÀÁ(ããâãa, aÂÄãå, aäáâA) {
+    aÃÄ = document.getElementById("bod").onresize;
     if (Aá.ÄáÃ === Aá.ÂÀå) {
-      cd.clearRect(ÅÁ, 0, D, D);
-      cg.clearRect(0, 0, D, D);
-      bs = Àá;
+      åäÄ.clearRect(ÅÁ, 0, aÁÂ, aÁÂ);
+      aåÅ.clearRect(0, 0, aÁÂ, aÁÂ);
+      aâa = Àá;
     }
-    bu = 0;
+    AÂÀ = 0;
     ÀÂ.äAÃ = ãÁ;
     ÀÂ.åÁÃ = ãÁ;
-    if (áÄÅ !== eA) {
-      bL = 0;
+    if (áÄÅ !== ããâãa) {
+      Åãá = 0;
     } else {
-      bL = ak;
+      Åãá = ÄAåaÂ;
     }
-    if (eC !== undefined) {
-      b9 = eC;
+    if (aäáâA !== undefined) {
+      aÁáÂã = aäáâA;
     } else {
-      b9 = r;
+      aÁáÂã = áåâÂÃ;
     }
-    if (eB !== undefined) {
-      bF = eB;
+    if (aÂÄãå !== undefined) {
+      áAâ = aÂÄãå;
     } else {
-      bF = q;
+      áAâ = ÃÄAAÃ;
     }
-    b3 = 0;
-    b4 = 0;
+    AÃÅ = 0;
+    ÃÂÀ = 0;
     Aá.â.x = 0;
     Aá.â.y = 0;
     Aá.â.ÂáÁ = 0;
     Aá.â.åäA = AÄ;
-    bn.ÄÁÁ = ãä;
-    bn.Àä = 0;
-    bo.ÄÁÁ = AÂ;
-    bo.Àä = äá;
-    dr.id = -ãâ;
-    dr.äâÂ = -äA;
-    var eD = Âáá.getItem("particles");
-    if (eD !== null) {
-      bd = Number(eD);
+    ÁÅå.ÄÁÁ = ãä;
+    ÁÅå.Àä = 0;
+    ÀÀÃ.ÄÁÁ = AÂ;
+    ÀÀÃ.Àä = äá;
+    ÁÅÃ.id = -ãâ;
+    ÁÅÃ.äâÂ = -äA;
+    var ãÃ = Âáá.getItem("particles");
+    if (ãÃ !== null) {
+      ãäÅ = Number(ãÃ);
     }
-    cT = "";
-    cU = null;
+    aÄA = "";
+    äÃÀ = null;
     ÃÁå.width = 150;
     ÃÁå.height = 150;
     ÀÂ.áaÀ = ÃÁå.width * 100 / ÃÁA;
-    t = ÃÁå.width;
-    w = ÃÁå.height;
-    u = j * t;
-    v = w * j;
-    y = 824 / u;
-    A = 824 - ai;
-    B = A + al;
-    G = u / AáÁÁá;
-    Aá.ÃAÀäA(t, w);
-    for (var eE = 0; w > eE; eE++) {
-      bf[eE] = [];
-      for (var eF = 0; eF < t; eF++) {
-        bf[eE][eF] = new cS();
+    áÂÀ = ÃÁå.width;
+    aåA = ÃÁå.height;
+    ÀÄÂ = ááá * áÂÀ;
+    ÀaÅâÂ = aåA * ááá;
+    âää = 824 / ÀÄÂ;
+    ÂÁâ = 824 - ÀäÀ;
+    âaÃAÁ = ÂÁâ + ÁÁÅ;
+    ÂAáäå = ÀÄÂ / AáÁÁá;
+    Aá.ÃAÀäA(áÂÀ, aåA);
+    for (var ä = 0; aåA > ä; ä++) {
+      äa[ä] = [];
+      for (var åã = 0; åã < áÂÀ; åã++) {
+        äa[ä][åã] = new äåÄäå();
       }
     }
-    var eG = ÅÀ.åA[0].length;
-    for (eE = 0; eE < eG; eE++) {
-      bG[eE] = null;
+    var Aå = ÅÀ.åA[0].length;
+    for (ä = 0; ä < Aå; ä++) {
+      Äãa[ä] = null;
     }
   }
   ;
-  function cA(eA, eB) {
-    var eC = D * ÄÀ;
-    var eD = ÄÀ * E;
-    var eE = åäÅ - eC / 2;
-    var eF = Math.max(ÂáÅ - eD / 2, AÄ);
-    var eG = eE / ÄÀ;
-    var eH = eF / ÄÀ;
-    var eI = D / u;
-    var eJ = E / v;
-    eB.áâ.x = Math.floor(eE + eC + åâ * ÄÀ);
-    eB.áâ.y = Math.floor(eF + ÄÀ * 0);
-    eA.Áá();
-    var eK = Aá.â.ãâÄ;
-    var eL = eK.length / 2;
-    if (ãÁ < eL) {
-      eT = Math.floor(eF / ÄÀ + Math.min(Math.max(ÂÃã, eJ * eK[0]), 400));
-      eS = Math.floor(eE / ÄÀ + Math.min(Math.max(10, eI * eK[1]), 400));
-      áá.ÄA(c0, eS, eT, ãa, ÁÀ, äå, 1);
-      for (var eM = 1; eL > eM; eM++) {
-        eT = Math.floor(eF / ÄÀ + Math.min(Math.max(âäÂ, eJ * eK[eM * ÄÂÅ]), 400));
-        eS = Math.floor(eE / ÄÀ + Math.min(Math.max(10, eK[1 + eM * 2] * eI), 400));
-        áá.ÄA(bZ, eS, eT, Aa, AÂ, Aa, 1);
+  function Åaáaa(áãÂãá, äAÁ) {
+    var ÅÅ = aÁÂ * ÄÀ;
+    var Âå = ÄÀ * aÁa;
+    var ã = åäÅ - ÅÅ / 2;
+    var áã = Math.max(ÂáÅ - Âå / 2, AÄ);
+    var åáÁ = ã / ÄÀ;
+    var AÁá = áã / ÄÀ;
+    var Åâá = aÁÂ / ÀÄÂ;
+    var aáÀãÂ = aÁa / ÀaÅâÂ;
+    äAÁ.áâ.x = Math.floor(ã + ÅÅ + åâ * ÄÀ);
+    äAÁ.áâ.y = Math.floor(áã + ÄÀ * 0);
+    áãÂãá.Áá();
+    var ãâÄ = Aá.â.ãâÄ;
+    var Aå = ãâÄ.length / 2;
+    if (ãÁ < Aå) {
+      ãÄ = Math.floor(áã / ÄÀ + Math.min(Math.max(ÂÃã, aáÀãÂ * ãâÄ[0]), 400));
+      aå = Math.floor(ã / ÄÀ + Math.min(Math.max(10, Åâá * ãâÄ[1]), 400));
+      áá.ÄA(ÅáÂAÀ, aå, ãÄ, ãa, ÁÀ, äå, 1);
+      for (var ä = 1; Aå > ä; ä++) {
+        ãÄ = Math.floor(áã / ÄÀ + Math.min(Math.max(âäÂ, aáÀãÂ * ãâÄ[ä * ÄÂÅ]), 400));
+        aå = Math.floor(ã / ÄÀ + Math.min(Math.max(10, ãâÄ[1 + ä * 2] * Åâá), 400));
+        áá.ÄA(ÃäÀaÄ, aå, ãÄ, Aa, AÂ, Aa, 1);
       }
     }
     if (Aá.ÄáÃ === Aá.ÂÀå) {
-      var eN = eG + D / åÃÅ;
-      var eO = eH + E / 2;
-      áá.ÄA(ce, eN, eO, ãÁ, 0, ãÂ, áÂa);
-      AÅ.globalAlpha = ci > 600 ? Ää.ÁÃ.ÄáÀ((1200 - ci) / 600) : Ää.ÁÃ.ÄáÀ(ci / 600);
-      áá.ÄA(ch, eN, eO, ãa, âã, 0, 2);
+      var ÂáÂÄá = åáÁ + aÁÂ / åÃÅ;
+      var âÀÂÂÀ = AÁá + aÁa / 2;
+      áá.ÄA(ÅAãäA, ÂáÂÄá, âÀÂÂÀ, ãÁ, 0, ãÂ, áÂa);
+      AÅ.globalAlpha = ãaå > 600 ? Ää.ÁÃ.ÄáÀ((1200 - ãaå) / 600) : Ää.ÁÃ.ÄáÀ(ãaå / 600);
+      áá.ÄA(áÀAáÀ, ÂáÂÄá, âÀÂÂÀ, ãa, âã, 0, 2);
       AÅ.globalAlpha = Äá;
     }
-    eB.Áá();
+    äAÁ.Áá();
     if (Aá.â.Aâ !== -1 || Aá.â.ÀÃã !== äá && Aá.ãâÃ < 6) {
-      var eP = ÅÀ.åA[âAä];
-      for (var eM = AÂ; Aá.â.ÅâÀ > eM; eM++) {
-        var eQ = Aá.â.AãÃ[eM];
-        if (eQ.ååa < 0) {
+      var ÂÅ = ÅÀ.åA[âAä];
+      for (var ä = AÂ; Aá.â.ÅâÀ > ä; ä++) {
+        var Ããâ = Aá.â.AãÃ[ä];
+        if (Ããâ.ååa < 0) {
           continue;
         }
-        var eR = Aá.ÂÅ[eQ.id];
-        var eS = Math.floor(eG + Math.min(Math.max(åÃA, eR.rx * eI), 400));
-        var eT = Math.floor(eH + Math.min(Math.max(ãÄä, eR.ry * eI), 400));
-        var eU;
-        if (cm === eR.ÂÀ + Âã) {
-          eU = eP[eR.åäâ].angle;
+        var â = Aá.ÂÅ[Ããâ.id];
+        var aå = Math.floor(åáÁ + Math.min(Math.max(åÃA, â.rx * Åâá), 400));
+        var ãÄ = Math.floor(AÁá + Math.min(Math.max(ãÄä, â.ry * Åâá), 400));
+        var Äã;
+        if (ÂÀ === â.ÂÀ + Âã) {
+          Äã = ÂÅ[â.åäâ].angle;
         } else {
-          eU = eR.x % ay;
+          Äã = â.x % áÀÃ;
         }
-        áá.ÄA(bX, eS, eT, eU, 0, 0, 1);
-        if (cfg.drawNamesOnMap && eR.âÅÄ != null) {
-          AÅ.drawImage(eR.âÅÄ, eS * ÄÀ - eR.áÄa.length * 3.5, eT * ÄÀ - 35, eR.áÄa.length * 7, 20);
+        áá.ÄA(ÂÃãáÅ, aå, ãÄ, Äã, 0, 0, 1);
+        if (cfg.drawNamesOnMap && â.âÅÄ != null) {
+          AÅ.drawImage(â.âÅÄ, aå * ÄÀ - â.áÄa.length * 3.5, ãÄ * ÄÀ - 35, â.áÄa.length * 7, 20);
         }
       }
     }
-    var eS = Math.floor(eE / ÄÀ + Math.min(Math.max(10, b3 * eI), 400));
-    var eT = Math.floor(eF / ÄÀ + Math.min(Math.max(Äáâ, eJ * b4), 400));
-    áá.ÄA(bW, eS, eT, ÁA.angle, 0, 0, ãå);
+    var aå = Math.floor(ã / ÄÀ + Math.min(Math.max(10, AÃÅ * Åâá), 400));
+    var ãÄ = Math.floor(áã / ÄÀ + Math.min(Math.max(Äáâ, aáÀãÂ * ÃÂÀ), 400));
+    áá.ÄA(áÄÃãÃ, aå, ãÄ, ÁA.angle, 0, 0, ãå);
     if (cfg.drawNamesOnMap) {
-      AÅ.drawImage(Aá.ÂÅ[Aá.â.id].âÅÄ, eS * ÄÀ - Aá.ÂÅ[Aá.â.id].áÄa.length * 3.5, eT * ÄÀ - 35, Aá.ÂÅ[Aá.â.id].áÄa.length * 7, 20);
+      AÅ.drawImage(Aá.ÂÅ[Aá.â.id].âÅÄ, aå * ÄÀ - Aá.ÂÅ[Aá.â.id].áÄa.length * 3.5, ãÄ * ÄÀ - 35, Aá.ÂÅ[Aá.â.id].áÄa.length * 7, 20);
     }
     if (Aá.â.ÁÂÃ > ãä) {
-      var eR = Aá.ÂÅ[Aá.â.Ääã];
-      áá.ÄA(ÀáÃ[eR.aåã], Math.floor(eG + Math.min(Math.max(10, eI * eR.rx), 400)), Math.floor(eH + Math.min(Math.max(10, eR.ry * eI), 400)), ãÁ, 0, AÄ, 1.25);
+      var â = Aá.ÂÅ[Aá.â.Ääã];
+      áá.ÄA(ÀáÃ[â.aåã], Math.floor(åáÁ + Math.min(Math.max(10, Åâá * â.rx), 400)), Math.floor(AÁá + Math.min(Math.max(10, â.ry * Åâá), 400)), ãÁ, 0, AÄ, 1.25);
     }
   }
   ;
-  function cB(eA, eB) {
-    if (ca.á !== 1) {
-      ca = áá.ÃA(ac, ca);
+  function ÅAÂåÃ(ã, áã) {
+    if (Àáä.á !== 1) {
+      Àáä = áá.ÃA(âÄáaÅ, Àáä);
       return;
     }
-    ÀÅ.ÃAâåÃ.áâ.x = eA + ÄÀ * 241;
-    ÀÅ.ÃAâåÃ.áâ.y = eB + ÄÀ * 6;
-    ÀÅ.âääAå.áâ.x = eA + ÄÀ * 290;
-    ÀÅ.âääAå.áâ.y = eB + ÄÀ * ãÁA;
+    ÀÅ.ÃAâåÃ.áâ.x = ã + ÄÀ * 241;
+    ÀÅ.ÃAâåÃ.áâ.y = áã + ÄÀ * 6;
+    ÀÅ.âääAå.áâ.x = ã + ÄÀ * 290;
+    ÀÅ.âääAå.áâ.y = áã + ÄÀ * ãÁA;
     if (Aá.â.aãÅ !== 0 || Aá.â.äÃâ > 0) {
       if (Aá.â.aãÅ !== 0) {
         if (Aá.â.äÃâ < 333) {
@@ -17309,13 +17319,13 @@ var ÀÂ = function () {
         AÅ.globalAlpha = Aá.â.äÃâ / 333;
         Aá.â.äÃâ = Math.max(0, Aá.â.äÃâ - ÀÀ);
       }
-      var eC = Aá.ÂÅ[Aá.â.aãÅ];
-      if (eC.âÅÄ === null) {
-        eC.âÅÄ = áÅ.åáa(eC.áÄa, "'Viga', sans-serif", "#FFFFFF", 38, 400, ÄåA, 16, 25, ÃÅá, ÅâÃ, ÅâÃ, ÂÄá, "#000000", AÅä);
+      var â = Aá.ÂÅ[Aá.â.aãÅ];
+      if (â.âÅÄ === null) {
+        â.âÅÄ = áÅ.åáa(â.áÄa, "'Viga', sans-serif", "#FFFFFF", 38, 400, ÄåA, 16, 25, ÃÅá, ÅâÃ, ÅâÃ, ÂÄá, "#000000", AÅä);
       }
-      AÅ.drawImage(ca, eA, eB, ca.ãâä * ÄÀ, ÄÀ * ca.ÅÀä);
-      if (âã !== eC.âÅÄ.width && Aa !== eC.âÅÄ.height) {
-        AÅ.drawImage(eC.âÅÄ, eA + ÄÀ * 20, eB + ÄÀ * 6, eC.âÅÄ.ãâä * ÄÀ, eC.âÅÄ.ÅÀä * ÄÀ);
+      AÅ.drawImage(Àáä, ã, áã, Àáä.ãâä * ÄÀ, ÄÀ * Àáä.ÅÀä);
+      if (âã !== â.âÅÄ.width && Aa !== â.âÅÄ.height) {
+        AÅ.drawImage(â.âÅÄ, ã + ÄÀ * 20, áã + ÄÀ * 6, â.âÅÄ.ãâä * ÄÀ, â.âÅÄ.ÅÀä * ÄÀ);
       }
       ÀÅ.ÃAâåÃ.Áá();
       ÀÅ.âääAå.Áá();
@@ -17325,702 +17335,705 @@ var ÀÂ = function () {
     }
   }
   ;
-  function cC(eA) {
-    var eB = eA.ÅÁa >> 7;
-    if (ÁÁ[eB].äÂ !== 1 || eA.ÃÁ > 0 || äá < eA.Äáá) {
+  function ãÃAáå(Ä) {
+    var AÀ = Ä.ÅÁa >> 7;
+    if (ÁÁ[AÀ].äÂ !== 1 || Ä.ÃÁ > 0 || äá < Ä.Äáá) {
       return;
     }
-    var eC = bf[eA.ä][eA.åã];
-    eC.ÅáA = cm;
+    var ÂÃ = äa[Ä.ä][Ä.åã];
+    ÂÃ.ÅáA = ÂÀ;
   }
   ;
-  function cD(eA) {
-    var eB = eA.ÅÁa >> åÃâAÃ;
-    if (ÂA !== ÁÁ[eB].ÁAä || ÀÄ < eA.ÃÁ || ãÂ < eA.Äáá) {
+  function ÄãÀäÂ(Ä) {
+    var AÀ = Ä.ÅÁa >> åÃâAÃ;
+    if (ÂA !== ÁÁ[AÀ].ÁAä || ÀÄ < Ä.ÃÁ || ãÂ < Ä.Äáá) {
       return;
     }
-    var eC = bf[eA.ä][eA.åã];
-    eC.äÀå = cm;
-    eC.äÂ = eB;
-    eC.rotate = eA.ÅÁa >> 5 & 3;
+    var ÂÃ = äa[Ä.ä][Ä.åã];
+    ÂÃ.äÀå = ÂÀ;
+    ÂÃ.äÂ = AÀ;
+    ÂÃ.rotate = Ä.ÅÁa >> 5 & 3;
   }
   ;
-  function cE(eA) {
-    if (eA.ÃÁ > Àá || eA.ÃAA !== 0) {
+  function ÀäAââ(Ä) {
+    if (Ä.ÃÁ > Àá || Ä.ÃAA !== 0) {
       return 0;
     }
-    var eB = eA.ä;
-    var eC = eA.åã;
-    var eD = eA.ÅÁa >> Âåa;
-    var eE = 0;
-    var eF = AÄ;
-    var eG = áÃ;
-    var eH = äå;
-    var eI = 0;
-    if (eB - Áå >= ãä) {
-      var eJ = bf[eB - áââ][eC];
-      if (cm === eJ.ÅáA) {
-        eI = Äá;
-        eE += aE;
+    var ä = Ä.ä;
+    var åã = Ä.åã;
+    var AÀ = Ä.ÅÁa >> Âåa;
+    var ãã = 0;
+    var å = AÄ;
+    var äÄÄ = áÃ;
+    var Ã = äå;
+    var ÃÀ = 0;
+    if (ä - Áå >= ãä) {
+      var ÂÃ = äa[ä - áââ][åã];
+      if (ÂÀ === ÂÃ.ÅáA) {
+        ÃÀ = Äá;
+        ãã += áaÃ;
       }
     }
-    if (eB + 1 < w) {
-      var eJ = bf[eB + 1][eC];
-      if (cm === eJ.ÅáA) {
-        eE += aF;
-        eH = 1;
+    if (ä + 1 < aåA) {
+      var ÂÃ = äa[ä + 1][åã];
+      if (ÂÀ === ÂÃ.ÅáA) {
+        ãã += äÀÄ;
+        Ã = 1;
       }
     }
-    if (ÁÀ <= eC - 1) {
-      var eJ = bf[eB][eC - Àâ];
-      if (eJ.ÅáA === cm) {
-        eE += aC;
-        eG = 1;
+    if (ÁÀ <= åã - 1) {
+      var ÂÃ = äa[ä][åã - Àâ];
+      if (ÂÃ.ÅáA === ÂÀ) {
+        ãã += AÁa;
+        äÄÄ = 1;
       }
     }
-    if (t > eC + åÀ) {
-      var eJ = bf[eB][eC + ÄÂ];
-      if (eJ.ÅáA === cm) {
-        eE += aD;
-        eF = åÀ;
+    if (áÂÀ > åã + åÀ) {
+      var ÂÃ = äa[ä][åã + ÄÂ];
+      if (ÂÃ.ÅáA === ÂÀ) {
+        ãã += áÃã;
+        å = åÀ;
       }
     }
-    if (eF + eI === 2) {
-      var eJ = bf[eB - ÂA][eC + ÁÅ];
-      if (cm === eJ.ÅáA) {
-        eE += aI;
+    if (å + ÃÀ === 2) {
+      var ÂÃ = äa[ä - ÂA][åã + ÁÅ];
+      if (ÂÀ === ÂÃ.ÅáA) {
+        ãã += ÅÀâ;
       }
     }
-    if (eG + eI === ÁÅá) {
-      var eJ = bf[eB - 1][eC - 1];
-      if (cm === eJ.ÅáA) {
-        eE += aJ;
+    if (äÄÄ + ÃÀ === ÁÅá) {
+      var ÂÃ = äa[ä - 1][åã - 1];
+      if (ÂÀ === ÂÃ.ÅáA) {
+        ãã += AãÂ;
       }
     }
-    if (eH + eF === 2) {
-      var eJ = bf[eB + 1][eC + 1];
-      if (eJ.ÅáA === cm) {
-        eE += aG;
+    if (Ã + å === 2) {
+      var ÂÃ = äa[ä + 1][åã + 1];
+      if (ÂÃ.ÅáA === ÂÀ) {
+        ãã += ÀÅÄ;
       }
     }
-    if (eH + eG === 2) {
-      var eJ = bf[eB + ÀA][eC - 1];
-      if (cm === eJ.ÅáA) {
-        eE += aH;
+    if (Ã + äÄÄ === 2) {
+      var ÂÃ = äa[ä + ÀA][åã - 1];
+      if (ÂÀ === ÂÃ.ÅáA) {
+        ãã += ÀÂÄ;
       }
     }
-    return aU[eE];
+    return AÄá[ãã];
   }
   ;
-  function cF(eA, eB) {
-    var eC = Aá.â.level;
-    if (bk[eC] === undefined) {
-      bk[eC] = {
-        À: áÅ.åáa("" + eC, "'Black Han Sans', sans-serif", "#ffffff", 44, 250, âÄä, 18, 15, undefined, âÂa, undefined, ÂÄá, "#000000", ÃAä)
+  function ÁäÀáÀ(ã, áã) {
+    var âÅÁ = Aá.â.level;
+    if (ÀÃå[âÅÁ] === undefined) {
+      ÀÃå[âÅÁ] = {
+        À: áÅ.åáa("" + âÅÁ, "'Black Han Sans', sans-serif", "#ffffff", 44, 250, âÄä, 18, 15, undefined, âÂa, undefined, ÂÄá, "#000000", ÃAä)
       };
-      bk[eC].À.á = 1;
+      ÀÃå[âÅÁ].À.á = 1;
     }
-    áá.ÄA(bk[eC], eA / ÄÀ + 234, eB / ÄÀ + 79, AÂ, ãÂ, 0, âÃ);
-    var eD = Aá.ÄÄ.áÅÀ;
-    var eE = 1 - eD.Äáa / eD.ââÅ;
-    áá.ÄA(c5, 38 + eA / ÄÀ, 37 + eB / ÄÀ, Math.PI * eE, áÃ, 0, 1);
+    áá.ÄA(ÀÃå[âÅÁ], ã / ÄÀ + 234, áã / ÄÀ + 79, AÂ, ãÂ, 0, âÃ);
+    var áÅÀ = Aá.ÄÄ.áÅÀ;
+    var ãÃ = 1 - áÅÀ.Äáa / áÅÀ.ââÅ;
+    áá.ÄA(AÂåáã, 38 + ã / ÄÀ, 37 + áã / ÄÀ, Math.PI * ãÃ, áÃ, 0, 1);
   }
   ;
-  function cG(eA, eB, eC) {
-    if (cq[eA] === åãÂ) {
-      cq[eA] = document.createElement("canvas");
-      cr[eA] = cq[eA].getContext("2d");
-      var eD = cq[eA];
-      var eE = cr[eA];
-      eD.width = 400;
-      eD.height = 148;
-      eE.clearRect(Àá, ãÂ, 400, 148);
-      áá.roundRect(eE, áÃ, ãÁ, 400, 148, 10);
-      eE.fillStyle = "#000000";
-      eE.globalAlpha = 0.5;
-      eE.fill();
-      eE.globalAlpha = 1;
-      dc(cr[eA], eA);
+  function ÁãÀ(ãã, ã, áã) {
+    if (ãaá[ãã] === åãÂ) {
+      ãaá[ãã] = document.createElement("canvas");
+      áÂÄÄá[ãã] = ãaá[ãã].getContext("2d");
+      var âÃäÄÅ = ãaá[ãã];
+      var âãá = áÂÄÄá[ãã];
+      âÃäÄÅ.width = 400;
+      âÃäÄÅ.height = 148;
+      âãá.clearRect(Àá, ãÂ, 400, 148);
+      áá.roundRect(âãá, áÃ, ãÁ, 400, 148, 10);
+      âãá.fillStyle = "#000000";
+      âãá.globalAlpha = 0.5;
+      âãá.fill();
+      âãá.globalAlpha = 1;
+      ÀAãÂâ(áÂÄÄá[ãã], ãã);
     }
-    var eF = ÄÀ * 74;
-    AÅ.drawImage(cq[eA], eB, eC, ÄÀ * 190, eF);
+    var Âå = ÄÀ * 74;
+    AÅ.drawImage(ãaá[ãã], ã, áã, ÄÀ * 190, Âå);
   }
   ;
-  function cH(eA) {
-    if (áÃ < eA.ÃÁ || ãa !== eA.ÃAA) {
+  function äÃÃÄÅ(Ä) {
+    if (áÃ < Ä.ÃÁ || ãa !== Ä.ÃAA) {
       return 0;
     }
-    var eB = eA.ä;
-    var eC = eA.åã;
-    var eD = ÁÁ[eA.ÅÁa >> 7];
-    var eE = eD.ÁÁÁ;
-    var eF = 0;
-    var eG = 0;
-    var eH = 0;
-    var eI = 0;
-    var eJ = ãÁ;
-    if (eB - 1 >= 0) {
-      var eK = bf[eB - åä][eC];
-      if (eK.äÀå === cm && eE === eK.äÂ) {
-        eG = 1;
-        eF += aE;
+    var ä = Ä.ä;
+    var åã = Ä.åã;
+    var äÂ = ÁÁ[Ä.ÅÁa >> 7];
+    var AÀ = äÂ.ÁÁÁ;
+    var ãã = 0;
+    var ÃÀ = 0;
+    var å = 0;
+    var äÄÄ = 0;
+    var Ã = ãÁ;
+    if (ä - 1 >= 0) {
+      var ÂÃ = äa[ä - åä][åã];
+      if (ÂÃ.äÀå === ÂÀ && AÀ === ÂÃ.äÂ) {
+        ÃÀ = 1;
+        ãã += áaÃ;
       }
     }
-    if (eB + 1 < w) {
-      var eK = bf[eB + Àâ][eC];
-      if (eK.äÀå === cm && eE === eK.äÂ) {
-        eF += aF;
-        eJ = 1;
+    if (ä + 1 < aåA) {
+      var ÂÃ = äa[ä + Àâ][åã];
+      if (ÂÃ.äÀå === ÂÀ && AÀ === ÂÃ.äÂ) {
+        ãã += äÀÄ;
+        Ã = 1;
       }
     }
-    if (ÀÄ <= eC - 1) {
-      var eK = bf[eB][eC - ÁÅ];
-      if (eK.äÀå === cm && eK.äÂ === eE) {
-        eF += aC;
-        eI = aÅ;
+    if (ÀÄ <= åã - 1) {
+      var ÂÃ = äa[ä][åã - ÁÅ];
+      if (ÂÃ.äÀå === ÂÀ && ÂÃ.äÂ === AÀ) {
+        ãã += AÁa;
+        äÄÄ = aÅ;
       }
     }
-    if (eC + ãå < t) {
-      var eK = bf[eB][eC + 1];
-      if (cm === eK.äÀå && eK.äÂ === eE) {
-        eF += aD;
-        eH = 1;
+    if (åã + ãå < áÂÀ) {
+      var ÂÃ = äa[ä][åã + 1];
+      if (ÂÀ === ÂÃ.äÀå && ÂÃ.äÂ === AÀ) {
+        ãã += áÃã;
+        å = 1;
       }
     }
-    if (aâA === eH + eG) {
-      var eK = bf[eB - 1][eC + 1];
-      if (cm === eK.äÀå && eE === eK.äÂ) {
-        eF += aI;
+    if (aâA === å + ÃÀ) {
+      var ÂÃ = äa[ä - 1][åã + 1];
+      if (ÂÀ === ÂÃ.äÀå && AÀ === ÂÃ.äÂ) {
+        ãã += ÅÀâ;
       }
     }
-    if (eI + eG === 2) {
-      var eK = bf[eB - 1][eC - 1];
-      if (cm === eK.äÀå && eK.äÂ === eE) {
-        eF += aJ;
+    if (äÄÄ + ÃÀ === 2) {
+      var ÂÃ = äa[ä - 1][åã - 1];
+      if (ÂÀ === ÂÃ.äÀå && ÂÃ.äÂ === AÀ) {
+        ãã += AãÂ;
       }
     }
-    if (eJ + eH === ÅÂÂ) {
-      var eK = bf[eB + Âã][eC + Áå];
-      if (cm === eK.äÀå && eK.äÂ === eE) {
-        eF += aG;
+    if (Ã + å === ÅÂÂ) {
+      var ÂÃ = äa[ä + Âã][åã + Áå];
+      if (ÂÀ === ÂÃ.äÀå && ÂÃ.äÂ === AÀ) {
+        ãã += ÀÅÄ;
       }
     }
-    if (ãÄá === eJ + eI) {
-      var eK = bf[eB + 1][eC - Ãäã];
-      if (cm === eK.äÀå && eE === eK.äÂ) {
-        eF += aH;
+    if (ãÄá === Ã + äÄÄ) {
+      var ÂÃ = äa[ä + 1][åã - Ãäã];
+      if (ÂÀ === ÂÃ.äÀå && AÀ === ÂÃ.äÂ) {
+        ãã += ÀÂÄ;
       }
     }
-    var eF = aU[eF];
-    bf[eB][eC].âÃÄ = eD.âÃÄ[eF];
-    return eF;
+    var ãã = AÄá[ãã];
+    äa[ä][åã].âÃÄ = äÂ.âÃÄ[ãã];
+    return ãã;
   }
   ;
-  function cI(eA, eB) {
-    if (eA.ÃÁ > 0 || åâ !== eA.ÃAA) {
+  function ÂAÂÄå(Ä, Áä) {
+    if (Ä.ÃÁ > 0 || åâ !== Ä.ÃAA) {
       return ãä;
     }
-    var eC = eA.ä;
-    var eD = eA.åã;
-    var eE = eA.ÅÁa >> ÄÁÄ;
-    var eF = 0;
-    switch (eB) {
+    var ä = Ä.ä;
+    var åã = Ä.åã;
+    var AÀ = Ä.ÅÁa >> ÄÁÄ;
+    var ãã = 0;
+    switch (Áä) {
       case AÂ:
-        if (w > eC + 1) {
-          var eG = bf[eC + ãâ][eD];
-          if (eG.äÀå === cm && eE === eG.äÂ) {
-            if (Ãäã === eG.rotate) {
-              eF += aL;
-            } else if (eG.rotate === 3) {
-              eF += aM;
+        if (aåA > ä + 1) {
+          var ÂÃ = äa[ä + ãâ][åã];
+          if (ÂÃ.äÀå === ÂÀ && AÀ === ÂÃ.äÂ) {
+            if (Ãäã === ÂÃ.rotate) {
+              ãã += ãAä;
+            } else if (ÂÃ.rotate === 3) {
+              ãã += Áãá;
             }
           }
         }
-        if (ÀÄ <= eD - 1) {
-          var eG = bf[eC][eD - 1];
-          if (eG.äÀå === cm && eG.äÂ === eE && (eG.rotate === åÁâ || eG.rotate === 0)) {
-            eF += aN;
+        if (ÀÄ <= åã - 1) {
+          var ÂÃ = äa[ä][åã - 1];
+          if (ÂÃ.äÀå === ÂÀ && ÂÃ.äÂ === AÀ && (ÂÃ.rotate === åÁâ || ÂÃ.rotate === 0)) {
+            ãã += AãÄ;
           }
         }
-        if (t > eD + 1) {
-          var eG = bf[eC][eD + 1];
-          if (eG.äÀå === cm && eE === eG.äÂ && (eG.rotate === 1 || âã === eG.rotate)) {
-            eF += aO;
+        if (áÂÀ > åã + 1) {
+          var ÂÃ = äa[ä][åã + 1];
+          if (ÂÃ.äÀå === ÂÀ && AÀ === ÂÃ.äÂ && (ÂÃ.rotate === 1 || âã === ÂÃ.rotate)) {
+            ãã += Âää;
           }
         }
         break;
       case ãâ:
-        if (ãä <= eD - aÅ) {
-          var eG = bf[eC][eD - 1];
-          if (eG.äÀå === cm && eG.äÂ === eE) {
-            if (eG.rotate === 0) {
-              eF += aM;
-            } else if (ÃÃÃ === eG.rotate) {
-              eF += aL;
+        if (ãä <= åã - aÅ) {
+          var ÂÃ = äa[ä][åã - 1];
+          if (ÂÃ.äÀå === ÂÀ && ÂÃ.äÂ === AÀ) {
+            if (ÂÃ.rotate === 0) {
+              ãã += Áãá;
+            } else if (ÃÃÃ === ÂÃ.rotate) {
+              ãã += ãAä;
             }
           }
         }
-        if (eC - 1 >= 0) {
-          var eG = bf[eC - 1][eD];
-          if (eG.äÀå === cm && eG.äÂ === eE && (eG.rotate === ÄÁ || eG.rotate === 1)) {
-            eF += aN;
+        if (ä - 1 >= 0) {
+          var ÂÃ = äa[ä - 1][åã];
+          if (ÂÃ.äÀå === ÂÀ && ÂÃ.äÂ === AÀ && (ÂÃ.rotate === ÄÁ || ÂÃ.rotate === 1)) {
+            ãã += AãÄ;
           }
         }
-        if (w > eC + 1) {
-          var eG = bf[eC + aÅ][eD];
-          if (cm === eG.äÀå && eE === eG.äÂ && (ããÁ === eG.rotate || âÃ === eG.rotate)) {
-            eF += aO;
+        if (aåA > ä + 1) {
+          var ÂÃ = äa[ä + aÅ][åã];
+          if (ÂÀ === ÂÃ.äÀå && AÀ === ÂÃ.äÂ && (ããÁ === ÂÃ.rotate || âÃ === ÂÃ.rotate)) {
+            ãã += Âää;
           }
         }
         break;
       case åÃÅ:
-        if (eC - 1 >= ÅÁ) {
-          var eG = bf[eC - åÀ][eD];
-          if (cm === eG.äÀå && eG.äÂ === eE) {
-            if (eG.rotate === 1) {
-              eF += aM;
-            } else if (eG.rotate === 3) {
-              eF += aL;
+        if (ä - 1 >= ÅÁ) {
+          var ÂÃ = äa[ä - åÀ][åã];
+          if (ÂÀ === ÂÃ.äÀå && ÂÃ.äÂ === AÀ) {
+            if (ÂÃ.rotate === 1) {
+              ãã += Áãá;
+            } else if (ÂÃ.rotate === 3) {
+              ãã += ãAä;
             }
           }
         }
-        if (eD - Àâ >= AÄ) {
-          var eG = bf[eC][eD - 1];
-          if (cm === eG.äÀå && eE === eG.äÂ && (eG.rotate === 3 || eG.rotate === Äåã)) {
-            eF += aO;
+        if (åã - Àâ >= AÄ) {
+          var ÂÃ = äa[ä][åã - 1];
+          if (ÂÀ === ÂÃ.äÀå && AÀ === ÂÃ.äÂ && (ÂÃ.rotate === 3 || ÂÃ.rotate === Äåã)) {
+            ãã += Âää;
           }
         }
-        if (t > eD + Áå) {
-          var eG = bf[eC][eD + 1];
-          if (eG.äÀå === cm && eG.äÂ === eE && (eG.rotate === âá || eG.rotate === 2)) {
-            eF += aN;
+        if (áÂÀ > åã + Áå) {
+          var ÂÃ = äa[ä][åã + 1];
+          if (ÂÃ.äÀå === ÂÀ && ÂÃ.äÂ === AÀ && (ÂÃ.rotate === âá || ÂÃ.rotate === 2)) {
+            ãã += AãÄ;
           }
         }
         break;
       case âÀâ:
-        if (eD + âá < t) {
-          var eG = bf[eC][eD + aÅ];
-          if (eG.äÀå === cm && eG.äÂ === eE) {
-            if (Àá === eG.rotate) {
-              eF += aL;
-            } else if (ÃÃÃ === eG.rotate) {
-              eF += aM;
+        if (åã + âá < áÂÀ) {
+          var ÂÃ = äa[ä][åã + aÅ];
+          if (ÂÃ.äÀå === ÂÀ && ÂÃ.äÂ === AÀ) {
+            if (Àá === ÂÃ.rotate) {
+              ãã += ãAä;
+            } else if (ÃÃÃ === ÂÃ.rotate) {
+              ãã += Áãá;
             }
           }
         }
-        if (ãÂ <= eC - 1) {
-          var eG = bf[eC - 1][eD];
-          if (cm === eG.äÀå && eG.äÂ === eE && (ÅÁ === eG.rotate || ÄÀá === eG.rotate)) {
-            eF += aO;
+        if (ãÂ <= ä - 1) {
+          var ÂÃ = äa[ä - 1][åã];
+          if (ÂÀ === ÂÃ.äÀå && ÂÃ.äÂ === AÀ && (ÅÁ === ÂÃ.rotate || ÄÀá === ÂÃ.rotate)) {
+            ãã += Âää;
           }
         }
-        if (eC + ÂA < w) {
-          var eG = bf[eC + ãå][eD];
-          if (eG.äÀå === cm && eE === eG.äÂ && (eG.rotate === 2 || eG.rotate === äaá)) {
-            eF += aN;
+        if (ä + ÂA < aåA) {
+          var ÂÃ = äa[ä + ãå][åã];
+          if (ÂÃ.äÀå === ÂÀ && AÀ === ÂÃ.äÂ && (ÂÃ.rotate === 2 || ÂÃ.rotate === äaá)) {
+            ãã += AãÄ;
           }
         }
         break;
     }
-    return aT[eB][eF];
+    return áaÁ[Áä][ãã];
   }
   ;
-  function cJ(eA, eB) {
-    cB(eA + ÄÀ * 250, eB);
-    if (bY.á !== 1) {
-      bY = áá.ÃA(H, bY);
+  function áÀÅâä(ã, áã) {
+    ÅAÂåÃ(ã + ÄÀ * 250, áã);
+    if (áÅã.á !== 1) {
+      áÅã = áá.ÃA(ÄaÃáá, áÅã);
       return;
     }
-    var eC = b3 * y;
-    var eD = b4 * y;
-    var eE = Math.min(Math.max(ãÂ, eC - al), A);
-    var eF = Math.min(Math.max(0, eD - al), A);
-    var eG = al * ÄÀ;
-    AÅ.drawImage(bY, eE, eF, ai, ai, eA, eB, eG, eG);
+    var ãáÂ = AÃÅ * âää;
+    var âÄA = ÃÂÀ * âää;
+    var ááa = Math.min(Math.max(ãÂ, ãáÂ - ÁÁÅ), ÂÁâ);
+    var áaá = Math.min(Math.max(0, âÄA - ÁÁÅ), ÂÁâ);
+    var ÅÅ = ÁÁÅ * ÄÀ;
+    AÅ.drawImage(áÅã, ááa, áaá, ÀäÀ, ÀäÀ, ã, áã, ÅÅ, ÅÅ);
     if (Aá.aÄÀ === Aá.ÂÀå) {
       if (Aá.â.ÀÃã !== 0) {
-        cR(-255, eB);
+        ÃáÃåa(-255, áã);
       } else {
-        cM(eA + 50, eB, 1);
+        áÁâÂã(ã + 50, áã, 1);
       }
     }
     if (Aá.ÄáÃ === Aá.ÂÀå) {
-      var eH = Aá.â.ÄAÁ[Math.floor(b4 / G)][Math.floor(b3 / G)];
-      if (eH !== äå && Aá.â.ÁáÅ > eH && Aá.â.ÁáÅ !== ÄAâ) {
-        bs = Math.min(1000, bs + ÀÀ);
-        AÅ.globalAlpha = Ää.ÁÃ.AÃa(bs / 500);
-        áá.ÄA(br, äâA, 58, 0, ÁÀ, áÁ, 1);
+      var ÅAå = Aá.â.ÄAÁ[Math.floor(ÃÂÀ / ÂAáäå)][Math.floor(AÃÅ / ÂAáäå)];
+      if (ÅAå !== äå && Aá.â.ÁáÅ > ÅAå && Aá.â.ÁáÅ !== ÄAâ) {
+        aâa = Math.min(1000, aâa + ÀÀ);
+        AÅ.globalAlpha = Ää.ÁÃ.AÃa(aâa / 500);
+        áá.ÄA(ãaåÃÃ, äâA, 58, 0, ÁÀ, áÁ, 1);
         AÅ.globalAlpha = aÅ;
-      } else if (AÂ < bs) {
-        bs = Math.max(âã, bs - ÀÀ);
-        AÅ.globalAlpha = Ää.ÁÃ.AÃa(bs / 500);
-        áá.ÄA(br, äâA, 58, ãÁ, Àá, ÅÁ, âÃ);
+      } else if (AÂ < aâa) {
+        aâa = Math.max(âã, aâa - ÀÀ);
+        AÅ.globalAlpha = Ää.ÁÃ.AÃa(aâa / 500);
+        áá.ÄA(ãaåÃÃ, äâA, 58, ãÁ, Àá, ÅÁ, âÃ);
         AÅ.globalAlpha = 1;
       }
-      AÅ.drawImage(ce.À, eE / ÅÂÂ, eF / 2, al, al, eA, eB, eG, eG);
-      AÅ.globalAlpha = ci > 600 ? Ää.ÁÃ.ÄáÀ((1200 - ci) / 600) : Ää.ÁÃ.ÄáÀ(ci / 600);
-      ci = (ci + ÀÀ) % 1200;
-      AÅ.drawImage(ch.À, eE / 2, eF / ããÄ, al, al, eA, eB, eG, eG);
+      AÅ.drawImage(ÅAãäA.À, ááa / ÅÂÂ, áaá / 2, ÁÁÅ, ÁÁÅ, ã, áã, ÅÅ, ÅÅ);
+      AÅ.globalAlpha = ãaå > 600 ? Ää.ÁÃ.ÄáÀ((1200 - ãaå) / 600) : Ää.ÁÃ.ÄáÀ(ãaå / 600);
+      ãaå = (ãaå + ÀÀ) % 1200;
+      AÅ.drawImage(áÀAáÀ.À, ááa / 2, áaá / ããÄ, ÁÁÅ, ÁÁÅ, ã, áã, ÅÅ, ÅÅ);
       AÅ.globalAlpha = ãå;
-      cR(0, eB);
-      cM(eA, eB, 0);
+      ÃáÃåa(0, áã);
+      áÁâÂã(ã, áã, 0);
     } else if (Aá.â.ÀÃã === ÄÁ) {
       if (ÁÅ === Aá.ÄÄ.áÅÀ.áÃÅ) {
-        bu = Math.min(1000, bu + ÀÀ);
-        AÅ.globalAlpha = Ää.ÁÃ.AÃa(bu / 500);
-        áá.ÄA(bt, äâA, 58, ãÁ, ÁÀ, 0, 1);
+        AÂÀ = Math.min(1000, AÂÀ + ÀÀ);
+        AÅ.globalAlpha = Ää.ÁÃ.AÃa(AÂÀ / 500);
+        áá.ÄA(ÁäÄáÃ, äâA, 58, ãÁ, ÁÀ, 0, 1);
         AÅ.globalAlpha = ÁÅ;
-      } else if (bu > 0) {
-        bu = Math.max(AÂ, bu - ÀÀ);
-        AÅ.globalAlpha = Ää.ÁÃ.AÃa(bu / 500);
-        áá.ÄA(bt, äâA, 58, ÀÄ, ÀÄ, äå, âa);
+      } else if (AÂÀ > 0) {
+        AÂÀ = Math.max(AÂ, AÂÀ - ÀÀ);
+        AÅ.globalAlpha = Ää.ÁÃ.AÃa(AÂÀ / 500);
+        áá.ÄA(ÁäÄáÃ, äâA, 58, ÀÄ, ÀÄ, äå, âa);
         AÅ.globalAlpha = 1;
       }
     }
-    if (A <= eE) {
-      eC = Math.min((eC - B) / 2 + am, al - 8);
-    } else if (al > eC) {
-      eC = Math.max(15, eC / 2);
+    if (ÂÁâ <= ááa) {
+      ãáÂ = Math.min((ãáÂ - âaÃAÁ) / 2 + ÀÂä, ÁÁÅ - 8);
+    } else if (ÁÁÅ > ãáÂ) {
+      ãáÂ = Math.max(15, ãáÂ / 2);
     } else {
-      eC = am;
+      ãáÂ = ÀÂä;
     }
-    if (A <= eF) {
-      eD = Math.min((eD - B) / ããÄ + am, al - 8);
-    } else if (al > eD) {
-      eD = Math.max(ååä, eD / ÄÀã);
+    if (ÂÁâ <= áaá) {
+      âÄA = Math.min((âÄA - âaÃAÁ) / ããÄ + ÀÂä, ÁÁÅ - 8);
+    } else if (ÁÁÅ > âÄA) {
+      âÄA = Math.max(ååä, âÄA / ÄÀã);
     } else {
-      eD = am;
+      âÄA = ÀÂä;
     }
-    var eI = eA / ÄÀ;
-    var eJ = eB / ÄÀ;
+    var åáÁ = ã / ÄÀ;
+    var AÁá = áã / ÄÀ;
     if (-ãå !== Aá.â.Aâ || Aá.â.ÀÃã !== 0 && ãÄÂ > Aá.ãâÃ) {
-      var eK = ÅÀ.åA[âAä];
-      for (var eL = 0; Aá.â.ÅâÀ > eL; eL++) {
-        var eM = Aá.â.AãÃ[eL];
-        if (ÄÁ > eM.ååa) {
+      var ÂÅ = ÅÀ.åA[âAä];
+      for (var ä = 0; Aá.â.ÅâÀ > ä; ä++) {
+        var Ããâ = Aá.â.AãÃ[ä];
+        if (ÄÁ > Ããâ.ååa) {
           continue;
         }
-        var eN = Aá.ÂÅ[eM.id];
-        var eO;
-        if (eN.ÂÀ + Âã === cm) {
-          var eP = eK[eN.åäâ];
-          if (áâA.ÅáÂ(eN.rx, eN.ry, eP.x, eP.y) < 1000) {
-            eN.rx = eP.x;
-            eN.ry = eP.y;
+        var â = Aá.ÂÅ[Ããâ.id];
+        var Äã;
+        if (â.ÂÀ + Âã === ÂÀ) {
+          var ÁÂÁ = ÂÅ[â.åäâ];
+          if (áâA.ÅáÂ(â.rx, â.ry, ÁÂÁ.x, ÁÂÁ.y) < 1000) {
+            â.rx = ÁÂÁ.x;
+            â.ry = ÁÂÁ.y;
           }
-          eN.x = eP.x;
-          eN.y = eP.y;
-          eO = eP.angle;
+          â.x = ÁÂÁ.x;
+          â.y = ÁÂÁ.y;
+          Äã = ÁÂÁ.angle;
         } else {
-          var eO = eN.x % ay;
+          var Äã = â.x % áÀÃ;
         }
-        var eQ = eI + Math.max(15, Math.min(al - 15, eC - ÄÀá + y * (eN.rx - b3)));
-        var eR = eJ + Math.max(áâÁ, Math.min(al - ÁãÂáå, eD - 3 + y * (eN.ry - b4)));
-        áá.ÄA(bX, eQ, eR, eO, 0, 0, âá);
+        var aå = åáÁ + Math.max(15, Math.min(ÁÁÅ - 15, ãáÂ - ÄÀá + âää * (â.rx - AÃÅ)));
+        var ãÄ = AÁá + Math.max(áâÁ, Math.min(ÁÁÅ - ÁãÂáå, âÄA - 3 + âää * (â.ry - ÃÂÀ)));
+        áá.ÄA(ÂÃãáÅ, aå, ãÄ, Äã, 0, 0, âá);
       }
     }
     if (Aá.â.ÁÂÃ > 0) {
-      var eN = Aá.ÂÅ[Aá.â.Ääã];
-      if (eN.ÂÀ + 1 === cm) {
-        var eK = ÅÀ.åA[âAä];
-        var eP = eK[eN.åäâ];
-        if (áâA.ÅáÂ(eN.rx, eN.ry, eP.x, eP.y) < 1000) {
-          eN.rx = eP.x;
-          eN.ry = eP.y;
+      var â = Aá.ÂÅ[Aá.â.Ääã];
+      if (â.ÂÀ + 1 === ÂÀ) {
+        var ÂÅ = ÅÀ.åA[âAä];
+        var ÁÂÁ = ÂÅ[â.åäâ];
+        if (áâA.ÅáÂ(â.rx, â.ry, ÁÂÁ.x, ÁÂÁ.y) < 1000) {
+          â.rx = ÁÂÁ.x;
+          â.ry = ÁÂÁ.y;
         }
-        eN.x = eP.x;
-        eN.y = eP.y;
+        â.x = ÁÂÁ.x;
+        â.y = ÁÂÁ.y;
       }
-      áá.ÄA(ÀáÃ[eN.aåã], eI + Math.max(ÄAÀ, Math.min(al - 15, eC - ÂâÅ + (eN.rx - b3) * y)), eJ + Math.max(Ââå, Math.min(al - åäåää, eD - 3 + (eN.ry - b4) * y)), 0, AÂ, 0, 1.25);
+      áá.ÄA(ÀáÃ[â.aåã], åáÁ + Math.max(ÄAÀ, Math.min(ÁÁÅ - 15, ãáÂ - ÂâÅ + (â.rx - AÃÅ) * âää)), AÁá + Math.max(Ââå, Math.min(ÁÁÅ - åäåää, âÄA - 3 + (â.ry - ÃÂÀ) * âää)), 0, AÂ, 0, 1.25);
     }
-    var eQ = eI + (eC - Äâa);
-    var eR = eJ + (eD - Åãâ);
-    áá.ÄA(bW, eQ, eR, ÁA.angle, ãä, 0, âá);
-    if (Aá.â.ÀÃã === 0 && (Aá.â.åáâ > ãä || bn.ÄÁÁ > ãä)) {
-      var eS = (bn.Àä + ÀÀ) % 1000;
-      bn.Àä = eS;
-      if (bn.Àä < 500) {
-        eA += 260 + Ää.ÁÃ.ÄáÀ(eS / 500) * ÀÃÀ;
+    var aå = åáÁ + (ãáÂ - Äâa);
+    var ãÄ = AÁá + (âÄA - Åãâ);
+    áá.ÄA(áÄÃãÃ, aå, ãÄ, ÁA.angle, ãä, 0, âá);
+    if (Aá.â.ÀÃã === 0 && (Aá.â.åáâ > ãä || ÁÅå.ÄÁÁ > ãä)) {
+      var Àä = (ÁÅå.Àä + ÀÀ) % 1000;
+      ÁÅå.Àä = Àä;
+      if (ÁÅå.Àä < 500) {
+        ã += 260 + Ää.ÁÃ.ÄáÀ(Àä / 500) * ÀÃÀ;
       } else {
-        eA += 260 + Ää.ÁÃ.ÄáÀ((1000 - eS) / 500) * 15;
+        ã += 260 + Ää.ÁÃ.ÄáÀ((1000 - Àä) / 500) * 15;
       }
-      AÅ.globalAlpha = Ää.ÁÃ.AÃa(bn.ÄÁÁ);
-      áá.ÄA(bn, eA, eB + 31, 0, ãÁ, ÀÄ, Âã);
+      AÅ.globalAlpha = Ää.ÁÃ.AÃa(ÁÅå.ÄÁÁ);
+      áá.ÄA(ÁÅå, ã, áã + 31, 0, ãÁ, ÀÄ, Âã);
       AÅ.globalAlpha = ÂA;
       if (Aá.â.åáâ <= 0 || ÀÅ.åÀå() === Äá) {
-        bn.ÄÁÁ = Math.max(0, bn.ÄÁÁ - ÀÀ / 500);
-      } else if (bn.ÄÁÁ < 1) {
-        bn.ÄÁÁ = Math.min(Äá, bn.ÄÁÁ + ÀÀ / 500);
+        ÁÅå.ÄÁÁ = Math.max(0, ÁÅå.ÄÁÁ - ÀÀ / 500);
+      } else if (ÁÅå.ÄÁÁ < 1) {
+        ÁÅå.ÄÁÁ = Math.min(Äá, ÁÅå.ÄÁÁ + ÀÀ / 500);
       }
     }
   }
   ;
-  function cK(eA) {
-    var eB = eA.ÅÁa >> ÂÁáââ;
-    if (âá !== ÁÁ[eB].äÂ || eA.ÃÁ > ãä || eA.Äáá > 0) {
+  function ãåÁåÃ(Ä) {
+    var AÀ = Ä.ÅÁa >> ÂÁáââ;
+    if (âá !== ÁÁ[AÀ].äÂ || Ä.ÃÁ > ãä || Ä.Äáá > 0) {
       return;
     }
-    var eC = bf[eA.ä][eA.åã];
-    eC.äÀå = cm;
-    eC.äÂ = ÁÁ[eB].ÁÁÁ;
-    if (eA.åã === Aá.â.åäA) {
-      var eD = Math.max(1, Math.abs(Aá.â.ÂáÁ - eA.ä));
-      if (eA.ä > Aá.â.ÂáÁ) {
-        bE[AÄ] = bF / eD;
+    var ÂÃ = äa[Ä.ä][Ä.åã];
+    ÂÃ.äÀå = ÂÀ;
+    ÂÃ.äÂ = ÁÁ[AÀ].ÁÁÁ;
+    if (Ä.åã === Aá.â.åäA) {
+      var ÃÂ = Math.max(1, Math.abs(Aá.â.ÂáÁ - Ä.ä));
+      if (Ä.ä > Aá.â.ÂáÁ) {
+        aÄÂ[AÄ] = áAâ / ÃÂ;
       } else {
-        bE[aÅ] = bF / eD;
+        aÄÂ[aÅ] = áAâ / ÃÂ;
       }
-    } else if (eA.ä === Aá.â.ÂáÁ) {
-      var eD = Math.max(äA, Math.abs(Aá.â.åäA - eA.åã));
-      if (Aá.â.åäA < eA.åã) {
-        bE[ãÂã] = bF / eD;
+    } else if (Ä.ä === Aá.â.ÂáÁ) {
+      var ÃÂ = Math.max(äA, Math.abs(Aá.â.åäA - Ä.åã));
+      if (Aá.â.åäA < Ä.åã) {
+        aÄÂ[ãÂã] = áAâ / ÃÂ;
       } else {
-        bE[ÂÀá] = bF / eD;
+        aÄÂ[ÂÀá] = áAâ / ÃÂ;
       }
     }
   }
   ;
-  function cL(eA, eB, eC, eD) {
+  function ÂâÄÃã(ÃÁã, ÀÁÃ, åÂâ, áÁa) {
     if (Aá.â.ÀÃã !== 0) {
       return;
     }
-    var eE = ÀÅ.ãÃä;
-    if (bl.á !== ãå) {
-      bl = áá.ÃA(M, bl);
+    var ãÃä = ÀÅ.ãÃä;
+    if (äãA.á !== ãå) {
+      äãA = áá.ÃA(åÃÅäÀ, äãA);
       return;
     }
-    var eF = Aá.â.ãÃä;
-    var eG = eF.length;
-    var eH = ÄÀ * bl.width / ÁÅá;
-    var eI = bl.height * ÄÀ / 2;
-    var eJ = Math.max(ÄÀ * 300, (aãA - eH * eG) / ãÂã);
-    var eK = äää - eI - ÄÀ * 5;
-    var eL = eJ;
-    var eM = eK;
-    var eN = åâa * ÄÀ + eH;
-    if (eG > ãÄä) {
-      eD.áâ.x = aãA - ÄÀ * 69;
-      eD.áâ.y = äää - ÄÀ * 68;
-      eD.Áá();
-      if (eD.open === Aa) {
-        eG = 10;
+    var áä = Aá.â.ãÃä;
+    var Aå = áä.length;
+    var ÅÅ = ÄÀ * äãA.width / ÁÅá;
+    var Âå = äãA.height * ÄÀ / 2;
+    var aå = Math.max(ÄÀ * 300, (aãA - ÅÅ * Aå) / ãÂã);
+    var ãÄ = äää - Âå - ÄÀ * 5;
+    var ã = aå;
+    var áã = ãÄ;
+    var ÁÂã = åâa * ÄÀ + ÅÅ;
+    if (Aå > ãÄä) {
+      áÁa.áâ.x = aãA - ÄÀ * 69;
+      áÁa.áâ.y = äää - ÄÀ * 68;
+      áÁa.Áá();
+      if (áÁa.open === Aa) {
+        Aå = 10;
       }
     }
-    for (var eO = Aa; eG > eO; eO++) {
-      var eP = eE[eO];
-      if (ãÁ === eF[eO][AÂ]) {
-        eP.áâ.x = eL;
-        eP.áâ.y = eM;
-        AÅ.drawImage(bl, eL, eM, eH, eI);
+    for (var ä = Aa; Aå > ä; ä++) {
+      var äÄ = ãÃä[ä];
+      if (ãÁ === áä[ä][AÂ]) {
+        äÄ.áâ.x = ã;
+        äÄ.áâ.y = áã;
+        AÅ.drawImage(äãA, ã, áã, ÅÅ, Âå);
       } else {
-        cP(eP, eF[eO], eL, eM, eA, eB);
+        åÀáåâ(äÄ, áä[ä], ã, áã, ÃÁã, ÀÁÃ);
       }
-      if (ãáÀâÂ === eO) {
-        eL = eD.áâ.x - ÄÀ * 5;
-        eM = eD.áâ.y - eN;
-      } else if (AâAäâ === eO) {
-        eL -= eN;
-        eM = eD.áâ.y - eN;
-      } else if (ÀÄáÂå < eO) {
-        eM -= eN;
+      if (ãáÀâÂ === ä) {
+        ã = áÁa.áâ.x - ÄÀ * 5;
+        áã = áÁa.áâ.y - ÁÂã;
+      } else if (AâAäâ === ä) {
+        ã -= ÁÂã;
+        áã = áÁa.áâ.y - ÁÂã;
+      } else if (ÀÄáÂå < ä) {
+        áã -= ÁÂã;
       } else {
-        eL += eN;
+        ã += ÁÂã;
       }
     }
-    var eQ = Aá.â.Âáâ;
-    if (eQ.ÀâÅ === 1 && ÁA.state === ÁA.Àãa && ÄÀ * 4 < áâA.ÃÂ(eQ.x, eQ.y, ÁA.x, ÁA.y)) {
-      var eR = eF[eQ.id][ãa];
-      if (eR > 0) {
-        var eS = ÁÁ[eR].Áã.À[âã];
-        if (eS.á === 0) {
-          eS = áaÂ[eR].Áã.À[ÄÁ];
+    var Âáâ = Aá.â.Âáâ;
+    if (Âáâ.ÀâÅ === 1 && ÁA.state === ÁA.Àãa && ÄÀ * 4 < áâA.ÃÂ(Âáâ.x, Âáâ.y, ÁA.x, ÁA.y)) {
+      var Åã = áä[Âáâ.id][ãa];
+      if (Åã > 0) {
+        var À = ÁÁ[Åã].Áã.À[âã];
+        if (À.á === 0) {
+          À = áaÂ[Åã].Áã.À[ÄÁ];
         }
         AÅ.globalAlpha = 0.7;
-        var eH = ÄÀ * 68;
-        AÅ.drawImage(eS, ÄÀ * ÁA.x - eH / Åaa, ÄÀ * ÁA.y - eH / åaÁ, eH, eH);
+        var ÅÅ = ÄÀ * 68;
+        AÅ.drawImage(À, ÄÀ * ÁA.x - ÅÅ / Åaa, ÄÀ * ÁA.y - ÅÅ / åaÁ, ÅÅ, ÅÅ);
         AÅ.globalAlpha = Àâ;
       }
-    } else if (eC !== -Àâ && eF[eC][áÁ] !== åâ) {
-      if (eC < 10) {
-        cG(eF[eC][áÁ], eJ + eC * eN, eK - ÄÀ * 79);
-      } else if (eC < Àaa) {
-        cG(eF[eC][âã], eD.áâ.x - ÄÀ * 200, eD.áâ.y + (-1 + (10 - eC) % 3) * eN);
+    } else if (åÂâ !== -Àâ && áä[åÂâ][áÁ] !== åâ) {
+      if (åÂâ < 10) {
+        ÁãÀ(áä[åÂâ][áÁ], aå + åÂâ * ÁÂã, ãÄ - ÄÀ * 79);
+      } else if (åÂâ < Àaa) {
+        ÁãÀ(áä[åÂâ][âã], áÁa.áâ.x - ÄÀ * 200, áÁa.áâ.y + (-1 + (10 - åÂâ) % 3) * ÁÂã);
       } else {
-        cG(eF[eC][0], eD.áâ.x - ÄÀ * 200 - eN, eD.áâ.y + eN * (-áââ + (ÂåÂ - eC) % áÄA));
+        ÁãÀ(áä[åÂâ][0], áÁa.áâ.x - ÄÀ * 200 - ÁÂã, áÁa.áâ.y + ÁÂã * (-áââ + (ÂåÂ - åÂâ) % áÄA));
       }
     }
   }
   ;
-  function cM(eA, eB, eC) {
+  function áÁâÂã(ã, áã, ÂÂÁÅå) {
     Aá.â.Aäå -= ÀÀ;
-    var eD = Math.max(0, Math.floor(Aá.â.Aäå / 1000));
-    if (eD < 3000) {
-      áá.ÄA(bp, eA / ÄÀ + 51, eB / ÄÀ + 145, 0, áÃ, ÄÁ, 1);
-      if (by[eD] === undefined) {
-        if (eC === 1 && by[eD + 1] !== undefined) {
-          by[eD + 1] = undefined;
+    var áâÃ = Math.max(0, Math.floor(Aá.â.Aäå / 1000));
+    if (áâÃ < 3000) {
+      áá.ÄA(ÃáaåÂ, ã / ÄÀ + 51, áã / ÄÀ + 145, 0, áÃ, ÄÁ, 1);
+      if (åâÂ[áâÃ] === undefined) {
+        if (ÂÂÁÅå === 1 && åâÂ[áâÃ + 1] !== undefined) {
+          åâÂ[áâÃ + 1] = undefined;
         }
-        var eE = Math.floor(eD / 60);
-        var eF = eD % 60;
-        by[eD] = {
-          À: áÅ.åáa((eE < Âãá ? "0" : "") + eE + ":" + (eF < ÂåÂ ? "0" : "") + eF, "'Viga', sans-serif", "#FF0000", 38, 100, ÃAã, 16, 25, ÄÂã, undefined, undefined, undefined, "#000000", ÀaÁÂâ)
+        var aáA = Math.floor(áâÃ / 60);
+        var ãåÂ = áâÃ % 60;
+        åâÂ[áâÃ] = {
+          À: áÅ.åáa((aáA < Âãá ? "0" : "") + aáA + ":" + (ãåÂ < ÂåÂ ? "0" : "") + ãåÂ, "'Viga', sans-serif", "#FF0000", 38, 100, ÃAã, 16, 25, ÄÂã, undefined, undefined, undefined, "#000000", ÀaÁÂâ)
         };
-        by[eD].À.á = Àâ;
+        åâÂ[áâÃ].À.á = Àâ;
       }
-      áá.ÄA(by[eD], eA / ÄÀ + 60, eB / ÄÀ + 145, 0, 0, 0, áââ);
+      áá.ÄA(åâÂ[áâÃ], ã / ÄÀ + 60, áã / ÄÀ + 145, 0, 0, 0, áââ);
     }
   }
   ;
-  function cN(eA, eB) {
-    var eC = Aá.âäÅ;
-    var eD = Aá.ÂÅ;
-    var eE = -Àâ;
+  function ãÃáAÂ(ã, áã) {
+    var âäÅ = Aá.âäÅ;
+    var ÂÅ = Aá.ÂÅ;
+    var âaã = -Àâ;
     if (Aá.ÁáÁ === 1) {
-      eE = 1;
+      âaã = 1;
       Aá.ÁáÁ = 0;
-      cl.clearRect(Àá, äå, ao, ap);
-      for (var eF = ãä; eF < eC.length && eC[eF] !== 0; eF++) {
-        var eG = eD[eC[eF]];
-        if (eC[eF] === Aá.â.id) {
-          eE = 0;
+      ÁäÅ.clearRect(Àá, äå, ãáaÄå, äãåÂÄ);
+      for (var ä = ãä; ä < âäÅ.length && âäÅ[ä] !== 0; ä++) {
+        var â = ÂÅ[âäÅ[ä]];
+        if (âäÅ[ä] === Aá.â.id) {
+          âaã = 0;
         }
-        if (eG.áÄa === Aa) {
+        if (â.áÄa === Aa) {
           break;
         }
-        if (eG.aÃÀ === null) {
-          if (Aá.â.id === eG.id) {
-            eG.aÃÀ = áÅ.åáa(eG.áÄa, "'Viga', sans-serif", "#D6C823", 40, 350, undefined, 0, 12);
+        if (â.aÃÀ === null) {
+          if (Aá.â.id === â.id) {
+            â.aÃÀ = áÅ.åáa(â.áÄa, "'Viga', sans-serif", "#D6C823", 40, 350, undefined, 0, 12);
           } else {
-            eG.aÃÀ = áÅ.åáa(eG.áÄa, "'Viga', sans-serif", "#ffffff", 40, 350, ÅâÃ, AÂ, 12);
+            â.aÃÀ = áÅ.åáa(â.áÄa, "'Viga', sans-serif", "#ffffff", 40, 350, ÅâÃ, AÂ, 12);
           }
         }
-        if (eG.ÅãA === null) {
-          if (Aá.â.id === eG.id) {
-            eG.ÅãA = áÅ.åáa(eG.Aãá, "'Viga', sans-serif", "#D6C823", 40, 150, ÃAã, ÃÀÁ, 12);
+        if (â.ÅãA === null) {
+          if (Aá.â.id === â.id) {
+            â.ÅãA = áÅ.åáa(â.Aãá, "'Viga', sans-serif", "#D6C823", 40, 150, ÃAã, ÃÀÁ, 12);
           } else {
-            eG.ÅãA = áÅ.åáa(eG.Aãá, "'Viga', sans-serif", "#ffffff", 40, 150, undefined, AÀâ, áÀAäå);
+            â.ÅãA = áÅ.åáa(â.Aãá, "'Viga', sans-serif", "#ffffff", 40, 150, undefined, AÀâ, áÀAäå);
           }
         }
-        if (eG.aÃÀ.width !== äå && eG.aÃÀ.height !== 0) {
-          cl.drawImage(eG.aÃÀ, 90, 114 + eF * 50, eG.aÃÀ.width, eG.aÃÀ.height);
+        if (â.aÃÀ.width !== äå && â.aÃÀ.height !== 0) {
+          ÁäÅ.drawImage(â.aÃÀ, 90, 114 + ä * 50, â.aÃÀ.width, â.aÃÀ.height);
         }
-        cl.drawImage(eG.ÅãA, 484, 114 + eF * 50, eG.ÅãA.width, eG.ÅãA.height);
-        var eH = ÀáÃ[eG.aåã].À;
-        if (eH.á === 1) {
-          cl.drawImage(eH, 612, 114 + eF * 50, eH.width, eH.height);
+        ÁäÅ.drawImage(â.ÅãA, 484, 114 + ä * 50, â.ÅãA.width, â.ÅãA.height);
+        var À = ÀáÃ[â.aåã].À;
+        if (À.á === 1) {
+          ÁäÅ.drawImage(À, 612, 114 + ä * 50, À.width, À.height);
         }
       }
-      Aá.â.áAÂaA = eE;
-      if (aÅ === eE) {
-        var eH = ÀáÃ[Aá.â.aåã].À;
-        if (eH.á === 1) {
-          cl.drawImage(eH, 375, 645, eH.width * 1.5, eH.height * 1.5);
+      Aá.â.áAÂaA = âaã;
+      if (aÅ === âaã) {
+        var À = ÀáÃ[Aá.â.aåã].À;
+        if (À.á === 1) {
+          ÁäÅ.drawImage(À, 375, 645, À.width * 1.5, À.height * 1.5);
         }
       }
     }
-    var eI = Aá.â.Ãa;
-    if (eE === ÁÅ || Aá.â.áAÂaA === Àâ && eI !== Aá.â.áÀâ) {
-      var eG = eD[Aá.â.id];
-      cl.clearRect(480, 657, 112, 60);
-      if (Aá.â.áÀâ !== eI) {
-        Aá.â.áÀâ = eI;
-        eG.ÅãA = áÅ.åáa(Ää.ÃÃä(eI), "'Viga', sans-serif", "#ffffff", 40, 150, âÂa, AâÁ, ÄAáäÅ);
+    var Ãa = Aá.â.Ãa;
+    if (âaã === ÁÅ || Aá.â.áAÂaA === Àâ && Ãa !== Aá.â.áÀâ) {
+      var â = ÂÅ[Aá.â.id];
+      ÁäÅ.clearRect(480, 657, 112, 60);
+      if (Aá.â.áÀâ !== Ãa) {
+        Aá.â.áÀâ = Ãa;
+        â.ÅãA = áÅ.åáa(Ää.ÃÃä(Ãa), "'Viga', sans-serif", "#ffffff", 40, 150, âÂa, AâÁ, ÄAáäÅ);
       }
-      cl.drawImage(eG.ÅãA, 484, 662, eG.ÅãA.width, eG.ÅãA.height);
+      ÁäÅ.drawImage(â.ÅãA, 484, 662, â.ÅãA.width, â.ÅãA.height);
     }
-    AÅ.drawImage(ck, eA, eB, ao / 3 * ÄÀ, ap / äaa * ÄÀ);
+    AÅ.drawImage(Áâå, ã, áã, ãáaÄå / 3 * ÄÀ, äãåÂÄ / äaa * ÄÀ);
   }
   ;
-  function cO(eA, eB) {
-    var eC = Aá.ÄÄ.ãá;
-    var eD = eC.Äáa / eC.ââÅ;
-    áá.fillRect(AÅ, eA / ÄÀ + AãÃäÄ, eB / ÄÀ + 71, eD * 189, 16, aq);
-    var eE = Aá.ÄÄ.ÃäÄ;
-    var eD = eE.Äáa / eE.ââÅ;
-    áá.fillRect(AÅ, eA / ÄÀ + ÃåÅ, eB / ÄÀ + 162, 54, -eD * 63, ar);
-    var eF = Aá.ÄÄ.aaå;
-    var eD = eF.Äáa / eF.ââÅ;
-    áá.fillRect(AÅ, eA / ÄÀ + 81, eB / ÄÀ + 162, 54, -eD * 63, as);
-    var eG = Aá.ÄÄ.AÁ;
-    var eD = eG.Äáa / eG.ââÅ;
-    áá.fillRect(AÅ, eA / ÄÀ + 150, eB / ÄÀ + 162, 54, -eD * 63, at);
-    var eH = Aá.ÄÄ.Aaâ;
-    var eD = eH.Äáa / eH.ââÅ;
-    áá.fillRect(AÅ, eA / ÄÀ + 226, eB / ÄÀ + 172, 16, -eD * 77, au);
-    var eI = Aá.aaãåÀ();
-    var eJ;
-    var eK;
-    if (eI >= 10000000) {
-      if (Áå !== c1.á) {
-        c1 = áá.ÃA(Y, c1);
+  function ÁäÁAa(ã, áã) {
+    var ãá = Aá.ÄÄ.ãá;
+    var ãÃ = ãá.Äáa / ãá.ââÅ;
+    áá.fillRect(AÅ, ã / ÄÀ + AãÃäÄ, áã / ÄÀ + 71, ãÃ * 189, 16, áÁâáÀ);
+    /*if (cfg.showHP) {
+      áá.fillText(AÅ, Math.floor(ãá.Äáa), ã / ÄÀ + 100, áã / ÄÀ + 84, "'Viga', sans-serif", "#00FF00", 25, 400, window.undefined, 16, 25, window.undefined, window.undefined, window.undefined, window.undefined, "#000000", 10);
+    }*/
+    var ÃäÄ = Aá.ÄÄ.ÃäÄ;
+    var ãÃ = ÃäÄ.Äáa / ÃäÄ.ââÅ;
+    áá.fillRect(AÅ, ã / ÄÀ + ÃåÅ, áã / ÄÀ + 162, 54, -ãÃ * 63, ãÃÀåÃ);
+    var aaå = Aá.ÄÄ.aaå;
+    var ãÃ = aaå.Äáa / aaå.ââÅ;
+    áá.fillRect(AÅ, ã / ÄÀ + 81, áã / ÄÀ + 162, 54, -ãÃ * 63, ÂåáAÄ);
+    var AÁ = Aá.ÄÄ.AÁ;
+    var ãÃ = AÁ.Äáa / AÁ.ââÅ;
+    áá.fillRect(AÅ, ã / ÄÀ + 150, áã / ÄÀ + 162, 54, -ãÃ * 63, áåaaA);
+    var Aaâ = Aá.ÄÄ.Aaâ;
+    var ãÃ = Aaâ.Äáa / Aaâ.ââÅ;
+    áá.fillRect(AÅ, ã / ÄÀ + 226, áã / ÄÀ + 172, 16, -ãÃ * 77, ÂáÃÅâ);
+    var ÁÅÅ = Aá.aaãåÀ();
+    var À;
+    var aãáÂa;
+    if (ÁÅÅ >= 10000000) {
+      if (Áå !== äåÀ.á) {
+        äåÀ = áá.ÃA(ÅáåäÁ, äåÀ);
         return;
       }
-      eI -= 10000000;
-      eJ = c1;
-      eK = c3;
+      ÁÅÅ -= 10000000;
+      À = äåÀ;
+      aãáÂa = áÅåÃÄ;
     } else {
-      if (c2.á !== Äá) {
-        c2 = áá.ÃA(X, c2);
+      if (ÄAÅ.á !== Äá) {
+        ÄAÅ = áá.ÃA(AÄÁâá, ÄAÅ);
         return;
       }
-      eJ = c2;
-      eK = c4;
+      À = ÄAÅ;
+      aãáÂa = ÃÀÅåâ;
     }
-    var eL = ÄÀ * eJ.width / ÃÃÃ;
-    var eM = eJ.height * ÄÀ / 2;
-    AÅ.drawImage(eJ, eA + ÄÀ * 100, eB + ÄÀ * 14, eL, eM);
-    áá.ÄA(eK, 144.5 + eA / ÄÀ, eB / ÄÀ + 56, eI * aB, 0, 0, 1);
-    var eN = null;
+    var ÅÅ = ÄÀ * À.width / ÃÃÃ;
+    var Âå = À.height * ÄÀ / 2;
+    AÅ.drawImage(À, ã + ÄÀ * 100, áã + ÄÀ * 14, ÅÅ, Âå);
+    áá.ÄA(aãáÂa, 144.5 + ã / ÄÀ, áã / ÄÀ + 56, ÁÅÅ * ÄÂááÅ, 0, 0, 1);
+    var LifeNumberLabel = null;
     if (cfg.showHP) {
-      if (eN === null) {
-        eN = áÅ.åáa(~~eC.Äáa, "'Viga', sans-serif", "#00FF00", 25, 400, window.undefined, 16, 25, window.undefined, window.undefined, window.undefined, window.undefined, "#000000", 10);
+      if (LifeNumberLabel === null) {
+        LifeNumberLabel = áÅ.åáa(~~ãá.Äáa, "'Viga', sans-serif", "#00FF00", 25, 400, window.undefined, 16, 25, window.undefined, window.undefined, window.undefined, window.undefined, "#000000", 10);
       }
-      var eO = eN;
-      var eP = ÄÀ * eO.width / 2.1;
-      var eQ = ÄÀ * eO.height / 2.1;
-      var eR = eA + ÄÀ * 100;
-      var eS = eB + ÄÀ * 14;
-      AÅ.drawImage(eO, eR, eS, eP, eQ);
+      var img2 = LifeNumberLabel;
+      var width = ÄÀ * img2.width / 2.1;
+      var height = ÄÀ * img2.height / 2.1;
+      var posx = ã + ÄÀ * 100;
+      var posy = áã + ÄÀ * 14;
+      AÅ.drawImage(img2, posx, posy, width, height);
     }
   }
   ;
-  function cP(eA, eB, eC, eD, eE, eF) {
-    eA.áâ.x = eC;
-    eA.áâ.y = eD;
-    eA.Áá();
-    var eG = ÁÁ[eB[0]];
-    var eH = eB[äA];
-    if (eH > 1) {
-      if (eE[eH] === undefined) {
-        eE[eH] = {
-          À: áÅ.åáa("x" + eH, "'Black Han Sans', sans-serif", "#ffffff", 30, 250, ãÅâ, ÄAÀ, 12, ÅâÃ, undefined, undefined, undefined, "#000000", 12)
+  function åÀáåâ(äÄ, áä, ã, áã, ÃÁã, ÀÁÃ) {
+    äÄ.áâ.x = ã;
+    äÄ.áâ.y = áã;
+    äÄ.Áá();
+    var Åã = ÁÁ[áä[0]];
+    var ãÀ = áä[äA];
+    if (ãÀ > 1) {
+      if (ÃÁã[ãÀ] === undefined) {
+        ÃÁã[ãÀ] = {
+          À: áÅ.åáa("x" + ãÀ, "'Black Han Sans', sans-serif", "#ffffff", 30, 250, ãÅâ, ÄAÀ, 12, ÅâÃ, undefined, undefined, undefined, "#000000", 12)
         };
-        eE[eH].À.á = åÀ;
+        ÃÁã[ãÀ].À.á = åÀ;
       }
-      áá.ÄA(eE[eH], eC / ÄÀ + 53, eD / ÄÀ + 55, -0.5, 0, 0, âá);
+      áá.ÄA(ÃÁã[ãÀ], ã / ÄÀ + 53, áã / ÄÀ + 55, -0.5, 0, 0, âá);
     }
-    if (eG.ááÃ !== undefined && eG.äáÀÀÂ === undefined) {
-      var eH = eB[3];
-      if (eF[eH] === undefined) {
-        eF[eH] = {
-          À: áÅ.åáa("x" + eH, "'Black Han Sans', sans-serif", "#FFFF00", 30, 250, Âäå, ååä, 12, ãÅâ, undefined, undefined, áÄÅ, "#000000", Aäáåâ)
+    if (Åã.ááÃ !== undefined && Åã.äáÀÀÂ === undefined) {
+      var ãÀ = áä[3];
+      if (ÀÁÃ[ãÀ] === undefined) {
+        ÀÁÃ[ãÀ] = {
+          À: áÅ.åáa("x" + ãÀ, "'Black Han Sans', sans-serif", "#FFFF00", 30, 250, Âäå, ååä, 12, ãÅâ, undefined, undefined, áÄÅ, "#000000", Aäáåâ)
         };
-        eF[eH].À.á = 1;
+        ÀÁÃ[ãÀ].À.á = 1;
       }
-      áá.ÄA(eF[eH], eC / ÄÀ + 53, eD / ÄÀ + 55, -0.5, 0, Àá, Áå);
+      áá.ÄA(ÀÁÃ[ãÀ], ã / ÄÀ + 53, áã / ÄÀ + 55, -0.5, 0, Àá, Áå);
     }
-    if (ÅÁÃ !== eG.AÂÁ) {
-      var eI = Math.floor(eB[3] / 12.8);
-      var eJ = cb[eI];
-      if (eJ.á !== 1) {
-        cb[eI] = áá.ÃA("img/rotten" + eI + ".png", eJ);
+    if (ÅÁÃ !== Åã.AÂÁ) {
+      var ÁÄåãa = Math.floor(áä[3] / 12.8);
+      var À = áÂåÁá[ÁÄåãa];
+      if (À.á !== 1) {
+        áÂåÁá[ÁÄåãa] = áá.ÃA("img/rotten" + ÁÄåãa + ".png", À);
       } else {
-        AÅ.drawImage(eJ, eC + ÄÀ * 0.5, eD, eJ.width * ÄÀ / aâA, eJ.height * ÄÀ / 2);
+        AÅ.drawImage(À, ã + ÄÀ * 0.5, áã, À.width * ÄÀ / aâA, À.height * ÄÀ / 2);
       }
     }
   }
   ;
-  function cQ() {
+  function Ááaaä() {
     if (ÄÁ < äâ.ÄÅÁ) {
       if (äâ.ÄÅÁ > 2500) {
         AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ((3000 - äâ.ÄÅÁ) / 500);
@@ -18030,31 +18043,31 @@ var ÀÂ = function () {
         AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(äâ.ÄÅÁ / 500);
       }
       if (âã === äâ.åAa) {
-        áá.ÄA(c8, äâA, c8.À.ÅÀä / 2, 0, äå, AÂ, 1);
+        áá.ÄA(ÀåAÅÅ, äâA, ÀåAÅÅ.À.ÅÀä / 2, 0, äå, AÂ, 1);
       } else if (äâ.åAa === 1) {
-        áá.ÄA(c7, äâA, c7.À.ÅÀä / Äåã, ÀÄ, 0, 0, 1);
+        áá.ÄA(aáäÃÀ, äâA, aáäÃÀ.À.ÅÀä / Äåã, ÀÄ, 0, 0, 1);
       } else if (äâ.åAa === 2) {
-        áá.ÄA(c6, äâA, c6.À.ÅÀä / åaÁ, ÅÁ, åâ, ãä, âa);
+        áá.ÄA(aÀÄåã, äâA, aÀÄåã.À.ÅÀä / åaÁ, ÅÁ, åâ, ãä, âa);
       } else if (äâ.åAa === 3) {
-        áá.ÄA(c9, äâA, c9.À.ÅÀä / áÂa, 0, AÄ, 0, aÅ);
+        áá.ÄA(áãÃAå, äâA, áãÃAå.À.ÅÀä / áÂa, 0, AÄ, 0, aÅ);
       }
       AÅ.globalAlpha = ÄÂ;
       äâ.ÄÅÁ -= ÀÀ;
     }
   }
   ;
-  function cR(eA, eB) {
-    áá.ÄA(bq, eA / ÄÀ + Äaá - 63, 25 + eB / ÄÀ, 0, ãä, ãa, 1);
-    if (bz[Aá.ãâÃ] === åÅÁ) {
-      bz[Aá.ãâÃ] = {
+  function ÃáÃåa(ã, áã) {
+    áá.ÄA(áÄÀAÀ, ã / ÄÀ + Äaá - 63, 25 + áã / ÄÀ, 0, ãä, ãa, 1);
+    if (ãâÃ[Aá.ãâÃ] === åÅÁ) {
+      ãâÃ[Aá.ãâÃ] = {
         À: áÅ.åáa("#" + Aá.ãâÃ, "'Viga', sans-serif", "#FFFFFF", 60, 140)
       };
-      bz[Aá.ãâÃ].À.á = 1;
+      ãâÃ[Aá.ãâÃ].À.á = 1;
     }
-    áá.ÄA(bz[Aá.ãâÃ], eA / ÄÀ + Äaá - 50, 25 + eB / ÄÀ, åâ, ãa, Aa, 1);
+    áá.ÄA(ãâÃ[Aá.ãâÃ], ã / ÄÀ + Äaá - 50, 25 + áã / ÄÀ, åâ, ãa, Aa, 1);
   }
   ;
-  function cS() {
+  function äåÄäå() {
     this.äÀå = ãÂ;
     this.ÅáA = 0;
     this.âÃÄ = ÁÀ;
@@ -18068,7 +18081,7 @@ var ÀÂ = function () {
     this.ä = åâ;
     this.b = [];
     this.rotate = åâ;
-    for (var eA = ãä; eA < ÂâÅ; eA++) {
+    for (var ä = ãä; ä < ÂâÅ; ä++) {
       this.b.push({
         ÁÀá: áÁ,
         type: ãa
@@ -18076,1361 +18089,1361 @@ var ÀÂ = function () {
     }
   }
   ;
-  var cT = "";
-  var cU = null;
-  function cV(eA, eB, eC, eD, eE, eF, eG) {
-    var eH = Aá.ÂÅ[eD.åÅ];
-    var eI = 0;
-    var eJ = eH.ÂaÅ - ÀÂ.åâå;
-    var eK = eH.ÄÀA - ÀÂ.åâå;
-    if (äå < eJ) {
-      if (eK > ÁÀ) {
-        eI = ÂâA;
-      } else if (eH.ÄÀA > áÁ) {
-        eI = ÀäÄ;
+  var aÄA = "";
+  var äÃÀ = null;
+  function áåÄaÁ(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    var ÀåA = 0;
+    var ÂaÅ = â.ÂaÅ - ÀÂ.åâå;
+    var ÄÀA = â.ÄÀA - ÀÂ.åâå;
+    if (äå < ÂaÅ) {
+      if (ÄÀA > ÁÀ) {
+        ÀåA = ÂâA;
+      } else if (â.ÄÀA > áÁ) {
+        ÀåA = ÀäÄ;
       } else {
-        eI = 1;
+        ÀåA = 1;
       }
-    } else if (ãa < eK) {
-      eI = 2;
-    } else if (eH.ÄÀA > 0) {
-      eI = AaÀ;
+    } else if (ãa < ÄÀA) {
+      ÀåA = 2;
+    } else if (â.ÄÀA > 0) {
+      ÀåA = AaÀ;
     }
-    if (eD.åÅ == Aá.â.id && cfg.changeMyModel) {
-      eI = cfg.myPlayerModel;
+    if (Ä.åÅ == Aá.â.id && cfg.changeMyModel) {
+      ÀåA = cfg.myPlayerModel;
     }
-    var eL = eA.Aâä[eI];
-    var eM = åâ;
-    var eN = eD.state & 254;
-    var eO = eB.ÂÄ;
-    var eP = eB.áÀ;
-    if (âÂÄ === eN) {
-      if (eH.ÂÄã === -1) {
-        var eQ = eD.ÅÁa >> ÄäÄ & 255;
-        if (ÅÁ !== Äå.AA.ÂAâ[eQ] && ÀÂ.åâå - eH.ÄäÀâÄ > 800) {
-          eH.ÄäÀâÄ = ÀÂ.åâå;
-          var eR = Math.floor(eB.ÀÁâ * Math.random());
-          Äå.âå(Äå.AA.ÂAâ[eQ][eR], eB.ÂAã, áâA.ÃÂ(Aá.â.x, Aá.â.y, eD.x, eD.y) / âÂÄ, eB.Ãåa);
+    var âÁÁ = áåa.Aâä[ÀåA];
+    var ÂÀÃ = åâ;
+    var ÁaA = Ä.state & 254;
+    var ÂÄÂ = ÁÂ.ÂÄ;
+    var ÃÄÀ = ÁÂ.áÀ;
+    if (âÂÄ === ÁaA) {
+      if (â.ÂÄã === -1) {
+        var ÂÂå = Ä.ÅÁa >> ÄäÄ & 255;
+        if (ÅÁ !== Äå.AA.ÂAâ[ÂÂå] && ÀÂ.åâå - â.ÄäÀâÄ > 800) {
+          â.ÄäÀâÄ = ÀÂ.åâå;
+          var äÅÄ = Math.floor(ÁÂ.ÀÁâ * Math.random());
+          Äå.âå(Äå.AA.ÂAâ[ÂÂå][äÅÄ], ÁÂ.ÂAã, áâA.ÃÂ(Aá.â.x, Aá.â.y, Ä.x, Ä.y) / âÂÄ, ÁÂ.Ãåa);
         }
-        eH.ÂÄã = 0;
+        â.ÂÄã = 0;
       }
-      if (eH.âÁã === 1) {
-        eH.ÂÄã = Math.max(0, eH.ÂÄã - ÀÀ);
+      if (â.âÁã === 1) {
+        â.ÂÄã = Math.max(0, â.ÂÄã - ÀÀ);
       } else {
-        eH.ÂÄã = Math.min(eB.áAá, eH.ÂÄã + ÀÀ);
+        â.ÂÄã = Math.min(ÁÂ.áAá, â.ÂÄã + ÀÀ);
       }
-      var eS = eH.ÂÄã / eB.áAá;
-      eM = eB.ÂÀÃ * eS;
-      if (eH.ÂÄã === äá || eH.ÂÄã === eB.áAá) {
-        eH.âÁã *= -1;
+      var ãÃ = â.ÂÄã / ÁÂ.áAá;
+      ÂÀÃ = ÁÂ.ÂÀÃ * ãÃ;
+      if (â.ÂÄã === äá || â.ÂÄã === ÁÂ.áAá) {
+        â.âÁã *= -1;
       }
-    } else if (áâA.ÅáÂ(eD.x, eD.y, eD.Åaä, eD.ÂÅä) < äA) {
-      eH.ÂÄã = -Âã;
-      eH.Äa = (eH.Äa + ÀÀ) % 1500;
-      if (eH.Àä !== AÂ) {
-        if (eH.Àä < 400) {
-          eH.Àä = 800 - eH.Àä;
+    } else if (áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä) < äA) {
+      â.ÂÄã = -Âã;
+      â.Äa = (â.Äa + ÀÀ) % 1500;
+      if (â.Àä !== AÂ) {
+        if (â.Àä < 400) {
+          â.Àä = 800 - â.Àä;
         }
-        eH.Àä = eH.Àä + ÀÀ;
-        if (eH.Àä > 800) {
-          eH.Àä = 0;
+        â.Àä = â.Àä + ÀÀ;
+        if (â.Àä > 800) {
+          â.Àä = 0;
         }
       }
     } else {
-      eH.ÂÄã = -1;
-      if (eD.aÁá > äâä[âAä].aÁá) {
-        eH.Àä = eH.Àä + ÀÀ * 1.9;
+      â.ÂÄã = -1;
+      if (Ä.aÁá > äâä[âAä].aÁá) {
+        â.Àä = â.Àä + ÀÀ * 1.9;
       } else {
-        eH.Àä = eH.Àä + ÀÀ;
+        â.Àä = â.Àä + ÀÀ;
       }
-      if (eH.Àä > 800) {
-        eH.orientation *= -1;
-        eH.Àä = eH.Àä % 800;
+      if (â.Àä > 800) {
+        â.orientation *= -1;
+        â.Àä = â.Àä % 800;
       }
-      if (eH.Äa !== ãÂ) {
-        if (eH.Äa < 750) {
-          eH.Äa = 1500 - eH.Äa;
+      if (â.Äa !== ãÂ) {
+        if (â.Äa < 750) {
+          â.Äa = 1500 - â.Äa;
         }
-        eH.Äa = eH.Äa + ÀÀ;
-        if (eH.Äa > 1500) {
-          eH.Äa = ãÁ;
+        â.Äa = â.Äa + ÀÀ;
+        if (â.Äa > 1500) {
+          â.Äa = ãÁ;
         }
       }
     }
-    var eT = (eH.Äa < 750 ? eH.Äa / 750 : âa - (eH.Äa - 750) / 750) * eB.Äa;
-    var eU = eB.Àä * (eH.Àä < 400 ? eH.Àä / 400 : 1 - (eH.Àä - 400) / 400);
-    var eV = âåã === eC.ÂÄ ? eL.ÂÄ : eC.ÂÄ;
-    áá.ÄA(eV, eF, eG, eO.angle + eD.angle, eO.x + eU * eH.orientation + eM + eT, eO.y, eE);
-    eV = aAÃÃÂ === eC.áÀ ? eL.áÀ : eC.áÀ;
-    áá.ÄA(eV, eF, eG, -eP.angle + eD.angle, eP.x + eH.orientation * eU + eM + eT, eP.y, eE);
-    var eW = eB.ÁÂ;
-    áá.ÄA(eW, eF, eG, eD.angle, eW.x + eU * eH.orientation + eT + eM, eW.y, eE);
-    if (eD.äÀA > 0) {
-      var eX = 1;
-      eD.äÀA -= ÀÀ;
-      var eS = AÂ;
-      if (eD.äÀA > 150) {
-        eS = Ää.ÁÃ.AÃa((300 - eD.äÀA) / 300);
+    var Äa = (â.Äa < 750 ? â.Äa / 750 : âa - (â.Äa - 750) / 750) * ÁÂ.Äa;
+    var Àä = ÁÂ.Àä * (â.Àä < 400 ? â.Àä / 400 : 1 - (â.Àä - 400) / 400);
+    var Âäâ = âåã === ÄÁá.ÂÄ ? âÁÁ.ÂÄ : ÄÁá.ÂÄ;
+    áá.ÄA(Âäâ, ã, áã, ÂÄÂ.angle + Ä.angle, ÂÄÂ.x + Àä * â.orientation + ÂÀÃ + Äa, ÂÄÂ.y, åÃ);
+    Âäâ = aAÃÃÂ === ÄÁá.áÀ ? âÁÁ.áÀ : ÄÁá.áÀ;
+    áá.ÄA(Âäâ, ã, áã, -ÃÄÀ.angle + Ä.angle, ÃÄÀ.x + â.orientation * Àä + ÂÀÃ + Äa, ÃÄÀ.y, åÃ);
+    var Åã = ÁÂ.ÁÂ;
+    áá.ÄA(Åã, ã, áã, Ä.angle, Åã.x + Àä * â.orientation + Äa + ÂÀÃ, Åã.y, åÃ);
+    if (Ä.äÀA > 0) {
+      var ááÂ = 1;
+      Ä.äÀA -= ÀÀ;
+      var ãÃ = AÂ;
+      if (Ä.äÀA > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.äÀA) / 300);
       } else {
-        eS = Ää.ÁÃ.ÃaÅ(eD.äÀA / 150);
-        eX += (1 - eS) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.äÀA / 150);
+        ááÂ += (1 - ãÃ) * 0.2;
       }
-      AÅ.globalAlpha = Math.min(âá, Math.max(0, eS));
-      áá.ÄA(eA.ÃäÄ, eF, eG, eD.angle, áÃ, ÅÁ, eX);
+      AÅ.globalAlpha = Math.min(âá, Math.max(0, ãÃ));
+      áá.ÄA(áåa.ÃäÄ, ã, áã, Ä.angle, áÃ, ÅÁ, ááÂ);
       AÅ.globalAlpha = áââ;
     }
-    if (ãä < eD.ÃÁ) {
-      var eX = 1;
-      eD.ÃÁ -= ÀÀ;
-      var eS = ãa;
-      if (eD.ÃÁ > 150) {
-        eS = Ää.ÁÃ.AÃa((300 - eD.ÃÁ) / 300);
+    if (ãä < Ä.ÃÁ) {
+      var ááÂ = 1;
+      Ä.ÃÁ -= ÀÀ;
+      var ãÃ = ãa;
+      if (Ä.ÃÁ > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.ÃÁ) / 300);
       } else {
-        eS = Ää.ÁÃ.ÃaÅ(eD.ÃÁ / 150);
-        eX += (1 - eS) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ÃÁ / 150);
+        ááÂ += (1 - ãÃ) * 0.2;
       }
-      eF += Math.sin(eD.áÀÅ) * eS * 3;
-      eG += Math.cos(eD.áÀÅ) * eS * ÁÁa;
-      AÅ.globalAlpha = Math.min(Áå, Math.max(ãa, eS));
-      áá.ÄA(eA.ÃÁ, eF, eG, eD.angle, 0, AÄ, eX);
+      ã += Math.sin(Ä.áÀÅ) * ãÃ * 3;
+      áã += Math.cos(Ä.áÀÅ) * ãÃ * ÁÁa;
+      AÅ.globalAlpha = Math.min(Áå, Math.max(ãa, ãÃ));
+      áá.ÄA(áåa.ÃÁ, ã, áã, Ä.angle, 0, AÄ, ááÂ);
       AÅ.globalAlpha = 1;
     }
-    if (eD.ââ > 0) {
-      var eX = ÁÅ;
-      eD.ââ -= ÀÀ;
-      if (eD.ââ > 150) {
-        AÅ.globalAlpha = Math.min(ÁÅ, Math.max(Aa, Ää.ÁÃ.AÃa((300 - eD.ââ) / 300)));
+    if (Ä.ââ > 0) {
+      var ááÂ = ÁÅ;
+      Ä.ââ -= ÀÀ;
+      if (Ä.ââ > 150) {
+        AÅ.globalAlpha = Math.min(ÁÅ, Math.max(Aa, Ää.ÁÃ.AÃa((300 - Ä.ââ) / 300)));
       } else {
-        var eS = Ää.ÁÃ.ÃaÅ(eD.ââ / 150);
-        eX += (1 - eS) * 0.2;
-        AÅ.globalAlpha = Math.min(åä, Math.max(0, eS));
+        var ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ââ / 150);
+        ááÂ += (1 - ãÃ) * 0.2;
+        AÅ.globalAlpha = Math.min(åä, Math.max(0, ãÃ));
       }
-      áá.ÄA(eA.ââ, eF, eG, eD.angle, Aa, áÁ, eX);
+      áá.ÄA(áåa.ââ, ã, áã, Ä.angle, Aa, áÁ, ááÂ);
       AÅ.globalAlpha = aÅ;
     }
-    áá.ÄA(eL.head, eF, eG, eD.angle, ãÁ, 0, eE);
-    if (eC.head !== ÃAã) {
-      áá.ÄA(eC.head, eF, eG, eD.angle, 0, äá, eE);
+    áá.ÄA(âÁÁ.head, ã, áã, Ä.angle, ãÁ, 0, åÃ);
+    if (ÄÁá.head !== ÃAã) {
+      áá.ÄA(ÄÁá.head, ã, áã, Ä.angle, 0, äá, åÃ);
     }
   }
   ;
-  function cW() {
-    ba = áá.ãåa(ba, ÀÂ.scale + bE[0] + bE[ãâ] + bE[ããÄ] + bE[3], b9);
-    bb = ÄÀ;
-    ÄÀ += ÄÀ * ba;
+  function ãÄÄÅá() {
+    âÀÅ = áá.ãåa(âÀÅ, ÀÂ.scale + aÄÂ[0] + aÄÂ[ãâ] + aÄÂ[ããÄ] + aÄÂ[3], aÁáÂã);
+    Ááåáá = ÄÀ;
+    ÄÀ += ÄÀ * âÀÅ;
     Äaá = aãA / ÄÀ;
     aÅä = äää / ÄÀ;
   }
   ;
-  function cX(eA, eB, eC, eD, eE, eF, eG) {
-    var eH = Aá.ÂÅ[eD.åÅ];
-    var eI = äá;
-    var eJ = eH.ÂaÅ - ÀÂ.åâå;
-    var eK = eH.ÄÀA - ÀÂ.åâå;
-    if (âã < eJ) {
-      if (eK > 0) {
-        eI = 3;
-      } else if (eH.ÄÀA > äå) {
-        eI = 5;
+  function âÅâåå(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    var ÀåA = äá;
+    var ÂaÅ = â.ÂaÅ - ÀÂ.åâå;
+    var ÄÀA = â.ÄÀA - ÀÂ.åâå;
+    if (âã < ÂaÅ) {
+      if (ÄÀA > 0) {
+        ÀåA = 3;
+      } else if (â.ÄÀA > äå) {
+        ÀåA = 5;
       } else {
-        eI = 1;
+        ÀåA = 1;
       }
-    } else if (ÀÄ < eK) {
-      eI = Äåã;
-    } else if (eH.ÄÀA > 0) {
-      eI = 4;
+    } else if (ÀÄ < ÄÀA) {
+      ÀåA = Äåã;
+    } else if (â.ÄÀA > 0) {
+      ÀåA = 4;
     }
-    if (eD.åÅ == Aá.â.id && cfg.changeMyModel) {
-      eI = cfg.myPlayerModel;
+    if (Ä.åÅ == Aá.â.id && cfg.changeMyModel) {
+      ÀåA = cfg.myPlayerModel;
     }
-    var eL = eA.Aâä[eI];
-    var eM = åâ;
-    var eN = 0;
-    var eO = ÄÁ;
-    var eP = -1;
-    var eQ = eB.ÂÄ;
-    var eR = eB.áÀ;
-    var eS = eH.áåã;
-    if (eD.Âa > 0) {
-      if (eD.áÃa === eD.Âa) {
-        for (var eT = 0; eS.length > eT; eT++) {
-          var eU = eS[eT];
-          if (eU.åÁ <= 0) {
-            eU.type = eB.Åãå;
-            eU.åÁ = eB.áãa;
-            eU.x = eF + Math.sin(eD.angle) * 44;
-            eU.y = eG + Math.cos(eD.angle) * 44;
-            var eV = -Math.PI / 2.5 + eD.angle + Math.random() * -Math.PI / 3.5;
-            eU.ÄáA = Math.sin(eV);
-            eU.áÂå = Math.cos(eV);
+    var âÁÁ = áåa.Aâä[ÀåA];
+    var ÂÀÃ = åâ;
+    var ÅÄÁ = 0;
+    var ãâÁ = ÄÁ;
+    var ÄÁÁ = -1;
+    var ÂÄÂ = ÁÂ.ÂÄ;
+    var ÃÄÀ = ÁÂ.áÀ;
+    var áåã = â.áåã;
+    if (Ä.Âa > 0) {
+      if (Ä.áÃa === Ä.Âa) {
+        for (var ä = 0; áåã.length > ä; ä++) {
+          var Åãå = áåã[ä];
+          if (Åãå.åÁ <= 0) {
+            Åãå.type = ÁÂ.Åãå;
+            Åãå.åÁ = ÁÂ.áãa;
+            Åãå.x = ã + Math.sin(Ä.angle) * 44;
+            Åãå.y = áã + Math.cos(Ä.angle) * 44;
+            var Äã = -Math.PI / 2.5 + Ä.angle + Math.random() * -Math.PI / 3.5;
+            Åãå.ÄáA = Math.sin(Äã);
+            Åãå.áÂå = Math.cos(Äã);
             break;
           }
         }
       }
-      eD.Âa = Math.max(0, eD.Âa - ÀÀ);
-      var eW = eD.Âa > 80 ? 1 - (eD.Âa - 80) / 100 : eD.Âa / 80;
-      if (ÅÁ === eB.AÂa) {
-        var eX = eA.ÂÂá[eB.ÂÂá].length;
-        for (var eY = ãÂ; eX > eY; eY++) {
-          if (eD.Âa > eB.åÁ - (eY + 1) * 30) {
-            eP = eY;
+      Ä.Âa = Math.max(0, Ä.Âa - ÀÀ);
+      var ãÃ = Ä.Âa > 80 ? 1 - (Ä.Âa - 80) / 100 : Ä.Âa / 80;
+      if (ÅÁ === ÁÂ.AÂa) {
+        var âÁAÁâ = áåa.ÂÂá[ÁÂ.ÂÂá].length;
+        for (var ÂÂá = ãÂ; âÁAÁâ > ÂÂá; ÂÂá++) {
+          if (Ä.Âa > ÁÂ.åÁ - (ÂÂá + 1) * 30) {
+            ÄÁÁ = ÂÂá;
             break;
           }
         }
       }
-      eO = eB.ãâÁ * eW;
-      eN = eB.ÅÄÁ * eW;
-      eM = eW * eB.ÂÀÃ;
-    } else if (áâA.ÅáÂ(eD.x, eD.y, eD.Åaä, eD.ÂÅä) < 1) {
-      eH.Äa = (eH.Äa + ÀÀ) % 1500;
-      if (eH.Àä !== 0) {
-        if (eH.Àä < 400) {
-          eH.Àä = 800 - eH.Àä;
+      ãâÁ = ÁÂ.ãâÁ * ãÃ;
+      ÅÄÁ = ÁÂ.ÅÄÁ * ãÃ;
+      ÂÀÃ = ãÃ * ÁÂ.ÂÀÃ;
+    } else if (áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä) < 1) {
+      â.Äa = (â.Äa + ÀÀ) % 1500;
+      if (â.Àä !== 0) {
+        if (â.Àä < 400) {
+          â.Àä = 800 - â.Àä;
         }
-        eH.Àä = eH.Àä + ÀÀ;
-        if (eH.Àä > 800) {
-          eH.Àä = 0;
+        â.Àä = â.Àä + ÀÀ;
+        if (â.Àä > 800) {
+          â.Àä = 0;
         }
       }
     } else {
-      if (eD.aÁá > äâä[âAä].aÁá) {
-        eH.Àä = eH.Àä + ÀÀ * 1.9;
+      if (Ä.aÁá > äâä[âAä].aÁá) {
+        â.Àä = â.Àä + ÀÀ * 1.9;
       } else {
-        eH.Àä = eH.Àä + ÀÀ;
+        â.Àä = â.Àä + ÀÀ;
       }
-      if (eH.Àä > 800) {
-        eH.orientation *= -ÀA;
-        eH.Àä = eH.Àä % 800;
+      if (â.Àä > 800) {
+        â.orientation *= -ÀA;
+        â.Àä = â.Àä % 800;
       }
-      if (AÄ !== eH.Äa) {
-        if (eH.Äa < 750) {
-          eH.Äa = 1500 - eH.Äa;
+      if (AÄ !== â.Äa) {
+        if (â.Äa < 750) {
+          â.Äa = 1500 - â.Äa;
         }
-        eH.Äa = eH.Äa + ÀÀ;
-        if (eH.Äa > 1500) {
-          eH.Äa = åâ;
+        â.Äa = â.Äa + ÀÀ;
+        if (â.Äa > 1500) {
+          â.Äa = åâ;
         }
       }
     }
-    var eZ = (eH.Äa < 750 ? eH.Äa / 750 : âa - (eH.Äa - 750) / 750) * eB.Äa;
-    var f0 = (eH.Àä < 400 ? eH.Àä / 400 : 1 - (eH.Àä - 400) / 400) * eB.Àä;
-    var f1 = eC.ÂÄ === undefined ? eL.ÂÄ : eC.ÂÄ;
-    áá.ÄA(f1, eF, eG, eQ.angle + eD.angle, eQ.x + eH.orientation * f0 + eM + eZ, eQ.y, eE);
-    f1 = eC.áÀ === undefined ? eL.áÀ : eC.áÀ;
-    áá.ÄA(f1, eF, eG, -eR.angle + eD.angle, eR.x + f0 * eH.orientation + eM + eZ, eR.y, eE);
-    var f2 = eB.ÁÂ;
-    if (eP >= ãÂ && eB.AÂa === 0) {
-      var eY = eA.ÂÂá[eB.ÂÂá][eP];
-      áá.ÄA(eY, eF, eG, eD.angle, f2.x + eH.orientation * f0 + eZ + eN + eB.ÁAÂ, f2.y, eE);
+    var Äa = (â.Äa < 750 ? â.Äa / 750 : âa - (â.Äa - 750) / 750) * ÁÂ.Äa;
+    var Àä = (â.Àä < 400 ? â.Àä / 400 : 1 - (â.Àä - 400) / 400) * ÁÂ.Àä;
+    var Âäâ = ÄÁá.ÂÄ === undefined ? âÁÁ.ÂÄ : ÄÁá.ÂÄ;
+    áá.ÄA(Âäâ, ã, áã, ÂÄÂ.angle + Ä.angle, ÂÄÂ.x + â.orientation * Àä + ÂÀÃ + Äa, ÂÄÂ.y, åÃ);
+    Âäâ = ÄÁá.áÀ === undefined ? âÁÁ.áÀ : ÄÁá.áÀ;
+    áá.ÄA(Âäâ, ã, áã, -ÃÄÀ.angle + Ä.angle, ÃÄÀ.x + Àä * â.orientation + ÂÀÃ + Äa, ÃÄÀ.y, åÃ);
+    var Åã = ÁÂ.ÁÂ;
+    if (ÄÁÁ >= ãÂ && ÁÂ.AÂa === 0) {
+      var ÂÂá = áåa.ÂÂá[ÁÂ.ÂÂá][ÄÁÁ];
+      áá.ÄA(ÂÂá, ã, áã, Ä.angle, Åã.x + â.orientation * Àä + Äa + ÅÄÁ + ÁÂ.ÁAÂ, Åã.y, åÃ);
     }
-    áá.ÄA(f2, eF, eG, eD.angle, f2.x + eH.orientation * f0 + eZ + eN, f2.y, eE);
-    for (var eT = 0; eT < eS.length; eT++) {
-      var eU = eS[eT];
-      if (AÄ < eU.åÁ) {
-        eU.x += eU.ÄáA * ÀÀ * 0.18;
-        eU.y += eU.áÂå * ÀÀ * 0.18;
-        if (eU.åÁ < 200 && Âã === AÅ.globalAlpha) {
-          AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(eU.åÁ / 200);
-          áá.ÄA(eA.áåã[eU.type], eU.x, eU.y, eU.åÁ * 0.007, 0, ãÁ, eE);
+    áá.ÄA(Åã, ã, áã, Ä.angle, Åã.x + â.orientation * Àä + Äa + ÅÄÁ, Åã.y, åÃ);
+    for (var ä = 0; ä < áåã.length; ä++) {
+      var Åãå = áåã[ä];
+      if (AÄ < Åãå.åÁ) {
+        Åãå.x += Åãå.ÄáA * ÀÀ * 0.18;
+        Åãå.y += Åãå.áÂå * ÀÀ * 0.18;
+        if (Åãå.åÁ < 200 && Âã === AÅ.globalAlpha) {
+          AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(Åãå.åÁ / 200);
+          áá.ÄA(áåa.áåã[Åãå.type], Åãå.x, Åãå.y, Åãå.åÁ * 0.007, 0, ãÁ, åÃ);
           AÅ.globalAlpha = 1;
         } else {
-          áá.ÄA(eA.áåã[eU.type], eU.x, eU.y, eU.åÁ * 0.007, 0, 0, eE);
+          áá.ÄA(áåa.áåã[Åãå.type], Åãå.x, Åãå.y, Åãå.åÁ * 0.007, 0, 0, åÃ);
         }
-        eU.åÁ -= ÀÀ;
+        Åãå.åÁ -= ÀÀ;
       }
     }
-    if (eD.ÃÁ > Àá) {
-      var f3 = 1;
-      eD.ÃÁ -= ÀÀ;
-      var eW = 0;
-      if (eD.ÃÁ > 150) {
-        eW = Ää.ÁÃ.AÃa((300 - eD.ÃÁ) / 300);
+    if (Ä.ÃÁ > Àá) {
+      var ááÂ = 1;
+      Ä.ÃÁ -= ÀÀ;
+      var ãÃ = 0;
+      if (Ä.ÃÁ > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.ÃÁ) / 300);
       } else {
-        eW = Ää.ÁÃ.ÃaÅ(eD.ÃÁ / 150);
-        f3 += (1 - eW) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ÃÁ / 150);
+        ááÂ += (1 - ãÃ) * 0.2;
       }
-      eF += eW * Math.sin(eD.áÀÅ) * ÂÀá;
-      eG += eW * Math.cos(eD.áÀÅ) * 3;
-      AÅ.globalAlpha = Math.min(aÅ, Math.max(0, eW));
-      áá.ÄA(eA.ÃÁ, eF, eG, eD.angle, eO, 0, f3);
+      ã += ãÃ * Math.sin(Ä.áÀÅ) * ÂÀá;
+      áã += ãÃ * Math.cos(Ä.áÀÅ) * 3;
+      AÅ.globalAlpha = Math.min(aÅ, Math.max(0, ãÃ));
+      áá.ÄA(áåa.ÃÁ, ã, áã, Ä.angle, ãâÁ, 0, ááÂ);
       AÅ.globalAlpha = 1;
     }
-    if (áÁ < eD.ââ) {
-      var f3 = 1;
-      eD.ââ -= ÀÀ;
-      if (eD.ââ > 150) {
-        AÅ.globalAlpha = Math.min(1, Math.max(ÁÀ, Ää.ÁÃ.AÃa((300 - eD.ââ) / 300)));
+    if (áÁ < Ä.ââ) {
+      var ááÂ = 1;
+      Ä.ââ -= ÀÀ;
+      if (Ä.ââ > 150) {
+        AÅ.globalAlpha = Math.min(1, Math.max(ÁÀ, Ää.ÁÃ.AÃa((300 - Ä.ââ) / 300)));
       } else {
-        var eW = Ää.ÁÃ.ÃaÅ(eD.ââ / 150);
-        f3 += (ÄÂ - eW) * 0.2;
-        AÅ.globalAlpha = Math.min(ÀA, Math.max(AÄ, eW));
+        var ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ââ / 150);
+        ááÂ += (ÄÂ - ãÃ) * 0.2;
+        AÅ.globalAlpha = Math.min(ÀA, Math.max(AÄ, ãÃ));
       }
-      áá.ÄA(eA.ââ, eF, eG, eD.angle, eO, AÂ, f3);
+      áá.ÄA(áåa.ââ, ã, áã, Ä.angle, ãâÁ, AÂ, ááÂ);
       AÅ.globalAlpha = Äá;
     }
-    áá.ÄA(eL.head, eF, eG, eD.angle, eO, áÁ, eE);
-    if (eC.head !== undefined) {
-      áá.ÄA(eC.head, eF, eG, eD.angle, eO, 0, eE);
+    áá.ÄA(âÁÁ.head, ã, áã, Ä.angle, ãâÁ, áÁ, åÃ);
+    if (ÄÁá.head !== undefined) {
+      áá.ÄA(ÄÁá.head, ã, áã, Ä.angle, ãâÁ, 0, åÃ);
     }
   }
   ;
-  function cY() {
-    var eA = Math.min(ÃÁå.height - bh, Math.max(0, (n - bh) / 2 + Math.floor(b6 / j - bh / ÅÂÂ) + ÂA));
-    var eB = Math.min(ÃÁå.width - bg, Math.max(0, (m - bg) / 2 + Math.floor(b5 / j - bg / ããÁ) + 1));
-    var eC = eA + bh;
-    var eD = eB + bg;
-    for (var eE = eA; eC > eE; eE++) {
-      for (var eF = eB; eF < eD; eF++) {
-        var eG = ÃÁå.AåaÄã[eE][eF];
+  function âäâáÃ() {
+    var Ääåáá = Math.min(ÃÁå.height - äåÁ, Math.max(0, (áAã - äåÁ) / 2 + Math.floor(ÁâÃãa / ááá - äåÁ / ÅÂÂ) + ÂA));
+    var aAáÃÀ = Math.min(ÃÁå.width - Åâa, Math.max(0, (Ääå - Åâa) / 2 + Math.floor(äáÁÃå / ááá - Åâa / ããÁ) + 1));
+    var Âå = Ääåáá + äåÁ;
+    var ÅÅ = aAáÃÀ + Åâa;
+    for (var ä = Ääåáá; Âå > ä; ä++) {
+      for (var åã = aAáÃÀ; åã < ÅÅ; åã++) {
+        var Ä = ÃÁå.AåaÄã[ä][åã];
       }
     }
   }
   ;
-  function cZ(eA, eB, eC, eD, eE, eF, eG) {
-    var eH = Aá.ÂÅ[eD.åÅ];
-    var eI = 0;
-    var eJ = eH.ÂaÅ - ÀÂ.åâå;
-    var eK = eH.ÄÀA - ÀÂ.åâå;
-    if (ÄÁ < eJ) {
-      if (âã < eK) {
-        eI = 3;
-      } else if (ÅÁ < eH.ÄÀA) {
-        eI = ÃÀÁ;
+  function ÂááÅÁ(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    var ÀåA = 0;
+    var ÂaÅ = â.ÂaÅ - ÀÂ.åâå;
+    var ÄÀA = â.ÄÀA - ÀÂ.åâå;
+    if (ÄÁ < ÂaÅ) {
+      if (âã < ÄÀA) {
+        ÀåA = 3;
+      } else if (ÅÁ < â.ÄÀA) {
+        ÀåA = ÃÀÁ;
       } else {
-        eI = 1;
+        ÀåA = 1;
       }
-    } else if (eK > 0) {
-      eI = 2;
-    } else if (eH.ÄÀA > 0) {
-      eI = 4;
+    } else if (ÄÀA > 0) {
+      ÀåA = 2;
+    } else if (â.ÄÀA > 0) {
+      ÀåA = 4;
     }
-    if (eD.åÅ == Aá.â.id && cfg.changeMyModel) {
-      eI = cfg.myPlayerModel;
+    if (Ä.åÅ == Aá.â.id && cfg.changeMyModel) {
+      ÀåA = cfg.myPlayerModel;
     }
-    var eL = eA.Aâä[eI];
-    var eM = 0;
-    var eN = 0;
-    var eO = äå;
-    var eP = 0;
-    var eQ = eB.ÂÄ;
-    var eR = eB.áÀ;
-    if (eD.Âa > 0) {
-      eD.Âa = Math.max(ãä, eD.Âa - ÀÀ);
-      eX = eD.Âa > eB.âÃÂ ? 1 - (eD.Âa - eB.âÃÂ) / (eB.åÁ - eB.âÃÂ) : eD.Âa / eB.âÃÂ;
-      eM = -Ää.ÁÃ.ÄáÀ(eX) * 0.4;
-      eP = eX * 3;
-      eN = eR.ÃÂ * eX;
-      eO = eX * eQ.ÃÂ;
-    } else if (ãâ > áâA.ÅáÂ(eD.x, eD.y, eD.Åaä, eD.ÂÅä)) {
-      eH.Äa = (eH.Äa + ÀÀ) % 1500;
-      if (eH.Àä !== 0) {
-        if (eH.Àä < 400) {
-          eH.Àä = 800 - eH.Àä;
+    var âÁÁ = áåa.Aâä[ÀåA];
+    var aáÂ = 0;
+    var ÁAå = 0;
+    var äâÃ = äå;
+    var AåÅ = 0;
+    var ÂÄÂ = ÁÂ.ÂÄ;
+    var ÃÄÀ = ÁÂ.áÀ;
+    if (Ä.Âa > 0) {
+      Ä.Âa = Math.max(ãä, Ä.Âa - ÀÀ);
+      ãÃ = Ä.Âa > ÁÂ.âÃÂ ? 1 - (Ä.Âa - ÁÂ.âÃÂ) / (ÁÂ.åÁ - ÁÂ.âÃÂ) : Ä.Âa / ÁÂ.âÃÂ;
+      aáÂ = -Ää.ÁÃ.ÄáÀ(ãÃ) * 0.4;
+      AåÅ = ãÃ * 3;
+      ÁAå = ÃÄÀ.ÃÂ * ãÃ;
+      äâÃ = ãÃ * ÂÄÂ.ÃÂ;
+    } else if (ãâ > áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä)) {
+      â.Äa = (â.Äa + ÀÀ) % 1500;
+      if (â.Àä !== 0) {
+        if (â.Àä < 400) {
+          â.Àä = 800 - â.Àä;
         }
-        eH.Àä = eH.Àä + ÀÀ;
-        if (eH.Àä > 800) {
-          eH.Àä = 0;
+        â.Àä = â.Àä + ÀÀ;
+        if (â.Àä > 800) {
+          â.Àä = 0;
         }
       }
     } else {
-      if (äâä[âAä].aÁá < eD.aÁá) {
-        eH.Àä = eH.Àä + ÀÀ * 1.9;
+      if (äâä[âAä].aÁá < Ä.aÁá) {
+        â.Àä = â.Àä + ÀÀ * 1.9;
       } else {
-        eH.Àä = eH.Àä + ÀÀ;
+        â.Àä = â.Àä + ÀÀ;
       }
-      if (eH.Àä > 800) {
-        eH.orientation *= -åÀ;
-        eH.Àä = eH.Àä % 800;
+      if (â.Àä > 800) {
+        â.orientation *= -åÀ;
+        â.Àä = â.Àä % 800;
       }
-      if (eH.Äa !== 0) {
-        if (eH.Äa < 750) {
-          eH.Äa = 1500 - eH.Äa;
+      if (â.Äa !== 0) {
+        if (â.Äa < 750) {
+          â.Äa = 1500 - â.Äa;
         }
-        eH.Äa = eH.Äa + ÀÀ;
-        if (eH.Äa > 1500) {
-          eH.Äa = 0;
+        â.Äa = â.Äa + ÀÀ;
+        if (â.Äa > 1500) {
+          â.Äa = 0;
         }
       }
     }
-    var eS = (eH.Äa < 750 ? eH.Äa / 750 : 1 - (eH.Äa - 750) / 750) * eB.Äa;
-    var eT = eB.Àä * (eH.Àä < 400 ? eH.Àä / 400 : âá - (eH.Àä - 400) / 400);
-    var eU = eB.ÁÂ;
-    áá.åáÃaÁ(eU, eF, eG, eU.angle + eD.angle + eS, eU.x + eT * eH.orientation, eU.y, eE, eU.Åáä * eM, eU.x2, eU.y2);
-    var eV = eC.ÂÄ === undefined ? eL.ÂÄ : eC.ÂÄ;
-    áá.ÄA(eV, eF, eG, eQ.angle + eD.angle + eS + eQ.Åáä * eM, eQ.x + eT * eH.orientation + eO, eQ.y, eE);
-    eV = eC.áÀ === undefined ? eL.áÀ : eC.áÀ;
-    áá.ÄA(eV, eF, eG, -eR.angle + eD.angle + eS + eM * eR.Åáä, eR.x + eH.orientation * eT + eN, eR.y, eE);
-    if (eD.ÃÁ > ãÁ) {
-      var eW = 1;
-      eD.ÃÁ -= ÀÀ;
-      var eX = ãÁ;
-      if (eD.ÃÁ > 150) {
-        eX = Ää.ÁÃ.AÃa((300 - eD.ÃÁ) / 300);
+    var Äa = (â.Äa < 750 ? â.Äa / 750 : 1 - (â.Äa - 750) / 750) * ÁÂ.Äa;
+    var Àä = ÁÂ.Àä * (â.Àä < 400 ? â.Àä / 400 : âá - (â.Àä - 400) / 400);
+    var Åã = ÁÂ.ÁÂ;
+    áá.åáÃaÁ(Åã, ã, áã, Åã.angle + Ä.angle + Äa, Åã.x + Àä * â.orientation, Åã.y, åÃ, Åã.Åáä * aáÂ, Åã.x2, Åã.y2);
+    var Âäâ = ÄÁá.ÂÄ === undefined ? âÁÁ.ÂÄ : ÄÁá.ÂÄ;
+    áá.ÄA(Âäâ, ã, áã, ÂÄÂ.angle + Ä.angle + Äa + ÂÄÂ.Åáä * aáÂ, ÂÄÂ.x + Àä * â.orientation + äâÃ, ÂÄÂ.y, åÃ);
+    Âäâ = ÄÁá.áÀ === undefined ? âÁÁ.áÀ : ÄÁá.áÀ;
+    áá.ÄA(Âäâ, ã, áã, -ÃÄÀ.angle + Ä.angle + Äa + aáÂ * ÃÄÀ.Åáä, ÃÄÀ.x + â.orientation * Àä + ÁAå, ÃÄÀ.y, åÃ);
+    if (Ä.ÃÁ > ãÁ) {
+      var ááÂ = 1;
+      Ä.ÃÁ -= ÀÀ;
+      var ãÃ = ãÁ;
+      if (Ä.ÃÁ > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.ÃÁ) / 300);
       } else {
-        eX = Ää.ÁÃ.ÃaÅ(eD.ÃÁ / 150);
-        eW += (1 - eX) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ÃÁ / 150);
+        ááÂ += (1 - ãÃ) * 0.2;
       }
-      eF += eX * Math.sin(eD.áÀÅ) * 3;
-      eG += Math.cos(eD.áÀÅ) * eX * 3;
-      AÅ.globalAlpha = Math.min(äA, Math.max(ãä, eX));
-      áá.ÄA(eA.ÃÁ, eF, eG, eD.angle + eM / 1.5, eP, 0, eW);
+      ã += ãÃ * Math.sin(Ä.áÀÅ) * 3;
+      áã += Math.cos(Ä.áÀÅ) * ãÃ * 3;
+      AÅ.globalAlpha = Math.min(äA, Math.max(ãä, ãÃ));
+      áá.ÄA(áåa.ÃÁ, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, 0, ááÂ);
       AÅ.globalAlpha = âá;
     }
-    if (eD.ââ > 0) {
-      var eW = åÀ;
-      eD.ââ -= ÀÀ;
-      if (eD.ââ > 150) {
-        AÅ.globalAlpha = Math.min(1, Math.max(ÀÄ, Ää.ÁÃ.AÃa((300 - eD.ââ) / 300)));
+    if (Ä.ââ > 0) {
+      var ááÂ = åÀ;
+      Ä.ââ -= ÀÀ;
+      if (Ä.ââ > 150) {
+        AÅ.globalAlpha = Math.min(1, Math.max(ÀÄ, Ää.ÁÃ.AÃa((300 - Ä.ââ) / 300)));
       } else {
-        var eX = Ää.ÁÃ.ÃaÅ(eD.ââ / 150);
-        eW += (1 - eX) * 0.2;
-        AÅ.globalAlpha = Math.min(âÃ, Math.max(0, eX));
+        var ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ââ / 150);
+        ááÂ += (1 - ãÃ) * 0.2;
+        AÅ.globalAlpha = Math.min(âÃ, Math.max(0, ãÃ));
       }
-      áá.ÄA(eA.ââ, eF, eG, eD.angle + eM / 1.5, eP, 0, eW);
+      áá.ÄA(áåa.ââ, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, 0, ááÂ);
       AÅ.globalAlpha = ãå;
     }
-    áá.ÄA(eL.head, eF, eG, eD.angle + eM / 1.5, eP, 0, eE);
-    if (eC.head !== ÃÅá) {
-      áá.ÄA(eC.head, eF, eG, eD.angle + eM / 1.5, eP, ÁÀ, eE);
+    áá.ÄA(âÁÁ.head, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, 0, åÃ);
+    if (ÄÁá.head !== ÃÅá) {
+      áá.ÄA(ÄÁá.head, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, ÁÀ, åÃ);
     }
   }
   ;
-  function d0() {
-    for (var eA = áÁ; Aá.â.âaÅ.length > eA; eA++) {
-      if (Aá.â.âaÅ[eA] !== 0) {
+  function AâÂaÁ() {
+    for (var ä = áÁ; Aá.â.âaÅ.length > ä; ä++) {
+      if (Aá.â.âaÅ[ä] !== 0) {
         return 0;
       }
     }
     return 1;
   }
   ;
-  function d1(eA) {
-    var eB = Aá.ÂÅ[eA.åÅ];
-    if ((eA.ÅÁa & 255) === 16 && Aá.â.aâå !== 1 && eA.åÅ !== Aá.â.id && (eB.Aâ === -1 || Aá.Ááä[eB.Aâ].äâÂ !== eB.åÂå || Aá.â.Aâ !== eB.Aâ)) {
+  function _playerID(Ä) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    if ((Ä.ÅÁa & 255) === 16 && Aá.â.aâå !== 1 && Ä.åÅ !== Aá.â.id && (â.Aâ === -1 || Aá.Ááä[â.Aâ].äâÂ !== â.åÂå || Aá.â.Aâ !== â.Aâ)) {
       return;
     }
-    if (eB.playerIdLabel === null) {
-      eB.playerIdLabel = áÅ.åáa("#" + eB.id, "'Viga', sans-serif", "#FFFFFF", 24, 400, window.undefined, 16, 25, window.undefined, 0.5, window.undefined, window.undefined, "#000000", 5);
+    if (â.playerIdLabel === null) {
+      â.playerIdLabel = áÅ.åáa("#" + â.id, "'Viga', sans-serif", "#FFFFFF", 24, 400, window.undefined, 16, 25, window.undefined, 0.5, window.undefined, window.undefined, "#000000", 5);
     }
-    var eC = eB.playerIdLabel;
-    var eD = 90;
-    AÅ.drawImage(eC, (b1 + eA.x - eC.ãâä / 2) * ÄÀ, (b2 + eA.y - eD - 13) * ÄÀ, eC.ãâä * ÄÀ, eC.ÅÀä * ÄÀ);
+    var À = â.playerIdLabel;
+    var offsetY = 90;
+    AÅ.drawImage(À, (äÁ + Ä.x - À.ãâä / 2) * ÄÀ, (ãÅ + Ä.y - offsetY - 13) * ÄÀ, À.ãâä * ÄÀ, À.ÅÀä * ÄÀ);
   }
-  function d2(eA) {
-    var eB = Aá.ÂÅ[eA.åÅ];
-    if (ÁaÁ === (eA.ÅÁa & 255) && ÂA !== Aá.â.aâå && eA.åÅ !== Aá.â.id && (eB.Aâ === -1 || Aá.Ááä[eB.Aâ].äâÂ !== eB.åÂå || eB.Aâ !== Aá.â.Aâ)) {
+  function âÁÅÄå(Ä) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    if (ÁaÁ === (Ä.ÅÁa & 255) && ÂA !== Aá.â.aâå && Ä.åÅ !== Aá.â.id && (â.Aâ === -1 || Aá.Ááä[â.Aâ].äâÂ !== â.åÂå || â.Aâ !== Aá.â.Aâ)) {
       return;
     }
-    if (eB.âÅÄ === null) {
-      eB.âÅÄ = áÅ.åáa(eB.áÄa, "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, 16, 25, undefined, ÃÅá, undefined, âåã, "#000000", ãAâ);
+    if (â.âÅÄ === null) {
+      â.âÅÄ = áÅ.åáa(â.áÄa, "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, 16, 25, undefined, ÃÅá, undefined, âåã, "#000000", ãAâ);
     }
-    var eC = eB.âÅÄ;
-    var eD = 90;
-    if (-ãå === eB.Aâ) {
-      AÅ.drawImage(eC, (b1 + eA.x - eC.ãâä / ÅÄä) * ÄÀ, (b2 + eA.y - eD) * ÄÀ, ÄÀ * eC.ãâä, eC.ÅÀä * ÄÀ);
-    } else if (-åä !== eB.Aâ) {
-      var eE = Aá.Ááä[eB.Aâ];
-      if (eE.äâÂ === eB.åÂå) {
-        if (eE.AãA === null) {
-          var eF = 0;
+    var À = â.âÅÄ;
+    var áã = 90;
+    if (-ãå === â.Aâ) {
+      AÅ.drawImage(À, (äÁ + Ä.x - À.ãâä / ÅÄä) * ÄÀ, (ãÅ + Ä.y - áã) * ÄÀ, ÄÀ * À.ãâä, À.ÅÀä * ÄÀ);
+    } else if (-åä !== â.Aâ) {
+      var Aâ = Aá.Ááä[â.Aâ];
+      if (Aâ.äâÂ === â.åÂå) {
+        if (Aâ.AãA === null) {
+          var ÃÀáÃ = 0;
         }
-        if (eA.åÅ === Aá.â.id || Aá.â.Aâ !== -ãå && Aá.â.Aâ === Aá.ÂÅ[eA.åÅ].Aâ && Aá.ÂÅ[eA.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ) {
-          eF = 1;
-          eE.AãA = áÅ.åáa("[" + eE.name + "]", "'Viga', sans-serif", cfg.teamColor, 38, 400, âaÃAÄ, 16, 25, undefined, ÃÅá, âÄä, undefined, "#000000", ãAâ);
+        if (Ä.åÅ === Aá.â.id || Aá.â.Aâ !== -ãå && Aá.â.Aâ === Aá.ÂÅ[Ä.åÅ].Aâ && Aá.ÂÅ[Ä.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ) {
+          ÃÀáÃ = 1;
+          Aâ.AãA = áÅ.åáa("[" + Aâ.name + "]", "'Viga', sans-serif", cfg.teamColor, 38, 400, âaÃAÄ, 16, 25, undefined, ÃÅá, âÄä, undefined, "#000000", ãAâ);
         } else {
-          eE.AãA = áÅ.åáa("[" + eE.name + "]", "'Viga', sans-serif", cfg.enemyColor, 38, 400, âaÃAÄ, 16, 25, undefined, ÃÅá, âÄä, undefined, "#000000", ãAâ);
+          Aâ.AãA = áÅ.åáa("[" + Aâ.name + "]", "'Viga', sans-serif", cfg.enemyColor, 38, 400, âaÃAÄ, 16, 25, undefined, ÃÅá, âÄä, undefined, "#000000", ãAâ);
         }
-        var eG = eE.AãA;
-        AÅ.drawImage(eG, ÄÀ * (b1 + eA.x - eC.ãâä / 2 - eG.ãâä / ãÄá - 0.5), ÄÀ * (b2 + eA.y - eD), ÄÀ * eG.ãâä, eG.ÅÀä * ÄÀ);
-        if (eC.width !== ÄÁ && ÅÁ !== eC.height) {
-          AÅ.drawImage(eC, ÄÀ * (b1 + eA.x - eC.ãâä / 2 + eG.ãâä / ãÂã), ÄÀ * (b2 + eA.y - eD), ÄÀ * eC.ãâä, ÄÀ * eC.ÅÀä);
+        var ÁÅa = Aâ.AãA;
+        AÅ.drawImage(ÁÅa, ÄÀ * (äÁ + Ä.x - À.ãâä / 2 - ÁÅa.ãâä / ãÄá - 0.5), ÄÀ * (ãÅ + Ä.y - áã), ÄÀ * ÁÅa.ãâä, ÁÅa.ÅÀä * ÄÀ);
+        if (À.width !== ÄÁ && ÅÁ !== À.height) {
+          AÅ.drawImage(À, ÄÀ * (äÁ + Ä.x - À.ãâä / 2 + ÁÅa.ãâä / ãÂã), ÄÀ * (ãÅ + Ä.y - áã), ÄÀ * À.ãâä, ÄÀ * À.ÅÀä);
         }
       } else {
-        eB.Aâ = -1;
+        â.Aâ = -1;
       }
     }
     if (cfg.AimBotEnable) {
       if (AimBotLabel === null) {
         AimBotLabel = áÅ.åáa("AIM", "'Viga', sans-serif", "#ad00e3", 20, 400, window.undefined, 16, 25, window.undefined, window.undefined, window.undefined, window.undefined, "#000000", 10);
       }
-      var eC = AimBotLabel;
-      var eH = 90;
-      AÅ.drawImage(eC, (b1 + Aá.â.x - (eC.ãâä - 60) / 2) * ÄÀ, (b2 + Aá.â.y - eH + 21) * ÄÀ, eC.ãâä * ÄÀ, eC.ÅÀä * ÄÀ);
+      var À = AimBotLabel;
+      var offsetY = 90;
+      AÅ.drawImage(À, (äÁ + Aá.â.x - (À.ãâä - 60) / 2) * ÄÀ, (ãÅ + Aá.â.y - offsetY + 21) * ÄÀ, À.ãâä * ÄÀ, À.ÅÀä * ÄÀ);
     }
     if (cfg.autoEat) {
       if (AutoEatLabel === null) {
         AutoEatLabel = áÅ.åáa("AUTO EAT", "'Viga', sans-serif", "#00FF00", 38, 400, window.undefined, 16, 25, window.undefined, window.undefined, window.undefined, window.undefined, "#000000", 10);
       }
-      var eC = AutoEatLabel;
-      var eH = 90;
-      AÅ.drawImage(eC, (b1 + Aá.â.x - eC.ãâä / 2) * ÄÀ, (b2 + Aá.â.y - eH + 74) * ÄÀ, eC.ãâä * ÄÀ, eC.ÅÀä * ÄÀ);
+      var À = AutoEatLabel;
+      var offsetY = 90;
+      AÅ.drawImage(À, (äÁ + Aá.â.x - À.ãâä / 2) * ÄÀ, (ãÅ + Aá.â.y - offsetY + 74) * ÄÀ, À.ãâä * ÄÀ, À.ÅÀä * ÄÀ);
     }
     if (cfg.autoBuild) {
       if (AutoBuildLabel === null) {
         AutoBuildLabel = áÅ.åáa("BUILD", "'Viga', sans-serif", "#FFFFFF", 20, 400, window.undefined, 16, 25, window.undefined, window.undefined, window.undefined, window.undefined, "#000000", 10);
       }
-      var eC = AutoBuildLabel;
-      var eH = 90;
-      AÅ.drawImage(eC, (b1 + Aá.â.x - eC.ãâä / 2) * ÄÀ, (b2 + Aá.â.y - eH + 32) * ÄÀ, eC.ãâä * ÄÀ, eC.ÅÀä * ÄÀ);
+      var À = AutoBuildLabel;
+      var offsetY = 90;
+      AÅ.drawImage(À, (äÁ + Aá.â.x - À.ãâä / 2) * ÄÀ, (ãÅ + Aá.â.y - offsetY + 32) * ÄÀ, À.ãâä * ÄÀ, À.ÅÀä * ÄÀ);
     }
     if (cfg.autoLoot) {
       if (AutoLootLabel === null) {
         AutoLootLabel = áÅ.åáa("LOOT", "'Viga', sans-serif", "#FF0000", 20, 400, window.undefined, 16, 25, window.undefined, window.undefined, window.undefined, window.undefined, "#000000", 10);
       }
-      var eC = AutoLootLabel;
-      var eH = 90;
-      AÅ.drawImage(eC, (b1 + Aá.â.x - eC.ãâä / 2) * ÄÀ, (b2 + Aá.â.y - eH + 21) * ÄÀ, eC.ãâä * ÄÀ, eC.ÅÀä * ÄÀ);
+      var À = AutoLootLabel;
+      var offsetY = 90;
+      AÅ.drawImage(À, (äÁ + Aá.â.x - À.ãâä / 2) * ÄÀ, (ãÅ + Aá.â.y - offsetY + 21) * ÄÀ, À.ãâä * ÄÀ, À.ÅÀä * ÄÀ);
     }
   }
-  function d3(eA, eB, eC, eD, eE, eF, eG, eH) {
-    var eI = Aa;
-    var eJ = ãa;
+  function ÀäáÁÅ(äAÁ, áãÃåa, ááÁåä, ÀÄâãå, åaã, Áäáaá, äáÅÅã, ÄÅÃ) {
+    var ã = Aa;
+    var áã = ãa;
     if (-ÂA === Aá.â.Aâ) {
-      var eK = åä;
+      var áaå = åä;
       if (ÀÅ.aÄA.length === ãÁ) {
-        eK = áÁ;
+        áaå = áÁ;
       } else {
-        for (var eL = áÃ; Aá.Ááä.length > eL; eL++) {
-          if (ÀÅ.aÄA === Aá.Ááä[eL].name) {
-            eK = 0;
+        for (var ä = áÃ; Aá.Ááä.length > ä; ä++) {
+          if (ÀÅ.aÄA === Aá.Ááä[ä].name) {
+            áaå = 0;
             break;
           }
         }
       }
-      Aá.â.áaå = eK;
-      eI = eB.áâ.x;
-      eJ = eB.áâ.y;
-      eB.Áá();
-      eA.áâ.x = eI + ÄÀ * 513;
-      eA.áâ.y = eJ + ÄÀ * 2;
-      if (cT !== ÀÅ.aÄA) {
-        cT = ÀÅ.aÄA;
-        cU = áÅ.åáa(cT, "'Viga', sans-serif", "#FFFFFF", 30, 400);
+      Aá.â.áaå = áaå;
+      ã = áãÃåa.áâ.x;
+      áã = áãÃåa.áâ.y;
+      áãÃåa.Áá();
+      äAÁ.áâ.x = ã + ÄÀ * 513;
+      äAÁ.áâ.y = áã + ÄÀ * 2;
+      if (aÄA !== ÀÅ.aÄA) {
+        aÄA = ÀÅ.aÄA;
+        äÃÀ = áÅ.åáa(aÄA, "'Viga', sans-serif", "#FFFFFF", 30, 400);
       }
-      if (cU !== null && cT.length !== 0) {
-        áá.fillRect(AÅ, eI / ÄÀ + 39, eJ / ÄÀ + 14, 122, 16.5, "#000000");
-        AÅ.drawImage(cU, eI + ÄÀ * 35, eJ + ÄÀ * 14.5, cU.ãâä * ÄÀ, ÄÀ * cU.ÅÀä);
+      if (äÃÀ !== null && aÄA.length !== 0) {
+        áá.fillRect(AÅ, ã / ÄÀ + 39, áã / ÄÀ + 14, 122, 16.5, "#000000");
+        AÅ.drawImage(äÃÀ, ã + ÄÀ * 35, áã + ÄÀ * 14.5, äÃÀ.ãâä * ÄÀ, ÄÀ * äÃÀ.ÅÀä);
       }
-      eE.áâ.x = eI + ÄÀ * 172;
-      eE.áâ.y = eJ + ÄÀ * 6;
-      if (eK === AÄ || Date.now() - Aá.â.ãÁâ < 30500) {
-        eE.Äâ(áÅ.Àå);
+      åaã.áâ.x = ã + ÄÀ * 172;
+      åaã.áâ.y = áã + ÄÀ * 6;
+      if (áaå === AÄ || Date.now() - Aá.â.ãÁâ < 30500) {
+        åaã.Äâ(áÅ.Àå);
         AÅ.globalAlpha = 0.5;
-        eE.Áá();
+        åaã.Áá();
         AÅ.globalAlpha = ãå;
       } else {
-        eE.Áá();
+        åaã.Áá();
       }
-      var eM = AÂ;
-      for (var eL = 0; eL < 18; eL++) {
-        var eN = Aá.Ááä[eL];
-        if (eN.ãaã === 0) {
+      var åã = AÂ;
+      for (var ä = 0; ä < 18; ä++) {
+        var Aâ = Aá.Ááä[ä];
+        if (Aâ.ãaã === 0) {
           continue;
         }
-        if (eN.label === null) {
-          eN.label = áÅ.åáa(eN.name, "'Viga', sans-serif", "#FFFFFF", 30, 400);
+        if (Aâ.label === null) {
+          Aâ.label = áÅ.åáa(Aâ.name, "'Viga', sans-serif", "#FFFFFF", 30, 400);
         }
-        AÅ.drawImage(eN.label, eI + ÄÀ * (äÃá + eM % 3 * 163), eJ + (58.5 + Math.floor(eM / 3) * 36) * ÄÀ, ÄÀ * eN.label.ãâä, eN.label.ÅÀä * ÄÀ);
-        var eO = ÀÅ.join[eM];
-        eO.áâ.x = eI + ÄÀ * (84 + eM % 3 * 163);
-        eO.áâ.y = eJ + (48 + Math.floor(eM / ÁÁa) * 36) * ÄÀ;
+        AÅ.drawImage(Aâ.label, ã + ÄÀ * (äÃá + åã % 3 * 163), áã + (58.5 + Math.floor(åã / 3) * 36) * ÄÀ, ÄÀ * Aâ.label.ãâä, Aâ.label.ÅÀä * ÄÀ);
+        var äÄ = ÀÅ.join[åã];
+        äÄ.áâ.x = ã + ÄÀ * (84 + åã % 3 * 163);
+        äÄ.áâ.y = áã + (48 + Math.floor(åã / ÁÁa) * 36) * ÄÀ;
         if (Date.now() - Aá.â.äåâ < 10500) {
-          eO.Äâ(áÅ.Àå);
+          äÄ.Äâ(áÅ.Àå);
           AÅ.globalAlpha = 0.5;
-          eO.Áá();
+          äÄ.Áá();
           AÅ.globalAlpha = ÂA;
         } else {
-          eO.Áá();
+          äÄ.Áá();
         }
-        eM++;
+        åã++;
       }
     } else {
-      eI = eC.áâ.x;
-      eJ = eC.áâ.y;
-      var eN = Aá.Ááä[Aá.â.Aâ];
-      if (eN.label === null) {
-        eN.label = áÅ.åáa(eN.name, "'Viga', sans-serif", "#FFFFFF", 30, 400);
+      ã = ááÁåä.áâ.x;
+      áã = ááÁåä.áâ.y;
+      var Aâ = Aá.Ááä[Aá.â.Aâ];
+      if (Aâ.label === null) {
+        Aâ.label = áÅ.åáa(Aâ.name, "'Viga', sans-serif", "#FFFFFF", 30, 400);
       }
-      AÅ.drawImage(eN.label, eI + ÄÀ * 144, eJ + ÄÀ * 13, ÄÀ * eN.label.ãâä, eN.label.ÅÀä * ÄÀ);
-      eC.Áá();
-      eA.áâ.x = eI + ÄÀ * 512;
-      eA.áâ.y = eJ + ÄÀ * 34.5;
+      AÅ.drawImage(Aâ.label, ã + ÄÀ * 144, áã + ÄÀ * 13, ÄÀ * Aâ.label.ãâä, Aâ.label.ÅÀä * ÄÀ);
+      ááÁåä.Áá();
+      äAÁ.áâ.x = ã + ÄÀ * 512;
+      äAÁ.áâ.y = áã + ÄÀ * 34.5;
       if (Aá.â.Aäá === aÅ) {
         if (Aá.â.AÃA === 0) {
-          eF.áâ.x = eI + ÄÀ * 259;
-          eF.áâ.y = eJ + AÀâ * ÄÀ;
-          eF.Áá();
+          Áäáaá.áâ.x = ã + ÄÀ * 259;
+          Áäáaá.áâ.y = áã + AÀâ * ÄÀ;
+          Áäáaá.Áá();
         } else {
-          eG.áâ.x = eI + ÄÀ * 259;
-          eG.áâ.y = eJ + ÄÀ * åâa;
-          eG.Áá();
+          äáÅÅã.áâ.x = ã + ÄÀ * 259;
+          äáÅÅã.áâ.y = áã + ÄÀ * åâa;
+          äáÅÅã.Áá();
         }
-        eH.áâ.x = eI + ÄÀ * 311.5;
-        eH.áâ.y = eJ + ÄÀ * 5;
-        eH.Áá();
-        var eM = áÁ;
-        for (var eL = 0; eL < Aá.ÂÅ.length; eL++) {
-          var eP = Aá.ÂÅ[eL];
-          if (eN.äâÂ !== eP.åÂå || eN.id !== eP.Aâ) {
+        ÄÅÃ.áâ.x = ã + ÄÀ * 311.5;
+        ÄÅÃ.áâ.y = áã + ÄÀ * 5;
+        ÄÅÃ.Áá();
+        var åã = áÁ;
+        for (var ä = 0; ä < Aá.ÂÅ.length; ä++) {
+          var â = Aá.ÂÅ[ä];
+          if (Aâ.äâÂ !== â.åÂå || Aâ.id !== â.Aâ) {
             continue;
           }
-          if (eP.âÅÄ === null) {
-            eP.âÅÄ = áÅ.åáa(eP.áÄa, "'Viga', sans-serif", "#FFFFFF", 38, 400, ãÅâ, 16, 25, ÃÃÁ, undefined, undefined, undefined, "#000000", ääã);
+          if (â.âÅÄ === null) {
+            â.âÅÄ = áÅ.åáa(â.áÄa, "'Viga', sans-serif", "#FFFFFF", 38, 400, ãÅâ, 16, 25, ÃÃÁ, undefined, undefined, undefined, "#000000", ääã);
           }
-          if (eP.âÅÄ.width !== 0 && eP.âÅÄ.height !== 0) {
-            AÅ.drawImage(eP.âÅÄ, eI + (26 + eM % äaá * 166.5) * ÄÀ, eJ + (53 + Math.floor(eM / 3) * 29.5) * ÄÀ, ÄÀ * eP.âÅÄ.ãâä / 2.2, ÄÀ * eP.âÅÄ.ÅÀä / 2.2);
+          if (â.âÅÄ.width !== 0 && â.âÅÄ.height !== 0) {
+            AÅ.drawImage(â.âÅÄ, ã + (26 + åã % äaá * 166.5) * ÄÀ, áã + (53 + Math.floor(åã / 3) * 29.5) * ÄÀ, ÄÀ * â.âÅÄ.ãâä / 2.2, ÄÀ * â.âÅÄ.ÅÀä / 2.2);
           }
-          var eO = ÀÅ.ÂÂÃ[eM];
-          eO.áâ.x = eI + ÄÀ * (132 + eM % åÄa * 166.5);
-          eO.áâ.y = eJ + ÄÀ * (48.5 + Math.floor(eM / 3) * 29.5);
-          if (Date.now() - Aá.â.äåâ < 10500 || eP.id === Aá.â.id) {
-            eO.Äâ(áÅ.Àå);
+          var äÄ = ÀÅ.ÂÂÃ[åã];
+          äÄ.áâ.x = ã + ÄÀ * (132 + åã % åÄa * 166.5);
+          äÄ.áâ.y = áã + ÄÀ * (48.5 + Math.floor(åã / 3) * 29.5);
+          if (Date.now() - Aá.â.äåâ < 10500 || â.id === Aá.â.id) {
+            äÄ.Äâ(áÅ.Àå);
             AÅ.globalAlpha = 0.5;
-            eO.Áá();
+            äÄ.Áá();
             AÅ.globalAlpha = åä;
           } else {
-            eO.Áá();
+            äÄ.Áá();
           }
-          eM++;
+          åã++;
         }
       } else {
-        eD.áâ.x = eI + ÄÀ * 311.5;
-        eD.áâ.y = eJ + ÄÀ * 5;
-        eD.Áá();
-        var eM = 0;
-        for (var eL = ãä; Aá.ÂÅ.length > eL; eL++) {
-          var eP = Aá.ÂÅ[eL];
-          if (eN.äâÂ !== eP.åÂå || eP.Aâ !== eN.id) {
+        ÀÄâãå.áâ.x = ã + ÄÀ * 311.5;
+        ÀÄâãå.áâ.y = áã + ÄÀ * 5;
+        ÀÄâãå.Áá();
+        var åã = 0;
+        for (var ä = ãä; Aá.ÂÅ.length > ä; ä++) {
+          var â = Aá.ÂÅ[ä];
+          if (Aâ.äâÂ !== â.åÂå || â.Aâ !== Aâ.id) {
             continue;
           }
-          if (eP.âÅÄ === null) {
-            eP.âÅÄ = áÅ.åáa(eP.áÄa, "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, Ãâã, 25, âÂa, undefined, undefined, áÄÅ, "#000000", 12);
+          if (â.âÅÄ === null) {
+            â.âÅÄ = áÅ.åáa(â.áÄa, "'Viga', sans-serif", "#FFFFFF", 38, 400, undefined, Ãâã, 25, âÂa, undefined, undefined, áÄÅ, "#000000", 12);
           }
-          if (eP.âÅÄ.width !== ÁÀ && eP.âÅÄ.height !== äå) {
-            AÅ.drawImage(eP.âÅÄ, eI + (26 + eM % 3 * 166.5) * ÄÀ, eJ + (53 + Math.floor(eM / 3) * 29.5) * ÄÀ, ÄÀ * eP.âÅÄ.ãâä / 2.2, eP.âÅÄ.ÅÀä * ÄÀ / 2.2);
+          if (â.âÅÄ.width !== ÁÀ && â.âÅÄ.height !== äå) {
+            AÅ.drawImage(â.âÅÄ, ã + (26 + åã % 3 * 166.5) * ÄÀ, áã + (53 + Math.floor(åã / 3) * 29.5) * ÄÀ, ÄÀ * â.âÅÄ.ãâä / 2.2, â.âÅÄ.ÅÀä * ÄÀ / 2.2);
           }
-          eM++;
+          åã++;
         }
       }
     }
-    eA.Áá();
+    äAÁ.Áá();
   }
   ;
-  function d4() {
-    var eA = b1;
-    if (ãÁ < eA) {
-      áá.fillRect(AÅ, 0, ãÂ, eA, aÅä, ÃáÀ);
+  function ãAÅÅâ() {
+    var ÅÀÂ = äÁ;
+    if (ãÁ < ÅÀÂ) {
+      áá.fillRect(AÅ, 0, ãÂ, ÅÀÂ, aÅä, ÃáÀ);
     } else {
-      eA = 0;
+      ÅÀÂ = 0;
     }
-    var eB = b2;
-    if (eB > 0) {
-      áá.fillRect(AÅ, eA, 0, Äaá - eA, eB, ÃáÀ);
+    var åÃå = ãÅ;
+    if (åÃå > 0) {
+      áá.fillRect(AÅ, ÅÀÂ, 0, Äaá - ÅÀÂ, åÃå, ÃáÀ);
     } else {
-      eB = 0;
+      åÃå = 0;
     }
-    var eC = -b1 + Äaá - u;
-    if (eC > 0) {
-      áá.fillRect(AÅ, Äaá - eC, eB, eC, aÅä - eB, ÃáÀ);
+    var åâÅ = -äÁ + Äaá - ÀÄÂ;
+    if (åâÅ > 0) {
+      áá.fillRect(AÅ, Äaá - åâÅ, åÃå, åâÅ, aÅä - åÃå, ÃáÀ);
     } else {
-      eC = åâ;
+      åâÅ = åâ;
     }
-    var eD = -b2 + aÅä - v;
-    if (ÄÁ < eD) {
-      áá.fillRect(AÅ, eA, aÅä - eD, Äaá - eA - eC, eD, ÃáÀ);
+    var ÃáááÃ = -ãÅ + aÅä - ÀaÅâÂ;
+    if (ÄÁ < ÃáááÃ) {
+      áá.fillRect(AÅ, ÅÀÂ, aÅä - ÃáááÃ, Äaá - ÅÀÂ - åâÅ, ÃáááÃ, ÃáÀ);
     }
   }
   ;
-  function d5(eA) {
-    var eB = Aá.ÂÅ[eA.åÅ];
-    if (eB.text.length > 0) {
-      for (var eC = 0; eC < eB.text.length && eC < 2; eC++) {
-        if (!eB.label[eC]) {
-          eB.label[eC] = áÅ.åáa(eB.text[eC], "'Viga', sans-serif", "#ffffff", 32, 1000, "#000000", 33, 19, undefined, undefined, 0.55, ÃÀã);
-          eB.ÁÅâ[eC] = äá;
-          eB.ÂÂA[eC] = åâ;
+  function áãáâã(Ä) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    if (â.text.length > 0) {
+      for (var ä = 0; ä < â.text.length && ä < 2; ä++) {
+        if (!â.label[ä]) {
+          â.label[ä] = áÅ.åáa(â.text[ä], "'Viga', sans-serif", "#ffffff", 32, 1000, "#000000", 33, 19, undefined, undefined, 0.55, ÃÀã);
+          â.ÁÅâ[ä] = äá;
+          â.ÂÂA[ä] = åâ;
         }
-        if (eC === âÃ) {
-          eB.ÂÂA[0] = Ää.ÁÃ.ÄáÀ(eB.äÁÂ) * 28;
+        if (ä === âÃ) {
+          â.ÂÂA[0] = Ää.ÁÃ.ÄáÀ(â.äÁÂ) * 28;
         }
       }
       ããåÅå = ÀÀ / 1000;
-      eB.ÁÅâ[0] += ããåÅå;
-      if (eB.text.length > Áå) {
-        eB.äÁÂ = Math.min(eB.äÁÂ + ããåÅå, 1);
-        if (eB.ÁÅâ[0] > 1 && eB.äÁÂ > 0.5) {
-          eB.ÁÅâ[aÅ] += ããåÅå;
+      â.ÁÅâ[0] += ããåÅå;
+      if (â.text.length > Áå) {
+        â.äÁÂ = Math.min(â.äÁÂ + ããåÅå, 1);
+        if (â.ÁÅâ[0] > 1 && â.äÁÂ > 0.5) {
+          â.ÁÅâ[aÅ] += ããåÅå;
         }
       }
-      for (var eC = äå; eB.text.length > eC && eC < 2; eC++) {
-        var eD = eB.ÁÅâ[eC];
-        if (AÂ < eD) {
-          if (eD < 0.25) {
-            AÅ.globalAlpha = eD * 4;
-          } else if (eD > 4.75) {
-            AÅ.globalAlpha = Math.max((5 - eD) * 5, 0);
+      for (var ä = äå; â.text.length > ä && ä < 2; ä++) {
+        var ÄÁÁ = â.ÁÅâ[ä];
+        if (AÂ < ÄÁÁ) {
+          if (ÄÁÁ < 0.25) {
+            AÅ.globalAlpha = ÄÁÁ * 4;
+          } else if (ÄÁÁ > 4.75) {
+            AÅ.globalAlpha = Math.max((5 - ÄÁÁ) * 5, 0);
           } else {
             AÅ.globalAlpha = 1;
           }
-          var eE = 118;
-          var eF = eB.label[eC];
-          AÅ.drawImage(eF, 0, ãÁ, eF.width, eF.height, ÄÀ * (b1 + eA.x - eF.width / aää), ÄÀ * (b2 + eA.y - eE - eB.ÂÂA[eC]), ÄÀ * (eF.width / ÄÀã), ÄÀ * (eF.height / Áâá));
+          var áã = 118;
+          var À = â.label[ä];
+          AÅ.drawImage(À, 0, ãÁ, À.width, À.height, ÄÀ * (äÁ + Ä.x - À.width / aää), ÄÀ * (ãÅ + Ä.y - áã - â.ÂÂA[ä]), ÄÀ * (À.width / ÄÀã), ÄÀ * (À.height / Áâá));
           AÅ.globalAlpha = 1;
         }
       }
-      if (eB.ÁÅâ[ÄÁ] > ÃÀã) {
-        eB.ÁÅâ.shift();
-        eB.text.shift();
-        eB.ÂÂA.shift();
-        eB.label.shift();
-        eB.äÁÂ = ãÂ;
+      if (â.ÁÅâ[ÄÁ] > ÃÀã) {
+        â.ÁÅâ.shift();
+        â.text.shift();
+        â.ÂÂA.shift();
+        â.label.shift();
+        â.äÁÂ = ãÂ;
       }
     }
   }
   ;
-  function d6(eA) {
-    var eB = Aá.ÂÅ[eA.åÅ];
-    if (eB !== undefined && âã < eB.ããÀ.length) {
-      if (eB.âÅÅ >= av) {
-        eB.âÅÅ = Aa;
+  function âÃAÀâ(Ä) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    if (â !== undefined && âã < â.ããÀ.length) {
+      if (â.âÅÅ >= âãÁ) {
+        â.âÅÅ = Aa;
       }
-      var eC = eB.âÅÅ;
-      var eD = eB.äáa[0];
-      var eE = eB.ããÀ[0];
-      if (eC === áÃ) {
-        var eF = áâA.ÃÂ(eA.x, eA.y, b3, b4);
+      var åÁ = â.âÅÅ;
+      var âÅÁ = â.äáa[0];
+      var AÀ = â.ããÀ[0];
+      if (åÁ === áÃ) {
+        var ÃÂ = áâA.ÃÂ(Ä.x, Ä.y, AÃÅ, ÃÂÀ);
       }
-      eB.âÅÅ += ÀÀ;
-      if (av <= eB.âÅÅ) {
-        eB.âÅÅ = 0;
-        eB.äáa.shift();
-        eB.ããÀ.shift();
+      â.âÅÅ += ÀÀ;
+      if (âãÁ <= â.âÅÅ) {
+        â.âÅÅ = 0;
+        â.äáa.shift();
+        â.ããÀ.shift();
       }
-      var eG = bU[eE][eD];
-      if (eG.á !== 1) {
-        bU[eE][eD] = áá.ÃA(an + eE + "_" + eD + ".png", eG);
+      var À = ÃAÄ[AÀ][âÅÁ];
+      if (À.á !== 1) {
+        ÃAÄ[AÀ][âÅÁ] = áá.ÃA(Àãááá + AÀ + "_" + âÅÁ + ".png", À);
         return;
       }
-      var eH = ãä;
-      if (aw > eC) {
-        var eI = eC / aw;
-        AÅ.globalAlpha = eI;
-        eH = âÂÅ * (ãå - eI);
-      } else if (ax < eC) {
-        var eJ = (av - eC) / (av - ax);
-        AÅ.globalAlpha = eJ;
-        eH = (eJ - 1) * 40;
+      var Àä = ãä;
+      if (ÃAäâÀ > åÁ) {
+        var aâáÁá = åÁ / ÃAäâÀ;
+        AÅ.globalAlpha = aâáÁá;
+        Àä = âÂÅ * (ãå - aâáÁá);
+      } else if (ÃÄÁaÂ < åÁ) {
+        var áaaÂá = (âãÁ - åÁ) / (âãÁ - ÃÄÁaÂ);
+        AÅ.globalAlpha = áaaÂá;
+        Àä = (áaaÂá - 1) * 40;
       }
-      AÅ.drawImage(eG, (b1 + eA.x - 120) * ÄÀ, (b2 + eA.y + (eH - 45)) * ÄÀ, eG.width * ÄÀ / 2, ÄÀ * eG.height / ÁÅá);
+      AÅ.drawImage(À, (äÁ + Ä.x - 120) * ÄÀ, (ãÅ + Ä.y + (Àä - 45)) * ÄÀ, À.width * ÄÀ / 2, ÄÀ * À.height / ÁÅá);
       AÅ.globalAlpha = 1;
     }
   }
   ;
-  function d7(eA, eB, eC, eD, eE, eF, eG) {
-    var eH = ÅáÀÃÄ[eA.type];
-    var eI = eH.À;
-    if (eI.á !== 1) {
-      eH.À = áá.ÃA(eH.src, eH.À);
+  function ÅÅáÀÄ(aAÅ, ä, åã, Ääåáá, aAáÃÀ, AÂâAã, ÄåÅÄá) {
+    var aä = ÅáÀÃÄ[aAÅ.type];
+    var À = aä.À;
+    if (À.á !== 1) {
+      aä.À = áá.ÃA(aä.src, aä.À);
       return;
     }
-    var eJ = eF - eA.ä;
-    var eK = eG - eA.åã;
-    var eL = eB + eH.AAã.length - eJ;
-    var eM = eC + eH.AAã[0].length - eK;
-    var eN = 0;
-    var eO = 0;
-    for (var eP = eB, eQ = 0; eP < eL; eP++, eQ++) {
-      if (bh <= eP) {
-        eN = eH.AAã.length - eQ;
+    var AÁå = AÂâAã - aAÅ.ä;
+    var ÅÃÁ = ÄåÅÄá - aAÅ.åã;
+    var ÀâÁãÃ = ä + aä.AAã.length - AÁå;
+    var äÀâáa = åã + aä.AAã[0].length - ÅÃÁ;
+    var âÂaáá = 0;
+    var ÄåÄÃÀ = 0;
+    for (var ÂáÁ = ä, âåáAå = 0; ÂáÁ < ÀâÁãÃ; ÂáÁ++, âåáAå++) {
+      if (äåÁ <= ÂáÁ) {
+        âÂaáá = aä.AAã.length - âåáAå;
         break;
       }
-      for (var eR = eC, eS = 0; eM > eR; eR++, eS++) {
-        if (eR >= bg) {
-          eO = eH.AAã[0].length - eS;
+      for (var åäA = åã, AÄäaÀ = 0; äÀâáa > åäA; åäA++, AÄäaÀ++) {
+        if (åäA >= Åâa) {
+          ÄåÄÃÀ = aä.AAã[0].length - AÄäaÀ;
           break;
         } else {
-          be[eP][eR] = cm;
+          áaÅaA[ÂáÁ][åäA] = ÂÀ;
         }
       }
     }
-    var eT = 0;
-    var eU = Àá;
-    var eV = äá;
-    var eW = AÂ;
-    if (eN !== 0 || eO !== äå) {
-      eT = ÄÀ * ((eA.åã + eK) * j + b1);
-      eU = ÄÀ * (j * (eA.ä + eJ) + b2);
-      eJ *= 32;
-      eK *= 32;
-      eV = eI.height - eN * 32 + eJ;
-      eW = eI.width - eO * 32 + eK;
+    var ã = 0;
+    var áã = Àá;
+    var Âå = äá;
+    var ÅÅ = AÂ;
+    if (âÂaáá !== 0 || ÄåÄÃÀ !== äå) {
+      ã = ÄÀ * ((aAÅ.åã + ÅÃÁ) * ááá + äÁ);
+      áã = ÄÀ * (ááá * (aAÅ.ä + AÁå) + ãÅ);
+      AÁå *= 32;
+      ÅÃÁ *= 32;
+      Âå = À.height - âÂaáá * 32 + AÁå;
+      ÅÅ = À.width - ÄåÄÃÀ * 32 + ÅÃÁ;
     } else {
-      eT = ÄÀ * ((eA.åã + eK) * j + b1);
-      eU = ((eA.ä + eJ) * j + b2) * ÄÀ;
-      eJ *= 32;
-      eK *= 32;
-      eV = eI.height - eJ;
-      eW = eI.width - eK;
+      ã = ÄÀ * ((aAÅ.åã + ÅÃÁ) * ááá + äÁ);
+      áã = ((aAÅ.ä + AÁå) * ááá + ãÅ) * ÄÀ;
+      AÁå *= 32;
+      ÅÃÁ *= 32;
+      Âå = À.height - AÁå;
+      ÅÅ = À.width - ÅÃÁ;
     }
-    AÅ.drawImage(eI, eK, eJ, eW, eV, eT, eU, ÄÀ * (eW * 3), Äâa * eV * ÄÀ);
+    AÅ.drawImage(À, ÅÃÁ, AÁå, ÅÅ, Âå, ã, áã, ÄÀ * (ÅÅ * 3), Äâa * Âå * ÄÀ);
   }
   ;
-  function d8(eA, eB, eC, eD, eE, eF, eG) {
-    var eH = Aá.ÂÅ[eD.åÅ];
-    var eI = AÂ;
-    var eJ = eH.ÂaÅ - ÀÂ.åâå;
-    var eK = eH.ÄÀA - ÀÂ.åâå;
-    if (ÀÄ < eJ) {
-      if (eK > 0) {
-        eI = 3;
-      } else if (eH.ÄÀA > AÄ) {
-        eI = åÄá;
+  function ÄÀÅÃå(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    var ÀåA = AÂ;
+    var ÂaÅ = â.ÂaÅ - ÀÂ.åâå;
+    var ÄÀA = â.ÄÀA - ÀÂ.åâå;
+    if (ÀÄ < ÂaÅ) {
+      if (ÄÀA > 0) {
+        ÀåA = 3;
+      } else if (â.ÄÀA > AÄ) {
+        ÀåA = åÄá;
       } else {
-        eI = áââ;
+        ÀåA = áââ;
       }
-    } else if (åâ < eK) {
-      eI = ÅÄä;
-    } else if (eH.ÄÀA > 0) {
-      eI = äÅÂ;
+    } else if (åâ < ÄÀA) {
+      ÀåA = ÅÄä;
+    } else if (â.ÄÀA > 0) {
+      ÀåA = äÅÂ;
     }
-    if (eD.åÅ == Aá.â.id && cfg.changeMyModel) {
-      eI = cfg.myPlayerModel;
+    if (Ä.åÅ == Aá.â.id && cfg.changeMyModel) {
+      ÀåA = cfg.myPlayerModel;
     }
-    var eL = eA.Aâä[eI];
-    var eM = ÄÁ;
-    var eN = 0;
-    if (áâA.ÅáÂ(eD.x, eD.y, eD.Åaä, eD.ÂÅä) < aÅ) {
-      eH.Äa = (eH.Äa + ÀÀ) % 1500;
-      if (eH.Àä !== 0) {
-        if (eH.Àä < 400) {
-          eH.Àä = 800 - eH.Àä;
+    var âÁÁ = áåa.Aâä[ÀåA];
+    var ÁAå = ÄÁ;
+    var äâÃ = 0;
+    if (áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä) < aÅ) {
+      â.Äa = (â.Äa + ÀÀ) % 1500;
+      if (â.Àä !== 0) {
+        if (â.Àä < 400) {
+          â.Àä = 800 - â.Àä;
         }
-        eH.Àä = eH.Àä + ÀÀ;
-        if (eH.Àä > 800) {
-          eH.Àä = ÀÄ;
+        â.Àä = â.Àä + ÀÀ;
+        if (â.Àä > 800) {
+          â.Àä = ÀÄ;
         }
       }
     } else {
-      if (äâä[âAä].aÁá < eD.aÁá) {
-        eH.Àä = eH.Àä + ÀÀ * 1.9;
+      if (äâä[âAä].aÁá < Ä.aÁá) {
+        â.Àä = â.Àä + ÀÀ * 1.9;
       } else {
-        eH.Àä = eH.Àä + ÀÀ;
+        â.Àä = â.Àä + ÀÀ;
       }
-      if (eH.Àä > 800) {
-        eH.orientation *= -Áå;
-        eH.Àä = eH.Àä % 800;
+      if (â.Àä > 800) {
+        â.orientation *= -Áå;
+        â.Àä = â.Àä % 800;
       }
-      if (äå !== eH.Äa) {
-        if (eH.Äa < 750) {
-          eH.Äa = 1500 - eH.Äa;
+      if (äå !== â.Äa) {
+        if (â.Äa < 750) {
+          â.Äa = 1500 - â.Äa;
         }
-        eH.Äa = eH.Äa + ÀÀ;
-        if (eH.Äa > 1500) {
-          eH.Äa = áÃ;
+        â.Äa = â.Äa + ÀÀ;
+        if (â.Äa > 1500) {
+          â.Äa = áÃ;
         }
       }
     }
-    var eO = (eH.Äa < 750 ? eH.Äa / 750 : Àâ - (eH.Äa - 750) / 750) * eB.Äa;
-    var eP = eB.Àä * (eH.Àä < 400 ? eH.Àä / 400 : 1 - (eH.Àä - 400) / 400);
-    var eQ = eB.ÂÄ;
-    var eR = eC.ÂÄ === undefined ? eL.ÂÄ : eC.ÂÄ;
-    áá.ÄA(eR, eF, eG, eQ.angle + eD.angle + eO, eQ.x + eP * eH.orientation + eN, eQ.y, eE);
-    eQ = eB.áÀ;
-    eR = eC.áÀ === aäÁ ? eL.áÀ : eC.áÀ;
-    áá.ÄA(eR, eF, eG, -eQ.angle + eD.angle - eO, eQ.x - eH.orientation * eP + eM, eQ.y, eE);
-    áá.ÄA(eB.åa, eF, eG, -eQ.angle + eD.angle - eO + Math.PI / 3, eQ.x - eH.orientation * eP + eM - 40, eQ.y - 15, eE);
-    if (ãÂ < eD.ÃÁ) {
-      var eS = åÀ;
-      eD.ÃÁ -= ÀÀ;
-      var eT = ãa;
-      if (eD.ÃÁ > 150) {
-        eT = Ää.ÁÃ.AÃa((300 - eD.ÃÁ) / 300);
+    var Äa = (â.Äa < 750 ? â.Äa / 750 : Àâ - (â.Äa - 750) / 750) * ÁÂ.Äa;
+    var Àä = ÁÂ.Àä * (â.Àä < 400 ? â.Àä / 400 : 1 - (â.Àä - 400) / 400);
+    var âaá = ÁÂ.ÂÄ;
+    var Âäâ = ÄÁá.ÂÄ === undefined ? âÁÁ.ÂÄ : ÄÁá.ÂÄ;
+    áá.ÄA(Âäâ, ã, áã, âaá.angle + Ä.angle + Äa, âaá.x + Àä * â.orientation + äâÃ, âaá.y, åÃ);
+    âaá = ÁÂ.áÀ;
+    Âäâ = ÄÁá.áÀ === aäÁ ? âÁÁ.áÀ : ÄÁá.áÀ;
+    áá.ÄA(Âäâ, ã, áã, -âaá.angle + Ä.angle - Äa, âaá.x - â.orientation * Àä + ÁAå, âaá.y, åÃ);
+    áá.ÄA(ÁÂ.åa, ã, áã, -âaá.angle + Ä.angle - Äa + Math.PI / 3, âaá.x - â.orientation * Àä + ÁAå - 40, âaá.y - 15, åÃ);
+    if (ãÂ < Ä.ÃÁ) {
+      var ááÂ = åÀ;
+      Ä.ÃÁ -= ÀÀ;
+      var ãÃ = ãa;
+      if (Ä.ÃÁ > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.ÃÁ) / 300);
       } else {
-        eT = Ää.ÁÃ.ÃaÅ(eD.ÃÁ / 150);
-        eS += (ÁÅ - eT) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ÃÁ / 150);
+        ááÂ += (ÁÅ - ãÃ) * 0.2;
       }
-      eF += áÄA * (eT * Math.sin(eD.áÀÅ));
-      eG += eT * Math.cos(eD.áÀÅ) * 3;
-      AÅ.globalAlpha = Math.min(1, Math.max(ÄÁ, eT));
-      áá.ÄA(eA.ÃÁ, eF, eG, eD.angle, äå, 0, eS);
+      ã += áÄA * (ãÃ * Math.sin(Ä.áÀÅ));
+      áã += ãÃ * Math.cos(Ä.áÀÅ) * 3;
+      AÅ.globalAlpha = Math.min(1, Math.max(ÄÁ, ãÃ));
+      áá.ÄA(áåa.ÃÁ, ã, áã, Ä.angle, äå, 0, ááÂ);
       AÅ.globalAlpha = aÅ;
     }
-    if (eD.ââ > 0) {
-      var eS = 1;
-      eD.ââ -= ÀÀ;
-      if (eD.ââ > 150) {
-        AÅ.globalAlpha = Math.min(1, Math.max(AÂ, Ää.ÁÃ.AÃa((300 - eD.ââ) / 300)));
+    if (Ä.ââ > 0) {
+      var ááÂ = 1;
+      Ä.ââ -= ÀÀ;
+      if (Ä.ââ > 150) {
+        AÅ.globalAlpha = Math.min(1, Math.max(AÂ, Ää.ÁÃ.AÃa((300 - Ä.ââ) / 300)));
       } else {
-        var eT = Ää.ÁÃ.ÃaÅ(eD.ââ / 150);
-        eS += (âa - eT) * 0.2;
-        AÅ.globalAlpha = Math.min(1, Math.max(åâ, eT));
+        var ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ââ / 150);
+        ááÂ += (âa - ãÃ) * 0.2;
+        AÅ.globalAlpha = Math.min(1, Math.max(åâ, ãÃ));
       }
-      áá.ÄA(eA.ââ, eF, eG, eD.angle, 0, 0, eS);
+      áá.ÄA(áåa.ââ, ã, áã, Ä.angle, 0, 0, ááÂ);
       AÅ.globalAlpha = ÂA;
     }
-    áá.ÄA(eL.head, eF, eG, eD.angle, Àá, ÅÁ, eE);
-    if (eC.head !== undefined) {
-      áá.ÄA(eC.head, eF, eG, eD.angle, áÁ, 0, eE);
+    áá.ÄA(âÁÁ.head, ã, áã, Ä.angle, Àá, ÅÁ, åÃ);
+    if (ÄÁá.head !== undefined) {
+      áá.ÄA(ÄÁá.head, ã, áã, Ä.angle, áÁ, 0, åÃ);
     }
-    áá.ÄA(eB.ãäââÅ, eF, eG, eD.angle, áÃ, 0, eE);
+    áá.ÄA(ÁÂ.ãäââÅ, ã, áã, Ä.angle, áÃ, 0, åÃ);
   }
   ;
-  function d9() {
-    var eA = ÅÀ.åA[âAä];
-    var eB = ÅÀ.border[âAä];
-    var eC = eB.border;
-    for (var eD = 0; eC > eD; eD++) {
-      var eE = eA[eB.ÁÀá[eD]];
-      if (eE.åÅ === Aá.â.id) {
-        if (áâA.ÅáÂ(Aá.â.x, Aá.â.y, eE.x, eE.y) < aÅ) {
-          bL = Math.max(0, bL - ÀÀ);
+  function áÄáåÀ() {
+    var ÂÅ = ÅÀ.åA[âAä];
+    var âÁ = ÅÀ.border[âAä];
+    var Aå = âÁ.border;
+    for (var ä = 0; Aå > ä; ä++) {
+      var â = ÂÅ[âÁ.ÁÀá[ä]];
+      if (â.åÅ === Aá.â.id) {
+        if (áâA.ÅáÂ(Aá.â.x, Aá.â.y, â.x, â.y) < aÅ) {
+          Åãá = Math.max(0, Åãá - ÀÀ);
         } else {
-          bL = ak;
+          Åãá = ÄAåaÂ;
         }
-        var eF = äâä[âAä].âãÅ[eE.ÅÁa & 255];
-        var eG = Aá.ÄÄ;
-        if (eF.áÅÀ !== undefined) {
-          eG.áÅÀ.åaá = eF.áÅÀ;
-          eG.aaå.åaá = eF.ÁÃá;
+        var ÄÁá = äâä[âAä].âãÅ[â.ÅÁa & 255];
+        var ÄÄ = Aá.ÄÄ;
+        if (ÄÁá.áÅÀ !== undefined) {
+          ÄÄ.áÅÀ.åaá = ÄÁá.áÅÀ;
+          ÄÄ.aaå.åaá = ÄÁá.ÁÃá;
         } else {
-          eG.áÅÀ.åaá = AÄ;
-          eG.aaå.åaá = áÃ;
+          ÄÄ.áÅÀ.åaá = AÄ;
+          ÄÄ.aaå.åaá = áÃ;
         }
-        b3 = eE.x;
-        b4 = eE.y;
-        Aá.â.x = eE.x;
-        Aá.â.y = eE.y;
-        Aá.â.ÂáÁ = eE.ä;
-        Aá.â.åäA = eE.åã;
-        Aá.â.aÅÁ = äâä[âAä].aäA[eE.ÅÁa >> ÂáÄ & 255].type === 6 ? 1 : 0;
-        var eH = Math.min(ÂãáåÃ, Aaä);
-        if (eH < ÁA.ÃÂ) {
-          eH = o * Math.min((ÁA.ÃÂ - eH) / eH, âa);
+        AÃÅ = â.x;
+        ÃÂÀ = â.y;
+        Aá.â.x = â.x;
+        Aá.â.y = â.y;
+        Aá.â.ÂáÁ = â.ä;
+        Aá.â.åäA = â.åã;
+        Aá.â.aÅÁ = äâä[âAä].aäA[â.ÅÁa >> ÂáÄ & 255].type === 6 ? 1 : 0;
+        var ÁåÄ = Math.min(ÂãáåÃ, Aaä);
+        if (ÁåÄ < ÁA.ÃÂ) {
+          ÁåÄ = ÅaÄäÅ * Math.min((ÁA.ÃÂ - ÁåÄ) / ÁåÄ, âa);
         } else {
-          eH = 0;
+          ÁåÄ = 0;
         }
-        var eI = Math.sin(ÁA.angle) * eH;
-        var eJ = Math.cos(ÁA.angle) * eH;
-        b7 = áá.ãåa(b7, eI, p);
-        b8 = áá.ãåa(b8, eJ, p);
-        var eK = 0;
-        var eL = åâ;
+        var ã = Math.sin(ÁA.angle) * ÁåÄ;
+        var áã = Math.cos(ÁA.angle) * ÁåÄ;
+        ÂãÀ = áá.ãåa(ÂãÀ, ã, äááÄa);
+        AAÂ = áá.ãåa(AAÂ, áã, äááÄa);
+        var áÃâÃÁ = 0;
+        var ÅäÃÄä = åâ;
         if (ÀÂ.åÁÃ > ãa) {
           ÀÂ.åÁÃ -= 1;
-          eK += Math.random() * AâÃ - 3;
-          eL += Math.random() * 6 - Äâa;
+          áÃâÃÁ += Math.random() * AâÃ - 3;
+          ÅäÃÄä += Math.random() * 6 - Äâa;
         }
         if (AÄ < ÀÂ.äAÃ) {
           ÀÂ.äAÃ -= 1;
-          eK += Math.random() * 18 - ÂAÃ;
-          eL += Math.random() * 18 - 9;
+          áÃâÃÁ += Math.random() * 18 - ÂAÃ;
+          ÅäÃÄä += Math.random() * 18 - 9;
         }
-        b1 = åäÅ / ÄÀ - eE.x - b7 + eK;
-        b2 = ÂáÅ / ÄÀ - eE.y - b8 + eL;
-        b5 = eE.x + b7;
-        b6 = eE.y + b8;
-        important = [ÄÀ, b7, b8, b1, b2];
+        äÁ = åäÅ / ÄÀ - â.x - ÂãÀ + áÃâÃÁ;
+        ãÅ = ÂáÅ / ÄÀ - â.y - AAÂ + ÅäÃÄä;
+        äáÁÃå = â.x + ÂãÀ;
+        ÁâÃãa = â.y + AAÂ;
+        important = [ÄÀ, ÂãÀ, AAÂ, äÁ, ãÅ];
         return;
       }
     }
   }
   ;
-  function da(eA, eB, eC, eD, eE, eF, eG) {
-    var eH = Aá.ÂÅ[eD.åÅ];
-    var eI = 0;
-    var eJ = eH.ÂaÅ - ÀÂ.åâå;
-    var eK = eH.ÄÀA - ÀÂ.åâå;
-    if (eJ > 0) {
-      if (eK > 0) {
-        eI = áÄA;
-      } else if (eH.ÄÀA > 0) {
-        eI = AâÁ;
+  function Âaáãá(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    var ÀåA = 0;
+    var ÂaÅ = â.ÂaÅ - ÀÂ.åâå;
+    var ÄÀA = â.ÄÀA - ÀÂ.åâå;
+    if (ÂaÅ > 0) {
+      if (ÄÀA > 0) {
+        ÀåA = áÄA;
+      } else if (â.ÄÀA > 0) {
+        ÀåA = AâÁ;
       } else {
-        eI = 1;
+        ÀåA = 1;
       }
-    } else if (eK > Àá) {
-      eI = ããÁ;
-    } else if (åâ < eH.ÄÀA) {
-      eI = åÁá;
+    } else if (ÄÀA > Àá) {
+      ÀåA = ããÁ;
+    } else if (åâ < â.ÄÀA) {
+      ÀåA = åÁá;
     }
-    if (eD.åÅ == Aá.â.id && cfg.changeMyModel) {
-      eI = cfg.myPlayerModel;
+    if (Ä.åÅ == Aá.â.id && cfg.changeMyModel) {
+      ÀåA = cfg.myPlayerModel;
     }
-    var eL = eA.Aâä[eI];
-    var eM = ÄÁ;
-    var eN = ÅÁ;
-    var eO = 0;
-    var eP = 0;
-    if (Aa < eD.Âa) {
-      eD.Âa = Math.max(0, eD.Âa - ÀÀ);
-      eY = eB.âÃÂ < eD.Âa ? 1 - (eD.Âa - eB.âÃÂ) / (eB.åÁ - eB.âÃÂ) : eD.Âa / eB.âÃÂ;
-      eM = -Ää.ÁÃ.ÄáÀ(eY) * 0.35;
-      eP = áÄA * eY;
-      eO = ÃÁä * -eY;
-      eN = eY * âÀâ;
-    } else if (áâA.ÅáÂ(eD.x, eD.y, eD.Åaä, eD.ÂÅä) < 1) {
-      eH.Äa = (eH.Äa + ÀÀ) % 1500;
-      if (Àá !== eH.Àä) {
-        if (eH.Àä < 400) {
-          eH.Àä = 800 - eH.Àä;
+    var âÁÁ = áåa.Aâä[ÀåA];
+    var aáÂ = ÄÁ;
+    var ÁAå = ÅÁ;
+    var äâÃ = 0;
+    var AåÅ = 0;
+    if (Aa < Ä.Âa) {
+      Ä.Âa = Math.max(0, Ä.Âa - ÀÀ);
+      ãÃ = ÁÂ.âÃÂ < Ä.Âa ? 1 - (Ä.Âa - ÁÂ.âÃÂ) / (ÁÂ.åÁ - ÁÂ.âÃÂ) : Ä.Âa / ÁÂ.âÃÂ;
+      aáÂ = -Ää.ÁÃ.ÄáÀ(ãÃ) * 0.35;
+      AåÅ = áÄA * ãÃ;
+      äâÃ = ÃÁä * -ãÃ;
+      ÁAå = ãÃ * âÀâ;
+    } else if (áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä) < 1) {
+      â.Äa = (â.Äa + ÀÀ) % 1500;
+      if (Àá !== â.Àä) {
+        if (â.Àä < 400) {
+          â.Àä = 800 - â.Àä;
         }
-        eH.Àä = eH.Àä + ÀÀ;
-        if (eH.Àä > 800) {
-          eH.Àä = 0;
+        â.Àä = â.Àä + ÀÀ;
+        if (â.Àä > 800) {
+          â.Àä = 0;
         }
       }
     } else {
-      if (äâä[âAä].aÁá < eD.aÁá) {
-        eH.Àä = eH.Àä + ÀÀ * 1.9;
+      if (äâä[âAä].aÁá < Ä.aÁá) {
+        â.Àä = â.Àä + ÀÀ * 1.9;
       } else {
-        eH.Àä = eH.Àä + ÀÀ;
+        â.Àä = â.Àä + ÀÀ;
       }
-      if (eH.Àä > 800) {
-        eH.orientation *= -1;
-        eH.Àä = eH.Àä % 800;
+      if (â.Àä > 800) {
+        â.orientation *= -1;
+        â.Àä = â.Àä % 800;
       }
-      if (eH.Äa !== ãa) {
-        if (eH.Äa < 750) {
-          eH.Äa = 1500 - eH.Äa;
+      if (â.Äa !== ãa) {
+        if (â.Äa < 750) {
+          â.Äa = 1500 - â.Äa;
         }
-        eH.Äa = eH.Äa + ÀÀ;
-        if (eH.Äa > 1500) {
-          eH.Äa = 0;
+        â.Äa = â.Äa + ÀÀ;
+        if (â.Äa > 1500) {
+          â.Äa = 0;
         }
       }
     }
-    var eQ = eB.Äa * (eH.Äa < 750 ? eH.Äa / 750 : 1 - (eH.Äa - 750) / 750);
-    var eR = (eH.Àä < 400 ? eH.Àä / 400 : 1 - (eH.Àä - 400) / 400) * eB.Àä;
-    var eS = (eH.Äa < 750 ? eH.Äa / 750 : ÁÅ - (eH.Äa - 750) / 750) * eB.ãÄã;
-    var eT = eB.ÂÄ;
-    var eU = eC.ÂÄ === undefined ? eL.ÂÄ : eC.ÂÄ;
-    áá.ÄA(eU, eF, eG, eT.angle + eD.angle - eM, eT.x - eH.orientation * eR + eO + eS, eT.y, eE);
-    if (eD.Âa > 0) {
-      var eV = eB.Åâä;
-      áá.ÄA(eV, eF, eG, eD.angle, eV.x - eR * eH.orientation + eS + eO, eV.y, eE);
+    var Äa = ÁÂ.Äa * (â.Äa < 750 ? â.Äa / 750 : 1 - (â.Äa - 750) / 750);
+    var Àä = (â.Àä < 400 ? â.Àä / 400 : 1 - (â.Àä - 400) / 400) * ÁÂ.Àä;
+    var ãÄã = (â.Äa < 750 ? â.Äa / 750 : ÁÅ - (â.Äa - 750) / 750) * ÁÂ.ãÄã;
+    var âaá = ÁÂ.ÂÄ;
+    var Âäâ = ÄÁá.ÂÄ === undefined ? âÁÁ.ÂÄ : ÄÁá.ÂÄ;
+    áá.ÄA(Âäâ, ã, áã, âaá.angle + Ä.angle - aáÂ, âaá.x - â.orientation * Àä + äâÃ + ãÄã, âaá.y, åÃ);
+    if (Ä.Âa > 0) {
+      var Åâä = ÁÂ.Åâä;
+      áá.ÄA(Åâä, ã, áã, Ä.angle, Åâä.x - Àä * â.orientation + ãÄã + äâÃ, Åâä.y, åÃ);
     }
-    var eW = eB.ÁÂ;
-    áá.ÄA(eW, eF, eG, eW.angle + eD.angle, eW.x + eR * eH.orientation + eQ + eN, eW.y, eE);
-    eT = eB.áÀ;
-    eU = eC.áÀ === undefined ? eL.áÀ : eC.áÀ;
-    áá.ÄA(eU, eF, eG, -eT.angle + eD.angle, eT.x + eH.orientation * eR + eN + eQ, eT.y, eE);
-    if (eD.ÃÁ > 0) {
-      var eX = ÄÂ;
-      eD.ÃÁ -= ÀÀ;
-      var eY = 0;
-      if (eD.ÃÁ > 150) {
-        eY = Ää.ÁÃ.AÃa((300 - eD.ÃÁ) / 300);
+    var Åã = ÁÂ.ÁÂ;
+    áá.ÄA(Åã, ã, áã, Åã.angle + Ä.angle, Åã.x + Àä * â.orientation + Äa + ÁAå, Åã.y, åÃ);
+    âaá = ÁÂ.áÀ;
+    Âäâ = ÄÁá.áÀ === undefined ? âÁÁ.áÀ : ÄÁá.áÀ;
+    áá.ÄA(Âäâ, ã, áã, -âaá.angle + Ä.angle, âaá.x + â.orientation * Àä + ÁAå + Äa, âaá.y, åÃ);
+    if (Ä.ÃÁ > 0) {
+      var ááÂ = ÄÂ;
+      Ä.ÃÁ -= ÀÀ;
+      var ãÃ = 0;
+      if (Ä.ÃÁ > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.ÃÁ) / 300);
       } else {
-        eY = Ää.ÁÃ.ÃaÅ(eD.ÃÁ / 150);
-        eX += (1 - eY) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ÃÁ / 150);
+        ááÂ += (1 - ãÃ) * 0.2;
       }
-      eF += ÄÀá * (eY * Math.sin(eD.áÀÅ));
-      eG += Math.cos(eD.áÀÅ) * eY * áÄA;
-      AÅ.globalAlpha = Math.min(Äá, Math.max(0, eY));
-      áá.ÄA(eA.ÃÁ, eF, eG, eD.angle - eM / 1.5, eP, 0, eX);
+      ã += ÄÀá * (ãÃ * Math.sin(Ä.áÀÅ));
+      áã += Math.cos(Ä.áÀÅ) * ãÃ * áÄA;
+      AÅ.globalAlpha = Math.min(Äá, Math.max(0, ãÃ));
+      áá.ÄA(áåa.ÃÁ, ã, áã, Ä.angle - aáÂ / 1.5, AåÅ, 0, ááÂ);
       AÅ.globalAlpha = Àâ;
     }
-    if (eD.ââ > 0) {
-      var eX = 1;
-      eD.ââ -= ÀÀ;
-      if (eD.ââ > 150) {
-        AÅ.globalAlpha = Math.min(1, Math.max(ãÁ, Ää.ÁÃ.AÃa((300 - eD.ââ) / 300)));
+    if (Ä.ââ > 0) {
+      var ááÂ = 1;
+      Ä.ââ -= ÀÀ;
+      if (Ä.ââ > 150) {
+        AÅ.globalAlpha = Math.min(1, Math.max(ãÁ, Ää.ÁÃ.AÃa((300 - Ä.ââ) / 300)));
       } else {
-        var eY = Ää.ÁÃ.ÃaÅ(eD.ââ / 150);
-        eX += (1 - eY) * 0.2;
-        AÅ.globalAlpha = Math.min(1, Math.max(0, eY));
+        var ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ââ / 150);
+        ááÂ += (1 - ãÃ) * 0.2;
+        AÅ.globalAlpha = Math.min(1, Math.max(0, ãÃ));
       }
-      áá.ÄA(eA.ââ, eF, eG, eD.angle - eM / 1.5, eP, 0, eX);
+      áá.ÄA(áåa.ââ, ã, áã, Ä.angle - aáÂ / 1.5, AåÅ, 0, ááÂ);
       AÅ.globalAlpha = 1;
     }
-    áá.ÄA(eL.head, eF, eG, eD.angle - eM / 1.5, eP, 0, eE);
-    if (eC.head !== undefined) {
-      áá.ÄA(eC.head, eF, eG, eD.angle - eM / 1.5, eP, ãÁ, eE);
+    áá.ÄA(âÁÁ.head, ã, áã, Ä.angle - aáÂ / 1.5, AåÅ, 0, åÃ);
+    if (ÄÁá.head !== undefined) {
+      áá.ÄA(ÄÁá.head, ã, áã, Ä.angle - aáÂ / 1.5, AåÅ, ãÁ, åÃ);
     }
   }
   ;
-  function db(eA) {
+  function åáåÃâ(Ä) {
     if (cfg.dontShowShiftAnimation) {
       return;
     }
-    var eB = Aá.ÂÅ[eA.åÅ];
-    for (var eC = ãÂ; eB.ÅAá.length > eC; eC++) {
-      var eD = eB.ÅAá[eC];
-      if (eC > ÄÁ && eD.åÁ <= 0) {
-        var eE = eB.ÅAá[eC - 1];
-        if (eE.åÁ > 500 || eE.åÁ <= 0) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    for (var ä = ãÂ; â.ÅAá.length > ä; ä++) {
+      var ÄÁÁ = â.ÅAá[ä];
+      if (ä > ÄÁ && ÄÁÁ.åÁ <= 0) {
+        var ÅÃÄÀÃ = â.ÅAá[ä - 1];
+        if (ÅÃÄÀÃ.åÁ > 500 || ÅÃÄÀÃ.åÁ <= 0) {
           continue;
         }
       }
-      if (äâä[âAä].aÁá < eA.aÁá || eD.åÁ > ãä) {
-        var eF = äâä[âAä].ÅAá;
-        var eG = eF.À;
-        if (eG.á !== Äá) {
-          eF.À = áá.ÃA(eF.src, eF.À);
+      if (äâä[âAä].aÁá < Ä.aÁá || ÄÁÁ.åÁ > ãä) {
+        var áåa = äâä[âAä].ÅAá;
+        var À = áåa.À;
+        if (À.á !== Äá) {
+          áåa.À = áá.ÃA(áåa.src, áåa.À);
           return;
         }
-        if (áÁ >= eD.åÁ) {
-          eD.åÁ = 750;
-          eD.angle = ay * Math.random();
-          eD.x = eA.x;
-          eD.y = eA.y;
-          eD.size = 1 + Math.random() * 0.8;
+        if (áÁ >= ÄÁÁ.åÁ) {
+          ÄÁÁ.åÁ = 750;
+          ÄÁÁ.angle = áÀÃ * Math.random();
+          ÄÁÁ.x = Ä.x;
+          ÄÁÁ.y = Ä.y;
+          ÄÁÁ.size = 1 + Math.random() * 0.8;
         } else {
-          eD.åÁ -= ÀÀ;
+          ÄÁÁ.åÁ -= ÀÀ;
         }
-        var eH = Ää.ÁÃ.ÀÅA(Math.max(0, eD.åÁ / 750));
-        var eI = eG.width * (eH * (ÄÀ * (eD.size + 1))) / AAÃ;
-        var eJ = -eI / 2;
+        var ãÃ = Ää.ÁÃ.ÀÅA(Math.max(0, ÄÁÁ.åÁ / 750));
+        var âAã = À.width * (ãÃ * (ÄÀ * (ÄÁÁ.size + 1))) / AAÃ;
+        var ãâä = -âAã / 2;
         AÅ.save();
-        AÅ.translate(ÄÀ * (b1 + eD.x), (b2 + eD.y) * ÄÀ);
-        AÅ.rotate(eD.angle);
-        AÅ.globalAlpha = Math.max(0, eH * eH);
-        AÅ.drawImage(eG, eJ, eJ, eI, eI);
+        AÅ.translate(ÄÀ * (äÁ + ÄÁÁ.x), (ãÅ + ÄÁÁ.y) * ÄÀ);
+        AÅ.rotate(ÄÁÁ.angle);
+        AÅ.globalAlpha = Math.max(0, ãÃ * ãÃ);
+        AÅ.drawImage(À, ãâä, ãâä, âAã, âAã);
         AÅ.restore();
       }
     }
   }
   ;
-  function dc(eA, eB) {
-    var eC = ÁÁ[eB];
-    var eD = eC.detail;
-    var eE = áÅ.åáa(eD.name, "'Viga', sans-serif", "#D3BB43", 30, 400);
-    eA.drawImage(eE, ÀÄÀ, 20);
-    eE = áÅ.åáa(eD.description, "'Viga', sans-serif", "#FFFFFF", ÂÄâ, 400);
-    eA.drawImage(eE, 20, 68);
-    if (eC.aa === 21) {
-      if (eC.ÄÄA > 0) {
-        eE = áÅ.åáa("Damage: " + eC.áAa + "/" + eC.ÄÄA, "'Viga', sans-serif", "#D3BB43", 24, 400);
-        eA.drawImage(eE, 20, 101);
+  function ÀAãÂâ(ãaá, ãã) {
+    var âÃÃ = ÁÁ[ãã];
+    var ÀÁ = âÃÃ.detail;
+    var ÅAä = áÅ.åáa(ÀÁ.name, "'Viga', sans-serif", "#D3BB43", 30, 400);
+    ãaá.drawImage(ÅAä, ÀÄÀ, 20);
+    ÅAä = áÅ.åáa(ÀÁ.description, "'Viga', sans-serif", "#FFFFFF", ÂÄâ, 400);
+    ãaá.drawImage(ÅAä, 20, 68);
+    if (âÃÃ.aa === 21) {
+      if (âÃÃ.ÄÄA > 0) {
+        ÅAä = áÅ.åáa("Damage: " + âÃÃ.áAa + "/" + âÃÃ.ÄÄA, "'Viga', sans-serif", "#D3BB43", 24, 400);
+        ãaá.drawImage(ÅAä, 20, 101);
       } else {
-        eE = áÅ.åáa("Life: " + eC.ãá, "'Viga', sans-serif", "#D3BB43", 24, 400);
-        eA.drawImage(eE, 20, 101);
+        ÅAä = áÅ.åáa("Life: " + âÃÃ.ãá, "'Viga', sans-serif", "#D3BB43", 24, 400);
+        ãaá.drawImage(ÅAä, 20, 101);
       }
-    } else if (eC.aa !== âÄä && âã !== eC.aa) {
-      var eF = "";
-      var eG = äâä[âAä].aäA[eC.aa];
-      if (eG.áAa !== undefined) {
-        eF = "Damage: " + (eG.äÄÀ === undefined ? eG.áAa : eG.äÄÀ);
+    } else if (âÃÃ.aa !== âÄä && âã !== âÃÃ.aa) {
+      var åÀA = "";
+      var ÁÂ = äâä[âAä].aäA[âÃÃ.aa];
+      if (ÁÂ.áAa !== undefined) {
+        åÀA = "Damage: " + (ÁÂ.äÄÀ === undefined ? ÁÂ.áAa : ÁÂ.äÄÀ);
       } else {
-        if (äá !== eG.ÃäÄ) {
-          eF += "Food: " + eG.ÃäÄ + " ";
+        if (äá !== ÁÂ.ÃäÄ) {
+          åÀA += "Food: " + ÁÂ.ÃäÄ + " ";
         }
-        if (eG.ââ < 0) {
-          eF += "Damage: " + eG.ââ + " ";
-        } else if (eG.ââ > 0) {
-          eF += "Heal: " + eG.ââ + " ";
+        if (ÁÂ.ââ < 0) {
+          åÀA += "Damage: " + ÁÂ.ââ + " ";
+        } else if (ÁÂ.ââ > 0) {
+          åÀA += "Heal: " + ÁÂ.ââ + " ";
         }
-        if (eG.ÁâA !== 0) {
-          eF += "Energy: " + eG.ÁâA;
+        if (ÁÂ.ÁâA !== 0) {
+          åÀA += "Energy: " + ÁÂ.ÁâA;
         }
       }
-      eE = áÅ.åáa(eF, "'Viga', sans-serif", "#D3BB43", 24, 400);
-      eA.drawImage(eE, ãÃa, 101);
-    } else if (eC.ÁåA !== aäÁ) {} else {
-      eE = áÅ.åáa("Cannot be equipped", "'Viga', sans-serif", "#FFFFFF", AãÅ, 400);
-      eA.drawImage(eE, ÄÂá, 108);
+      ÅAä = áÅ.åáa(åÀA, "'Viga', sans-serif", "#D3BB43", 24, 400);
+      ãaá.drawImage(ÅAä, ãÃa, 101);
+    } else if (âÃÃ.ÁåA !== aäÁ) {} else {
+      ÅAä = áÅ.åáa("Cannot be equipped", "'Viga', sans-serif", "#FFFFFF", AãÅ, 400);
+      ãaá.drawImage(ÅAä, ÄÂá, 108);
     }
   }
   ;
-  function dd(eA, eB, eC, eD, eE, eF, eG, eH, eI, eJ, eK, eL, eM, eN) {
-    eA.Áá();
-    var eO = eA.áâ.x;
-    var eP = eA.áâ.y;
-    eK.áâ.x = eO + ÄÀ * 265;
-    eK.áâ.y = eP + âã * ÄÀ;
-    eK.Áá();
-    eE.áâ.x = eO + ÄÀ * 87;
-    eE.áâ.y = eP + ÄÀ * 15;
+  function ÀÅáAá(ÃÁáÄA, ãÀÄ, åÀÂ, Âäá, âÂÃ, aaã, ÃÄÂ, ÅAÃ, aãÀ, åAã, äAÁ, aäa, ÁåÅ, Äãâ) {
+    ÃÁáÄA.Áá();
+    var ã = ÃÁáÄA.áâ.x;
+    var áã = ÃÁáÄA.áâ.y;
+    äAÁ.áâ.x = ã + ÄÀ * 265;
+    äAÁ.áâ.y = áã + âã * ÄÀ;
+    äAÁ.Áá();
+    âÂÃ.áâ.x = ã + ÄÀ * 87;
+    âÂÃ.áâ.y = áã + ÄÀ * 15;
     if (ÂÄA.åÀÃáâ() === 1) {
-      eE.Äâ(áÅ.Áåâ);
+      âÂÃ.Äâ(áÅ.Áåâ);
     }
-    eE.Áá();
-    eF.áâ.x = eO + ÄÀ * 173;
-    eF.áâ.y = eP + ÄÀ * ÅâAÃÁ;
+    âÂÃ.Áá();
+    aaã.áâ.x = ã + ÄÀ * 173;
+    aaã.áâ.y = áã + ÄÀ * ÅâAÃÁ;
     if (ÂÄA.ÃÂáÄa() === 1) {
-      eF.Äâ(áÅ.Áåâ);
+      aaã.Äâ(áÅ.Áåâ);
     }
-    eF.Áá();
-    eD.áâ.x = eO + ÄÀ * 87;
-    eD.áâ.y = eP + ÄÀ * 62;
+    aaã.Áá();
+    Âäá.áâ.x = ã + ÄÀ * 87;
+    Âäá.áâ.y = áã + ÄÀ * 62;
     if (ÂâA === áá.options.ÂÁá) {
-      eD.Äâ(áÅ.Áåâ);
+      Âäá.Äâ(áÅ.Áåâ);
     }
-    eD.Áá();
-    eC.áâ.x = eO + ÄÀ * 147;
-    eC.áâ.y = eP + ÄÀ * 62;
+    Âäá.Áá();
+    åÀÂ.áâ.x = ã + ÄÀ * 147;
+    åÀÂ.áâ.y = áã + ÄÀ * 62;
     if (áá.options.ÂÁá === 2) {
-      eC.Äâ(áÅ.Áåâ);
+      åÀÂ.Äâ(áÅ.Áåâ);
     }
-    eC.Áá();
-    eB.áâ.x = eO + ÄÀ * 207;
-    eB.áâ.y = eP + ÄÀ * 62;
+    åÀÂ.Áá();
+    ãÀÄ.áâ.x = ã + ÄÀ * 207;
+    ãÀÄ.áâ.y = áã + ÄÀ * 62;
     if (áá.options.ÂÁá === 1) {
-      eB.Äâ(áÅ.Áåâ);
+      ãÀÄ.Äâ(áÅ.Áåâ);
     }
-    eB.Áá();
-    eG.áâ.x = eO + ÄÀ * 87;
-    eG.áâ.y = eP + ÄÀ * 117;
+    ãÀÄ.Áá();
+    ÃÄÂ.áâ.x = ã + ÄÀ * 87;
+    ÃÄÂ.áâ.y = áã + ÄÀ * 117;
     if (ÂA === Äå.options.ááâ) {
-      eG.Äâ(áÅ.Áåâ);
+      ÃÄÂ.Äâ(áÅ.Áåâ);
     }
-    eG.Áá();
-    eH.áâ.x = eO + ÄÀ * 147;
-    eH.áâ.y = eP + ÄÀ * 117;
+    ÃÄÂ.Áá();
+    ÅAÃ.áâ.x = ã + ÄÀ * 147;
+    ÅAÃ.áâ.y = áã + ÄÀ * 117;
     if (Äå.options.ááâ === 0) {
-      eH.Äâ(áÅ.Áåâ);
+      ÅAÃ.Äâ(áÅ.Áåâ);
     }
-    eH.Áá();
-    eI.áâ.x = eO + ÄÀ * 87;
-    eI.áâ.y = eP + ÄÀ * 167;
+    ÅAÃ.Áá();
+    aãÀ.áâ.x = ã + ÄÀ * 87;
+    aãÀ.áâ.y = áã + ÄÀ * 167;
     if (Äå.options.åÄä === Áå) {
-      eI.Äâ(áÅ.Áåâ);
+      aãÀ.Äâ(áÅ.Áåâ);
     }
-    eI.Áá();
-    eJ.áâ.x = eO + ÄÀ * 147;
-    eJ.áâ.y = eP + ÄÀ * 167;
+    aãÀ.Áá();
+    åAã.áâ.x = ã + ÄÀ * 147;
+    åAã.áâ.y = áã + ÄÀ * 167;
     if (ÄÁ === Äå.options.åÄä) {
-      eJ.Äâ(áÅ.Áåâ);
+      åAã.Äâ(áÅ.Áåâ);
     }
-    eJ.Áá();
-    eN.áâ.x = eO + ÄÀ * 87;
-    eN.áâ.y = eP + ÄÀ * 217;
-    if (bd === 0) {
-      eN.Äâ(áÅ.Áåâ);
+    åAã.Áá();
+    Äãâ.áâ.x = ã + ÄÀ * 87;
+    Äãâ.áâ.y = áã + ÄÀ * 217;
+    if (ãäÅ === 0) {
+      Äãâ.Äâ(áÅ.Áåâ);
     }
-    eN.Áá();
-    eM.áâ.x = eO + ÄÀ * 147;
-    eM.áâ.y = eP + ÄÀ * 217;
-    if (ÁÅ === bd) {
-      eM.Äâ(áÅ.Áåâ);
+    Äãâ.Áá();
+    ÁåÅ.áâ.x = ã + ÄÀ * 147;
+    ÁåÅ.áâ.y = áã + ÄÀ * 217;
+    if (ÁÅ === ãäÅ) {
+      ÁåÅ.Äâ(áÅ.Áåâ);
     }
-    eM.Áá();
-    eL.áâ.x = eO + ÄÀ * 207;
-    eL.áâ.y = eP + ÄÀ * 217;
-    if (bd === ÄÀã) {
-      eL.Äâ(áÅ.Áåâ);
+    ÁåÅ.Áá();
+    aäa.áâ.x = ã + ÄÀ * 207;
+    aäa.áâ.y = áã + ÄÀ * 217;
+    if (ãäÅ === ÄÀã) {
+      aäa.Äâ(áÅ.Áåâ);
     }
-    eL.Áá();
+    aäa.Áá();
   }
   ;
-  function de(eA, eB, eC, eD, eE, eF, eG) {
-    var eH = Aá.ÂÅ[eD.åÅ];
-    var eI = 0;
-    var eJ = eH.ÂaÅ - ÀÂ.åâå;
-    var eK = eH.ÄÀA - ÀÂ.åâå;
-    if (äá < eJ) {
-      if (eK > 0) {
-        eI = 3;
-      } else if (ãÂ < eH.ÄÀA) {
-        eI = äÂá;
+  function ÅÃáâA(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    var ÀåA = 0;
+    var ÂaÅ = â.ÂaÅ - ÀÂ.åâå;
+    var ÄÀA = â.ÄÀA - ÀÂ.åâå;
+    if (äá < ÂaÅ) {
+      if (ÄÀA > 0) {
+        ÀåA = 3;
+      } else if (ãÂ < â.ÄÀA) {
+        ÀåA = äÂá;
       } else {
-        eI = äA;
+        ÀåA = äA;
       }
-    } else if (ãa < eK) {
-      eI = 2;
-    } else if (eH.ÄÀA > 0) {
-      eI = åäá;
+    } else if (ãa < ÄÀA) {
+      ÀåA = 2;
+    } else if (â.ÄÀA > 0) {
+      ÀåA = åäá;
     }
-    if (eD.åÅ == Aá.â.id && cfg.changeMyModel) {
-      eI = cfg.myPlayerModel;
+    if (Ä.åÅ == Aá.â.id && cfg.changeMyModel) {
+      ÀåA = cfg.myPlayerModel;
     }
-    var eL = eA.Aâä[eI];
-    var eM = 0;
-    var eN = 0;
-    var eO = AÂ;
-    var eP = ÄÁ;
-    if (eD.Âa > äå) {
-      eD.Âa = Math.max(åâ, eD.Âa - ÀÀ);
-      eV = eD.Âa > eB.âÃÂ ? ÀA - (eD.Âa - eB.âÃÂ) / (eB.åÁ - eB.âÃÂ) : eD.Âa / eB.âÃÂ;
-      eM = -Ää.ÁÃ.ÄáÀ(eV) * 0.55;
-      eP = eV * 3;
-      eO = -eV * 25;
-      eN = eV * 10;
-    } else if (ãâ > áâA.ÅáÂ(eD.x, eD.y, eD.Åaä, eD.ÂÅä)) {
-      eH.Äa = (eH.Äa + ÀÀ) % 1500;
-      if (ãÂ !== eH.Àä) {
-        if (eH.Àä < 400) {
-          eH.Àä = 800 - eH.Àä;
+    var âÁÁ = áåa.Aâä[ÀåA];
+    var aáÂ = 0;
+    var ÁAå = 0;
+    var äâÃ = AÂ;
+    var AåÅ = ÄÁ;
+    if (Ä.Âa > äå) {
+      Ä.Âa = Math.max(åâ, Ä.Âa - ÀÀ);
+      ãÃ = Ä.Âa > ÁÂ.âÃÂ ? ÀA - (Ä.Âa - ÁÂ.âÃÂ) / (ÁÂ.åÁ - ÁÂ.âÃÂ) : Ä.Âa / ÁÂ.âÃÂ;
+      aáÂ = -Ää.ÁÃ.ÄáÀ(ãÃ) * 0.55;
+      AåÅ = ãÃ * 3;
+      äâÃ = -ãÃ * 25;
+      ÁAå = ãÃ * 10;
+    } else if (ãâ > áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä)) {
+      â.Äa = (â.Äa + ÀÀ) % 1500;
+      if (ãÂ !== â.Àä) {
+        if (â.Àä < 400) {
+          â.Àä = 800 - â.Àä;
         }
-        eH.Àä = eH.Àä + ÀÀ;
-        if (eH.Àä > 800) {
-          eH.Àä = ÁÀ;
+        â.Àä = â.Àä + ÀÀ;
+        if (â.Àä > 800) {
+          â.Àä = ÁÀ;
         }
       }
     } else {
-      if (äâä[âAä].aÁá < eD.aÁá) {
-        eH.Àä = eH.Àä + ÀÀ * 1.9;
+      if (äâä[âAä].aÁá < Ä.aÁá) {
+        â.Àä = â.Àä + ÀÀ * 1.9;
       } else {
-        eH.Àä = eH.Àä + ÀÀ;
+        â.Àä = â.Àä + ÀÀ;
       }
-      if (eH.Àä > 800) {
-        eH.orientation *= -1;
-        eH.Àä = eH.Àä % 800;
+      if (â.Àä > 800) {
+        â.orientation *= -1;
+        â.Àä = â.Àä % 800;
       }
-      if (ãÁ !== eH.Äa) {
-        if (eH.Äa < 750) {
-          eH.Äa = 1500 - eH.Äa;
+      if (ãÁ !== â.Äa) {
+        if (â.Äa < 750) {
+          â.Äa = 1500 - â.Äa;
         }
-        eH.Äa = eH.Äa + ÀÀ;
-        if (eH.Äa > 1500) {
-          eH.Äa = 0;
+        â.Äa = â.Äa + ÀÀ;
+        if (â.Äa > 1500) {
+          â.Äa = 0;
         }
       }
     }
-    var eQ = eB.Äa * (eH.Äa < 750 ? eH.Äa / 750 : 1 - (eH.Äa - 750) / 750);
-    var eR = (eH.Àä < 400 ? eH.Àä / 400 : 1 - (eH.Àä - 400) / 400) * eB.Àä;
-    var eS = eB.áÀ;
-    var eT = eC.áÀ === undefined ? eL.áÀ : eC.áÀ;
-    áá.ÄA(eT, eF, eG, -eS.angle + eD.angle - eQ - eM, eS.x - eR * eH.orientation + eN, eS.y, eE);
-    if (eD.ÃÁ > 0) {
-      var eU = åÀ;
-      eD.ÃÁ -= ÀÀ;
-      var eV = åâ;
-      if (eD.ÃÁ > 150) {
-        eV = Ää.ÁÃ.AÃa((300 - eD.ÃÁ) / 300);
+    var Äa = ÁÂ.Äa * (â.Äa < 750 ? â.Äa / 750 : 1 - (â.Äa - 750) / 750);
+    var Àä = (â.Àä < 400 ? â.Àä / 400 : 1 - (â.Àä - 400) / 400) * ÁÂ.Àä;
+    var âaá = ÁÂ.áÀ;
+    var Âäâ = ÄÁá.áÀ === undefined ? âÁÁ.áÀ : ÄÁá.áÀ;
+    áá.ÄA(Âäâ, ã, áã, -âaá.angle + Ä.angle - Äa - aáÂ, âaá.x - Àä * â.orientation + ÁAå, âaá.y, åÃ);
+    if (Ä.ÃÁ > 0) {
+      var ááÂ = åÀ;
+      Ä.ÃÁ -= ÀÀ;
+      var ãÃ = åâ;
+      if (Ä.ÃÁ > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.ÃÁ) / 300);
       } else {
-        eV = Ää.ÁÃ.ÃaÅ(eD.ÃÁ / 150);
-        eU += (ãâ - eV) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ÃÁ / 150);
+        ááÂ += (ãâ - ãÃ) * 0.2;
       }
-      eF += Math.sin(eD.áÀÅ) * eV * 3;
-      eG += Math.cos(eD.áÀÅ) * eV * AÂÂ;
-      AÅ.globalAlpha = Math.min(Âã, Math.max(Àá, eV));
-      áá.ÄA(eA.ÃÁ, eF, eG, eD.angle - eM / 1.5, eP, áÃ, eU);
+      ã += Math.sin(Ä.áÀÅ) * ãÃ * 3;
+      áã += Math.cos(Ä.áÀÅ) * ãÃ * AÂÂ;
+      AÅ.globalAlpha = Math.min(Âã, Math.max(Àá, ãÃ));
+      áá.ÄA(áåa.ÃÁ, ã, áã, Ä.angle - aáÂ / 1.5, AåÅ, áÃ, ááÂ);
       AÅ.globalAlpha = Àâ;
     }
-    if (eD.ââ > AÄ) {
-      var eU = Äá;
-      eD.ââ -= ÀÀ;
-      if (eD.ââ > 150) {
-        AÅ.globalAlpha = Math.min(Âã, Math.max(äá, Ää.ÁÃ.AÃa((300 - eD.ââ) / 300)));
+    if (Ä.ââ > AÄ) {
+      var ááÂ = Äá;
+      Ä.ââ -= ÀÀ;
+      if (Ä.ââ > 150) {
+        AÅ.globalAlpha = Math.min(Âã, Math.max(äá, Ää.ÁÃ.AÃa((300 - Ä.ââ) / 300)));
       } else {
-        var eV = Ää.ÁÃ.ÃaÅ(eD.ââ / 150);
-        eU += (ÁÅ - eV) * 0.2;
-        AÅ.globalAlpha = Math.min(1, Math.max(AÂ, eV));
+        var ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ââ / 150);
+        ááÂ += (ÁÅ - ãÃ) * 0.2;
+        AÅ.globalAlpha = Math.min(1, Math.max(AÂ, ãÃ));
       }
-      áá.ÄA(eA.ââ, eF, eG, eD.angle - eM / 1.5, eP, 0, eU);
+      áá.ÄA(áåa.ââ, ã, áã, Ä.angle - aáÂ / 1.5, AåÅ, 0, ááÂ);
       AÅ.globalAlpha = 1;
     }
-    áá.ÄA(eL.head, eF, eG, eD.angle - eM / 1.5, eP, 0, eE);
-    if (eC.head !== ÅÁÃ) {
-      áá.ÄA(eC.head, eF, eG, eD.angle - eM / 1.5, eP, 0, eE);
+    áá.ÄA(âÁÁ.head, ã, áã, Ä.angle - aáÂ / 1.5, AåÅ, 0, åÃ);
+    if (ÄÁá.head !== ÅÁÃ) {
+      áá.ÄA(ÄÁá.head, ã, áã, Ä.angle - aáÂ / 1.5, AåÅ, 0, åÃ);
     }
-    var eW = (eH.Äa < 750 ? eH.Äa / 750 : âá - (eH.Äa - 750) / 750) * eB.ãÄã;
-    eS = eB.ÂÄ;
-    eT = âåã === eC.ÂÄ ? eL.ÂÄ : eC.ÂÄ;
-    áá.ÄA(eT, eF, eG, eS.angle + eD.angle, eS.x + eR * eH.orientation + eO + eW, eS.y, eE);
-    var eX = eB.ÁÂ;
-    áá.ÄA(eX, eF, eG, eX.angle + eD.angle, eX.x + eH.orientation * eR + eW + eO, eX.y, eE);
+    var ãÄã = (â.Äa < 750 ? â.Äa / 750 : âá - (â.Äa - 750) / 750) * ÁÂ.ãÄã;
+    âaá = ÁÂ.ÂÄ;
+    Âäâ = âåã === ÄÁá.ÂÄ ? âÁÁ.ÂÄ : ÄÁá.ÂÄ;
+    áá.ÄA(Âäâ, ã, áã, âaá.angle + Ä.angle, âaá.x + Àä * â.orientation + äâÃ + ãÄã, âaá.y, åÃ);
+    var Åã = ÁÂ.ÁÂ;
+    áá.ÄA(Åã, ã, áã, Åã.angle + Ä.angle, Åã.x + â.orientation * Àä + ãÄã + äâÃ, Åã.y, åÃ);
   }
   ;
-  function df() {
+  function ãÄâÅá() {
     if (Aá.â.aÅÁ === Áå) {
       if (Aá.â.AAã > 0 && (Aá.â.aáa !== Aá.â.ÂáÁ || Aá.â.åäA !== Aá.â.âáÂ)) {
-        for (var eA = 0; eA < Aá.â.âaÅ.length; eA++) {
-          if (åâ === Aá.â.âaÅ[eA]) {
-            Aá.â.âaÅ[eA] = Aá.â.AAã;
-            Aá.â.ÄãÃAá[eA] = Aá.â.aáa;
-            Aá.â.âÀÂåÃ[eA] = Aá.â.âáÂ;
+        for (var ä = 0; ä < Aá.â.âaÅ.length; ä++) {
+          if (åâ === Aá.â.âaÅ[ä]) {
+            Aá.â.âaÅ[ä] = Aá.â.AAã;
+            Aá.â.ÄãÃAá[ä] = Aá.â.aáa;
+            Aá.â.âÀÂåÃ[ä] = Aá.â.âáÂ;
             break;
           }
         }
@@ -19438,2018 +19451,2018 @@ var ÀÂ = function () {
         Aá.â.aáa = Aá.â.ÂáÁ;
         Aá.â.âáÂ = Aá.â.åäA;
       }
-      Aá.â.AAã = Math.min(ah, Aá.â.AAã + ÀÀ);
-      for (var eA = ãÂ; Aá.â.âaÅ.length > eA; eA++) {
-        Aá.â.âaÅ[eA] = Math.max(0, Aá.â.âaÅ[eA] - ÀÀ);
+      Aá.â.AAã = Math.min(ãâäãá, Aá.â.AAã + ÀÀ);
+      for (var ä = ãÂ; Aá.â.âaÅ.length > ä; ä++) {
+        Aá.â.âaÅ[ä] = Math.max(0, Aá.â.âaÅ[ä] - ÀÀ);
       }
-    } else if (AÄ === Aá.â.AAã && d0() === ãå) {
+    } else if (AÄ === Aá.â.AAã && AâÂaÁ() === ãå) {
       return;
     } else {
       Aá.â.AAã = Math.max(äå, Aá.â.AAã - ÀÀ);
-      for (var eA = ÀÄ; Aá.â.âaÅ.length > eA; eA++) {
-        Aá.â.âaÅ[eA] = Math.max(0, Aá.â.âaÅ[eA] - ÀÀ);
+      for (var ä = ÀÄ; Aá.â.âaÅ.length > ä; ä++) {
+        Aá.â.âaÅ[ä] = Math.max(0, Aá.â.âaÅ[ä] - ÀÀ);
       }
     }
-    if (bM.á !== 1) {
-      bM = áá.ÃA(R, bM);
+    if (ÀÄÃ.á !== 1) {
+      ÀÄÃ = áá.ÃA(áÀÅÂÁ, ÀÄÃ);
       return;
     }
-    AÅ.globalAlpha = Aá.â.AAã / ah;
-    var eB = (j * Aá.â.aáa + b2 + k) * ÄÀ;
-    var eC = (j * Aá.â.âáÂ + b1 + k) * ÄÀ;
-    var eD = ÄÀ * bM.width / 2;
-    var eE = ÄÀ * bM.height / 2;
-    AÅ.drawImage(bM, eC - eD / 2, eB - eE / 2, eD, eE);
+    AÅ.globalAlpha = Aá.â.AAã / ãâäãá;
+    var áã = (ááá * Aá.â.aáa + ãÅ + ãÁä) * ÄÀ;
+    var ã = (ááá * Aá.â.âáÂ + äÁ + ãÁä) * ÄÀ;
+    var ÅÅ = ÄÀ * ÀÄÃ.width / 2;
+    var Âå = ÄÀ * ÀÄÃ.height / 2;
+    AÅ.drawImage(ÀÄÃ, ã - ÅÅ / 2, áã - Âå / 2, ÅÅ, Âå);
     AÅ.globalAlpha = 1;
-    for (var eA = âã; Aá.â.âaÅ.length > eA; eA++) {
-      if (ÁÀ < Aá.â.âaÅ[eA]) {
-        AÅ.globalAlpha = Aá.â.âaÅ[eA] / ah;
-        var eB = (Aá.â.ÄãÃAá[eA] * j + b2 + k) * ÄÀ;
-        var eC = ÄÀ * (j * Aá.â.âÀÂåÃ[eA] + b1 + k);
-        var eD = bM.width * ÄÀ / 2;
-        var eE = bM.height * ÄÀ / 2;
-        AÅ.drawImage(bM, eC - eD / 2, eB - eE / ÅÂÂ, eD, eE);
+    for (var ä = âã; Aá.â.âaÅ.length > ä; ä++) {
+      if (ÁÀ < Aá.â.âaÅ[ä]) {
+        AÅ.globalAlpha = Aá.â.âaÅ[ä] / ãâäãá;
+        var áã = (Aá.â.ÄãÃAá[ä] * ááá + ãÅ + ãÁä) * ÄÀ;
+        var ã = ÄÀ * (ááá * Aá.â.âÀÂåÃ[ä] + äÁ + ãÁä);
+        var ÅÅ = ÀÄÃ.width * ÄÀ / 2;
+        var Âå = ÀÄÃ.height * ÄÀ / 2;
+        AÅ.drawImage(ÀÄÃ, ã - ÅÅ / 2, áã - Âå / ÅÂÂ, ÅÅ, Âå);
         AÅ.globalAlpha = åä;
       }
     }
   }
   ;
-  function dg(eA, eB, eC, eD) {
-    eA.Áá();
-    var eE = eA.áâ.x;
-    var eF = eA.áâ.y;
-    eB.áâ.x = eE + ÄÀ * 161;
-    eB.áâ.y = eF + ÄÀ * äá;
-    eB.Áá();
-    var eG = Aá.â.äÁâ;
-    var eH;
-    var eI = eF + ÄÀ * 14;
-    var eJ = ÀÅ.äÁâ;
-    for (var eK = äå; eK < 4; eK++) {
-      if (eK % 2 === 0) {
-        eH = eE + ÄÀ * 12.5;
-        if (ããÄ === eK) {
-          eI += ÄÀ * 71;
+  function ÃÃãAÀ(ÁÃA, äAÁ, ÃÁã, ÀÁÃ) {
+    ÁÃA.Áá();
+    var ã = ÁÃA.áâ.x;
+    var áã = ÁÃA.áâ.y;
+    äAÁ.áâ.x = ã + ÄÀ * 161;
+    äAÁ.áâ.y = áã + ÄÀ * äá;
+    äAÁ.Áá();
+    var äÁâ = Aá.â.äÁâ;
+    var aå;
+    var ãÄ = áã + ÄÀ * 14;
+    var äÄ = ÀÅ.äÁâ;
+    for (var ä = äå; ä < 4; ä++) {
+      if (ä % 2 === 0) {
+        aå = ã + ÄÀ * 12.5;
+        if (ããÄ === ä) {
+          ãÄ += ÄÀ * 71;
         }
       } else {
-        eH += ÄÀ * 72;
+        aå += ÄÀ * 72;
       }
-      if (ãä === eG[eK][Aa]) {
+      if (ãä === äÁâ[ä][Aa]) {
         continue;
       }
-      cP(eJ[eK], eG[eK], eH, eI, eC, eD);
+      åÀáåâ(äÄ[ä], äÁâ[ä], aå, ãÄ, ÃÁã, ÀÁÃ);
     }
   }
   ;
-  function dh(eA, eB, eC, eD, eE, eF, eG, eH, eI, eJ, eK, eL, eM, eN) {
-    eA.Áá();
-    var eO = eA.áâ.x;
-    var eP = eA.áâ.y;
-    var eQ = eO / ÄÀ;
-    var eR = eP / ÄÀ;
-    eB.áâ.x = eO + ÄÀ * 594;
-    eB.áâ.y = eP + Àá * ÄÀ;
-    eB.Áá();
-    var eS = Aá.â.Ååã;
-    var eT = Aá.â.áÄâ;
-    var eU = Aá.â.ãåÄ;
-    var eV = Aá.â.ÄaA;
-    for (var eW = 0; eC.length > eW; eW++) {
-      var eX = eC[eW];
-      if (eU === eW) {
-        eX.Äâ(áÅ.Áåâ);
+  function áAâÅã(ÃÃA, äAÁ, ÃãÁ, AåÀ, åáÀáã, ÀÁa, âÀÃ, åÄÁ, ÃÁã, ÀÁÃ, ÅÃÃ, åAâ, åÅå, âAÀ) {
+    ÃÃA.Áá();
+    var ã = ÃÃA.áâ.x;
+    var áã = ÃÃA.áâ.y;
+    var åáÁ = ã / ÄÀ;
+    var AÁá = áã / ÄÀ;
+    äAÁ.áâ.x = ã + ÄÀ * 594;
+    äAÁ.áâ.y = áã + Àá * ÄÀ;
+    äAÁ.Áá();
+    var Ååã = Aá.â.Ååã;
+    var áÄâ = Aá.â.áÄâ;
+    var AÅÀ = Aá.â.ãåÄ;
+    var áÄÂ = Aá.â.ÄaA;
+    for (var ä = 0; ÃãÁ.length > ä; ä++) {
+      var äÄ = ÃãÁ[ä];
+      if (AÅÀ === ä) {
+        äÄ.Äâ(áÅ.Áåâ);
       }
-      eX.áâ.x = Äáâ * ÄÀ + eO + ÄÀ * (eW * 47);
-      eX.áâ.y = eP - ÄÀ * 40;
-      eX.Áá();
+      äÄ.áâ.x = Äáâ * ÄÀ + ã + ÄÀ * (ä * 47);
+      äÄ.áâ.y = áã - ÄÀ * 40;
+      äÄ.Áá();
     }
-    var eY = 0;
-    for (eW = ãÂ; eG.length > eW; eW++) {
-      if (eW === eV && Aá.â.Aáá === åÀ) {} else if (eW !== Aá.â.ÂaA && eW !== 0) {
+    var åã = 0;
+    for (ä = ãÂ; âÀÃ.length > ä; ä++) {
+      if (ä === áÄÂ && Aá.â.Aáá === åÀ) {} else if (ä !== Aá.â.ÂaA && ä !== 0) {
         continue;
       }
-      var eX = eG[eW];
-      if (eW === eV) {
-        eX.Äâ(áÅ.Áåâ);
+      var äÄ = âÀÃ[ä];
+      if (ä === áÄÂ) {
+        äÄ.Äâ(áÅ.Áåâ);
       }
-      eX.áâ.x = eO - ÄÀ * 40;
-      eX.áâ.y = ÄÀ * åÃA + eP + ÄÀ * (eY * 43);
-      eX.Áá();
-      eY++;
+      äÄ.áâ.x = ã - ÄÀ * 40;
+      äÄ.áâ.y = ÄÀ * åÃA + áã + ÄÀ * (åã * 43);
+      äÄ.Áá();
+      åã++;
     }
-    eH.áâ.x = eO + ÄÀ * 364;
-    eH.áâ.y = eP + ÄÀ * 27;
-    eH.Áá();
-    var eZ = ÀÅ.áãá;
-    var f0 = Aá.â.ãÀÅ;
-    var f1 = ÄÀ * 49;
-    var f2 = ÄÀ * 49;
-    var f3 = ÄÀ * 58;
-    var f4 = ÄÀ * 30;
-    var f5 = ÄÀ * 34;
-    var f6 = 1;
-    if (bP < 500) {
-      f6 += Ää.ÁÃ.AÃa(bP / 500) * 0.08;
-      bP += ÀÀ;
+    åÄÁ.áâ.x = ã + ÄÀ * 364;
+    åÄÁ.áâ.y = áã + ÄÀ * 27;
+    åÄÁ.Áá();
+    var áãá = ÀÅ.áãá;
+    var Aå = Aá.â.ãÀÅ;
+    var ÅÅ = ÄÀ * 49;
+    var Âå = ÄÀ * 49;
+    var ÁÂã = ÄÀ * 58;
+    var Ãäa = ÄÀ * 30;
+    var ÀAa = ÄÀ * 34;
+    var Äa = 1;
+    if (ÅáÀ < 500) {
+      Äa += Ää.ÁÃ.AÃa(ÅáÀ / 500) * 0.08;
+      ÅáÀ += ÀÀ;
     } else {
-      f6 += Ää.ÁÃ.ÃaÅ(1 - (bP - 500) / 500) * 0.08;
-      bP += ÀÀ;
-      if (bP > 1000) {
-        bP = Àá;
+      Äa += Ää.ÁÃ.ÃaÅ(1 - (ÅáÀ - 500) / 500) * 0.08;
+      ÅáÀ += ÀÀ;
+      if (ÅáÀ > 1000) {
+        ÅáÀ = Àá;
       }
     }
-    f6 = Math.max(ÀA, Math.min(1.08, f6));
-    for (eW = ãÂ; eW < f0; eW++) {
-      var eX = eZ[eW];
-      eX.áâ.x = f4 + eO + f3 * (eW % ÅAåáã);
-      eX.áâ.y = f5 + eP + f3 * Math.floor(eW / AâÁ);
-      var f7 = eS[eW];
-      if (f7 === ÄÁ) {
+    Äa = Math.max(ÀA, Math.min(1.08, Äa));
+    for (ä = ãÂ; ä < Aå; ä++) {
+      var äÄ = áãá[ä];
+      äÄ.áâ.x = Ãäa + ã + ÁÂã * (ä % ÅAåáã);
+      äÄ.áâ.y = ÀAa + áã + ÁÂã * Math.floor(ä / AâÁ);
+      var ÅÅá = Ååã[ä];
+      if (ÅÅá === ÄÁ) {
         AÅ.globalAlpha = 0.45;
-        eX.Áá();
+        äÄ.Áá();
         AÅ.globalAlpha = Äá;
-      } else if (f7 === 2) {
-        eX.Äâ(áÅ.ÁAáÃÀ);
-        eX.Áá();
+      } else if (ÅÅá === 2) {
+        äÄ.Äâ(áÅ.ÁAáÃÀ);
+        äÄ.Áá();
       } else {
         AÅ.globalAlpha = 0.6;
-        áá.ÄA(bO, eX.áâ.x / ÄÀ + 24.5, eX.áâ.y / ÄÀ + 24.5, ãä, ÁÀ, ÄÁ, f6);
+        áá.ÄA(Àãåäâ, äÄ.áâ.x / ÄÀ + 24.5, äÄ.áâ.y / ÄÀ + 24.5, ãä, ÁÀ, ÄÁ, Äa);
         AÅ.globalAlpha = 1;
-        eX.Áá();
+        äÄ.Áá();
       }
     }
-    var f8 = 0;
+    var ÃÀá = 0;
     if (Aá.â.ãåÄ === -1) {
       if (Aá.â.Aáá === 1) {
-        eD.áâ.x = eO + ÄÀ * 454;
-        eD.áâ.y = eP + ÄÀ * 153;
+        AåÀ.áâ.x = ã + ÄÀ * 454;
+        AåÀ.áâ.y = áã + ÄÀ * 153;
         if (Aá.â.Ååã[Aá.â.ÅÀá] === aÅ && Aá.â.aä.Aå < åÁá && Aá.â.aä.Ââ !== 0) {
-          eD.Áá();
+          AåÀ.Áá();
         } else {
           AÅ.globalAlpha = 0.5;
-          eD.Äâ(áÅ.Àå);
-          eD.Áá();
+          AåÀ.Äâ(áÅ.Àå);
+          AåÀ.Áá();
           AÅ.globalAlpha = 1;
         }
       } else if (áÃ === Aá.â.âáä) {
-        eD.áâ.x = eO + ÄÀ * 454;
-        eD.áâ.y = eP + ÄÀ * 153;
+        AåÀ.áâ.x = ã + ÄÀ * 454;
+        AåÀ.áâ.y = áã + ÄÀ * 153;
         if (Aá.â.Ååã[Aá.â.ÅÀá] === 1) {
-          eD.Áá();
+          AåÀ.Áá();
         } else {
           AÅ.globalAlpha = 0.5;
-          eD.Äâ(áÅ.Àå);
-          eD.Áá();
+          AåÀ.Äâ(áÅ.Àå);
+          AåÀ.Áá();
           AÅ.globalAlpha = 1;
         }
       } else {
-        eE.áâ.x = eO + ÄÀ * 454;
-        eE.áâ.y = eP + ÄÀ * 153;
-        eE.Áá();
+        åáÀáã.áâ.x = ã + ÄÀ * 454;
+        åáÀáã.áâ.y = áã + ÄÀ * 153;
+        åáÀáã.Áá();
       }
-      if (bN.á !== 1) {
-        bN = áá.ÃA(a2, bN);
+      if (áÃA.á !== 1) {
+        áÃA = áá.ÃA(áAáAA, áÃA);
         return;
       }
       if (ÄÂ === Aá.â.Aáá) {
         if (Aá.â.aä.time !== âã && Aá.â.aä.Ââ !== 0) {
-          f8 = Aá.â.aä.time - Date.now();
-          if (f8 < 0) {
+          ÃÀá = Aá.â.aä.time - Date.now();
+          if (ÃÀá < 0) {
             Aá.â.aä.time = ÀÄ;
           }
-          f8 = Ää.ÁÃ.ÄáÀ(Àâ - f8 / Aá.â.aä.ÂâÁãá);
+          ÃÀá = Ää.ÁÃ.ÄáÀ(Àâ - ÃÀá / Aá.â.aä.ÂâÁãá);
         }
       } else if (Aá.â.âáä !== 0) {
-        f8 = Aá.â.âáä - Date.now();
-        if (f8 < 0) {
+        ÃÀá = Aá.â.âáä - Date.now();
+        if (ÃÀá < 0) {
           Aá.â.âáä = ãä;
         }
-        f8 = Ää.ÁÃ.ÄáÀ(ÀA - f8 / Aá.â.áÀÁÄå);
+        ÃÀá = Ää.ÁÃ.ÄáÀ(ÀA - ÃÀá / Aá.â.áÀÁÄå);
       }
-      f8 = Math.min(Áå, Math.max(0, f8));
-      f1 = bN.width * ÄÀ / 2;
-      f2 = bN.height * ÄÀ / Äåã;
-      var f9 = eO + ÄÀ * 356;
-      var fa = eP + ÄÀ * 206;
+      ÃÀá = Math.min(Áå, Math.max(0, ÃÀá));
+      ÅÅ = áÃA.width * ÄÀ / 2;
+      Âå = áÃA.height * ÄÀ / Äåã;
+      var ÁaÅåá = ã + ÄÀ * 356;
+      var ããAâä = áã + ÄÀ * 206;
       AÅ.fillStyle = "#A29742";
-      f3 = åáÂ * ÄÀ;
-      f4 = ãÄá * f3;
-      AÅ.fillRect(Math.floor(f9 + f3), Math.floor(fa + f3), Math.floor((f1 - f4) * f8), Math.floor(f2 - f4));
-      AÅ.drawImage(bN, f9, fa, f1, f2);
+      ÁÂã = åáÂ * ÄÀ;
+      Ãäa = ãÄá * ÁÂã;
+      AÅ.fillRect(Math.floor(ÁaÅåá + ÁÂã), Math.floor(ããAâä + ÁÂã), Math.floor((ÅÅ - Ãäa) * ÃÀá), Math.floor(Âå - Ãäa));
+      AÅ.drawImage(áÃA, ÁaÅåá, ããAâä, ÅÅ, Âå);
     } else {
-      var fb = Aá.â.Ååã[Aá.â.ÅÀá];
-      eF.áâ.x = eO + ÄÀ * 454;
-      eF.áâ.y = eP + ÄÀ * 153;
-      if (fb === ãâ) {
-        eF.Áá();
-      } else if (fb === Àá) {
+      var ááå = Aá.â.Ååã[Aá.â.ÅÀá];
+      ÀÁa.áâ.x = ã + ÄÀ * 454;
+      ÀÁa.áâ.y = áã + ÄÀ * 153;
+      if (ááå === ãâ) {
+        ÀÁa.Áá();
+      } else if (ááå === Àá) {
         AÅ.globalAlpha = 0.5;
-        eF.Äâ(áÅ.Àå);
-        eF.Áá();
+        ÀÁa.Äâ(áÅ.Àå);
+        ÀÁa.Áá();
         AÅ.globalAlpha = áââ;
-        if (cx !== Aá.â.åââ) {
-          cw.clearRect(ãÂ, 0, 420, 148);
-          cx = Aá.â.åââ;
-          var fc = ÁÁ[cx].detail;
-          var fd = 20;
-          if (fc.level > Aá.â.level) {
-            var fe = áÅ.åáa("Require level " + fc.level + " or higher", "'Viga', sans-serif", "#D8BA3D", 30, 600);
-            cw.drawImage(fe, ÃÁä, fd);
-            fd += 50;
+        if (ÂáaÂÄ !== Aá.â.åââ) {
+          AÃã.clearRect(ãÂ, 0, 420, 148);
+          ÂáaÂÄ = Aá.â.åââ;
+          var ÀÁ = ÁÁ[ÂáaÂÄ].detail;
+          var ÁÃa = 20;
+          if (ÀÁ.level > Aá.â.level) {
+            var ÃÃâ = áÅ.åáa("Require level " + ÀÁ.level + " or higher", "'Viga', sans-serif", "#D8BA3D", 30, 600);
+            AÃã.drawImage(ÃÃâ, ÃÁä, ÁÃa);
+            ÁÃa += 50;
           }
-          if (-åä !== fc.âAÅ && Aá.â.ããä[fc.âAÅ] === undefined) {
-            var fe = áÅ.åáa("Unlock " + ÁÁ[fc.âAÅ].detail.name + " before", "'Viga', sans-serif", "#D8BA3D", 30, 600);
-            cw.drawImage(fe, åÅÂ, fd);
-            fd += 50;
+          if (-åä !== ÀÁ.âAÅ && Aá.â.ããä[ÀÁ.âAÅ] === undefined) {
+            var ÃÃâ = áÅ.åáa("Unlock " + ÁÁ[ÀÁ.âAÅ].detail.name + " before", "'Viga', sans-serif", "#D8BA3D", 30, 600);
+            AÃã.drawImage(ÃÃâ, åÅÂ, ÁÃa);
+            ÁÃa += 50;
           }
-          if (fc.ÀÄÁ > Aá.â.åáâ) {
-            var fe = áÅ.åáa("Cost " + fc.ÀÄÁ + " skill point" + (fc.ÀÄÁ !== 1 ? "s" : ""), "'Viga', sans-serif", "#D8BA3D", 30, 600);
-            cw.drawImage(fe, ÀÄÀ, fd);
+          if (ÀÁ.ÀÄÁ > Aá.â.åáâ) {
+            var ÃÃâ = áÅ.åáa("Cost " + ÀÁ.ÀÄÁ + " skill point" + (ÀÁ.ÀÄÁ !== 1 ? "s" : ""), "'Viga', sans-serif", "#D8BA3D", 30, 600);
+            AÃã.drawImage(ÃÃâ, ÀÄÀ, ÁÃa);
           }
         }
-        AÅ.drawImage(cv, eO + ÄÀ * 356, eP + ÄÀ * 211, ÄÀ * cv.width / ÃÃÃ, ÄÀ * cv.height / 2);
+        AÅ.drawImage(ÂÁÅ, ã + ÄÀ * 356, áã + ÄÀ * 211, ÄÀ * ÂÁÅ.width / ÃÃÃ, ÄÀ * ÂÁÅ.height / 2);
       } else {
-        eF.Äâ(áÅ.Áåâ);
-        eF.Áá();
+        ÀÁa.Äâ(áÅ.Áåâ);
+        ÀÁa.Áá();
       }
     }
     if (Aá.â.Aáá === Àâ) {
-      var ff = Aá.â.aä.Ââ;
-      if (ff >= ÀÄ) {
-        var eX;
-        if (ää.AáÅ === eV || ää.ááA === eV || ää.âáå === eV) {
-          eX = eL;
-        } else if (ää.ÅÂA === eV || eV === ää.ããá) {
-          eX = eM;
+      var ãÀ = Aá.â.aä.Ââ;
+      if (ãÀ >= ÀÄ) {
+        var äÄ;
+        if (ää.AáÅ === áÄÂ || ää.ááA === áÄÂ || ää.âáå === áÄÂ) {
+          äÄ = åAâ;
+        } else if (ää.ÅÂA === áÄÂ || áÄÂ === ää.ããá) {
+          äÄ = åÅå;
         } else {
-          eX = eK;
+          äÄ = ÅÃÃ;
         }
-        eX.áâ.x = eO + ÄÀ * 532;
-        eX.áâ.y = eP + ÄÀ * 153;
+        äÄ.áâ.x = ã + ÄÀ * 532;
+        äÄ.áâ.y = áã + ÄÀ * 153;
         if (áÁã !== Aá.â.aä.Ââ) {
-          eX.Áá();
+          äÄ.Áá();
         } else {
           AÅ.globalAlpha = 0.5;
-          eX.Äâ(áÅ.Àå);
-          eX.Áá();
+          äÄ.Äâ(áÅ.Àå);
+          äÄ.Áá();
           AÅ.globalAlpha = 1;
         }
-        if (eJ[ff] === undefined) {
-          eJ[ff] = {
-            À: áÅ.åáa("x" + ff, "'Black Han Sans', sans-serif", "#FFFF00", 30, 250, ãÅâ, ÅâAÃÁ, 12, âaÃAÄ, undefined, ÅâÃ, undefined, "#000000", 12)
+        if (ÀÁÃ[ãÀ] === undefined) {
+          ÀÁÃ[ãÀ] = {
+            À: áÅ.åáa("x" + ãÀ, "'Black Han Sans', sans-serif", "#FFFF00", 30, 250, ãÅâ, ÅâAÃÁ, 12, âaÃAÄ, undefined, ÅâÃ, undefined, "#000000", 12)
           };
-          eJ[ff].À.á = aÅ;
+          ÀÁÃ[ãÀ].À.á = aÅ;
         }
-        áá.ÄA(eJ[ff], eX.áâ.x / ÄÀ + 42, eX.áâ.y / ÄÀ + 42, -0.5, Aa, ÄÁ, 0.9);
+        áá.ÄA(ÀÁÃ[ãÀ], äÄ.áâ.x / ÄÀ + 42, äÄ.áâ.y / ÄÀ + 42, -0.5, Aa, ÄÁ, 0.9);
       }
-      var fg = ÀÅ.äåá;
-      var fh = Aá.â.aä.áâ;
-      f0 = Aá.â.aä.Aå;
-      f1 = ÄÀ * 40;
-      f2 = ÄÀ * 40;
-      f3 = ÄÀ * 62;
-      f4 = ÄÀ * 356;
-      f5 = ÄÀ * 237;
-      for (var eW = Aa; f0 > eW; eW++) {
-        var eX = fg[eW];
-        if (fh === eW) {
-          if (f8 !== 0) {
+      var äåá = ÀÅ.äåá;
+      var ÃâÂÀã = Aá.â.aä.áâ;
+      Aå = Aá.â.aä.Aå;
+      ÅÅ = ÄÀ * 40;
+      Âå = ÄÀ * 40;
+      ÁÂã = ÄÀ * 62;
+      Ãäa = ÄÀ * 356;
+      ÀAa = ÄÀ * 237;
+      for (var ä = Aa; Aå > ä; ä++) {
+        var äÄ = äåá[ä];
+        if (ÃâÂÀã === ä) {
+          if (ÃÀá !== 0) {
             AÅ.globalAlpha = 0.6;
-            áá.ÄA(bO, eX.áâ.x / ÄÀ + 20, eX.áâ.y / ÄÀ + 20, åâ, 0, 0, Math.max(0.01, Math.min(1, f8)) * 0.85);
+            áá.ÄA(Àãåäâ, äÄ.áâ.x / ÄÀ + 20, äÄ.áâ.y / ÄÀ + 20, åâ, 0, 0, Math.max(0.01, Math.min(1, ÃÀá)) * 0.85);
             AÅ.globalAlpha = 1;
           }
-        } else if (fh > eW) {
+        } else if (ÃâÂÀã > ä) {
           AÅ.globalAlpha = 0.6;
-          áá.ÄA(bO, eX.áâ.x / ÄÀ + åÅa, eX.áâ.y / ÄÀ + äÃá, ãa, ÁÀ, Aa, f6 * 0.85);
+          áá.ÄA(Àãåäâ, äÄ.áâ.x / ÄÀ + åÅa, äÄ.áâ.y / ÄÀ + äÃá, ãa, ÁÀ, Aa, Äa * 0.85);
           AÅ.globalAlpha = âÃ;
         }
-        eX.áâ.x = f4 + eO + f3 * eW;
-        eX.áâ.y = f5 + eP;
-        eX.Áá();
+        äÄ.áâ.x = Ãäa + ã + ÁÂã * ä;
+        äÄ.áâ.y = ÀAa + áã;
+        äÄ.Áá();
       }
     }
-    var fi = ÀÅ.âåå;
-    f0 = Aá.â.âÁÃ;
-    f3 = ÄÀ * 45;
-    f4 = ÄÀ * 356;
-    f5 = ÄÀ * 151;
-    for (var eW = 0; f0 > eW; eW++) {
-      var eX = fi[eW];
-      eX.áâ.x = f4 + eO + f3 * eW;
-      eX.áâ.y = f5 + eP;
-      eX.Áá();
+    var âåå = ÀÅ.âåå;
+    Aå = Aá.â.âÁÃ;
+    ÁÂã = ÄÀ * 45;
+    Ãäa = ÄÀ * 356;
+    ÀAa = ÄÀ * 151;
+    for (var ä = 0; Aå > ä; ä++) {
+      var äÄ = âåå[ä];
+      äÄ.áâ.x = Ãäa + ã + ÁÂã * ä;
+      äÄ.áâ.y = ÀAa + áã;
+      äÄ.Áá();
     }
-    if (Aá.â.åáâ !== cu) {
-      ct.clearRect(0, AÄ, 280, 50);
-      cu = Aá.â.åáâ;
-      var fe = áÅ.åáa("SKILL POINT: " + cu, "'Viga', sans-serif", "#FFFFFF", 32, 400);
-      ct.drawImage(fe, 24, 12);
+    if (Aá.â.åáâ !== ááÃÀá) {
+      áãâaä.clearRect(0, AÄ, 280, 50);
+      ááÃÀá = Aá.â.åáâ;
+      var ÃÃâ = áÅ.åáa("SKILL POINT: " + ááÃÀá, "'Viga', sans-serif", "#FFFFFF", 32, 400);
+      áãâaä.drawImage(ÃÃâ, 24, 12);
     }
-    AÅ.drawImage(cs, eO + ÄÀ * 455, eP + ÄÀ * 378, ÄÀ * cs.width / 2, ÄÀ * cs.height / Áâá);
-    if (cp !== Aá.â.åââ) {
-      co.clearRect(ÅÁ, äå, 280, 148);
-      cp = Aá.â.åââ;
-      dc(co, cp);
+    AÅ.drawImage(åáâ, ã + ÄÀ * 455, áã + ÄÀ * 378, ÄÀ * åáâ.width / 2, ÄÀ * åáâ.height / Áâá);
+    if (ÃáãÂå !== Aá.â.åââ) {
+      ÅÀâaÅ.clearRect(ÅÁ, äå, 280, 148);
+      ÃáãÂå = Aá.â.åââ;
+      ÀAãÂâ(ÅÀâaÅ, ÃáãÂå);
     }
-    AÅ.drawImage(cn, eO + ÄÀ * 439, eP + ÄÀ * 24, ÄÀ * cn.width / 2, ÄÀ * cn.height / 2);
-    if (Aá.â.åáâ > 0 || bo.ÄÁÁ > ãä) {
-      var fj = (bo.Àä + ÀÀ) % 1000;
-      bo.Àä = fj;
-      var fk = eP / ÄÀ;
-      if (bo.Àä < 500) {
-        fk += -62 - Ää.ÁÃ.ÄáÀ(fj / 500) * 15;
+    AÅ.drawImage(âÃå, ã + ÄÀ * 439, áã + ÄÀ * 24, ÄÀ * âÃå.width / 2, ÄÀ * âÃå.height / 2);
+    if (Aá.â.åáâ > 0 || ÀÀÃ.ÄÁÁ > ãä) {
+      var Àä = (ÀÀÃ.Àä + ÀÀ) % 1000;
+      ÀÀÃ.Àä = Àä;
+      var ãÄ = áã / ÄÀ;
+      if (ÀÀÃ.Àä < 500) {
+        ãÄ += -62 - Ää.ÁÃ.ÄáÀ(Àä / 500) * 15;
       } else {
-        fk += -62 - âÂÅ * Ää.ÁÃ.ÄáÀ((1000 - fj) / 500);
+        ãÄ += -62 - âÂÅ * Ää.ÁÃ.ÄáÀ((1000 - Àä) / 500);
       }
-      AÅ.globalAlpha = Ää.ÁÃ.AÃa(bo.ÄÁÁ);
-      áá.ÄA(bo, 266 + eA.áâ.x / ÄÀ, fk, Aa, ÅÁ, ãa, ÂA);
+      AÅ.globalAlpha = Ää.ÁÃ.AÃa(ÀÀÃ.ÄÁÁ);
+      áá.ÄA(ÀÀÃ, 266 + ÃÃA.áâ.x / ÄÀ, ãÄ, Aa, ÅÁ, ãa, ÂA);
       AÅ.globalAlpha = âa;
       if (Aá.â.åáâ <= 0) {
-        bo.ÄÁÁ = Math.max(ãä, bo.ÄÁÁ - ÀÀ / 500);
-      } else if (bo.ÄÁÁ < ÄÂ) {
-        bo.ÄÁÁ = Math.min(1, bo.ÄÁÁ + ÀÀ / 500);
+        ÀÀÃ.ÄÁÁ = Math.max(ãä, ÀÀÃ.ÄÁÁ - ÀÀ / 500);
+      } else if (ÀÀÃ.ÄÁÁ < ÄÂ) {
+        ÀÀÃ.ÄÁÁ = Math.min(1, ÀÀÃ.ÄÁÁ + ÀÀ / 500);
       }
     }
-    var fl = ÀÅ.ÃÄá;
-    f0 = Aá.â.åÂa;
-    f1 = ÄÀ * 40;
-    f2 = ÄÀ * 40;
-    f3 = ÄÀ * 45;
-    f4 = ÄÀ * 356;
-    f5 = ÄÀ * 107;
-    for (var eW = 0; f0 > eW; eW++) {
-      var eX = fl[eW];
-      eX.áâ.x = f4 + eO + eW * f3;
-      eX.áâ.y = f5 + eP;
-      var ff = Math.abs(eT[eW]);
-      if (eI[ff] === aäÁ) {
-        eI[ff] = {
-          À: áÅ.åáa("x" + ff, "'Black Han Sans', sans-serif", "#ffffff", 30, 250, aäÁ, åAåAÀ, aÃå, ÃÅá, ÅâÃ, undefined, undefined, "#000000", 12)
+    var ÃÄá = ÀÅ.ÃÄá;
+    Aå = Aá.â.åÂa;
+    ÅÅ = ÄÀ * 40;
+    Âå = ÄÀ * 40;
+    ÁÂã = ÄÀ * 45;
+    Ãäa = ÄÀ * 356;
+    ÀAa = ÄÀ * 107;
+    for (var ä = 0; Aå > ä; ä++) {
+      var äÄ = ÃÄá[ä];
+      äÄ.áâ.x = Ãäa + ã + ä * ÁÂã;
+      äÄ.áâ.y = ÀAa + áã;
+      var ãÀ = Math.abs(áÄâ[ä]);
+      if (ÃÁã[ãÀ] === aäÁ) {
+        ÃÁã[ãÀ] = {
+          À: áÅ.åáa("x" + ãÀ, "'Black Han Sans', sans-serif", "#ffffff", 30, 250, aäÁ, åAåAÀ, aÃå, ÃÅá, ÅâÃ, undefined, undefined, "#000000", 12)
         };
-        eI[ff].À.á = åä;
+        ÃÁã[ãÀ].À.á = åä;
       }
-      if (AÂ > eT[eW]) {
+      if (AÂ > áÄâ[ä]) {
         AÅ.globalAlpha = 0.45;
-        eX.Áá();
-        áá.ÄA(eI[ff], eX.áâ.x / ÄÀ + 30, eX.áâ.y / ÄÀ + 32, -0.5, 0, äå, 0.9);
+        äÄ.Áá();
+        áá.ÄA(ÃÁã[ãÀ], äÄ.áâ.x / ÄÀ + 30, äÄ.áâ.y / ÄÀ + 32, -0.5, 0, äå, 0.9);
         AÅ.globalAlpha = áââ;
       } else {
-        eX.Áá();
-        áá.ÄA(eI[ff], eX.áâ.x / ÄÀ + 30, eX.áâ.y / ÄÀ + 32, -0.5, åâ, ãÂ, 0.9);
+        äÄ.Áá();
+        áá.ÄA(ÃÁã[ãÀ], äÄ.áâ.x / ÄÀ + 30, äÄ.áâ.y / ÄÀ + 32, -0.5, åâ, ãÂ, 0.9);
       }
-      if (eN === eW && Aá.â.ÀÂÀ[eW] > ãä) {
-        cG(Aá.â.ÀÂÀ[eW], eX.áâ.x, eX.áâ.y + ÄÀ * 45);
+      if (âAÀ === ä && Aá.â.ÀÂÀ[ä] > ãä) {
+        ÁãÀ(Aá.â.ÀÂÀ[ä], äÄ.áâ.x, äÄ.áâ.y + ÄÀ * 45);
       }
     }
   }
   ;
-  var di = [äå, 0, Àá, ÄÁ];
-  function dj() {
+  var ÅåãaÃ = [äå, 0, Àá, ÄÁ];
+  function ãáÄåÅ() {
     if (Aá.â.ÀÃã !== 0) {
       return;
     }
-    var eA = Aá.â.Aãa;
-    if (eA > 0) {
-      if (eA < 500) {
-        AÅ.globalAlpha = Ää.ÁÃ.AÃa(eA / 500);
-      } else if (eA > 1500) {
-        AÅ.globalAlpha = Ää.ÁÃ.AÃa(Äá - (eA - 1500) / 500);
+    var ÁãÄ = Aá.â.Aãa;
+    if (ÁãÄ > 0) {
+      if (ÁãÄ < 500) {
+        AÅ.globalAlpha = Ää.ÁÃ.AÃa(ÁãÄ / 500);
+      } else if (ÁãÄ > 1500) {
+        AÅ.globalAlpha = Ää.ÁÃ.AÃa(Äá - (ÁãÄ - 1500) / 500);
       } else {
         AÅ.globalAlpha = 1;
       }
-      var eB = Aá.â.ÂÅá === 1 ? bR : ââä[ÁÁ[Aá.â.ÂÅá].Ãá];
-      áá.ÄA(bQ, äâA, 50, 0, 0, 0, âÃ);
-      áá.ÄA(eB, äâA, 50, ÁÀ, ÁÀ, 0, 1);
+      var äÁä = Aá.â.ÂÅá === 1 ? áÀáÄÃ : ââä[ÁÁ[Aá.â.ÂÅá].Ãá];
+      áá.ÄA(ÂÅá, äâA, 50, 0, 0, 0, âÃ);
+      áá.ÄA(äÁä, äâA, 50, ÁÀ, ÁÀ, 0, 1);
       AÅ.globalAlpha = 1;
       Aá.â.Aãa -= ÀÀ;
     }
-    var eC = Aá.â.AÁÂ;
-    switch (eC) {
+    var AÁÂ = Aá.â.AÁÂ;
+    switch (AÁÂ) {
       case åâ:
-        if (ãå !== bC.á) {
+        if (ãå !== ÅAÅ.á) {
           if (äã === ÁÀ) {
-            bC = áá.ÃA(N, bC);
+            ÅAÅ = áá.ÃA(ãÁAÁå, ÅAÅ);
           } else {
-            bC = áá.ÃA(O, bC);
+            ÅAÅ = áá.ÃA(ÃáÅäá, ÅAÅ);
           }
           return;
         }
-        var eD = ÄÀ + ÄÀ * ba;
-        var eE = eD / ÄÀ;
-        var eF = ÄÀ * bC.width / ããÁ;
-        var eG = bC.height * ÄÀ / ãÄá;
-        var eH = eD * (b1 + b3) - eF / 2;
-        var eI = Math.max(ÄÀ * 10, eD * (b2 + b4) - eG / 2 - eD * 65 - ÄÀ * 60);
+        var åÃ = ÄÀ + ÄÀ * âÀÅ;
+        var Aåå = åÃ / ÄÀ;
+        var ÅÅ = ÄÀ * ÅAÅ.width / ããÁ;
+        var Âå = ÅAÅ.height * ÄÀ / ãÄá;
+        var ã = åÃ * (äÁ + AÃÅ) - ÅÅ / 2;
+        var áã = Math.max(ÄÀ * 10, åÃ * (ãÅ + ÃÂÀ) - Âå / 2 - åÃ * 65 - ÄÀ * 60);
         if (ãå === äã) {
-          ÀÅ.åÅÃ = eH;
-          ÀÅ.ÃaÀ = eI;
-          ÀÅ.ÃÄã = eF;
-          ÀÅ.Âaá = eG;
+          ÀÅ.åÅÃ = ã;
+          ÀÅ.ÃaÀ = áã;
+          ÀÅ.ÃÄã = ÅÅ;
+          ÀÅ.Âaá = Âå;
         }
-        AÅ.drawImage(bC, eH, eI, eF, eG);
-        var eJ = ââä[Aá.â.Ãá];
-        eH = (b1 + b3) * eE - eF / (Aäã * ÄÀ);
-        eI = Math.max(10, (b2 + b4) * eE - eG / (ÄÀ * Äåã) - eE * 65 - 60);
-        áá.ÄA(eJ, eH + 77, eI + 33, eJ.angle, 0, 0, eJ.scale);
+        AÅ.drawImage(ÅAÅ, ã, áã, ÅÅ, Âå);
+        var Ãá = ââä[Aá.â.Ãá];
+        ã = (äÁ + AÃÅ) * Aåå - ÅÅ / (Aäã * ÄÀ);
+        áã = Math.max(10, (ãÅ + ÃÂÀ) * Aåå - Âå / (ÄÀ * Äåã) - Aåå * 65 - 60);
+        áá.ÄA(Ãá, ã + 77, áã + 33, Ãá.angle, 0, 0, Ãá.scale);
         break;
       case âÃ:
-        var eK = Aá.â.áåá / Aá.â.âââÁÁ;
-        var eL = Aá.â.âââÁÁ - Aá.â.áåá;
+        var ãÃ = Aá.â.áåá / Aá.â.âââÁÁ;
+        var åÁ = Aá.â.âââÁÁ - Aá.â.áåá;
         Aá.â.áåá -= ÀÀ;
         if (Aá.â.áåá < 0) {
           Aá.â.AÁÂ = -1;
           return;
         }
-        if (bI.á !== 1) {
-          bI = áá.ÃA(Q, bI);
+        if (AÄÂ.á !== 1) {
+          AÄÂ = áá.ÃA(áåäÅá, AÄÂ);
           return;
         }
-        if (ÄÂ !== bJ.á) {
-          bJ = áá.ÃA(S, bJ);
+        if (ÄÂ !== ÃÀa.á) {
+          ÃÀa = áá.ÃA(ÅääaÀ, ÃÀa);
           return;
         }
-        if (bK.á !== Àâ) {
-          bK = áá.ÃA(T, bK);
+        if (ÀâÁ.á !== Àâ) {
+          ÀâÁ = áá.ÃA(ÀáÂaã, ÀâÁ);
           return;
         }
-        var eD = ÄÀ + ba * ÄÀ;
-        var eF = bI.width * ÄÀ / 2;
-        var eG = bI.height * ÄÀ / ÁÅá;
-        var eM = eD * (b1 + b3);
-        var eN = eD * (b2 + b4);
-        var eH = eM - eF / ããÄ;
-        var eI = Math.max(eD * 10, eN - eG / ÄÀã - eD * 65 - ÄÀ * 60);
-        if (Åáa > eL) {
-          AÅ.globalAlpha = eL / 100;
+        var åÃ = ÄÀ + âÀÅ * ÄÀ;
+        var ÅÅ = AÄÂ.width * ÄÀ / 2;
+        var Âå = AÄÂ.height * ÄÀ / ÁÅá;
+        var aå = åÃ * (äÁ + AÃÅ);
+        var ãÄ = åÃ * (ãÅ + ÃÂÀ);
+        var ã = aå - ÅÅ / ããÄ;
+        var áã = Math.max(åÃ * 10, ãÄ - Âå / ÄÀã - åÃ * 65 - ÄÀ * 60);
+        if (Åáa > åÁ) {
+          AÅ.globalAlpha = åÁ / 100;
         } else if (Aá.â.áåá < 100) {
           AÅ.globalAlpha = Aá.â.áåá / 100;
         }
-        AÅ.drawImage(bI, eH, eI, eF, eG);
+        AÅ.drawImage(AÄÂ, ã, áã, ÅÅ, Âå);
         AÅ.save();
-        AÅ.translate(eM, Math.max(eD * ÂåÂ + eG / 2, eN - eD * 65 - ÄÀ * 60));
-        AÅ.rotate(-ay * eK);
-        AÅ.drawImage(bJ, -eF / 2, -eG / Áâá, eF, eG);
+        AÅ.translate(aå, Math.max(åÃ * ÂåÂ + Âå / 2, ãÄ - åÃ * 65 - ÄÀ * 60));
+        AÅ.rotate(-áÀÃ * ãÃ);
+        AÅ.drawImage(ÃÀa, -ÅÅ / 2, -Âå / Áâá, ÅÅ, Âå);
         AÅ.restore();
-        AÅ.drawImage(bK, eH, eI, eF, eG);
+        AÅ.drawImage(ÀâÁ, ã, áã, ÅÅ, Âå);
         AÅ.globalAlpha = áââ;
         break;
       case 2:
-        var eO = Aá.â.äAÅ.À;
-        if (eO.á !== âÃ) {
+        var À = Aá.â.äAÅ.À;
+        if (À.á !== âÃ) {
           if (äã === 0) {
-            Aá.â.äAÅ.À = áá.ÃA(Aá.â.äAÅ.src, eO);
+            Aá.â.äAÅ.À = áá.ÃA(Aá.â.äAÅ.src, À);
           } else {
-            Aá.â.äAÅ.À = áá.ÃA(Aá.â.äAÅ.src.replace("e-", "e-mobile-"), eO);
+            Aá.â.äAÅ.À = áá.ÃA(Aá.â.äAÅ.src.replace("e-", "e-mobile-"), À);
           }
           return;
         }
-        var eD = ÄÀ + ÄÀ * ba;
-        var eF = eO.width * ÄÀ / Åaa;
-        var eG = eO.height * ÄÀ / ÃÃÃ;
-        var eH;
+        var åÃ = ÄÀ + ÄÀ * âÀÅ;
+        var ÅÅ = À.width * ÄÀ / Åaa;
+        var Âå = À.height * ÄÀ / ÃÃÃ;
+        var ã;
         if (åä === Aá.â.ÄaÃ) {
-          eH = (b1 + b3 - åâa) * eD - eF;
+          ã = (äÁ + AÃÅ - åâa) * åÃ - ÅÅ;
         } else {
-          eH = eD * (b1 + b3) - eF / 2;
+          ã = åÃ * (äÁ + AÃÅ) - ÅÅ / 2;
         }
-        var eI = Math.max(ÂÁã * ÄÀ, (b2 + b4) * eD - eG / 2 - eD * 65 - ÄÀ * 60);
+        var áã = Math.max(ÂÁã * ÄÀ, (ãÅ + ÃÂÀ) * åÃ - Âå / 2 - åÃ * 65 - ÄÀ * 60);
         if (äã === 1) {
-          ÀÅ.åÅÃ = eH;
-          ÀÅ.ÃaÀ = eI;
-          ÀÅ.ÃÄã = eF;
-          ÀÅ.Âaá = eG;
+          ÀÅ.åÅÃ = ã;
+          ÀÅ.ÃaÀ = áã;
+          ÀÅ.ÃÄã = ÅÅ;
+          ÀÅ.Âaá = Âå;
         }
-        AÅ.drawImage(eO, eH, eI, eF, eG);
+        AÅ.drawImage(À, ã, áã, ÅÅ, Âå);
         if (Aá.â.ÄaÃ === 1) {
-          if (bD.á !== 1) {
+          if (ãAã.á !== 1) {
             if (äã === 0) {
-              bD = áá.ÃA(P, bD);
+              ãAã = áá.ÃA(ÃäÂâÃ, ãAã);
             } else {
-              bD = áá.ÃA(O, bC);
+              ãAã = áá.ÃA(ÃáÅäá, ÅAÅ);
             }
             return;
           }
-          var eE = eD / ÄÀ;
-          eF = bD.width * ÄÀ / ãÂã;
-          eG = bD.height * ÄÀ / ããÄ;
-          eH += eF + ÅÂÄ * ÄÀ;
-          eI = Math.max(ÄÀ * 10, (b2 + b4) * eD - eG / åaÁ - eD * 65 - ÄÀ * 60);
+          var Aåå = åÃ / ÄÀ;
+          ÅÅ = ãAã.width * ÄÀ / ãÂã;
+          Âå = ãAã.height * ÄÀ / ããÄ;
+          ã += ÅÅ + ÅÂÄ * ÄÀ;
+          áã = Math.max(ÄÀ * 10, (ãÅ + ÃÂÀ) * åÃ - Âå / åaÁ - åÃ * 65 - ÄÀ * 60);
           if (Äá === äã) {
-            ÀÅ.âaâÃÂ = eH;
-            ÀÅ.åaáaÅ = eI;
+            ÀÅ.âaâÃÂ = ã;
+            ÀÅ.åaáaÅ = áã;
           }
-          AÅ.drawImage(bD, eH, eI, eF, eG);
-          var eJ = ââä[Aá.â.Ãá];
-          eH = (b1 + b3) * eE + 5;
-          eI = Math.max(aáÃ, eE * (b2 + b4) - eG / (ÄÀ * 2) - eE * 65 - 60);
-          áá.ÄA(eJ, eH + 77, eI + 33, eJ.angle, AÄ, 0, eJ.scale);
+          AÅ.drawImage(ãAã, ã, áã, ÅÅ, Âå);
+          var Ãá = ââä[Aá.â.Ãá];
+          ã = (äÁ + AÃÅ) * Aåå + 5;
+          áã = Math.max(aáÃ, Aåå * (ãÅ + ÃÂÀ) - Âå / (ÄÀ * 2) - Aåå * 65 - 60);
+          áá.ÄA(Ãá, ã + 77, áã + 33, Ãá.angle, AÄ, 0, Ãá.scale);
         }
         break;
     }
   }
   ;
-  function dk() {
-    var eA = AÂ;
+  function áÄáÃá() {
+    var ÅÂä = AÂ;
     if (Aá.â.aÅÁ === 1 && Aá.â.åa !== 0) {
-      var eB = ÁÁ[Aá.â.åa];
-      if (eB.Åâ !== 0) {
-        eB = eB.Åâ[Aá.â.äÅâ];
-        eB.AAâ = eB.aä;
-        eB.åa = eB.aä;
-        eB.ÃÄÃ = di;
-        eB.åAÄ = di;
+      var Åã = ÁÁ[Aá.â.åa];
+      if (Åã.Åâ !== 0) {
+        Åã = Åã.Åâ[Aá.â.äÅâ];
+        Åã.AAâ = Åã.aä;
+        Åã.åa = Åã.aä;
+        Åã.ÃÄÃ = ÅåãaÃ;
+        Åã.åAÄ = ÅåãaÃ;
       }
-      var eC = ÁA.angle;
-      var eD = eB.äÂ === Àâ ? 0 : Aá.â.ÀÃÁ;
-      Aá.â.äáA = Aá.â.åäA + Math.floor((k + j * Math.sin(eC)) / j);
-      Aá.â.AAá = Aá.â.ÂáÁ + Math.floor((k + j * Math.cos(eC)) / j);
-      var eE = eB.ÃÄÃ[eD] + b1 + k + j * Aá.â.äáA;
-      var eF = eB.åAÄ[eD] + b2 + k + j * Aá.â.AAá;
-      if (Aá.â.äáA >= âã && Aá.â.AAá >= 0 && Aá.â.äáA < t && Aá.â.AAá < w) {
-        var eG = bf[Aá.â.AAá][Aá.â.äáA];
-        var eH = -åä === Aá.â.Aâ ? -2 : Aá.â.Aâ;
-        if (eG.aAÅ === cm && (eB.aÃä !== 2 || äå === eG.aAÄ || aá.ååÃ === eG.AÅÀ)) {
-          Aá.â.aÀâ = 1;
-          áá.ÄA(eB.AAâ, eE, eF, aA * eD, áÃ, 0, âá);
-        } else if ((eB.detail.AÅÀ === aá.ååÃ || eB.aÃä === ããÄ || âã !== eG.åÅ && eG.åÅ !== Aá.â.id && Aá.ÂÅ[eG.åÅ].Aâ !== eH) && cm === eG.åÂÀ) {
+      var Äã = ÁA.angle;
+      var Áä = Åã.äÂ === Àâ ? 0 : Aá.â.ÀÃÁ;
+      Aá.â.äáA = Aá.â.åäA + Math.floor((ãÁä + ááá * Math.sin(Äã)) / ááá);
+      Aá.â.AAá = Aá.â.ÂáÁ + Math.floor((ãÁä + ááá * Math.cos(Äã)) / ááá);
+      var ã = Åã.ÃÄÃ[Áä] + äÁ + ãÁä + ááá * Aá.â.äáA;
+      var áã = Åã.åAÄ[Áä] + ãÅ + ãÁä + ááá * Aá.â.AAá;
+      if (Aá.â.äáA >= âã && Aá.â.AAá >= 0 && Aá.â.äáA < áÂÀ && Aá.â.AAá < aåA) {
+        var ÂÃ = äa[Aá.â.AAá][Aá.â.äáA];
+        var Aâ = -åä === Aá.â.Aâ ? -2 : Aá.â.Aâ;
+        if (ÂÃ.aAÅ === ÂÀ && (Åã.aÃä !== 2 || äå === ÂÃ.aAÄ || aá.ååÃ === ÂÃ.AÅÀ)) {
+          Aá.â.aÀâ = 1; // before 0
+          áá.ÄA(Åã.AAâ, ã, áã, ãáA * Áä, áÃ, 0, âá);
+        } else if ((Åã.detail.AÅÀ === aá.ååÃ || Åã.aÃä === ããÄ || âã !== ÂÃ.åÅ && ÂÃ.åÅ !== Aá.â.id && Aá.ÂÅ[ÂÃ.åÅ].Aâ !== Aâ) && ÂÀ === ÂÃ.åÂÀ) {
           Aá.â.aÀâ = ÄÁ;
-          áá.ÄA(eB.AAâ, eE, eF, aA * eD, ÅÁ, 0, ÂA);
-        } else if (eB.Áäa !== Âäå && (eD % ÄäÀ === 0 && (Aá.â.AAá < 1 || Aá.â.AAá >= w - 1 || cm === bf[Aá.â.AAá + 1][Aá.â.äáA].aAÅ || cm === bf[Aá.â.AAá + 1][Aá.â.äáA].åÂÀ && bf[Aá.â.AAá + 1][Aá.â.äáA].åÅ !== Aá.â.id && Àá !== bf[Aá.â.AAá + åÀ][Aá.â.äáA].åÅ && eH !== Aá.ÂÅ[bf[Aá.â.AAá + 1][Aá.â.äáA].åÅ].Aâ || cm === bf[Aá.â.AAá - ãå][Aá.â.äáA].aAÅ || cm === bf[Aá.â.AAá - 1][Aá.â.äáA].åÂÀ && bf[Aá.â.AAá - 1][Aá.â.äáA].åÅ !== Aá.â.id && bf[Aá.â.AAá - ÁÅ][Aá.â.äáA].åÅ !== AÄ && eH !== Aá.ÂÅ[bf[Aá.â.AAá - 1][Aá.â.äáA].åÅ].Aâ) || aÅ === eD % ããÁ && (Aá.â.äáA < 1 || Aá.â.äáA >= t - 1 || bf[Aá.â.AAá][Aá.â.äáA + ÄÂ].aAÅ === cm || cm === bf[Aá.â.AAá][Aá.â.äáA + Áå].åÂÀ && Aá.â.id !== bf[Aá.â.AAá][Aá.â.äáA + ÂA].åÅ && bf[Aá.â.AAá][Aá.â.äáA + âá].åÅ !== 0 && eH !== Aá.ÂÅ[bf[Aá.â.AAá][Aá.â.äáA + áââ].åÅ].Aâ || bf[Aá.â.AAá][Aá.â.äáA - 1].aAÅ === cm || cm === bf[Aá.â.AAá][Aá.â.äáA - 1].åÂÀ && Aá.â.id !== bf[Aá.â.AAá][Aá.â.äáA - 1].åÅ && ãÁ !== bf[Aá.â.AAá][Aá.â.äáA - 1].åÅ && eH !== Aá.ÂÅ[bf[Aá.â.AAá][Aá.â.äáA - 1].åÅ].Aâ || Aá.â.ÂáÁ === Aá.â.AAá))) {
+          áá.ÄA(Åã.AAâ, ã, áã, ãáA * Áä, ÅÁ, 0, ÂA);
+        } else if (Åã.Áäa !== Âäå && (Áä % ÄäÀ === 0 && (Aá.â.AAá < 1 || Aá.â.AAá >= aåA - 1 || ÂÀ === äa[Aá.â.AAá + 1][Aá.â.äáA].aAÅ || ÂÀ === äa[Aá.â.AAá + 1][Aá.â.äáA].åÂÀ && äa[Aá.â.AAá + 1][Aá.â.äáA].åÅ !== Aá.â.id && Àá !== äa[Aá.â.AAá + åÀ][Aá.â.äáA].åÅ && Aâ !== Aá.ÂÅ[äa[Aá.â.AAá + 1][Aá.â.äáA].åÅ].Aâ || ÂÀ === äa[Aá.â.AAá - ãå][Aá.â.äáA].aAÅ || ÂÀ === äa[Aá.â.AAá - 1][Aá.â.äáA].åÂÀ && äa[Aá.â.AAá - 1][Aá.â.äáA].åÅ !== Aá.â.id && äa[Aá.â.AAá - ÁÅ][Aá.â.äáA].åÅ !== AÄ && Aâ !== Aá.ÂÅ[äa[Aá.â.AAá - 1][Aá.â.äáA].åÅ].Aâ) || aÅ === Áä % ããÁ && (Aá.â.äáA < 1 || Aá.â.äáA >= áÂÀ - 1 || äa[Aá.â.AAá][Aá.â.äáA + ÄÂ].aAÅ === ÂÀ || ÂÀ === äa[Aá.â.AAá][Aá.â.äáA + Áå].åÂÀ && Aá.â.id !== äa[Aá.â.AAá][Aá.â.äáA + ÂA].åÅ && äa[Aá.â.AAá][Aá.â.äáA + âá].åÅ !== 0 && Aâ !== Aá.ÂÅ[äa[Aá.â.AAá][Aá.â.äáA + áââ].åÅ].Aâ || äa[Aá.â.AAá][Aá.â.äáA - 1].aAÅ === ÂÀ || ÂÀ === äa[Aá.â.AAá][Aá.â.äáA - 1].åÂÀ && Aá.â.id !== äa[Aá.â.AAá][Aá.â.äáA - 1].åÅ && ãÁ !== äa[Aá.â.AAá][Aá.â.äáA - 1].åÅ && Aâ !== Aá.ÂÅ[äa[Aá.â.AAá][Aá.â.äáA - 1].åÅ].Aâ || Aá.â.ÂáÁ === Aá.â.AAá))) {
           Aá.â.aÀâ = 0;
-          áá.ÄA(eB.AAâ, eE, eF, aA * eD, âã, 0, åä);
+          áá.ÄA(Åã.AAâ, ã, áã, ãáA * Áä, âã, 0, åä);
         } else {
           Aá.â.aÀâ = Âã;
-          áá.ÄA(eB.åa, eE, eF, eD * aA, 0, 0, ãâ);
+          áá.ÄA(Åã.åa, ã, áã, Áä * ãáA, 0, 0, ãâ);
         }
       }
-      if (bm.á !== 1) {
-        bm = áá.ÃA(U, bm);
+      if (ÂäÀ.á !== 1) {
+        ÂäÀ = áá.ÃA(aáÂÅA, ÂäÀ);
         return;
       }
-      if (eB.äÂ === 1 || Aá.â.AÁÂ >= 0) {
-        eA = Math.max(ÀÄ, Aá.â.ÂäÀ - ÀÀ);
+      if (Åã.äÂ === 1 || Aá.â.AÁÂ >= 0) {
+        ÅÂä = Math.max(ÀÄ, Aá.â.ÂäÀ - ÀÀ);
       } else {
-        eA = Math.min(900, Aá.â.ÂäÀ + ÀÀ);
+        ÅÂä = Math.min(900, Aá.â.ÂäÀ + ÀÀ);
       }
     } else {
-      eA = Math.max(0, Aá.â.ÂäÀ - ÀÀ);
+      ÅÂä = Math.max(0, Aá.â.ÂäÀ - ÀÀ);
     }
-    if (eA > 0) {
-      AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(Math.max(áÃ, eA - 600) / 300);
-      var eI = ÄÀ + ba * ÄÀ;
-      var eJ = eI / ÄÀ;
-      var eK = bm.width * ÄÀ / 2;
-      var eL = bm.height * ÄÀ / 2;
-      AÅ.drawImage(bm, (b1 + b3) * ÄÀ - eK / 2, Math.max(Àää * ÄÀ, ÄÀ * (b2 + b4) - eL / 2 - ÄÀ * 65 - ÄÀ * 60), eK, eL);
+    if (ÅÂä > 0) {
+      AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(Math.max(áÃ, ÅÂä - 600) / 300);
+      var åÃ = ÄÀ + âÀÅ * ÄÀ;
+      var Aåå = åÃ / ÄÀ;
+      var ÅÅ = ÂäÀ.width * ÄÀ / 2;
+      var Âå = ÂäÀ.height * ÄÀ / 2;
+      AÅ.drawImage(ÂäÀ, (äÁ + AÃÅ) * ÄÀ - ÅÅ / 2, Math.max(Àää * ÄÀ, ÄÀ * (ãÅ + ÃÂÀ) - Âå / 2 - ÄÀ * 65 - ÄÀ * 60), ÅÅ, Âå);
       AÅ.globalAlpha = 1;
     }
-    Aá.â.ÂäÀ = eA;
+    Aá.â.ÂäÀ = ÅÂä;
   }
   ;
-  function dl(eA, eB, eC, eD, eE, eF, eG) {
-    var eH = Aá.ÂÅ[eD.åÅ];
-    var eI = 0;
-    var eJ = eH.ÂaÅ - ÀÂ.åâå;
-    var eK = eH.ÄÀA - ÀÂ.åâå;
-    if (eJ > ÅÁ) {
-      if (eK > 0) {
-        eI = 3;
-      } else if (ÁÀ < eH.ÄÀA) {
-        eI = åÄá;
+  function ãaÁâÄ(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã) {
+    var â = Aá.ÂÅ[Ä.åÅ];
+    var ÀåA = 0;
+    var ÂaÅ = â.ÂaÅ - ÀÂ.åâå;
+    var ÄÀA = â.ÄÀA - ÀÂ.åâå;
+    if (ÂaÅ > ÅÁ) {
+      if (ÄÀA > 0) {
+        ÀåA = 3;
+      } else if (ÁÀ < â.ÄÀA) {
+        ÀåA = åÄá;
       } else {
-        eI = 1;
+        ÀåA = 1;
       }
-    } else if (eK > AÄ) {
-      eI = ããÄ;
-    } else if (eH.ÄÀA > 0) {
-      eI = 4;
+    } else if (ÄÀA > AÄ) {
+      ÀåA = ããÄ;
+    } else if (â.ÄÀA > 0) {
+      ÀåA = 4;
     }
-    if (eD.åÅ == Aá.â.id && cfg.changeMyModel) {
-      eI = cfg.myPlayerModel;
+    if (Ä.åÅ == Aá.â.id && cfg.changeMyModel) {
+      ÀåA = cfg.myPlayerModel;
     }
-    var eL = eA.Aâä[eI];
-    var eM = 0;
-    var eN = 0;
-    var eO = AÄ;
-    var eP = 0;
-    if (ãÂ < eD.Âa) {
-      eD.Âa = Math.max(0, eD.Âa - ÀÀ);
-      eD.Âa = Math.min(eD.Âa, eB.åÁ);
-      eV = eD.Âa > eB.âÃÂ ? äA - (eD.Âa - eB.âÃÂ) / (eB.åÁ - eB.âÃÂ) : eD.Âa / eB.âÃÂ;
-      eM = Ää.ÁÃ.ÄáÀ(eV) * eH.âÁã * 0.55;
-      eP = äaa * eV;
-      if (eH.âÁã === aÅ) {
-        eN = eV * 25;
+    var âÁÁ = áåa.Aâä[ÀåA];
+    var aáÂ = 0;
+    var ÁAå = 0;
+    var äâÃ = AÄ;
+    var AåÅ = 0;
+    if (ãÂ < Ä.Âa) {
+      Ä.Âa = Math.max(0, Ä.Âa - ÀÀ);
+      Ä.Âa = Math.min(Ä.Âa, ÁÂ.åÁ);
+      ãÃ = Ä.Âa > ÁÂ.âÃÂ ? äA - (Ä.Âa - ÁÂ.âÃÂ) / (ÁÂ.åÁ - ÁÂ.âÃÂ) : Ä.Âa / ÁÂ.âÃÂ;
+      aáÂ = Ää.ÁÃ.ÄáÀ(ãÃ) * â.âÁã * 0.55;
+      AåÅ = äaa * ãÃ;
+      if (â.âÁã === aÅ) {
+        ÁAå = ãÃ * 25;
       } else {
-        eO = eV * 25;
+        äâÃ = ãÃ * 25;
       }
-      if (eD.Âa === 0) {
-        eH.âÁã *= -âa;
+      if (Ä.Âa === 0) {
+        â.âÁã *= -âa;
       }
-    } else if (áâA.ÅáÂ(eD.x, eD.y, eD.Åaä, eD.ÂÅä) < 1) {
-      eH.Äa = (eH.Äa + ÀÀ) % 1500;
-      if (ÅÁ !== eH.Àä) {
-        if (eH.Àä < 400) {
-          eH.Àä = 800 - eH.Àä;
+    } else if (áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä) < 1) {
+      â.Äa = (â.Äa + ÀÀ) % 1500;
+      if (ÅÁ !== â.Àä) {
+        if (â.Àä < 400) {
+          â.Àä = 800 - â.Àä;
         }
-        eH.Àä = eH.Àä + ÀÀ;
-        if (eH.Àä > 800) {
-          eH.Àä = äá;
+        â.Àä = â.Àä + ÀÀ;
+        if (â.Àä > 800) {
+          â.Àä = äá;
         }
       }
     } else {
-      if (äâä[âAä].aÁá < eD.aÁá) {
-        eH.Àä = eH.Àä + ÀÀ * 1.9;
+      if (äâä[âAä].aÁá < Ä.aÁá) {
+        â.Àä = â.Àä + ÀÀ * 1.9;
       } else {
-        eH.Àä = eH.Àä + ÀÀ;
+        â.Àä = â.Àä + ÀÀ;
       }
-      if (eH.Àä > 800) {
-        eH.orientation *= -1;
-        eH.Àä = eH.Àä % 800;
+      if (â.Àä > 800) {
+        â.orientation *= -1;
+        â.Àä = â.Àä % 800;
       }
-      if (eH.Äa !== 0) {
-        if (eH.Äa < 750) {
-          eH.Äa = 1500 - eH.Äa;
+      if (â.Äa !== 0) {
+        if (â.Äa < 750) {
+          â.Äa = 1500 - â.Äa;
         }
-        eH.Äa = eH.Äa + ÀÀ;
-        if (eH.Äa > 1500) {
-          eH.Äa = 0;
+        â.Äa = â.Äa + ÀÀ;
+        if (â.Äa > 1500) {
+          â.Äa = 0;
         }
       }
     }
-    var eQ = (eH.Äa < 750 ? eH.Äa / 750 : 1 - (eH.Äa - 750) / 750) * eB.Äa;
-    var eR = (eH.Àä < 400 ? eH.Àä / 400 : Áå - (eH.Àä - 400) / 400) * eB.Àä;
-    var eS = eB.ÂÄ;
-    var eT = eC.ÂÄ === undefined ? eL.ÂÄ : eC.ÂÄ;
-    áá.ÄA(eT, eF, eG, eS.angle + eD.angle + eQ + eM, eS.x + eR * eH.orientation + eO, eS.y, eE);
-    eS = eB.áÀ;
-    eT = eC.áÀ === undefined ? eL.áÀ : eC.áÀ;
-    áá.ÄA(eT, eF, eG, -eS.angle + eD.angle - eQ + eM, eS.x - eR * eH.orientation + eN, eS.y, eE);
-    if (ÄÁ < eD.äÀA) {
-      var eU = 1;
-      eD.äÀA -= ÀÀ;
-      var eV = ãÁ;
-      if (eD.äÀA > 150) {
-        eV = Ää.ÁÃ.AÃa((300 - eD.äÀA) / 300);
+    var Äa = (â.Äa < 750 ? â.Äa / 750 : 1 - (â.Äa - 750) / 750) * ÁÂ.Äa;
+    var Àä = (â.Àä < 400 ? â.Àä / 400 : Áå - (â.Àä - 400) / 400) * ÁÂ.Àä;
+    var âaá = ÁÂ.ÂÄ;
+    var Âäâ = ÄÁá.ÂÄ === undefined ? âÁÁ.ÂÄ : ÄÁá.ÂÄ;
+    áá.ÄA(Âäâ, ã, áã, âaá.angle + Ä.angle + Äa + aáÂ, âaá.x + Àä * â.orientation + äâÃ, âaá.y, åÃ);
+    âaá = ÁÂ.áÀ;
+    Âäâ = ÄÁá.áÀ === undefined ? âÁÁ.áÀ : ÄÁá.áÀ;
+    áá.ÄA(Âäâ, ã, áã, -âaá.angle + Ä.angle - Äa + aáÂ, âaá.x - Àä * â.orientation + ÁAå, âaá.y, åÃ);
+    if (ÄÁ < Ä.äÀA) {
+      var ááÂ = 1;
+      Ä.äÀA -= ÀÀ;
+      var ãÃ = ãÁ;
+      if (Ä.äÀA > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.äÀA) / 300);
       } else {
-        eV = Ää.ÁÃ.ÃaÅ(eD.äÀA / 150);
-        eU += (ãå - eV) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.äÀA / 150);
+        ááÂ += (ãå - ãÃ) * 0.2;
       }
-      AÅ.globalAlpha = Math.min(1, Math.max(0, eV));
-      áá.ÄA(eA.ÃäÄ, eF, eG, eD.angle + eM / 1.5, eP, AÄ, eU);
+      AÅ.globalAlpha = Math.min(1, Math.max(0, ãÃ));
+      áá.ÄA(áåa.ÃäÄ, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, AÄ, ááÂ);
       AÅ.globalAlpha = Ãäã;
     }
-    if (eD.ÃÁ > ãä) {
-      var eU = 1;
-      eD.ÃÁ -= ÀÀ;
-      var eV = 0;
-      if (eD.ÃÁ > 150) {
-        eV = Ää.ÁÃ.AÃa((300 - eD.ÃÁ) / 300);
+    if (Ä.ÃÁ > ãä) {
+      var ááÂ = 1;
+      Ä.ÃÁ -= ÀÀ;
+      var ãÃ = 0;
+      if (Ä.ÃÁ > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.ÃÁ) / 300);
       } else {
-        eV = Ää.ÁÃ.ÃaÅ(eD.ÃÁ / 150);
-        eU += (ÀA - eV) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ÃÁ / 150);
+        ááÂ += (ÀA - ãÃ) * 0.2;
       }
-      eF += ÄÀá * (Math.sin(eD.áÀÅ) * eV);
-      eG += äaá * (Math.cos(eD.áÀÅ) * eV);
-      AÅ.globalAlpha = Math.min(1, Math.max(0, eV));
-      áá.ÄA(eA.ÃÁ, eF, eG, eD.angle + eM / 1.5, eP, ÁÀ, eU);
+      ã += ÄÀá * (Math.sin(Ä.áÀÅ) * ãÃ);
+      áã += äaá * (Math.cos(Ä.áÀÅ) * ãÃ);
+      AÅ.globalAlpha = Math.min(1, Math.max(0, ãÃ));
+      áá.ÄA(áåa.ÃÁ, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, ÁÀ, ááÂ);
       AÅ.globalAlpha = 1;
     }
-    if (eD.ââ > 0) {
-      var eU = 1;
-      eD.ââ -= ÀÀ;
-      if (eD.ââ > 150) {
-        AÅ.globalAlpha = Math.min(Àâ, Math.max(0, Ää.ÁÃ.AÃa((300 - eD.ââ) / 300)));
+    if (Ä.ââ > 0) {
+      var ááÂ = 1;
+      Ä.ââ -= ÀÀ;
+      if (Ä.ââ > 150) {
+        AÅ.globalAlpha = Math.min(Àâ, Math.max(0, Ää.ÁÃ.AÃa((300 - Ä.ââ) / 300)));
       } else {
-        var eV = Ää.ÁÃ.ÃaÅ(eD.ââ / 150);
-        eU += (1 - eV) * 0.2;
-        AÅ.globalAlpha = Math.min(Âã, Math.max(ÀÄ, eV));
+        var ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ââ / 150);
+        ááÂ += (1 - ãÃ) * 0.2;
+        AÅ.globalAlpha = Math.min(Âã, Math.max(ÀÄ, ãÃ));
       }
-      áá.ÄA(eA.ââ, eF, eG, eD.angle + eM / 1.5, eP, 0, eU);
+      áá.ÄA(áåa.ââ, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, 0, ááÂ);
       AÅ.globalAlpha = Âã;
     }
-    áá.ÄA(eL.head, eF, eG, eD.angle + eM / 1.5, eP, Àá, eE);
-    if (Âäå !== eC.head) {
-      áá.ÄA(eC.head, eF, eG, eD.angle + eM / 1.5, eP, 0, eE);
+    áá.ÄA(âÁÁ.head, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, Àá, åÃ);
+    if (Âäå !== ÄÁá.head) {
+      áá.ÄA(ÄÁá.head, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, 0, åÃ);
     }
   }
   ;
-  function dm(eA) {
-    var eB = ÃãÃ[eA.ÅÁa & 15];
-    bf[eA.ä][eA.åã].aAÅ = cm;
-    bf[eA.ä][eA.åã].aAÄ = eA.åÅ;
-    bf[eA.ä][eA.åã].AÅÀ = ÃÃÁ;
-    var eC = 1;
-    var eD = b1 + eA.x;
-    var eE = b2 + eA.y;
-    if (eA.ÃAA !== 0) {
-      eA.AÁÄ += ÀÀ;
-      var eF = Ää.ÁÃ.ÀÅA(áââ - (eA.AÁÄ - 500) / 400);
-      AÅ.globalAlpha = Math.min(Math.max(0, eF), ÀA);
-      áá.ÄA(eB.AÁÄ, eD, eE, eA.angle, äá, ÄÁ, 1);
-      eF = Ää.ÁÃ.ÀÅA(1 - eA.AÁÄ / 400);
-      eC = Math.min(ãâ + (1 - eF) * 0.5, 1.5);
-      AÅ.globalAlpha = Math.max(ÄÁ, eF);
+  function áÂÁ(Ä) {
+    var ÀÀÄ = ÃãÃ[Ä.ÅÁa & 15];
+    äa[Ä.ä][Ä.åã].aAÅ = ÂÀ;
+    äa[Ä.ä][Ä.åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä][Ä.åã].AÅÀ = ÃÃÁ;
+    var åÃ = 1;
+    var ã = äÁ + Ä.x;
+    var áã = ãÅ + Ä.y;
+    if (Ä.ÃAA !== 0) {
+      Ä.AÁÄ += ÀÀ;
+      var ãÃ = Ää.ÁÃ.ÀÅA(áââ - (Ä.AÁÄ - 500) / 400);
+      AÅ.globalAlpha = Math.min(Math.max(0, ãÃ), ÀA);
+      áá.ÄA(ÀÀÄ.AÁÄ, ã, áã, Ä.angle, äá, ÄÁ, 1);
+      ãÃ = Ää.ÁÃ.ÀÅA(1 - Ä.AÁÄ / 400);
+      åÃ = Math.min(ãâ + (1 - ãÃ) * 0.5, 1.5);
+      AÅ.globalAlpha = Math.max(ÄÁ, ãÃ);
     }
-    if ((eA.ÅÁa & 16) === 16) {
-      eA.ÅÁa &= ~16;
-      eA.ÃÁ = 250;
-      eA.áÀÅ = (eA.ÅÁa >> 5 & 31) * ay / 31;
+    if ((Ä.ÅÁa & 16) === 16) {
+      Ä.ÅÁa &= ~16;
+      Ä.ÃÁ = 250;
+      Ä.áÀÅ = (Ä.ÅÁa >> 5 & 31) * áÀÃ / 31;
     }
-    eB.Áá(eB, eA, eD, eE, eC);
-    if (eA.ÃAA !== AÄ) {
-      if (eA.AÁÄ > 900) {
-        eA.ÃAA = 2;
+    ÀÀÄ.Áá(ÀÀÄ, Ä, ã, áã, åÃ);
+    if (Ä.ÃAA !== AÄ) {
+      if (Ä.AÁÄ > 900) {
+        Ä.ÃAA = 2;
       }
       AÅ.globalAlpha = 1;
     }
   }
   ;
-  function dn(eA) {
-    bf[eA.ä][eA.åã].aAÅ = cm;
-    bf[eA.ä][eA.åã].aAÄ = eA.åÅ;
-    bf[eA.ä][eA.åã].AÅÀ = áÄÅ;
-    var eB = äâä[âAä];
-    var eC = eA.ÅÁa >> 8 & 255;
-    var eD = eB.aäA[eC];
-    var eE = eB.âãÅ[eA.ÅÁa & 255];
-    var eF = 1;
-    var eG = eA.state & 254;
-    var eH = b1 + eA.x;
-    var eI = b2 + eA.y;
-    if (ãÁ !== eA.ÃAA) {
-      eA.AÁÄ += ÀÀ;
-      var eJ = Ää.ÁÃ.ÀÅA(1 - (eA.AÁÄ - 500) / 400);
-      AÅ.globalAlpha = Math.min(Math.max(0, eJ), ÂA);
-      áá.ÄA(eB.AÁÄ, eH, eI, eA.angle, ÁÀ, äá, Âã);
-      eJ = Ää.ÁÃ.ÀÅA(1 - eA.AÁÄ / 400);
-      eF = Math.min(1 + (ÁÅ - eJ) * 0.5, 1.5);
-      AÅ.globalAlpha = Math.max(Aa, eJ);
+  function âÁÄ(Ä) {
+    äa[Ä.ä][Ä.åã].aAÅ = ÂÀ;
+    äa[Ä.ä][Ä.åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä][Ä.åã].AÅÀ = áÄÅ;
+    var áåa = äâä[âAä];
+    var ÂÂå = Ä.ÅÁa >> 8 & 255;
+    var ÁÂ = áåa.aäA[ÂÂå];
+    var ÄÁá = áåa.âãÅ[Ä.ÅÁa & 255];
+    var åÃ = 1;
+    var ÁaA = Ä.state & 254;
+    var ã = äÁ + Ä.x;
+    var áã = ãÅ + Ä.y;
+    if (ãÁ !== Ä.ÃAA) {
+      Ä.AÁÄ += ÀÀ;
+      var ãÃ = Ää.ÁÃ.ÀÅA(1 - (Ä.AÁÄ - 500) / 400);
+      AÅ.globalAlpha = Math.min(Math.max(0, ãÃ), ÂA);
+      áá.ÄA(áåa.AÁÄ, ã, áã, Ä.angle, ÁÀ, äá, Âã);
+      ãÃ = Ää.ÁÃ.ÀÅA(1 - Ä.AÁÄ / 400);
+      åÃ = Math.min(1 + (ÁÅ - ãÃ) * 0.5, 1.5);
+      AÅ.globalAlpha = Math.max(Aa, ãÃ);
     }
-    if (eG === 2) {
-      eA.state &= 65281;
-      if (Äå.AA.ÂAâ[eC] !== ãä) {
-        var eK = Math.floor(eD.ÀÁâ * Math.random());
-        Äå.âå(Äå.AA.ÂAâ[eC][eK], eD.ÂAã, áâA.ÃÂ(Aá.â.x, Aá.â.y, eA.x, eA.y) / ÁÄã, eD.Ãåa);
+    if (ÁaA === 2) {
+      Ä.state &= 65281;
+      if (Äå.AA.ÂAâ[ÂÂå] !== ãä) {
+        var äÅÄ = Math.floor(ÁÂ.ÀÁâ * Math.random());
+        Äå.âå(Äå.AA.ÂAâ[ÂÂå][äÅÄ], ÁÂ.ÂAã, áâA.ÃÂ(Aá.â.x, Aá.â.y, Ä.x, Ä.y) / ÁÄã, ÁÂ.Ãåa);
       }
-      if (eA.Âa <= 0) {
-        eA.Âa = eD.åÁ;
-        eA.áÃa = eD.åÁ;
+      if (Ä.Âa <= 0) {
+        Ä.Âa = ÁÂ.åÁ;
+        Ä.áÃa = ÁÂ.åÁ;
       }
-    } else if (aÃá === eG) {
-      eA.state &= 65281;
+    } else if (aÃá === ÁaA) {
+      Ä.state &= 65281;
     }
-    switch (eD.type) {
+    switch (ÁÂ.type) {
       case Aa:
-        dl(eB, eD, eE, eA, eF, eH, eI);
+        ãaÁâÄ(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã);
         break;
       case Äá:
-        cZ(eB, eD, eE, eA, eF, eH, eI);
+        ÂááÅÁ(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã);
         break;
       case 2:
-        cX(eB, eD, eE, eA, eF, eH, eI);
+        âÅâåå(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã);
         break;
       case AÂÂ:
-        de(eB, eD, eE, eA, eF, eH, eI);
+        ÅÃáâA(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã);
         break;
       case 4:
-        da(eB, eD, eE, eA, eF, eH, eI);
+        Âaáãá(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã);
         break;
       case ÀäÄ:
-        cV(eB, eD, eE, eA, eF, eH, eI);
+        áåÄaÁ(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã);
         break;
       case 6:
-        d8(eB, eD, eE, eA, eF, eH, eI);
+        ÄÀÅÃå(áåa, ÁÂ, ÄÁá, Ä, åÃ, ã, áã);
         break;
     }
-    if (eA.ÃAA !== ÁÀ) {
-      if (eA.AÁÄ > 900) {
-        eA.ÃAA = ÅÂÂ;
+    if (Ä.ÃAA !== ÁÀ) {
+      if (Ä.AÁÄ > 900) {
+        Ä.ÃAA = ÅÂÂ;
       }
       AÅ.globalAlpha = 1;
     }
   }
   ;
-  var dp = ÀÄ;
-  var dq = 0;
-  var dr = {
+  var ÅÀÀáÃ = ÀÄ;
+  var ãÄáÅÀ = 0;
+  var ÁÅÃ = {
     id: -aÅ,
     äâÂ: -Âã
   };
-  function ds(eA) {
-    AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(eA.áÃa / 500);
-    eA.ââ = (eA.ââ + ÀÀ) % 1000;
-    for (var eB = äå; ÁÁa > eB; eB++) {
-      var eC = (eA.ââ + eB * 333) % 1000;
-      var eD = âá + (eC < 500 ? eC / 500 : 1 - (eC - 500) / 500) * 0.15;
-      áá.ÄA(äáÅ[eB], b1 + eA.x + aaÄáÄ[eB], b2 + eA.y + âåâåÃ[eB], ÁÀ, Àá, 0, eD);
+  function âÄÃÄA(Ä) {
+    AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(Ä.áÃa / 500);
+    Ä.ââ = (Ä.ââ + ÀÀ) % 1000;
+    for (var ä = äå; ÁÁa > ä; ä++) {
+      var Äa = (Ä.ââ + ä * 333) % 1000;
+      var åÃ = âá + (Äa < 500 ? Äa / 500 : 1 - (Äa - 500) / 500) * 0.15;
+      áá.ÄA(äáÅ[ä], äÁ + Ä.x + aaÄáÄ[ä], ãÅ + Ä.y + âåâåÃ[ä], ÁÀ, Àá, 0, åÃ);
     }
-    eA.Aâa = (eA.Aâa + ÀÀ) % 5000;
-    var eC = eA.Aâa;
-    var eD = åä + (eC < 2500 ? eC / 2500 : 1 - (eC - 2500) / 2500) * 0.15;
-    áá.ÄA(äáÅ[3], b1 + eA.x + aaÄáÄ[áÄA], b2 + eA.y + âåâåÃ[3], Àá, 0, ãa, eD);
+    Ä.Aâa = (Ä.Aâa + ÀÀ) % 5000;
+    var Äa = Ä.Aâa;
+    var åÃ = åä + (Äa < 2500 ? Äa / 2500 : 1 - (Äa - 2500) / 2500) * 0.15;
+    áá.ÄA(äáÅ[3], äÁ + Ä.x + aaÄáÄ[áÄA], ãÅ + Ä.y + âåâåÃ[3], Àá, 0, ãa, åÃ);
     AÅ.globalAlpha = 1;
   }
   ;
-  function dt(eA, eB, eC, eD, eE, eF) {
-    eB.Äa = (eB.Äa + ÀÀ) % 500;
-    var eG = eB.Äa / 500;
-    var eH = 0.95 + Ää.ÁÃ.ÄáÀ(eG) * 0.3;
-    AÅ.globalAlpha = ÂA - eG;
-    áá.ÄA(eA.aä[1], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eH);
+  function âÄaäÀ(Åã, Ä, ã, áã, Áä, åÃ) {
+    Ä.Äa = (Ä.Äa + ÀÀ) % 500;
+    var ãÃ = Ä.Äa / 500;
+    var ááÂ = 0.95 + Ää.ÁÃ.ÄáÀ(ãÃ) * 0.3;
+    AÅ.globalAlpha = ÂA - ãÃ;
+    áá.ÄA(Åã.aä[1], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, ááÂ);
     AÅ.globalAlpha = ãå;
-    áá.ÄA(eA.aä[0], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
+    áá.ÄA(Åã.aä[0], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
   }
   ;
-  function du(eA, eB, eC, eD, eE, eF) {
-    dv(eA, eB, ÀÄ);
-    áá.ÄA(eA.aä[eB.state >> 4 & 1], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, 0, eF);
+  function ááÃãå(Åã, Ä, ã, áã, Áä, åÃ) {
+    ãÀå(Åã, Ä, ÀÄ);
+    áá.ÄA(Åã.aä[Ä.state >> 4 & 1], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, 0, åÃ);
   }
   ;
-  function dv(eA, eB, eC) {
-    if (áÃ === eB.ÃAA && Aá.â.AÁÂ !== ãå && Aá.â.Aáá !== 1 && (Àá === eC || Aá.â.id === eB.åÅ || Aá.â.Aâ !== -1 && Aá.ÂÅ[eB.åÅ].Aâ === Aá.â.Aâ && Aá.Ááä[Aá.â.Aâ].äâÂ === Aá.ÂÅ[eB.åÅ].åÂå)) {
-      var eD = áâA.ÅáÂ(b3, b4, eB.x, eB.y);
-      if (eD < bS) {
-        Aá.â.áÄå = eA.áÄå;
-        Aá.â.áÂA = eB.id;
-        Aá.â.ÃÄÄ = eB.åÅ;
-        Aá.â.ÂaA = eA.áÄÂ;
-        bS = eD;
+  function ãÀå(Åã, Ä, ãaAáa) {
+    if (áÃ === Ä.ÃAA && Aá.â.AÁÂ !== ãå && Aá.â.Aáá !== 1 && (Àá === ãaAáa || Aá.â.id === Ä.åÅ || Aá.â.Aâ !== -1 && Aá.ÂÅ[Ä.åÅ].Aâ === Aá.â.Aâ && Aá.Ááä[Aá.â.Aâ].äâÂ === Aá.ÂÅ[Ä.åÅ].åÂå)) {
+      var ÃÂ = áâA.ÅáÂ(AÃÅ, ÃÂÀ, Ä.x, Ä.y);
+      if (ÃÂ < ÂaÀâã) {
+        Aá.â.áÄå = Åã.áÄå;
+        Aá.â.áÂA = Ä.id;
+        Aá.â.ÃÄÄ = Ä.åÅ;
+        Aá.â.ÂaA = Åã.áÄÂ;
+        ÂaÀâã = ÃÂ;
         if (Aá.â.AÁÂ === 0) {
           Aá.â.ÄaÃ = âa;
         }
         Aá.â.AÁÂ = 2;
-        Aá.â.äAÅ = eA.aÅÃ;
+        Aá.â.äAÅ = Åã.aÅÃ;
         return 1;
       }
     }
     return áÁ;
   }
   ;
-  function dw(eA, eB, eC, eD, eE, eF) {
-    áá.ÄA(eA.aä[eB.Äáá], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, ãa, ãÁ, eF);
+  function ÁäâÅá(Åã, Ä, ã, áã, Áä, åÃ) {
+    áá.ÄA(Åã.aä[Ä.Äáá], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, ãa, ãÁ, åÃ);
   }
   ;
-  function dx() {
+  function ãâÀåÁ() {
     if (áÂ.state === 1) {
       if (cfg.autoBuild) {
         áÂ.áÂÄ(JSON.stringify([14, Aá.â.ÀÃÁ, Aá.â.AAá, Aá.â.äáA]));
       }
     }
-    var eA = 0;
-    bH = 0;
-    bE[0] = ãä;
-    bE[1] = ÀÄ;
-    bE[ÅÂÂ] = 0;
-    bE[äAá] = 0;
-    bS = 36000;
-    bT = 36000;
+    var ä = 0;
+    ãåA = 0;
+    aÄÂ[0] = ãä;
+    aÄÂ[1] = ÀÄ;
+    aÄÂ[ÅÂÂ] = 0;
+    aÄÂ[äAá] = 0;
+    ÂaÀâã = 36000;
+    åAÁAá = 36000;
     Aá.â.ÄaÃ = ÄÁ;
     Aá.â.áÂA = -1;
     Aá.â.ÂaA = -äA;
     if (Aá.â.AÁÂ !== 1) {
       Aá.â.AÁÂ = -áââ;
     }
-    var eB = ÅÀ.åA[äâä.length];
-    var eC = ÅÀ.border[äâä.length];
-    var eD = eC.border;
-    var eE = ÅÀ.åA[äÂa];
-    var eF = ÅÀ.border[äÂa];
-    var eG = eF.border;
-    for (eA = ÀÄ; eA < eG; eA++) {
-      cK(eE[eF.ÁÀá[eA]]);
+    var ÀãA = ÅÀ.åA[äâä.length];
+    var ÄaÀ = ÅÀ.border[äâä.length];
+    var ÃÂå = ÄaÀ.border;
+    var áaa = ÅÀ.åA[äÂa];
+    var ÁÂÀ = ÅÀ.border[äÂa];
+    var ÃÄa = ÁÂÀ.border;
+    for (ä = ÀÄ; ä < ÃÄa; ä++) {
+      ãåÁåÃ(áaa[ÁÂÀ.ÁÀá[ä]]);
     }
-    eE = ÅÀ.åA[ÂäÅ];
-    eF = ÅÀ.border[ÂäÅ];
-    eG = eF.border;
-    for (eA = 0; eA < eG; eA++) {
-      cC(eE[eF.ÁÀá[eA]]);
+    áaa = ÅÀ.åA[ÂäÅ];
+    ÁÂÀ = ÅÀ.border[ÂäÅ];
+    ÃÄa = ÁÂÀ.border;
+    for (ä = 0; ä < ÃÄa; ä++) {
+      ãÃAáå(áaa[ÁÂÀ.ÁÀá[ä]]);
     }
-    for (eA = 0; eA < eG; eA++) {
-      dZ(eE[eF.ÁÀá[eA]]);
+    for (ä = 0; ä < ÃÄa; ä++) {
+      äâÄ(áaa[ÁÂÀ.ÁÀá[ä]]);
     }
-    for (eA = Aa; eD > eA; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (eH.type === ÂäÅ) {
-        dZ(eH);
+    for (ä = Aa; ÃÂå > ä; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (Ä.type === ÂäÅ) {
+        äâÄ(Ä);
       }
     }
-    if (aV !== bd) {
-      var eI = ÅÀ.åA[âäå];
-      var eF = ÅÀ.border[âäå];
-      var eG = eF.border;
-      for (eA = 0; eA < eG; eA++) {
-        dP(eI[eF.ÁÀá[eA]]);
+    if (ÂåÄAÁ !== ãäÅ) {
+      var âÄ = ÅÀ.åA[âäå];
+      var ÁÂÀ = ÅÀ.border[âäå];
+      var ÃÄa = ÁÂÀ.border;
+      for (ä = 0; ä < ÃÄa; ä++) {
+        ãÃÄÅÁ(âÄ[ÁÂÀ.ÁÀá[ä]]);
       }
-      if (dr.id !== -ÄÂ) {
-        ÅÀ.remove(0, dr.id, dr.äâÂ, âäå);
-        dr.id = -ãå;
+      if (ÁÅÃ.id !== -ÄÂ) {
+        ÅÀ.remove(0, ÁÅÃ.id, ÁÅÃ.äâÂ, âäå);
+        ÁÅÃ.id = -ãå;
       }
     }
-    var eE = ÅÀ.åA[aÃÃ];
-    var eF = ÅÀ.border[aÃÃ];
-    var eG = eF.border;
-    for (eA = 0; eA < eG; eA++) {
-      dZ(eE[eF.ÁÀá[eA]]);
+    var áaa = ÅÀ.åA[aÃÃ];
+    var ÁÂÀ = ÅÀ.border[aÃÃ];
+    var ÃÄa = ÁÂÀ.border;
+    for (ä = 0; ä < ÃÄa; ä++) {
+      äâÄ(áaa[ÁÂÀ.ÁÀá[ä]]);
     }
-    for (eA = 0; eA < eD; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (aÃÃ === eH.type) {
-        dZ(eH);
+    for (ä = 0; ä < ÃÂå; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (aÃÃ === Ä.type) {
+        äâÄ(Ä);
       }
     }
     ãäá = ÅÀ.åA[ÂÁA];
     aÄå = ÅÀ.border[ÂÁA];
     åÅâ = aÄå.border;
-    for (eA = 0; åÅâ > eA; eA++) {
-      dU(ãäá[aÄå.ÁÀá[eA]]);
+    for (ä = 0; åÅâ > ä; ä++) {
+      åÄÂ(ãäá[aÄå.ÁÀá[ä]]);
     }
-    for (eA = AÂ; eA < eD; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (ÂÁA === eH.type) {
-        dU(eH);
+    for (ä = AÂ; ä < ÃÂå; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (ÂÁA === Ä.type) {
+        åÄÂ(Ä);
       }
     }
-    var eE = ÅÀ.åA[ãåâ];
-    var eF = ÅÀ.border[ãåâ];
-    var eG = eF.border;
-    for (eA = 0; eG > eA; eA++) {
-      cD(eE[eF.ÁÀá[eA]]);
+    var áaa = ÅÀ.åA[ãåâ];
+    var ÁÂÀ = ÅÀ.border[ãåâ];
+    var ÃÄa = ÁÂÀ.border;
+    for (ä = 0; ÃÄa > ä; ä++) {
+      ÄãÀäÂ(áaa[ÁÂÀ.ÁÀá[ä]]);
     }
-    for (eA = 0; eG > eA; eA++) {
-      dZ(eE[eF.ÁÀá[eA]]);
+    for (ä = 0; ÃÄa > ä; ä++) {
+      äâÄ(áaa[ÁÂÀ.ÁÀá[ä]]);
     }
-    for (eA = áÁ; eD > eA; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (eH.type === ãåâ) {
-        dZ(eH);
+    for (ä = áÁ; ÃÂå > ä; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (Ä.type === ãåâ) {
+        äâÄ(Ä);
       }
     }
-    var eJ = ÅÀ.åA[âAä];
-    var eK = ÅÀ.border[âAä];
-    var eL = eK.border;
-    for (eA = ãÂ; eA < eL; eA++) {
-      var eM = eK.ÁÀá[eA];
-      var eH = eJ[eM];
-      var eN = Aá.ÂÅ[eH.åÅ];
-      db(eH);
-      eN.åäâ = eM;
-      eN.ÂÀ = cm;
-      cy(eH, eM);
+    var ÂÅ = ÅÀ.åA[âAä];
+    var âÁ = ÅÀ.border[âAä];
+    var Aå = âÁ.border;
+    for (ä = ãÂ; ä < Aå; ä++) {
+      var áâ = âÁ.ÁÀá[ä];
+      var Ä = ÂÅ[áâ];
+      var â = Aá.ÂÅ[Ä.åÅ];
+      åáåÃâ(Ä);
+      â.åäâ = áâ;
+      â.ÂÀ = ÂÀ;
+      ÀAäáÀ(Ä, áâ);
     }
     Aá.â.Ãá = -ãâ;
     Aá.â.ãÂÀ = -1;
-    var eO = ÅÀ.åA[AáÃ];
-    var eP = ÅÀ.border[AáÃ];
-    var eQ = eP.border;
-    for (eA = äá; eQ > eA; eA++) {
-      e2(eO[eP.ÁÀá[eA]]);
-      e3(eO[eP.ÁÀá[eA]]);
+    var ÂÂÀáÅ = ÅÀ.åA[AáÃ];
+    var ÅÃÁäa = ÅÀ.border[AáÃ];
+    var äáÀãA = ÅÃÁäa.border;
+    for (ä = äá; äáÀãA > ä; ä++) {
+      áäaÄâ(ÂÂÀáÅ[ÅÃÁäa.ÁÀá[ä]]);
+      FastAutoLoot1(ÂÂÀáÅ[ÅÃÁäa.ÁÀá[ä]]);
     }
-    for (eA = 0; eA < eD; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (AáÃ === eH.type) {
-        e2(eH);
-        e3(eH);
+    for (ä = 0; ä < ÃÂå; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (AáÃ === Ä.type) {
+        áäaÄâ(Ä);
+        FastAutoLoot1(Ä);
       }
     }
-    var eR = ÅÀ.åA[âaÀ];
-    var eS = ÅÀ.border[âaÀ];
-    var eT = eS.border;
-    for (eA = 0; eT > eA; eA++) {
-      dG(eR[eS.ÁÀá[eA]]);
+    var ÂÅÄ = ÅÀ.åA[âaÀ];
+    var ÀãÃÀÃ = ÅÀ.border[âaÀ];
+    var aääÁÄ = ÀãÃÀÃ.border;
+    for (ä = 0; aääÁÄ > ä; ä++) {
+      äAäãÅ(ÂÅÄ[ÀãÃÀÃ.ÁÀá[ä]]);
     }
-    for (eA = 0; eA < eD; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (eH.type === âaÀ) {
-        dG(eH);
+    for (ä = 0; ä < ÃÂå; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (Ä.type === âaÀ) {
+        äAäãÅ(Ä);
       }
     }
     ãäá = ÅÀ.åA[ãaA];
     aÄå = ÅÀ.border[ãaA];
     åÅâ = aÄå.border;
-    for (eA = äá; eA < åÅâ; eA++) {
-      dU(ãäá[aÄå.ÁÀá[eA]]);
+    for (ä = äá; ä < åÅâ; ä++) {
+      åÄÂ(ãäá[aÄå.ÁÀá[ä]]);
     }
-    for (eA = ãä; eA < eD; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (eH.type === ãaA) {
-        dU(eH);
+    for (ä = ãä; ä < ÃÂå; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (Ä.type === ãaA) {
+        åÄÂ(Ä);
       }
     }
     if (Aá.aÄÀ === Aá.ÂÀå) {
-      for (eA = 0; eA < eL; eA++) {
-        var eH = eJ[eK.ÁÀá[eA]];
-        var eU = Aá.ÂÅ[eH.åÅ].ÀÃã;
-        if (Àá === eU) {
-          dn(eH);
+      for (ä = 0; ä < Aå; ä++) {
+        var Ä = ÂÅ[âÁ.ÁÀá[ä]];
+        var ÀÃã = Aá.ÂÅ[Ä.åÅ].ÀÃã;
+        if (Àá === ÀÃã) {
+          âÁÄ(Ä);
         } else {
-          eH.ÅÁa = eU - ÀA;
-          dm(eH);
+          Ä.ÅÁa = ÀÃã - ÀA;
+          áÂÁ(Ä);
         }
       }
-      for (eA = ÁÀ; eA < eD; eA++) {
-        var eH = eB[eC.ÁÀá[eA]];
-        if (eH.type === âAä) {
-          db(eH);
-          var eU = Aá.ÂÅ[eH.åÅ].ÀÃã;
-          if (áÃ === eU) {
-            dn(eH);
+      for (ä = ÁÀ; ä < ÃÂå; ä++) {
+        var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+        if (Ä.type === âAä) {
+          åáåÃâ(Ä);
+          var ÀÃã = Aá.ÂÅ[Ä.åÅ].ÀÃã;
+          if (áÃ === ÀÃã) {
+            âÁÄ(Ä);
           } else {
-            eH.ÅÁa = eU - ãå;
-            dm(eH);
+            Ä.ÅÁa = ÀÃã - ãå;
+            áÂÁ(Ä);
           }
         }
       }
     } else {
-      for (eA = 0; eA < eL; eA++) {
-        dn(eJ[eK.ÁÀá[eA]]);
+      for (ä = 0; ä < Aå; ä++) {
+        âÁÄ(ÂÅ[âÁ.ÁÀá[ä]]);
       }
-      for (eA = ãa; eA < eD; eA++) {
-        var eH = eB[eC.ÁÀá[eA]];
-        if (eH.type === âAä) {
-          db(eH);
-          dn(eH);
+      for (ä = ãa; ä < ÃÂå; ä++) {
+        var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+        if (Ä.type === âAä) {
+          åáåÃâ(Ä);
+          âÁÄ(Ä);
         }
       }
     }
-    var eV = ÅÀ.åA[ãáÀ];
-    var eW = ÅÀ.border[ãáÀ];
-    var eX = eW.border;
-    for (eA = ãÁ; eA < eX; eA++) {
-      dm(eV[eW.ÁÀá[eA]]);
+    var ÀÀÄ = ÅÀ.åA[ãáÀ];
+    var ÁAaáa = ÅÀ.border[ãáÀ];
+    var áÅááá = ÁAaáa.border;
+    for (ä = ãÁ; ä < áÅááá; ä++) {
+      áÂÁ(ÀÀÄ[ÁAaáa.ÁÀá[ä]]);
     }
-    for (eA = äá; eD > eA; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (eH.type === ãáÀ) {
-        dm(eH);
+    for (ä = äá; ÃÂå > ä; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (Ä.type === ãáÀ) {
+        áÂÁ(Ä);
       }
     }
-    eE = ÅÀ.åA[äÂa];
-    eF = ÅÀ.border[äÂa];
-    eG = eF.border;
-    for (eA = ãa; eG > eA; eA++) {
-      dZ(eE[eF.ÁÀá[eA]]);
+    áaa = ÅÀ.åA[äÂa];
+    ÁÂÀ = ÅÀ.border[äÂa];
+    ÃÄa = ÁÂÀ.border;
+    for (ä = ãa; ÃÄa > ä; ä++) {
+      äâÄ(áaa[ÁÂÀ.ÁÀá[ä]]);
     }
-    for (eA = ãÂ; eA < eD; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (eH.type === äÂa) {
-        dZ(eH);
+    for (ä = ãÂ; ä < ÃÂå; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (Ä.type === äÂa) {
+        äâÄ(Ä);
       }
     }
-    for (eA = 0; eA < bH; eA++) {
-      var eY = ÁÁ[bG[eA].ÅÁa >> Âåa];
-      eY.ÃÄããá(bG[eA]);
-      bG[eA] = null;
+    for (ä = 0; ä < ãåA; ä++) {
+      var Åã = ÁÁ[Äãa[ä].ÅÁa >> Âåa];
+      Åã.ÃÄããá(Äãa[ä]);
+      Äãa[ä] = null;
     }
     ãäá = ÅÀ.åA[åãá];
     aÄå = ÅÀ.border[åãá];
     åÅâ = aÄå.border;
-    for (eA = 0; åÅâ > eA; eA++) {
-      dU(ãäá[aÄå.ÁÀá[eA]]);
+    for (ä = 0; åÅâ > ä; ä++) {
+      åÄÂ(ãäá[aÄå.ÁÀá[ä]]);
     }
-    for (eA = ãÁ; eD > eA; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (åãá === eH.type) {
-        dU(eH);
+    for (ä = ãÁ; ÃÂå > ä; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (åãá === Ä.type) {
+        åÄÂ(Ä);
       }
     }
     ãäá = ÅÀ.åA[åÂá];
     aÄå = ÅÀ.border[åÂá];
     åÅâ = aÄå.border;
-    for (eA = 0; eA < åÅâ; eA++) {
-      dU(ãäá[aÄå.ÁÀá[eA]]);
+    for (ä = 0; ä < åÅâ; ä++) {
+      åÄÂ(ãäá[aÄå.ÁÀá[ä]]);
     }
-    for (eA = 0; eA < eD; eA++) {
-      var eH = eB[eC.ÁÀá[eA]];
-      if (åÂá === eH.type) {
-        dU(eH);
+    for (ä = 0; ä < ÃÂå; ä++) {
+      var Ä = ÀãA[ÄaÀ.ÁÀá[ä]];
+      if (åÂá === Ä.type) {
+        åÄÂ(Ä);
       }
     }
     ãÄÄ = ÅÀ.åA[aÅÅ];
     ÂÂÀÂA = ÅÀ.border[aÅÅ];
     AaÅaã = ÂÂÀÂA.border;
-    for (eA = ãÁ; AaÅaã > eA; eA++) {
-      dL(ãÄÄ[ÂÂÀÂA.ÁÀá[eA]]);
+    for (ä = ãÁ; AaÅaã > ä; ä++) {
+      AÄãÃá(ãÄÄ[ÂÂÀÂA.ÁÀá[ä]]);
     }
-    for (eA = 0; eA < eL; eA++) {
-      d6(eJ[eK.ÁÀá[eA]]);
+    for (ä = 0; ä < Aå; ä++) {
+      âÃAÀâ(ÂÅ[âÁ.ÁÀá[ä]]);
     }
     if (Aá.ÄáÃ !== Aá.ÂÀå) {
-      for (eA = 0; eL > eA; eA++) {
-        d2(eJ[eK.ÁÀá[eA]]);
+      for (ä = 0; Aå > ä; ä++) {
+        âÁÅÄå(ÂÅ[âÁ.ÁÀá[ä]]);
       }
-      for (eA = áÃ; eL > eA; eA++) {
-        d5(eJ[eK.ÁÀá[eA]]);
+      for (ä = áÃ; Aå > ä; ä++) {
+        áãáâã(ÂÅ[âÁ.ÁÀá[ä]]);
       }
       if (cfg.showPID) {
-        for (eA = áÃ; eL > eA; eA++) {
-          d1(eJ[eK.ÁÀá[eA]]);
+        for (ä = áÃ; Aå > ä; ä++) {
+          _playerID(ÂÅ[âÁ.ÁÀá[ä]]);
         }
       }
-      for (eA = áÃ; eL > eA; eA++) {
-        _CheckMyPlayer(eJ[eK.ÁÀá[eA]]);
+      for (ä = áÃ; Aå > ä; ä++) {
+        _CheckMyPlayer(ÂÅ[âÁ.ÁÀá[ä]]);
       }
     }
   }
   ;
-  function dy(eA, eB, eC, eD, eE, eF) {
-    if (AÄ < eB.Äáá) {
-      áá.ÄA(eA.âÃÁ[eB.Äáá - Ãäã], b1 + eB.x + eC, b2 + eB.y + eD, Àá, ÁÀ, ÀÄ, eF);
+  function åÀÀÁa(Åã, Ä, ã, áã, Áä, åÃ) {
+    if (AÄ < Ä.Äáá) {
+      áá.ÄA(Åã.âÃÁ[Ä.Äáá - Ãäã], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Àá, ÁÀ, ÀÄ, åÃ);
     } else {
-      áá.ÄA(eA.aä[cH(eB)], b1 + eB.x + eC, b2 + eB.y + eD, 0, äå, 0, eF);
+      áá.ÄA(Åã.aä[äÃÃÄÅ(Ä)], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, 0, äå, 0, åÃ);
     }
   }
   ;
-  function dz(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> 4 & Àâ;
-    if (eG === ÄÂ) {
-      eB.Âa = Math.min(500, eB.Âa + ÀÀ);
-    } else if (eB.Âa > 0) {
-      eB.Âa = Math.max(ÀÄ, eB.Âa - ÀÀ);
+  function ÀÀÀÀá(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÃÅA = Ä.state >> 4 & Àâ;
+    if (ÃÅA === ÄÂ) {
+      Ä.Âa = Math.min(500, Ä.Âa + ÀÀ);
+    } else if (Ä.Âa > 0) {
+      Ä.Âa = Math.max(ÀÄ, Ä.Âa - ÀÀ);
     }
-    if (eG === 0) {
-      dv(eA, eB, ÅÁ);
+    if (ÃÅA === 0) {
+      ãÀå(Åã, Ä, ÅÁ);
     }
-    var eH = eB.state >> 5 & 1;
-    if (eH === 1) {
-      eB.áÃa = Math.min(10000, eB.áÃa + ÀÀ);
-    } else if (ÅÁ < eB.áÃa) {
-      eB.áÃa = Math.max(0, eB.áÃa - ÀÀ);
+    var Åäã = Ä.state >> 5 & 1;
+    if (Åäã === 1) {
+      Ä.áÃa = Math.min(10000, Ä.áÃa + ÀÀ);
+    } else if (ÅÁ < Ä.áÃa) {
+      Ä.áÃa = Math.max(0, Ä.áÃa - ÀÀ);
     }
-    var eI = 0;
-    if (eB.áÃa > AÄ) {
-      eI = Ää.ÁÃ.ÃaÅ(eB.áÃa / 10000);
-      eC += eI * (Math.random() * 2 - Ãäã);
-      eD += (Math.random() * 2 - 1) * eI;
-      áá.ÄA(eA.aä[ãÂ], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
+    var ãÃ = 0;
+    if (Ä.áÃa > AÄ) {
+      ãÃ = Ää.ÁÃ.ÃaÅ(Ä.áÃa / 10000);
+      ã += ãÃ * (Math.random() * 2 - Ãäã);
+      áã += (Math.random() * 2 - 1) * ãÃ;
+      áá.ÄA(Åã.aä[ãÂ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
     } else {
-      áá.ÄA(eA.aä[1], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, ÀÄ, eF);
+      áá.ÄA(Åã.aä[1], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, ÀÄ, åÃ);
     }
-    if (eB.Âa > 0) {
-      dD(eB, eC, eD);
+    if (Ä.Âa > 0) {
+      ÂÅA(Ä, ã, áã);
     }
   }
   ;
-  function dA(eA, eB, eC, eD, eE, eF) {
-    var eG = ÁÁ[eA.id].Åâ[eB.Åâ];
-    áá.ÄA(eG.aä, b1 + eB.x, b2 + eB.y, 0, 0, 0, eF);
+  function ÃâãáÂ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var äãã = ÁÁ[Åã.id].Åâ[Ä.Åâ];
+    áá.ÄA(äãã.aä, äÁ + Ä.x, ãÅ + Ä.y, 0, 0, 0, åÃ);
   }
   ;
-  function dB(eA, eB, eC, eD, eE, eF) {
-    var eG = 0;
-    var eH = 0;
-    var eI = 0;
-    if (eB.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.â.Aâ === Aá.ÂÅ[eB.åÅ].Aâ && Aá.ÂÅ[eB.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ || áâA.ÅáÂ(b3, b4, eB.x, eB.y) < 52000) {
-      eH = 1;
+  function AAâáÃ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÁÄÃ = 0;
+    var ÃÀáÃ = 0;
+    var âÂÃ = 0;
+    if (Ä.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.â.Aâ === Aá.ÂÅ[Ä.åÅ].Aâ && Aá.ÂÅ[Ä.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ || áâA.ÅáÂ(AÃÅ, ÃÂÀ, Ä.x, Ä.y) < 52000) {
+      ÃÀáÃ = 1;
     }
-    if (eB.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.â.Aâ === Aá.ÂÅ[eB.åÅ].Aâ && Aá.ÂÅ[eB.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ) {
-      eI = 1;
+    if (Ä.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.â.Aâ === Aá.ÂÅ[Ä.åÅ].Aâ && Aá.ÂÅ[Ä.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ) {
+      âÂÃ = 1;
     }
     if (cfg.showLandmines) {
-      if (eH === 1) {
-        áá.ÄA(eA.aä[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, 0, eF);
-        if (eI === 1) {
+      if (ÃÀáÃ === 1) {
+        áá.ÄA(Åã.aä[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, 0, åÃ);
+        if (âÂÃ === 1) {
           AÅ.globalAlpha = 0.2;
-          áá.ÄA(äáÅ[5], b1 + eB.x + eC, b2 + eB.y + eD, 0, 0, 0, 0.6);
+          áá.ÄA(äáÅ[5], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, 0, 0, 0, 0.6);
           AÅ.globalAlpha = 1;
         } else {
           AÅ.globalAlpha = 0.2;
-          áá.ÄA(äáÅ[4], b1 + eB.x + eC, b2 + eB.y + eD, 0, 0, 0, 0.6);
+          áá.ÄA(äáÅ[4], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, 0, 0, 0, 0.6);
           AÅ.globalAlpha = 1;
         }
-      } else if (eH === 0) {
-        áá.ÄA(eA.aä[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, 0, eF);
+      } else if (ÃÀáÃ === 0) {
+        áá.ÄA(Åã.aä[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, 0, åÃ);
         AÅ.globalAlpha = 0.2;
-        áá.ÄA(äáÅ[4], b1 + eB.x + eC, b2 + eB.y + eD, 0, 0, 0, 0.6);
+        áá.ÄA(äáÅ[4], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, 0, 0, 0, 0.6);
         AÅ.globalAlpha = 1;
       }
-    } else if (eH === 1) {
-      eB.Äa = Math.min(300, eB.Äa + ÀÀ);
-      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(eB.Äa / 300);
-      áá.ÄA(eA.aä[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, 0, eF);
+    } else if (ÃÀáÃ === 1) {
+      Ä.Äa = Math.min(300, Ä.Äa + ÀÀ);
+      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ä.Äa / 300);
+      áá.ÄA(Åã.aä[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, 0, åÃ);
       AÅ.globalAlpha = 1;
-    } else if (eH === 0) {
-      eB.Äa = Math.min(300, eB.Äa + ÀÀ / 5);
-      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(eB.Äa / 300);
-      áá.ÄA(eA.aä[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, 0, eF);
+    } else if (ÃÀáÃ === 0) {
+      Ä.Äa = Math.min(300, Ä.Äa + ÀÀ / 5);
+      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ä.Äa / 300);
+      áá.ÄA(Åã.aä[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, 0, åÃ);
       AÅ.globalAlpha = 1;
     }
   }
-  function dC(eA, eB, eC, eD, eE, eF) {
-    var eG = (eE + 1) % 2;
-    var eH = eE % 2;
-    bf[eB.ä + eG][eB.åã + eH].aAÅ = cm;
-    bf[eB.ä - eG][eB.åã - eH].aAÅ = cm;
-    bf[eB.ä + eG][eB.åã + eH].aAÄ = eB.åÅ;
-    bf[eB.ä - eG][eB.åã - eH].aAÄ = eB.åÅ;
-    bf[eB.ä + eG][eB.åã + eH].AÅÀ = åãÂ;
-    bf[eB.ä - eG][eB.åã - eH].AÅÀ = undefined;
-    var eI = eB.state >> 4 & 1;
-    if (eI === 1) {
-      eB.Âa = Math.min(500, eB.Âa + ÀÀ);
-    } else if (eB.Âa > 0) {
-      eB.Âa = Math.max(0, eB.Âa - ÀÀ);
+  function ÂÃÂÂÅ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ä = (Áä + 1) % 2;
+    var åã = Áä % 2;
+    äa[Ä.ä + ä][Ä.åã + åã].aAÅ = ÂÀ;
+    äa[Ä.ä - ä][Ä.åã - åã].aAÅ = ÂÀ;
+    äa[Ä.ä + ä][Ä.åã + åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä - ä][Ä.åã - åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä + ä][Ä.åã + åã].AÅÀ = åãÂ;
+    äa[Ä.ä - ä][Ä.åã - åã].AÅÀ = undefined;
+    var ÃÅA = Ä.state >> 4 & 1;
+    if (ÃÅA === 1) {
+      Ä.Âa = Math.min(500, Ä.Âa + ÀÀ);
+    } else if (Ä.Âa > 0) {
+      Ä.Âa = Math.max(0, Ä.Âa - ÀÀ);
     }
-    if (eI === 0) {
-      dv(eA, eB, 0);
+    if (ÃÅA === 0) {
+      ãÀå(Åã, Ä, 0);
     }
-    var eJ = eB.state >> 5 & 1;
-    if (eJ === 1) {
-      eB.áÃa = äA + (eB.áÃa + ÀÀ % 300000);
+    var Åäã = Ä.state >> 5 & 1;
+    if (Åäã === 1) {
+      Ä.áÃa = äA + (Ä.áÃa + ÀÀ % 300000);
     } else {
-      eB.áÃa = ãa;
+      Ä.áÃa = ãa;
     }
-    var eK = Àá;
-    if (Aa < eB.áÃa) {
-      áá.ÄA(eA.aä[âÃ + Math.floor(eB.áÃa / 500) % Åãâ], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, ãä, eF);
-      var eJ = eA.Åäã[Math.floor(eB.áÃa / 50) % eA.Åäã.length];
-      if (eJ !== 0) {
-        áá.ÄA(eJ, b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, AÄ, eF);
+    var ãÃ = Àá;
+    if (Aa < Ä.áÃa) {
+      áá.ÄA(Åã.aä[âÃ + Math.floor(Ä.áÃa / 500) % Åãâ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, ãä, åÃ);
+      var Åäã = Åã.Åäã[Math.floor(Ä.áÃa / 50) % Åã.Åäã.length];
+      if (Åäã !== 0) {
+        áá.ÄA(Åäã, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, AÄ, åÃ);
       }
     } else {
-      áá.ÄA(eA.aä[ãÁ], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, ãa, eF);
+      áá.ÄA(Åã.aä[ãÁ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, ãa, åÃ);
     }
-    if (ÁÀ < eB.Âa) {
-      dD(eB, eC, eD);
+    if (ÁÀ < Ä.Âa) {
+      ÂÅA(Ä, ã, áã);
     }
   }
   ;
-  function dD(eA, eB, eC) {
-    eA.Äa = (eA.Äa + ÀÀ) % 1000;
-    var eD = 1 + (eA.Äa < 500 ? eA.Äa / 500 : ÀA - (eA.Äa - 500) / 500) * 0.15;
-    eD *= ÄÀ;
-    if (bB.á !== 1) {
-      bB = áá.ÃA(V, bB);
+  function ÂÅA(Ä, ã, áã) {
+    Ä.Äa = (Ä.Äa + ÀÀ) % 1000;
+    var åÃ = 1 + (Ä.Äa < 500 ? Ä.Äa / 500 : ÀA - (Ä.Äa - 500) / 500) * 0.15;
+    åÃ *= ÄÀ;
+    if (äáå.á !== 1) {
+      äáå = áá.ÃA(âååáÂ, äáå);
       return;
     }
-    AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(eA.Âa / 500);
-    var eC = (j * eA.ä + b2 + k) * ÄÀ;
-    var eB = (eA.åã * j + b1 + k) * ÄÀ;
-    var eE = eD * bB.width / ÄäÀ;
-    var eF = eD * bB.height / ããÄ;
-    AÅ.drawImage(bB, eB - eE / 2, eC - eF / ããÁ, eE, eF);
+    AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(Ä.Âa / 500);
+    var áã = (ááá * Ä.ä + ãÅ + ãÁä) * ÄÀ;
+    var ã = (Ä.åã * ááá + äÁ + ãÁä) * ÄÀ;
+    var ÅÅ = åÃ * äáå.width / ÄäÀ;
+    var Âå = åÃ * äáå.height / ããÄ;
+    AÅ.drawImage(äáå, ã - ÅÅ / 2, áã - Âå / ããÁ, ÅÅ, Âå);
     AÅ.globalAlpha = ÂA;
   }
   ;
-  function dE(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> aÀá & 15;
-    eB.Äa = (eB.Äa + ÀÀ) % 1000;
-    var eF = Äá + (eB.Äa < 500 ? eB.Äa / 500 : 1 - (eB.Äa - 500) / 500) * 0.01;
-    áá.ÄA(eA.aä[eG], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
+  function åaäÃä(Åã, Ä, ã, áã, Áä, åÃ) {
+    var âÅÁ = Ä.state >> aÀá & 15;
+    Ä.Äa = (Ä.Äa + ÀÀ) % 1000;
+    var åÃ = Äá + (Ä.Äa < 500 ? Ä.Äa / 500 : 1 - (Ä.Äa - 500) / 500) * 0.01;
+    áá.ÄA(Åã.aä[âÅÁ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
   }
   ;
-  function dF(eA, eB, eC, eD, eE, eF) {
-    dv(eA, eB, 0);
-    áá.ÄA(eA.aä[eB.state >> ãåÁ & 3], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, åâ, áÁ, eF);
+  function ÂÁaÅa(Åã, Ä, ã, áã, Áä, åÃ) {
+    ãÀå(Åã, Ä, 0);
+    áá.ÄA(Åã.aä[Ä.state >> ãåÁ & 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, åâ, áÁ, åÃ);
   }
   ;
-  function dG(eA) {
-    bf[eA.ä][eA.åã].aAÅ = cm;
-    bf[eA.ä][eA.åã].aAÄ = eA.åÅ;
-    bf[eA.ä][eA.åã].AÅÀ = undefined;
-    var eB = åä;
-    var eC = eA.ä;
-    var eD = eA.åã;
-    var eE = åä >= eC ? 0 : eC - 1;
-    var eF = eC >= t - 2 ? t - 1 : eC + âa;
-    var eG = eD <= 1 ? ãä : eD - Ãäã;
-    var eH = w - Äåã <= eD ? w - åÀ : eD + 1;
-    for (eC = eE; eC <= eF; eC++) {
-      for (eD = eG; eH >= eD; eD++) {
-        var eI = bf[eC][eD];
-        if (eI.ÂÀ !== cm) {
+  function äAäãÅ(Ä) {
+    äa[Ä.ä][Ä.åã].aAÅ = ÂÀ;
+    äa[Ä.ä][Ä.åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä][Ä.åã].AÅÀ = undefined;
+    var aáá = åä;
+    var ä = Ä.ä;
+    var åã = Ä.åã;
+    var åAáäã = åä >= ä ? 0 : ä - 1;
+    var aåÂAA = ä >= áÂÀ - 2 ? áÂÀ - 1 : ä + âa;
+    var ÂÂåÄÀ = åã <= 1 ? ãä : åã - Ãäã;
+    var ÁaáÃã = aåA - Äåã <= åã ? aåA - åÀ : åã + 1;
+    for (ä = åAáäã; ä <= aåÂAA; ä++) {
+      for (åã = ÂÂåÄÀ; ÁaáÃã >= åã; åã++) {
+        var ÂÃ = äa[ä][åã];
+        if (ÂÃ.ÂÀ !== ÂÀ) {
           continue;
         }
-        var eJ = eI.b;
-        var eK = eI.ä;
-        for (var eL = 0; eK > eL; eL++) {
-          var eM = eJ[eL];
-          var eN = eM.type;
-          var eO = ÅÀ.åA[eN][eM.ÁÀá];
-          if ((Aá.â.id !== eO.åÅ || eO.id !== 0) && áâA.ÃÂ(eO.x, eO.y, eA.x, eA.y) < äâä[eN].ÂÂ - 4) {
+        var Ã = ÂÃ.b;
+        var Aå = ÂÃ.ä;
+        for (var åÃÄ = 0; Aå > åÃÄ; åÃÄ++) {
+          var âÃÃ = Ã[åÃÄ];
+          var AÀ = âÃÃ.type;
+          var ÃÀÂ = ÅÀ.åA[AÀ][âÃÃ.ÁÀá];
+          if ((Aá.â.id !== ÃÀÂ.åÅ || ÃÀÂ.id !== 0) && áâA.ÃÂ(ÃÀÂ.x, ÃÀÂ.y, Ä.x, Ä.y) < äâä[AÀ].ÂÂ - 4) {
             console.log("DETECTED");
-            eA.rx = eA.x;
-            eA.ry = eA.y;
-            eA.Åaä = eA.x;
-            eA.ÂÅä = eA.y;
+            Ä.rx = Ä.x;
+            Ä.ry = Ä.y;
+            Ä.Åaä = Ä.x;
+            Ä.ÂÅä = Ä.y;
           }
         }
       }
     }
-    if (eA.ÃAA !== 0) {
-      eA.AÁÄ += ÀÀ;
-      eB = Math.max(Aa, Ää.ÁÃ.ÀÅA(1 - eA.AÁÄ / 200));
-      AÅ.globalAlpha = eB;
+    if (Ä.ÃAA !== 0) {
+      Ä.AÁÄ += ÀÀ;
+      aáá = Math.max(Aa, Ää.ÁÃ.ÀÅA(1 - Ä.AÁÄ / 200));
+      AÅ.globalAlpha = aáá;
     }
-    var eP = áâA.ÅáÂ(eA.Åaä, eA.ÂÅä, eA.x, eA.y);
-    if (eP < 400 || eA.ÃAA !== 0) {
-      AÅ.globalAlpha = Math.min(eP / 400, eB);
-      áá.ÄA(äâä[âAä].ÂÅÄ[eA.ÅÁa][2], b1 + eA.x, b2 + eA.y, eA.angle, 0, Àá, ÄÂ);
-      AÅ.globalAlpha = eB;
-      áá.ÄA(äâä[âAä].ÂÅÄ[eA.ÅÁa][ÀA], b1 + eA.x, b2 + eA.y, eA.angle, 0, 0, 1);
+    var ÃÂ = áâA.ÅáÂ(Ä.Åaä, Ä.ÂÅä, Ä.x, Ä.y);
+    if (ÃÂ < 400 || Ä.ÃAA !== 0) {
+      AÅ.globalAlpha = Math.min(ÃÂ / 400, aáá);
+      áá.ÄA(äâä[âAä].ÂÅÄ[Ä.ÅÁa][2], äÁ + Ä.x, ãÅ + Ä.y, Ä.angle, 0, Àá, ÄÂ);
+      AÅ.globalAlpha = aáá;
+      áá.ÄA(äâä[âAä].ÂÅÄ[Ä.ÅÁa][ÀA], äÁ + Ä.x, ãÅ + Ä.y, Ä.angle, 0, 0, 1);
     } else {
-      áá.ÄA(äâä[âAä].ÂÅÄ[eA.ÅÁa][ãÂ], b1 + eA.x, b2 + eA.y, eA.angle, 0, 0, Áå);
+      áá.ÄA(äâä[âAä].ÂÅÄ[Ä.ÅÁa][ãÂ], äÁ + Ä.x, ãÅ + Ä.y, Ä.angle, 0, 0, Áå);
     }
-    if (eA.ÃAA !== ãä) {
-      if (eA.AÁÄ > 200) {
-        eA.ÃAA = ÄÂÅ;
+    if (Ä.ÃAA !== ãä) {
+      if (Ä.AÁÄ > 200) {
+        Ä.ÃAA = ÄÂÅ;
       }
       AÅ.globalAlpha = 1;
     }
   }
   ;
-  function dH(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> aÀá & ÂA;
-    if (ãå === eG) {
-      eB.Âa = Math.min(500, eB.Âa + ÀÀ);
-    } else if (ãÁ < eB.Âa) {
-      eB.Âa = Math.max(0, eB.Âa - ÀÀ);
+  function aåáAå(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÃÅA = Ä.state >> aÀá & ÂA;
+    if (ãå === ÃÅA) {
+      Ä.Âa = Math.min(500, Ä.Âa + ÀÀ);
+    } else if (ãÁ < Ä.Âa) {
+      Ä.Âa = Math.max(0, Ä.Âa - ÀÀ);
     }
-    if (ÅÁ === eG) {
-      dv(eA, eB, ãä);
+    if (ÅÁ === ÃÅA) {
+      ãÀå(Åã, Ä, ãä);
     }
-    var eH = eB.state >> ÃáÅ & Áå;
-    if (aÅ === eH) {
-      eB.áÃa = Math.min(10000, eB.áÃa + ÀÀ);
-    } else if (eB.áÃa > ÀÄ) {
-      eB.áÃa = Math.max(0, eB.áÃa - ÀÀ);
+    var Åäã = Ä.state >> ÃáÅ & Áå;
+    if (aÅ === Åäã) {
+      Ä.áÃa = Math.min(10000, Ä.áÃa + ÀÀ);
+    } else if (Ä.áÃa > ÀÄ) {
+      Ä.áÃa = Math.max(0, Ä.áÃa - ÀÀ);
     }
-    var eI = AÄ;
-    if (eB.áÃa > 0) {
-      eI = Ää.ÁÃ.ÃaÅ(eB.áÃa / 10000);
-      eC += (ãÂã * Math.random() - 1) * eI;
-      eD += (Math.random() * 2 - 1) * eI;
-      eB.ââ += eI * ÀÀ / 300;
-      áá.ÄA(eA.aä[1], b1 + eB.x + eC + eA.ÁÂÄ[eE][0], b2 + eB.y + eD + eA.ÁÂÄ[eE][åÀ], aA * eE + eB.ââ, 0, Àá, eF);
-      áá.ÄA(eA.aä[ãa], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, ãä, 0, eF);
+    var ãÃ = AÄ;
+    if (Ä.áÃa > 0) {
+      ãÃ = Ää.ÁÃ.ÃaÅ(Ä.áÃa / 10000);
+      ã += (ãÂã * Math.random() - 1) * ãÃ;
+      áã += (Math.random() * 2 - 1) * ãÃ;
+      Ä.ââ += ãÃ * ÀÀ / 300;
+      áá.ÄA(Åã.aä[1], äÁ + Ä.x + ã + Åã.ÁÂÄ[Áä][0], ãÅ + Ä.y + áã + Åã.ÁÂÄ[Áä][åÀ], ãáA * Áä + Ä.ââ, 0, Àá, åÃ);
+      áá.ÄA(Åã.aä[ãa], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, ãä, 0, åÃ);
     } else {
-      áá.ÄA(eA.aä[ããÄ], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, åâ, AÄ, eF);
+      áá.ÄA(Åã.aä[ããÄ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, åâ, AÄ, åÃ);
     }
-    if (eB.Âa > åâ) {
-      dD(eB, eC, eD);
-    }
-  }
-  ;
-  function dI(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> åÃÃ & 1;
-    var eH = ÁÁ[eA.id].Åâ[eB.Åâ];
-    if (âa === eG) {
-      eB.Âa = Math.min(500, eB.Âa + ÀÀ);
-    } else if (eB.Âa > ÅÁ) {
-      eB.Âa = Math.max(ÄÁ, eB.Âa - ÀÀ);
-    }
-    if (ãÁ === eG && äA === eH.Åäá && dv(eH, eB, 0) === ÄÂ) {
-      Aá.â.äAÅ = bv;
-    }
-    áá.ÄA(eH.aä, b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, Aa, 0, eF);
-    if (eB.Âa > 0) {
-      dD(eB, eC, eD);
+    if (Ä.Âa > åâ) {
+      ÂÅA(Ä, ã, áã);
     }
   }
   ;
-  function dJ(eA, eB, eC, eD, eE, eF) {
-    var eG = bf[eB.ä][eB.åã];
-    eG.aAÅ = ãÂ;
-    eG.åÂÀ = cm;
-    eG.åÅ = eB.åÅ;
-    if (eG.äÀå !== cm || eG.âÃÄ === 1) {
-      if (eB.Äáá > 0) {
-        áá.ÄA(eA.âÃÁ[eB.Äáá - 1], b1 + eB.x + eC, b2 + eB.y + eD, ÅÁ, AÂ, ÅÁ, eF);
+  function âÂÀÄÅ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÃÅA = Ä.state >> åÃÃ & 1;
+    var äãã = ÁÁ[Åã.id].Åâ[Ä.Åâ];
+    if (âa === ÃÅA) {
+      Ä.Âa = Math.min(500, Ä.Âa + ÀÀ);
+    } else if (Ä.Âa > ÅÁ) {
+      Ä.Âa = Math.max(ÄÁ, Ä.Âa - ÀÀ);
+    }
+    if (ãÁ === ÃÅA && äA === äãã.Åäá && ãÀå(äãã, Ä, 0) === ÄÂ) {
+      Aá.â.äAÅ = âÀâÃÁ;
+    }
+    áá.ÄA(äãã.aä, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, Aa, 0, åÃ);
+    if (Ä.Âa > 0) {
+      ÂÅA(Ä, ã, áã);
+    }
+  }
+  ;
+  function ÅáAÃå(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÅãÂ = äa[Ä.ä][Ä.åã];
+    ÅãÂ.aAÅ = ãÂ;
+    ÅãÂ.åÂÀ = ÂÀ;
+    ÅãÂ.åÅ = Ä.åÅ;
+    if (ÅãÂ.äÀå !== ÂÀ || ÅãÂ.âÃÄ === 1) {
+      if (Ä.Äáá > 0) {
+        áá.ÄA(Åã.âÃÁ[Ä.Äáá - 1], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ÅÁ, AÂ, ÅÁ, åÃ);
       } else {
-        áá.ÄA(eA.aä[cE(eB)], b1 + eB.x, b2 + eB.y, ÁÀ, 0, 0, eF);
+        áá.ÄA(Åã.aä[ÀäAââ(Ä)], äÁ + Ä.x, ãÅ + Ä.y, ÁÀ, 0, 0, åÃ);
       }
     }
   }
   ;
-  function dK(eA, eB, eC, eD, eE, eF) {
+  function ÀÀÂÂã(Åã, Ä, ã, áã, Áä, åÃ) {
     AÅ.globalAlpha = Äá;
-    var eG = eB.state >> 7 & 1;
-    if (eG === 1) {
-      eB.áÃa = Math.min(500, eB.áÃa + ÀÀ);
-    } else if (eB.áÃa > 0) {
-      eB.áÃa = Math.max(0, eB.áÃa - ÀÀ);
+    var ÁãÂÅÃ = Ä.state >> 7 & 1;
+    if (ÁãÂÅÃ === 1) {
+      Ä.áÃa = Math.min(500, Ä.áÃa + ÀÀ);
+    } else if (Ä.áÃa > 0) {
+      Ä.áÃa = Math.max(0, Ä.áÃa - ÀÀ);
     }
-    if (eB.áÃa > äá && eB.áÃa !== 500) {
-      AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(eB.áÃa / 500);
-      áá.ÄA(eA.aä[1][eB.Äáá], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
-      AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(1 - eB.áÃa / 500);
-      áá.ÄA(eA.aä[0][eB.Äáá], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, ÄÁ, eF);
+    if (Ä.áÃa > äá && Ä.áÃa !== 500) {
+      AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(Ä.áÃa / 500);
+      áá.ÄA(Åã.aä[1][Ä.Äáá], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
+      AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(1 - Ä.áÃa / 500);
+      áá.ÄA(Åã.aä[0][Ä.Äáá], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, ÄÁ, åÃ);
       AÅ.globalAlpha = ÁÅ;
     } else {
-      áá.ÄA(eA.aä[eG][eB.Äáá], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, áÃ, 0, eF);
+      áá.ÄA(Åã.aä[ÁãÂÅÃ][Ä.Äáá], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, áÃ, 0, åÃ);
     }
   }
   ;
-  function dL(eA) {
-    var eB = äâä[aÅÅ].ãÄÄ;
-    var eC = Math.floor(eA.Äaå / 70);
-    if (eC < 10) {
-      if (eA.Äaå === 0) {
+  function AÄãÃá(Ä) {
+    var À = äâä[aÅÅ].ãÄÄ;
+    var áåa = Math.floor(Ä.Äaå / 70);
+    if (áåa < 10) {
+      if (Ä.Äaå === 0) {
         if (-Åaa !== ÀÂ.äAÃ) {
           ÀÂ.äAÃ = 20;
         }
-        Äå.âå(Äå.AA.ãA, 0.7, áâA.ÃÂ(Aá.â.x, Aá.â.y, eA.x, eA.y) / åÃÃ);
+        Äå.âå(Äå.AA.ãA, 0.7, áâA.ÃÂ(Aá.â.x, Aá.â.y, Ä.x, Ä.y) / åÃÃ);
       }
-      áá.ÄA(eB[eC], b1 + eA.x, b2 + eA.y, 0, áÁ, 0, 1);
+      áá.ÄA(À[áåa], äÁ + Ä.x, ãÅ + Ä.y, 0, áÁ, 0, 1);
     }
-    eA.Äaå += ÀÀ;
+    Ä.Äaå += ÀÀ;
   }
   ;
-  function dM(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> ÃaÂ & Ãäã;
-    if (eG === Ãäã) {
-      eB.Âa = Math.min(500, eB.Âa + ÀÀ);
-    } else if (ãÂ < eB.Âa) {
-      eB.Âa = Math.max(ÁÀ, eB.Âa - ÀÀ);
+  function ÂááåÀ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÃÅA = Ä.state >> ÃaÂ & Ãäã;
+    if (ÃÅA === Ãäã) {
+      Ä.Âa = Math.min(500, Ä.Âa + ÀÀ);
+    } else if (ãÂ < Ä.Âa) {
+      Ä.Âa = Math.max(ÁÀ, Ä.Âa - ÀÀ);
     }
-    if (eG === ãä) {
-      dv(eA, eB, ÅÁ);
+    if (ÃÅA === ãä) {
+      ãÀå(Åã, Ä, ÅÁ);
     }
-    var eH = eB.state >> äÂá & 1;
-    if (eH === 1) {
-      eB.áÃa = Math.min(10000, eB.áÃa + ÀÀ);
-    } else if (eB.áÃa > AÂ) {
-      eB.áÃa = Math.max(áÁ, eB.áÃa - ÀÀ);
+    var Åäã = Ä.state >> äÂá & 1;
+    if (Åäã === 1) {
+      Ä.áÃa = Math.min(10000, Ä.áÃa + ÀÀ);
+    } else if (Ä.áÃa > AÂ) {
+      Ä.áÃa = Math.max(áÁ, Ä.áÃa - ÀÀ);
     }
-    var eI = 0;
-    if (ÅÁ < eB.áÃa) {
-      eI = Ää.ÁÃ.ÃaÅ(eB.áÃa / 10000);
-      eC += (Math.random() * ÅÄä - Äá) * eI;
-      eD += (ÄÀã * Math.random() - åÀ) * eI;
-      eB.ââ += eI * ÀÀ / 300;
-      áá.ÄA(eA.aä[1], b1 + eB.x + eC + eA.ÁÂÄ[eE][áÃ], b2 + eB.y + eD + eA.ÁÂÄ[eE][1], eE * aA + eB.ââ, ÄÁ, AÂ, eF);
-      áá.ÄA(eA.aä[0], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
+    var ãÃ = 0;
+    if (ÅÁ < Ä.áÃa) {
+      ãÃ = Ää.ÁÃ.ÃaÅ(Ä.áÃa / 10000);
+      ã += (Math.random() * ÅÄä - Äá) * ãÃ;
+      áã += (ÄÀã * Math.random() - åÀ) * ãÃ;
+      Ä.ââ += ãÃ * ÀÀ / 300;
+      áá.ÄA(Åã.aä[1], äÁ + Ä.x + ã + Åã.ÁÂÄ[Áä][áÃ], ãÅ + Ä.y + áã + Åã.ÁÂÄ[Áä][1], Áä * ãáA + Ä.ââ, ÄÁ, AÂ, åÃ);
+      áá.ÄA(Åã.aä[0], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
     } else {
-      áá.ÄA(eA.aä[Äåã], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, 0, eF);
+      áá.ÄA(Åã.aä[Äåã], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, 0, åÃ);
     }
-    if (eB.Âa > 0) {
-      dD(eB, eC, eD);
+    if (Ä.Âa > 0) {
+      ÂÅA(Ä, ã, áã);
     }
   }
   ;
-  function dN(eA, eB, eC, eD, eE, eF) {
-    var eG = (eE + ÀA) % 2;
-    var eH = eE % 2;
-    bf[eB.ä + eG][eB.åã + eH].aAÅ = cm;
-    bf[eB.ä - eG][eB.åã - eH].aAÅ = cm;
-    bf[eB.ä + eG][eB.åã + eH].aAÄ = eB.åÅ;
-    bf[eB.ä - eG][eB.åã - eH].aAÄ = eB.åÅ;
-    bf[eB.ä + eG][eB.åã + eH].AÅÀ = ÄÂã;
-    bf[eB.ä - eG][eB.åã - eH].AÅÀ = åãÂ;
-    dv(eA, eB, 0);
-    áá.ÄA(eA.aä, b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, 0, eF);
+  function åaÀáã(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ä = (Áä + ÀA) % 2;
+    var åã = Áä % 2;
+    äa[Ä.ä + ä][Ä.åã + åã].aAÅ = ÂÀ;
+    äa[Ä.ä - ä][Ä.åã - åã].aAÅ = ÂÀ;
+    äa[Ä.ä + ä][Ä.åã + åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä - ä][Ä.åã - åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä + ä][Ä.åã + åã].AÅÀ = ÄÂã;
+    äa[Ä.ä - ä][Ä.åã - åã].AÅÀ = åãÂ;
+    ãÀå(Åã, Ä, 0);
+    áá.ÄA(Åã.aä, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, 0, åÃ);
   }
   ;
-  function dO(eA, eB, eC, eD, eE, eF) {
-    var eG = 0;
-    var eH = 1;
-    var eI = 0;
-    if ((eB.state & 16) === 16) {
-      eH = 0;
+  function áÅAÃÄ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÁÄÃ = 0;
+    var ÄÄÀ = 1;
+    var âÂÃ = 0;
+    if ((Ä.state & 16) === 16) {
+      ÄÄÀ = 0;
     }
-    if (eB.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.â.Aâ === Aá.ÂÅ[eB.åÅ].Aâ && Aá.ÂÅ[eB.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ || áâA.ÅáÂ(b3, b4, eB.x, eB.y) < 52000) {
-      eG = ÁÅ;
+    if (Ä.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.â.Aâ === Aá.ÂÅ[Ä.åÅ].Aâ && Aá.ÂÅ[Ä.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ || áâA.ÅáÂ(AÃÅ, ÃÂÀ, Ä.x, Ä.y) < 52000) {
+      ÁÄÃ = ÁÅ;
     }
-    if (eB.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.â.Aâ === Aá.ÂÅ[eB.åÅ].Aâ && Aá.ÂÅ[eB.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ) {
-      eI = 1;
+    if (Ä.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.â.Aâ === Aá.ÂÅ[Ä.åÅ].Aâ && Aá.ÂÅ[Ä.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ) {
+      âÂÃ = 1;
     }
     if (cfg.showSpikes) {
-      if (eH === 0) {
-        if (äá === eB.äÀA) {
-          dT(eB, eA.âÄ, eA.âÀ, 5);
+      if (ÄÄÀ === 0) {
+        if (äá === Ä.äÀA) {
+          ÄÀÅ(Ä, Åã.âÄ, Åã.âÀ, 5);
         }
-        if (eB.äÀA < 300) {
-          eC += Math.random() * ÂäÃÅÃ - 4;
-          eD += ååÄ * Math.random() - 4;
-          eB.äÀA += ÀÀ;
+        if (Ä.äÀA < 300) {
+          ã += Math.random() * ÂäÃÅÃ - 4;
+          áã += ååÄ * Math.random() - 4;
+          Ä.äÀA += ÀÀ;
         }
-        if (eB.Äa > äá) {
-          eB.Äa = Math.max(0, eB.Äa - ÀÀ / 5);
-          AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(eB.Äa / 300);
-          áá.ÄA(eA.hidden[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, áÁ, ãä, eF);
+        if (Ä.Äa > äá) {
+          Ä.Äa = Math.max(0, Ä.Äa - ÀÀ / 5);
+          AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ä.Äa / 300);
+          áá.ÄA(Åã.hidden[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, áÁ, ãä, åÃ);
           AÅ.globalAlpha = aÅ;
         }
-        áá.ÄA(eA.Âáaäâ[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, ãa, ÁÀ, eF);
-      } else if (eG === 1) {
-        áá.ÄA(eA.hidden[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
-        if (eI === 1) {
+        áá.ÄA(Åã.Âáaäâ[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, ãa, ÁÀ, åÃ);
+      } else if (ÁÄÃ === 1) {
+        áá.ÄA(Åã.hidden[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
+        if (âÂÃ === 1) {
           AÅ.globalAlpha = 0.2;
-          áá.ÄA(äáÅ[5], b1 + eB.x + eC, b2 + eB.y + eD, 0, 0, 0, 0.6);
+          áá.ÄA(äáÅ[5], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, 0, 0, 0, 0.6);
           AÅ.globalAlpha = 1;
         } else {
           AÅ.globalAlpha = 0.2;
-          áá.ÄA(äáÅ[4], b1 + eB.x + eC, b2 + eB.y + eD, 0, 0, 0, 0.6);
+          áá.ÄA(äáÅ[4], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, 0, 0, 0, 0.6);
           AÅ.globalAlpha = 1;
         }
-      } else if (eG === 0) {
-        áá.ÄA(eA.hidden[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
+      } else if (ÁÄÃ === 0) {
+        áá.ÄA(Åã.hidden[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
         AÅ.globalAlpha = 0.2;
-        áá.ÄA(äáÅ[4], b1 + eB.x + eC, b2 + eB.y + eD, 0, 0, 0, 0.6);
+        áá.ÄA(äáÅ[4], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, 0, 0, 0, 0.6);
         AÅ.globalAlpha = 1;
       }
-    } else if (eH === 0) {
-      if (äá === eB.äÀA) {
-        dT(eB, eA.âÄ, eA.âÀ, 5);
+    } else if (ÄÄÀ === 0) {
+      if (äá === Ä.äÀA) {
+        ÄÀÅ(Ä, Åã.âÄ, Åã.âÀ, 5);
       }
-      if (eB.äÀA < 300) {
-        eC += Math.random() * ÂäÃÅÃ - 4;
-        eD += ååÄ * Math.random() - 4;
-        eB.äÀA += ÀÀ;
+      if (Ä.äÀA < 300) {
+        ã += Math.random() * ÂäÃÅÃ - 4;
+        áã += ååÄ * Math.random() - 4;
+        Ä.äÀA += ÀÀ;
       }
-      if (eB.Äa > äá) {
-        eB.Äa = Math.max(0, eB.Äa - ÀÀ / 5);
-        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(eB.Äa / 300);
-        áá.ÄA(eA.hidden[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, áÁ, ãä, eF);
+      if (Ä.Äa > äá) {
+        Ä.Äa = Math.max(0, Ä.Äa - ÀÀ / 5);
+        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ä.Äa / 300);
+        áá.ÄA(Åã.hidden[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, áÁ, ãä, åÃ);
         AÅ.globalAlpha = aÅ;
       }
-      áá.ÄA(eA.Âáaäâ[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, ãa, ÁÀ, eF);
-    } else if (eG === 1) {
-      if (eB.Äa === 300) {
-        áá.ÄA(eA.hidden[eB.id % 3], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
+      áá.ÄA(Åã.Âáaäâ[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, ãa, ÁÀ, åÃ);
+    } else if (ÁÄÃ === 1) {
+      if (Ä.Äa === 300) {
+        áá.ÄA(Åã.hidden[Ä.id % 3], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
       } else {
-        eB.Äa = Math.min(300, eB.Äa + ÀÀ);
-        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(eB.Äa / 300);
-        áá.ÄA(eA.hidden[eB.id % åáÂ], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
+        Ä.Äa = Math.min(300, Ä.Äa + ÀÀ);
+        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ä.Äa / 300);
+        áá.ÄA(Åã.hidden[Ä.id % åáÂ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
         AÅ.globalAlpha = 1;
       }
-    } else if (eG === 0 && áÃ < eB.Äa) {
-      eB.Äa = Math.max(AÂ, eB.Äa - ÀÀ / 5);
-      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(eB.Äa / 300);
-      áá.ÄA(eA.hidden[eB.id % âÀâ], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, AÂ, eF);
+    } else if (ÁÄÃ === 0 && áÃ < Ä.Äa) {
+      Ä.Äa = Math.max(AÂ, Ä.Äa - ÀÀ / 5);
+      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ä.Äa / 300);
+      áá.ÄA(Åã.hidden[Ä.id % âÀâ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, AÂ, åÃ);
       AÅ.globalAlpha = Àâ;
     }
   }
-  function dP(eA) {
-    var eB = Aáã[eA.state][eA.ÅÁa];
-    if (eA.AÁÄ > 0) {
-      eA.AÁÄ = Math.min(Âã, eA.AÁÄ + ÀÀ / 500);
-      AÅ.globalAlpha = Àâ - eA.AÁÄ;
-      áá.ÄA(eB, b1 + eA.x, b2 + eA.y, eA.angle, ãÂ, ÄÁ, 1);
+  function ãÃÄÅÁ(Ä) {
+    var À = Aáã[Ä.state][Ä.ÅÁa];
+    if (Ä.AÁÄ > 0) {
+      Ä.AÁÄ = Math.min(Âã, Ä.AÁÄ + ÀÀ / 500);
+      AÅ.globalAlpha = Àâ - Ä.AÁÄ;
+      áá.ÄA(À, äÁ + Ä.x, ãÅ + Ä.y, Ä.angle, ãÂ, ÄÁ, 1);
       AÅ.globalAlpha = 1;
-      if (eA.AÁÄ === 1) {
-        dr.id = eA.id;
-        dr.äâÂ = eA.äâÂ;
+      if (Ä.AÁÄ === 1) {
+        ÁÅÃ.id = Ä.id;
+        ÁÅÃ.äâÂ = Ä.äâÂ;
       }
       return;
-    } else if (áâA.ÅáÂ(eA.x, eA.y, eA.Åaä, eA.ÂÅä) < 0.01) {
-      eA.AÁÄ = 0.001;
+    } else if (áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä) < 0.01) {
+      Ä.AÁÄ = 0.001;
     }
-    áá.ÄA(eB, b1 + eA.x, b2 + eA.y, eA.angle, äá, äå, áââ);
+    áá.ÄA(À, äÁ + Ä.x, ãÅ + Ä.y, Ä.angle, äá, äå, áââ);
   }
   ;
-  function dQ(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> ÅAa & âÃ;
-    if (eG === 1) {
-      eB.Âa = Math.min(500, eB.Âa + ÀÀ);
-    } else if (eB.Âa > 0) {
-      eB.Âa = Math.max(AÄ, eB.Âa - ÀÀ);
+  function äAãäÂ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÃÅA = Ä.state >> ÅAa & âÃ;
+    if (ÃÅA === 1) {
+      Ä.Âa = Math.min(500, Ä.Âa + ÀÀ);
+    } else if (Ä.Âa > 0) {
+      Ä.Âa = Math.max(AÄ, Ä.Âa - ÀÀ);
     }
-    if (äå === eG) {
-      dv(eA, eB, 0);
+    if (äå === ÃÅA) {
+      ãÀå(Åã, Ä, 0);
     }
-    áá.ÄA(eA.aä, b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, áÁ, 0, eF);
-    var eH = eB.state >> 5 & 1;
-    if (eH === 1) {
-      eB.áÃa = Math.min(500, eB.áÃa + ÀÀ);
-    } else if (eB.áÃa > áÃ) {
-      eB.áÃa = Math.max(0, eB.áÃa - ÀÀ);
+    áá.ÄA(Åã.aä, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, áÁ, 0, åÃ);
+    var Åäã = Ä.state >> 5 & 1;
+    if (Åäã === 1) {
+      Ä.áÃa = Math.min(500, Ä.áÃa + ÀÀ);
+    } else if (Ä.áÃa > áÃ) {
+      Ä.áÃa = Math.max(0, Ä.áÃa - ÀÀ);
     }
-    if (eB.áÃa > 0) {
-      bG[bH++] = eB;
+    if (Ä.áÃa > 0) {
+      Äãa[ãåA++] = Ä;
     }
-    if (eB.Âa > 0) {
-      dD(eB, eC, eD);
+    if (Ä.Âa > 0) {
+      ÂÅA(Ä, ã, áã);
     }
   }
   ;
-  function dR(eA, eB, eC, eD, eE, eF) {
-    var eG = (eE + ÂA) % áÂa;
-    var eH = eE % 2;
-    bf[eB.ä + eG][eB.åã + eH].aAÅ = cm;
-    bf[eB.ä - eG][eB.åã - eH].aAÅ = cm;
-    bf[eB.ä + eG][eB.åã + eH].aAÄ = eB.åÅ;
-    bf[eB.ä - eG][eB.åã - eH].aAÄ = eB.åÅ;
-    bf[eB.ä + eG][eB.åã + eH].AÅÀ = åãÂ;
-    bf[eB.ä - eG][eB.åã - eH].AÅÀ = undefined;
-    var eI = eB.state >> 4 & 1;
-    if (eI === 1) {
-      eB.Âa = Math.min(500, eB.Âa + ÀÀ);
-    } else if (eB.Âa > AÂ) {
-      eB.Âa = Math.max(ÁÀ, eB.Âa - ÀÀ);
+  function AÁáaä(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ä = (Áä + ÂA) % áÂa;
+    var åã = Áä % 2;
+    äa[Ä.ä + ä][Ä.åã + åã].aAÅ = ÂÀ;
+    äa[Ä.ä - ä][Ä.åã - åã].aAÅ = ÂÀ;
+    äa[Ä.ä + ä][Ä.åã + åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä - ä][Ä.åã - åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä + ä][Ä.åã + åã].AÅÀ = åãÂ;
+    äa[Ä.ä - ä][Ä.åã - åã].AÅÀ = undefined;
+    var ÃÅA = Ä.state >> 4 & 1;
+    if (ÃÅA === 1) {
+      Ä.Âa = Math.min(500, Ä.Âa + ÀÀ);
+    } else if (Ä.Âa > AÂ) {
+      Ä.Âa = Math.max(ÁÀ, Ä.Âa - ÀÀ);
     }
-    if (ãÂ === eI) {
-      dv(eA, eB, äá);
+    if (ãÂ === ÃÅA) {
+      ãÀå(Åã, Ä, äá);
     }
-    var eJ = eB.state >> ÀäÄ & 1;
-    if (åÀ === eJ) {
-      eB.áÃa = Math.min(10000, eB.áÃa + ÀÀ);
-    } else if (eB.áÃa > ãÁ) {
-      eB.áÃa = Math.max(0, eB.áÃa - ÀÀ);
+    var Åäã = Ä.state >> ÀäÄ & 1;
+    if (åÀ === Åäã) {
+      Ä.áÃa = Math.min(10000, Ä.áÃa + ÀÀ);
+    } else if (Ä.áÃa > ãÁ) {
+      Ä.áÃa = Math.max(0, Ä.áÃa - ÀÀ);
     }
-    var eK = 0;
-    if (áÁ < eB.áÃa) {
-      eK = Ää.ÁÃ.ÃaÅ(eB.áÃa / 10000);
-      eC += (Math.random() * 2 - 1) * eK;
-      eD += eK * (Math.random() * ããÄ - äA);
-      áá.ÄA(eA.aä[Áå], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, ãÂ, ãa, eF);
+    var ãÃ = 0;
+    if (áÁ < Ä.áÃa) {
+      ãÃ = Ää.ÁÃ.ÃaÅ(Ä.áÃa / 10000);
+      ã += (Math.random() * 2 - 1) * ãÃ;
+      áã += ãÃ * (Math.random() * ããÄ - äA);
+      áá.ÄA(Åã.aä[Áå], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, ãÂ, ãa, åÃ);
     } else {
-      áá.ÄA(eA.aä[0], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, ãÂ, ãa, eF);
+      áá.ÄA(Åã.aä[0], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, ãÂ, ãa, åÃ);
     }
-    if (eB.Âa > ãÁ) {
-      dD(eB, eC, eD);
+    if (Ä.Âa > ãÁ) {
+      ÂÅA(Ä, ã, áã);
     }
   }
   ;
-  function dS() {
-    ed = 0;
+  function aaÀ() {
+    áää = 0;
   }
   ;
-  function dT(eA, eB, eC, eD) {
-    if (aV === bd || Àa.åAá === eB) {
+  function ÄÀÅ(Ä, ãã, ÃÂ, ãÀ) {
+    if (ÂåÄAÁ === ãäÅ || Àa.åAá === ãã) {
       return;
-    } else if (aX === bd) {
-      eD *= Äâa;
+    } else if (áAåáa === ãäÅ) {
+      ãÀ *= Äâa;
     }
-    if (aY <= ÅÀ.border[âäå].border + eD) {
+    if (ââaåA <= ÅÀ.border[âäå].border + ãÀ) {
       return;
     }
-    for (var eE = 0; eE < eD; eE++) {
-      var eF = Math.random();
-      var eG = eF * 10 % Áå * ay;
-      var eH = eC + eF * 10000 % 1 * 25;
-      eC += 8;
-      dq = (dq + 1) % aY;
-      var eI = dq + ÅÀ.Àáâ;
-      dp += âÃ;
-      var eJ = ÅÀ.get(AÄ, eI, dp, âäå);
-      äÂÃ(eJ, 0, dp, eI, âäå, eA.ÄÀÄ, eA.aaÄ, eA.ÄÀÄ + eH * Math.sin(eG), eA.aaÄ + eH * Math.cos(eG), Math.floor(eF * Aáã[eB].length), eF * 100 % Áå * 255, eB, 0);
+    for (var ä = 0; ä < ãÀ; ä++) {
+      var å = Math.random();
+      var Äã = å * 10 % Áå * áÀÃ;
+      var ÄÀåAÅ = ÃÂ + å * 10000 % 1 * 25;
+      ÃÂ += 8;
+      ãÄáÅÀ = (ãÄáÅÀ + 1) % ââaåA;
+      var ÂáÂ = ãÄáÅÀ + ÅÀ.Àáâ;
+      ÅÀÀáÃ += âÃ;
+      var Ááa = ÅÀ.get(AÄ, ÂáÂ, ÅÀÀáÃ, âäå);
+      äÂÃ(Ááa, 0, ÅÀÀáÃ, ÂáÂ, âäå, Ä.ÄÀÄ, Ä.aaÄ, Ä.ÄÀÄ + ÄÀåAÅ * Math.sin(Äã), Ä.aaÄ + ÄÀåAÅ * Math.cos(Äã), Math.floor(å * Aáã[ãã].length), å * 100 % Áå * 255, ãã, 0);
     }
   }
   ;
-  function dU(eA) {
-    bf[eA.ä][eA.åã].aAÅ = cm;
-    bf[eA.ä][eA.åã].aAÄ = eA.åÅ;
-    bf[eA.ä][eA.åã].AÅÀ = âÂa;
-    var eB = åÂÅ[eA.ÅÁa >> 5 & 31];
-    var eC = eB.type[eA.ÅÁa >> ÅÁA & aÀA];
-    var eD = ÁÅ;
-    if (eA.ÃAA !== 0) {
-      if (ÁÀ === eA.AÁÄ) {
-        if (eB.ÅÂ !== 0 && ÃÃÀ[eB.ÅÂ] === 0) {
-          Äå.âå(Äå.AA.áAa[eB.ÅÂ], âa, áâA.ÃÂ(Aá.â.x, Aá.â.y, eA.x, eA.y) / 2.5);
-          ÃÃÀ[eB.ÅÂ] = aÅ;
+  function åÄÂ(Ä) {
+    äa[Ä.ä][Ä.åã].aAÅ = ÂÀ;
+    äa[Ä.ä][Ä.åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä][Ä.åã].AÅÀ = âÂa;
+    var ÄÂÃ = åÂÅ[Ä.ÅÁa >> 5 & 31];
+    var AÀ = ÄÂÃ.type[Ä.ÅÁa >> ÅÁA & aÀA];
+    var åÃ = ÁÅ;
+    if (Ä.ÃAA !== 0) {
+      if (ÁÀ === Ä.AÁÄ) {
+        if (ÄÂÃ.ÅÂ !== 0 && ÃÃÀ[ÄÂÃ.ÅÂ] === 0) {
+          Äå.âå(Äå.AA.áAa[ÄÂÃ.ÅÂ], âa, áâA.ÃÂ(Aá.â.x, Aá.â.y, Ä.x, Ä.y) / 2.5);
+          ÃÃÀ[ÄÂÃ.ÅÂ] = aÅ;
         }
-        dT(eA, eB.âÄ, eC.âÀ, eC.Ááa);
+        ÄÀÅ(Ä, ÄÂÃ.âÄ, AÀ.âÀ, AÀ.Ááa);
       }
-      eA.AÁÄ += ÀÀ;
-      var eE = Math.max(0, Ää.ÁÃ.ÀÅA(1 - eA.AÁÄ / 300));
-      AÅ.globalAlpha = eE;
-      eD = Math.min(1 + (1 - eE) * 0.35, 1.35);
-    } else if (eA.Äaå < 700) {
-      if (eA.Äaå === 0 && aäÁ !== eC.ÂAÄ) {
-        if (bL === 0) {
-          eA.Äa = Math.floor(Math.random() * 6000);
+      Ä.AÁÄ += ÀÀ;
+      var ãÃ = Math.max(0, Ää.ÁÃ.ÀÅA(1 - Ä.AÁÄ / 300));
+      AÅ.globalAlpha = ãÃ;
+      åÃ = Math.min(1 + (1 - ãÃ) * 0.35, 1.35);
+    } else if (Ä.Äaå < 700) {
+      if (Ä.Äaå === 0 && aäÁ !== AÀ.ÂAÄ) {
+        if (Åãá === 0) {
+          Ä.Äa = Math.floor(Math.random() * 6000);
         } else {
-          eA.ââ = Math.floor(Math.random() * 6000);
-          eA.Äa = 3000;
+          Ä.ââ = Math.floor(Math.random() * 6000);
+          Ä.Äa = 3000;
         }
       }
-      var eE = Math.min(1, Ää.ÁÃ.ÀÅA(eA.Äaå / 700));
-      AÅ.globalAlpha = eE;
-      eD = eE * 0.5 + 0.5;
+      var ãÃ = Math.min(1, Ää.ÁÃ.ÀÅA(Ä.Äaå / 700));
+      AÅ.globalAlpha = ãÃ;
+      åÃ = ãÃ * 0.5 + 0.5;
     }
-    if ((eA.state & 2) === ÄäÀ) {
-      if (äå !== eB.aA && áÁ === ÃÃÀ[eB.aA]) {
-        Äå.âå(Äå.AA.áAa[eB.aA], åä, áâA.ÃÂ(Aá.â.x, Aá.â.y, eA.x, eA.y) / 2.8);
-        ÃÃÀ[eB.aA] = Äá;
+    if ((Ä.state & 2) === ÄäÀ) {
+      if (äå !== ÄÂÃ.aA && áÁ === ÃÃÀ[ÄÂÃ.aA]) {
+        Äå.âå(Äå.AA.áAa[ÄÂÃ.aA], åä, áâA.ÃÂ(Aá.â.x, Aá.â.y, Ä.x, Ä.y) / 2.8);
+        ÃÃÀ[ÄÂÃ.aA] = Äá;
       }
-      eA.ÃÁ = 250;
-      if (eA.äÀA <= ÀÄ) {
-        eA.äÀA = 300;
+      Ä.ÃÁ = 250;
+      if (Ä.äÀA <= ÀÄ) {
+        Ä.äÀA = 300;
       }
-      eA.áÀÅ = ay * (eA.ÅÁa & 31) / 31;
-      eA.state &= ~2;
-      dT(eA, eB.âÄ, eC.âÀ, 1);
+      Ä.áÀÅ = áÀÃ * (Ä.ÅÁa & 31) / 31;
+      Ä.state &= ~2;
+      ÄÀÅ(Ä, ÄÂÃ.âÄ, AÀ.âÀ, 1);
     }
-    var eF = 0;
-    var eG = 0;
-    if (eA.ÃÁ > 0) {
-      var eH = eA.ÃÁ > 200 ? (250 - eA.ÃÁ) * aåáAÅ / 50 : eA.ÃÁ * 20 / 200;
-      eF = eH * Math.sin(eA.áÀÅ);
-      eG = Math.cos(eA.áÀÅ) * eH;
-      eA.ÃÁ -= ÀÀ;
+    var ã = 0;
+    var áã = 0;
+    if (Ä.ÃÁ > 0) {
+      var ÃÁ = Ä.ÃÁ > 200 ? (250 - Ä.ÃÁ) * aåáAÅ / 50 : Ä.ÃÁ * 20 / 200;
+      ã = ÃÁ * Math.sin(Ä.áÀÅ);
+      áã = Math.cos(Ä.áÀÅ) * ÃÁ;
+      Ä.ÃÁ -= ÀÀ;
     }
-    if (eA.Äa === 3000 && bL !== 0 && eA.ÃÁ === ÄÁ) {
-      áá.ÄA(eC.ÀAÅ, b1 + eA.x + eF, b2 + eA.y + eG, eA.angle, 0, åâ, eD);
-      if (eA.ÃAA !== 0) {
-        if (eA.AÁÄ > 300) {
-          eA.ÃAA = 2;
+    if (Ä.Äa === 3000 && Åãá !== 0 && Ä.ÃÁ === ÄÁ) {
+      áá.ÄA(AÀ.ÀAÅ, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Ä.angle, 0, åâ, åÃ);
+      if (Ä.ÃAA !== 0) {
+        if (Ä.AÁÄ > 300) {
+          Ä.ÃAA = 2;
         }
         AÅ.globalAlpha = 1;
-      } else if (eA.Äaå < 700) {
-        eA.Äaå += ÀÀ;
+      } else if (Ä.Äaå < 700) {
+        Ä.Äaå += ÀÀ;
         AÅ.globalAlpha = 1;
       }
       return;
     }
-    áá.ÄA(eC.À, b1 + eA.x + eF, b2 + eA.y + eG, eA.angle, 0, 0, eD);
-    if (eC.ÂAÄ !== undefined) {
-      eF = åâ;
-      eG = 0;
-      if (eA.äÀA > 0) {
-        var eH = eA.äÀA > 250 ? ãÄä * Ää.ÁÃ.AÃa((300 - eA.äÀA) / 250) : Ää.ÁÃ.ÃaÅ(eA.äÀA / 250) * ÅÁA;
-        eF = eH * Math.sin(eA.áÀÅ);
-        eG = Math.cos(eA.áÀÅ) * eH;
-        eA.äÀA -= ÀÀ;
+    áá.ÄA(AÀ.À, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Ä.angle, 0, 0, åÃ);
+    if (AÀ.ÂAÄ !== undefined) {
+      ã = åâ;
+      áã = 0;
+      if (Ä.äÀA > 0) {
+        var ÃÁ = Ä.äÀA > 250 ? ãÄä * Ää.ÁÃ.AÃa((300 - Ä.äÀA) / 250) : Ää.ÁÃ.ÃaÅ(Ä.äÀA / 250) * ÅÁA;
+        ã = ÃÁ * Math.sin(Ä.áÀÅ);
+        áã = Math.cos(Ä.áÀÅ) * ÃÁ;
+        Ä.äÀA -= ÀÀ;
       }
-      if (bL === 0) {
-        if (AÄ < eA.ââ) {
-          eA.ââ = Math.max(0, eA.ââ - ÀÀ);
+      if (Åãá === 0) {
+        if (AÄ < Ä.ââ) {
+          Ä.ââ = Math.max(0, Ä.ââ - ÀÀ);
         } else {
-          eA.Äa += ÀÀ;
+          Ä.Äa += ÀÀ;
         }
-        if (eA.Äa > 6000) {
-          eA.Äa = 0;
+        if (Ä.Äa > 6000) {
+          Ä.Äa = 0;
         }
-        if (eA.Äa > 3000) {
-          eD += (eA.Äa - 3000) * 0.025 / 3000;
+        if (Ä.Äa > 3000) {
+          åÃ += (Ä.Äa - 3000) * 0.025 / 3000;
         } else {
-          eD += 0.025 - eA.Äa * 0.025 / 3000;
+          åÃ += 0.025 - Ä.Äa * 0.025 / 3000;
         }
       } else {
-        if (ÁÀ === eA.ââ) {
-          eA.ââ = eA.Äa;
+        if (ÁÀ === Ä.ââ) {
+          Ä.ââ = Ä.Äa;
         }
-        if (eA.Äa > 6000) {
-          eA.Äa = Aa;
+        if (Ä.Äa > 6000) {
+          Ä.Äa = Aa;
         }
-        if (eA.Äa > 3000) {
-          eA.Äa = Math.max(3000, eA.Äa - ÀÀ);
-          eD += (eA.Äa - 3000) * 0.025 / 3000;
-        } else if (eA.Äa < 3000) {
-          eA.Äa = Math.min(3000, eA.Äa + ÀÀ);
-          eD += 0.025 - eA.Äa * 0.025 / 3000;
+        if (Ä.Äa > 3000) {
+          Ä.Äa = Math.max(3000, Ä.Äa - ÀÀ);
+          åÃ += (Ä.Äa - 3000) * 0.025 / 3000;
+        } else if (Ä.Äa < 3000) {
+          Ä.Äa = Math.min(3000, Ä.Äa + ÀÀ);
+          åÃ += 0.025 - Ä.Äa * 0.025 / 3000;
         }
       }
-      áá.ÄA(eC.ÂAÄ, b1 + eA.x + eF, b2 + eA.y + eG, eA.angle, 0, 0, eD);
+      áá.ÄA(AÀ.ÂAÄ, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Ä.angle, 0, 0, åÃ);
     }
-    if (eA.ÃAA !== 0) {
-      if (eA.AÁÄ > 300) {
-        eA.ÃAA = ÃÃÃ;
+    if (Ä.ÃAA !== 0) {
+      if (Ä.AÁÄ > 300) {
+        Ä.ÃAA = ÃÃÃ;
       }
       AÅ.globalAlpha = Àâ;
-    } else if (eA.Äaå < 700) {
-      eA.Äaå += ÀÀ;
+    } else if (Ä.Äaå < 700) {
+      Ä.Äaå += ÀÀ;
       AÅ.globalAlpha = âa;
     }
   }
   ;
-  function dV(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> ÂÃå & 15;
-    eB.Äa = (eB.Äa + ÀÀ) % 1000;
-    var eF = âá + (eB.Äa < 500 ? eB.Äa / 500 : 1 - (eB.Äa - 500) / 500) * 0.03;
-    áá.ÄA(eA.aä[eG], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, 0, eF);
+  function AÃÃáã(Åã, Ä, ã, áã, Áä, åÃ) {
+    var âÅÁ = Ä.state >> ÂÃå & 15;
+    Ä.Äa = (Ä.Äa + ÀÀ) % 1000;
+    var åÃ = âá + (Ä.Äa < 500 ? Ä.Äa / 500 : 1 - (Ä.Äa - 500) / 500) * 0.03;
+    áá.ÄA(Åã.aä[âÅÁ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, 0, åÃ);
   }
   ;
-  function dW(eA, eB, eC, eD, eE, eF) {
-    var eG = ÅÁ < eB.Äáá ? eA.âÃÁ[eB.Äáá - 1] : eA.aä[cI(eB, eE)];
-    var eH = eG.À;
-    if (eH.á !== 1) {
-      eG.À = áá.ÃA(eG.src, eG.À);
+  function ÀáÄåÀ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÀÀa = ÅÁ < Ä.Äáá ? Åã.âÃÁ[Ä.Äáá - 1] : Åã.aä[ÂAÂÄå(Ä, Áä)];
+    var À = ÀÀa.À;
+    if (À.á !== 1) {
+      ÀÀa.À = áá.ÃA(ÀÀa.src, ÀÀa.À);
       return;
     }
-    var eI = eF * (eH.width * ÄÀ / 2);
-    var eJ = eF * (ÄÀ * eH.height / 2);
+    var âAã = åÃ * (À.width * ÄÀ / 2);
+    var áÂä = åÃ * (ÄÀ * À.height / 2);
     AÅ.save();
-    AÅ.translate((b1 + eB.x + eC) * ÄÀ, (b2 + eB.y + eD) * ÄÀ);
-    AÅ.rotate(eE * aA);
-    AÅ.translate(eA.Ãáã * ÄÀ - eI / 2, eA.AaÃ * ÄÀ - eJ / 2);
-    AÅ.drawImage(eH, ÄÀ * -eA.Ãáã, -eA.AaÃ * ÄÀ, eI, eJ);
+    AÅ.translate((äÁ + Ä.x + ã) * ÄÀ, (ãÅ + Ä.y + áã) * ÄÀ);
+    AÅ.rotate(Áä * ãáA);
+    AÅ.translate(Åã.Ãáã * ÄÀ - âAã / 2, Åã.AaÃ * ÄÀ - áÂä / 2);
+    AÅ.drawImage(À, ÄÀ * -Åã.Ãáã, -Åã.AaÃ * ÄÀ, âAã, áÂä);
     AÅ.restore();
   }
   ;
-  function dX(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> ÃÄâÂÅ & ÄÂ;
-    var eH = eB.åÅ === AÂ ? 0 : åÀ;
-    if (áââ === dv(eA, eB, eH) && âá === eG) {
-      Aá.â.äAÅ = eA.áÄá;
+  function âÃÃAÀ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÄÂå = Ä.state >> ÃÄâÂÅ & ÄÂ;
+    var áåÂäÀ = Ä.åÅ === AÂ ? 0 : åÀ;
+    if (áââ === ãÀå(Åã, Ä, áåÂäÀ) && âá === ÄÂå) {
+      Aá.â.äAÅ = Åã.áÄá;
     }
-    if (eG !== eB.Âa) {
-      eB.áÃa = 500;
-      eB.Âa = eG;
+    if (ÄÂå !== Ä.Âa) {
+      Ä.áÃa = 500;
+      Ä.Âa = ÄÂå;
     }
-    if (eB.áÃa > 0) {
-      eB.áÃa = Math.max(ãÁ, eB.áÃa - ÀÀ);
+    if (Ä.áÃa > 0) {
+      Ä.áÃa = Math.max(ãÁ, Ä.áÃa - ÀÀ);
     }
-    var eI = eA.angle;
-    if (eG === âã) {
-      eI *= Ää.ÁÃ.ÄáÀ(eB.áÃa / 500);
+    var Äã = Åã.angle;
+    if (ÄÂå === âã) {
+      Äã *= Ää.ÁÃ.ÄáÀ(Ä.áÃa / 500);
     } else {
-      eI *= Ää.ÁÃ.ÄáÀ(1 - eB.áÃa / 500);
+      Äã *= Ää.ÁÃ.ÄáÀ(1 - Ä.áÃa / 500);
     }
-    var eJ = áÃ < eB.Äáá ? eA.âÃÁ[eB.Äáá - 1] : eA.aä;
-    var eK = eJ.À;
-    if (eK.á !== 1) {
-      eJ.À = áá.ÃA(eJ.src, eJ.À);
+    var ÀÀa = áÃ < Ä.Äáá ? Åã.âÃÁ[Ä.Äáá - 1] : Åã.aä;
+    var À = ÀÀa.À;
+    if (À.á !== 1) {
+      ÀÀa.À = áá.ÃA(ÀÀa.src, ÀÀa.À);
       return;
     }
-    var eL = eK.width * ÄÀ / 2 * eF;
-    var eM = ÄÀ * eK.height / 2 * eF;
+    var âAã = À.width * ÄÀ / 2 * åÃ;
+    var áÂä = ÄÀ * À.height / 2 * åÃ;
     AÅ.save();
-    AÅ.translate((b1 + eB.x + eC) * ÄÀ, (b2 + eB.y + eD) * ÄÀ);
-    AÅ.rotate(aA * eE);
-    AÅ.translate(eA.Ãáã * ÄÀ - eL / 2, eA.AaÃ * ÄÀ - eM / Áâá);
-    AÅ.rotate(eI);
-    AÅ.drawImage(eK, ÄÀ * -eA.Ãáã, ÄÀ * -eA.AaÃ, eL, eM);
+    AÅ.translate((äÁ + Ä.x + ã) * ÄÀ, (ãÅ + Ä.y + áã) * ÄÀ);
+    AÅ.rotate(ãáA * Áä);
+    AÅ.translate(Åã.Ãáã * ÄÀ - âAã / 2, Åã.AaÃ * ÄÀ - áÂä / Áâá);
+    AÅ.rotate(Äã);
+    AÅ.drawImage(À, ÄÀ * -Åã.Ãáã, ÄÀ * -Åã.AaÃ, âAã, áÂä);
     AÅ.restore();
-    if ((eB.state & 32) === 32) {
-      eB.state -= 32;
-      if (åâ === eB.Äa && áÁ === eC && eD === 0) {
-        eB.Äa = 600;
+    if ((Ä.state & 32) === 32) {
+      Ä.state -= 32;
+      if (åâ === Ä.Äa && áÁ === ã && áã === 0) {
+        Ä.Äa = 600;
       }
     }
-    if (eB.Äa > ãä) {
-      if (bB.á !== åÀ) {
-        bB = áá.ÃA(V, bB);
+    if (Ä.Äa > ãä) {
+      if (äáå.á !== åÀ) {
+        äáå = áá.ÃA(âååáÂ, äáå);
         return;
       }
-      if (eB.Äa > 400) {
-        AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(1 - (eB.Äa - 400) / 200);
-      } else if (eB.Äa < 200) {
-        AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(eB.Äa / 200);
+      if (Ä.Äa > 400) {
+        AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(1 - (Ä.Äa - 400) / 200);
+      } else if (Ä.Äa < 200) {
+        AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(Ä.Äa / 200);
       }
-      var eD = ÄÀ * (eB.ä * j + b2 + k);
-      var eC = ÄÀ * (j * eB.åã + b1 + k);
-      var eN = bB.width * ÄÀ / ÃÃÃ;
-      var eO = ÄÀ * bB.height / 2;
-      AÅ.drawImage(bB, eC - eN / 2, eD - eO / 2, eN, eO);
+      var áã = ÄÀ * (Ä.ä * ááá + ãÅ + ãÁä);
+      var ã = ÄÀ * (ááá * Ä.åã + äÁ + ãÁä);
+      var ÅÅ = äáå.width * ÄÀ / ÃÃÃ;
+      var Âå = ÄÀ * äáå.height / 2;
+      AÅ.drawImage(äáå, ã - ÅÅ / 2, áã - Âå / 2, ÅÅ, Âå);
       AÅ.globalAlpha = 1;
-      eB.Äa = Math.max(0, eB.Äa - ÀÀ);
+      Ä.Äa = Math.max(0, Ä.Äa - ÀÀ);
     }
-    mapData[eB.åã + ":" + eB.ä] = [eA.áÄå, eB.id, eB.åÅ];
+    mapData[Ä.åã + ":" + Ä.ä] = [Åã.áÄå, Ä.id, Ä.åÅ];
   }
   ;
-  function dY(eA) {
-    var eB = ÁÁ[eA.ÅÁa >> 7];
-    AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(eA.áÃa / 500);
-    eA.Aâa = (eA.Aâa + ÀÀ) % 5000;
-    var eC = eA.Aâa;
-    var eD = ÀA + (eC < 2500 ? eC / 2500 : 1 - (eC - 2500) / 2500) * 0.09;
-    áá.ÄA(eB.äÃáãä[eA.state >> ÅAÄ & 7], b1 + eA.x, b2 + eA.y, 0, ÅÁ, 0, eD);
+  function ÅÅAÅâ(Ä) {
+    var Åã = ÁÁ[Ä.ÅÁa >> 7];
+    AÅ.globalAlpha = Ää.ÁÃ.ÃaÅ(Ä.áÃa / 500);
+    Ä.Aâa = (Ä.Aâa + ÀÀ) % 5000;
+    var Äa = Ä.Aâa;
+    var åÃ = ÀA + (Äa < 2500 ? Äa / 2500 : 1 - (Äa - 2500) / 2500) * 0.09;
+    áá.ÄA(Åã.äÃáãä[Ä.state >> ÅAÄ & 7], äÁ + Ä.x, ãÅ + Ä.y, 0, ÅÁ, 0, åÃ);
     AÅ.globalAlpha = 1;
   }
   ;
-  function dZ(eA) {
-    bf[eA.ä][eA.åã].aAÅ = cm;
-    bf[eA.ä][eA.åã].aAÄ = eA.åÅ;
-    bf[eA.ä][eA.åã].AÅÀ = undefined;
-    var eB = eA.ÅÁa >> ÀáA & âÀâ;
-    var eC = ÁÁ[eA.ÅÁa >> ÄÁA];
-    var eD = 1;
-    var eE = 7;
-    bf[eA.ä][eA.åã].AÅÀ = eC.detail.AÅÀ;
-    if (eA.ÃAA !== 0) {
-      if (eA.AÁÄ === 0) {
-        var eF = eC.âÄ === -1 ? ÁÁ[eC.id].Åâ[eA.Åâ] : eC;
-        dT(eA, eF.âÄ, eF.âÀ, ÃáÅ);
-        if (eF.ÅÂ !== 0 && ÃÃÀ[eF.ÅÂ] === 0) {
-          Äå.âå(Äå.AA.áAa[eF.ÅÂ], ÀA, áâA.ÃÂ(Aá.â.x, Aá.â.y, eA.x, eA.y) / 2.5);
-          ÃÃÀ[eF.ÅÂ] = äA;
+  function äâÄ(Ä) {
+    äa[Ä.ä][Ä.åã].aAÅ = ÂÀ;
+    äa[Ä.ä][Ä.åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä][Ä.åã].AÅÀ = undefined;
+    var Áä = Ä.ÅÁa >> ÀáA & âÀâ;
+    var Åã = ÁÁ[Ä.ÅÁa >> ÄÁA];
+    var åÃ = 1;
+    var Åaa = 7;
+    äa[Ä.ä][Ä.åã].AÅÀ = Åã.detail.AÅÀ;
+    if (Ä.ÃAA !== 0) {
+      if (Ä.AÁÄ === 0) {
+        var ÃäÅ = Åã.âÄ === -1 ? ÁÁ[Åã.id].Åâ[Ä.Åâ] : Åã;
+        ÄÀÅ(Ä, ÃäÅ.âÄ, ÃäÅ.âÀ, ÃáÅ);
+        if (ÃäÅ.ÅÂ !== 0 && ÃÃÀ[ÃäÅ.ÅÂ] === 0) {
+          Äå.âå(Äå.AA.áAa[ÃäÅ.ÅÂ], ÀA, áâA.ÃÂ(Aá.â.x, Aá.â.y, Ä.x, Ä.y) / 2.5);
+          ÃÃÀ[ÃäÅ.ÅÂ] = äA;
         }
       }
-      eA.AÁÄ += ÀÀ;
-      var eG = Math.max(0, Ää.ÁÃ.ÀÅA(1 - eA.AÁÄ / 300));
-      AÅ.globalAlpha = eG;
-      eD = Math.min(1 + (1 - eG) * 0.35, 1.35);
+      Ä.AÁÄ += ÀÀ;
+      var ãÃ = Math.max(0, Ää.ÁÃ.ÀÅA(1 - Ä.AÁÄ / 300));
+      AÅ.globalAlpha = ãÃ;
+      åÃ = Math.min(1 + (1 - ãÃ) * 0.35, 1.35);
     }
-    if (aâA === (eA.state & 2)) {
-      eA.ÃÁ = 250;
-      eA.áÀÅ = ay * (eA.ÅÁa & 31) / 31;
-      eA.state &= ~2;
-      var eF = eC.âÄ === -1 ? ÁÁ[eC.id].Åâ[eA.Åâ] : eC;
-      dT(eA, eF.âÄ, eF.âÀ, 1);
-      if (ÀÄ !== eF.aA && ÅÁ === ÃÃÀ[eF.aA]) {
-        Äå.âå(Äå.AA.áAa[eF.aA], Ãäã, áâA.ÃÂ(Aá.â.x, Aá.â.y, eA.x, eA.y) / 2.8);
-        ÃÃÀ[eF.aA] = ãå;
+    if (aâA === (Ä.state & 2)) {
+      Ä.ÃÁ = 250;
+      Ä.áÀÅ = áÀÃ * (Ä.ÅÁa & 31) / 31;
+      Ä.state &= ~2;
+      var ÃäÅ = Åã.âÄ === -1 ? ÁÁ[Åã.id].Åâ[Ä.Åâ] : Åã;
+      ÄÀÅ(Ä, ÃäÅ.âÄ, ÃäÅ.âÀ, 1);
+      if (ÀÄ !== ÃäÅ.aA && ÅÁ === ÃÃÀ[ÃäÅ.aA]) {
+        Äå.âå(Äå.AA.áAa[ÃäÅ.aA], Ãäã, áâA.ÃÂ(Aá.â.x, Aá.â.y, Ä.x, Ä.y) / 2.8);
+        ÃÃÀ[ÃäÅ.aA] = ãå;
       }
     }
-    var eH = 0;
-    var eI = äå;
-    if (eA.ÃÁ > 0) {
-      if (eA.ÃÁ > 200) {
-        var eJ = (250 - eA.ÃÁ) * âÂã / ÀãÅ;
-        eH = eJ * Math.sin(eA.áÀÅ);
-        eI = Math.cos(eA.áÀÅ) * eJ;
-        eA.ÃÁ -= ÀÀ;
+    var ã = 0;
+    var áã = äå;
+    if (Ä.ÃÁ > 0) {
+      if (Ä.ÃÁ > 200) {
+        var ÃÁ = (250 - Ä.ÃÁ) * âÂã / ÀãÅ;
+        ã = ÃÁ * Math.sin(Ä.áÀÅ);
+        áã = Math.cos(Ä.áÀÅ) * ÃÁ;
+        Ä.ÃÁ -= ÀÀ;
       } else {
-        var eJ = eA.ÃÁ * 20 / 200;
-        eH = eJ * Math.sin(eA.áÀÅ);
-        eI = Math.cos(eA.áÀÅ) * eJ;
-        eA.ÃÁ -= ÀÀ;
+        var ÃÁ = Ä.ÃÁ * 20 / 200;
+        ã = ÃÁ * Math.sin(Ä.áÀÅ);
+        áã = Math.cos(Ä.áÀÅ) * ÃÁ;
+        Ä.ÃÁ -= ÀÀ;
       }
     }
-    eC.Áá(eC, eA, eH, eI, eB, eD);
-    if (eA.ÃAA !== 0) {
-      if (eA.AÁÄ > 300) {
-        eA.ÃAA = Áâá;
+    Åã.Áá(Åã, Ä, ã, áã, Áä, åÃ);
+    if (Ä.ÃAA !== 0) {
+      if (Ä.AÁÄ > 300) {
+        Ä.ÃAA = Áâá;
       }
       AÅ.globalAlpha = 1;
     }
     if (cfg.showBuildingOwner && áÂ.state === 1) {
-      var eK = 100;
-      var eL = Math.round(GetAllTargets.mouseMapCords.x);
-      var eM = Math.round(GetAllTargets.mouseMapCords.y);
-      var eN = Math.floor(eL / eK) * eK;
-      var eO = Math.floor(eM / eK) * eK;
-      var eP = eN / 100;
-      var eQ = eO / 100;
-      if (eP === eA.åã && eQ === eA.ä) {
-        if (eA.åÅ === 0) {
+      var _0x4a4c69 = 100;
+      var _0x50b691 = Math.round(GetAllTargets.mouseMapCords.x);
+      var _0x863b7a = Math.round(GetAllTargets.mouseMapCords.y);
+      var _0x2de6a = Math.floor(_0x50b691 / _0x4a4c69) * _0x4a4c69;
+      var _0x5980e4 = Math.floor(_0x863b7a / _0x4a4c69) * _0x4a4c69;
+      var _0x4f2a3e = _0x2de6a / 100;
+      var _0x566f62 = _0x5980e4 / 100;
+      if (_0x4f2a3e === Ä.åã && _0x566f62 === Ä.ä) {
+        if (Ä.åÅ === 0) {
           return;
         }
         AÅ.save();
-        var eR = ÄÀ * (eA.ä * 100 + b2 + 50);
-        var eS = ÄÀ * (eA.åã * 100 + b1 + 50);
-        var eT = eD * bB.width / 5;
-        var eU = eD * bB.height / 5;
+        var _0x921820 = ÄÀ * (Ä.ä * 100 + ãÅ + 50);
+        var _0x2ba6de = ÄÀ * (Ä.åã * 100 + äÁ + 50);
+        var _0x8ba8bf = åÃ * äáå.width / 5;
+        var _0x4f453e = åÃ * äáå.height / 5;
         AÅ.lineWidth = 4;
         AÅ.strokeStyle = "#000000";
         AÅ.font = "20px 'Viga', sans-serif";
         AÅ.textAlign = "center";
         AÅ.textBaseline = "middle";
-        AÅ.strokeText(eA.åÅ, eS, eR);
-        var eV = Aá.ÂÅ[eA.åÅ];
-        var eW = "#FF0000";
-        if (eA.åÅ === Aá.â.id) {
-          eW = "#00FF00";
-        } else if (eV && eV.Aâ !== -1) {
-          if (eV.Aâ === Aá.â.Aâ) {
-            eW = "#00FF00";
+        AÅ.strokeText(Ä.åÅ, _0x2ba6de, _0x921820);
+        var _0x419614 = Aá.ÂÅ[Ä.åÅ];
+        var _0xd72786 = "#FF0000";
+        if (Ä.åÅ === Aá.â.id) {
+          _0xd72786 = "#00FF00";
+        } else if (_0x419614 && _0x419614.Aâ !== -1) {
+          if (_0x419614.Aâ === Aá.â.Aâ) {
+            _0xd72786 = "#00FF00";
           } else {
-            eW = "#FF0000";
+            _0xd72786 = "#FF0000";
           }
         }
-        AÅ.fillStyle = eW;
-        AÅ.fillText(eA.åÅ, eS, eR);
+        AÅ.fillStyle = _0xd72786;
+        AÅ.fillText(Ä.åÅ, _0x2ba6de, _0x921820);
         AÅ.restore();
       }
     }
   }
   ;
-  function e0(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> ÃaÂ & ÀA;
-    if (eG === 1) {
-      eB.Âa = Math.min(500, eB.Âa + ÀÀ);
-    } else if (eB.Âa > 0) {
-      eB.Âa = Math.max(Àá, eB.Âa - ÀÀ);
+  function ÄÁÂÁa(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÃÅA = Ä.state >> ÃaÂ & ÀA;
+    if (ÃÅA === 1) {
+      Ä.Âa = Math.min(500, Ä.Âa + ÀÀ);
+    } else if (Ä.Âa > 0) {
+      Ä.Âa = Math.max(Àá, Ä.Âa - ÀÀ);
     }
-    if (eG === 0) {
-      dv(eA, eB, 0);
+    if (ÃÅA === 0) {
+      ãÀå(Åã, Ä, 0);
     }
-    áá.ÄA(eA.aä, b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, äå, 0, eF);
-    if (eB.Âa > AÂ) {
-      dD(eB, eC, eD);
+    áá.ÄA(Åã.aä, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, äå, 0, åÃ);
+    if (Ä.Âa > AÂ) {
+      ÂÅA(Ä, ã, áã);
     }
   }
   ;
-  function e1(eA, eB, eC, eD, eE, eF) {
-    dv(eA, eB, âã);
-    var eG = eB.state >> 7 & 1;
-    if (Ãäã === eG) {
-      eB.áÃa = Math.min(500, eB.áÃa + ÀÀ);
-    } else if (eB.áÃa > 0) {
-      eB.áÃa = Math.max(0, eB.áÃa - ÀÀ);
+  function áãåÀå(Åã, Ä, ã, áã, Áä, åÃ) {
+    ãÀå(Åã, Ä, âã);
+    var Åäã = Ä.state >> 7 & 1;
+    if (Ãäã === Åäã) {
+      Ä.áÃa = Math.min(500, Ä.áÃa + ÀÀ);
+    } else if (Ä.áÃa > 0) {
+      Ä.áÃa = Math.max(0, Ä.áÃa - ÀÀ);
     }
-    if (eB.áÃa > 0) {
-      bG[bH++] = eB;
-      áá.ÄA(eA.áÂÂãÃ[eB.state >> aÀÄ & 7], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, 0, 0, eF);
+    if (Ä.áÃa > 0) {
+      Äãa[ãåA++] = Ä;
+      áá.ÄA(Åã.áÂÂãÃ[Ä.state >> aÀÄ & 7], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, 0, 0, åÃ);
     } else {
-      áá.ÄA(eA.aä, b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, ãÂ, 0, eF);
+      áá.ÄA(Åã.aä, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, ãÂ, 0, åÃ);
     }
   }
   ;
-  function e2(eA) {
-    bf[eA.ä][eA.åã].aAÅ = cm;
-    bf[eA.ä][eA.åã].aAÄ = eA.åÅ;
-    bf[eA.ä][eA.åã].AÅÀ = undefined;
-    if (eA.Âa !== 0) {
-      var eB = Aá.ÂÅ[eA.Âa];
-      if (eB.ÂÀ === cm) {
-        var eC = ÅÀ.åA[âAä];
-        var eD = eC[eB.åäâ];
-        eA.Åaä = eD.x;
-        eA.ÂÅä = eD.y;
-        eA.ãÂâ = Math.sin(áâA.angle(eA.rx, eA.ry, eA.Åaä, eA.ÂÅä));
-        eA.åAÅ = Math.cos(áâA.angle(eA.rx, eA.ry, eA.Åaä, eA.ÂÅä));
+  function áäaÄâ(Ä) {
+    äa[Ä.ä][Ä.åã].aAÅ = ÂÀ;
+    äa[Ä.ä][Ä.åã].aAÄ = Ä.åÅ;
+    äa[Ä.ä][Ä.åã].AÅÀ = undefined;
+    if (Ä.Âa !== 0) {
+      var â = Aá.ÂÅ[Ä.Âa];
+      if (â.ÂÀ === ÂÀ) {
+        var ÂÅ = ÅÀ.åA[âAä];
+        var ÁÂÁ = ÂÅ[â.åäâ];
+        Ä.Åaä = ÁÂÁ.x;
+        Ä.ÂÅä = ÁÂÁ.y;
+        Ä.ãÂâ = Math.sin(áâA.angle(Ä.rx, Ä.ry, Ä.Åaä, Ä.ÂÅä));
+        Ä.åAÅ = Math.cos(áâA.angle(Ä.rx, Ä.ry, Ä.Åaä, Ä.ÂÅä));
       }
     }
-    if (eA.ÃAA === 0 && áâA.ÅáÂ(eA.x, eA.y, eA.Åaä, eA.ÂÅä) < 1) {
-      var eE = áâA.ÅáÂ(b3, b4, eA.x, eA.y);
-      if (eE < bT) {
-        bT = eE;
-        Aá.â.Ãá = eA.ÅÁa;
-        Aá.â.ãÂÀ = eA.id;
+    if (Ä.ÃAA === 0 && áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä) < 1) {
+      var ÃÂ = áâA.ÅáÂ(AÃÅ, ÃÂÀ, Ä.x, Ä.y);
+      if (ÃÂ < åAÁAá) {
+        åAÁAá = ÃÂ;
+        Aá.â.Ãá = Ä.ÅÁa;
+        Aá.â.ãÂÀ = Ä.id;
         if (Aá.â.AÁÂ <= ÄÁ) {
           Aá.â.AÁÂ = ÀÄ;
         } else {
@@ -21457,341 +21470,343 @@ var ÀÂ = function () {
         }
       }
     }
-    var eF = 0;
-    var eG = ÄÁ;
-    if (eA.ÃAA !== äå) {
-      eA.AÁÄ += ÀÀ;
-      AÅ.globalAlpha = Math.max(ãä, Ää.ÁÃ.ÀÅA(ÄÂ - eA.AÁÄ / 800));
-      eG = eA.AÁÄ / 2400;
-    } else if (eA.Äaå < 500) {
-      var eH = Math.min(âa, Ää.ÁÃ.ÀÅA(eA.Äaå / 500));
-      AÅ.globalAlpha = eH;
+    var Äa = 0;
+    var åáãáÃ = ÄÁ;
+    if (Ä.ÃAA !== äå) {
+      Ä.AÁÄ += ÀÀ;
+      AÅ.globalAlpha = Math.max(ãä, Ää.ÁÃ.ÀÅA(ÄÂ - Ä.AÁÄ / 800));
+      åáãáÃ = Ä.AÁÄ / 2400;
+    } else if (Ä.Äaå < 500) {
+      var ãÃ = Math.min(âa, Ää.ÁÃ.ÀÅA(Ä.Äaå / 500));
+      AÅ.globalAlpha = ãÃ;
     }
-    eA.Äa = (eA.Äa + ÀÀ) % 1500;
-    if (eA.Äa < 750) {
-      eF = 0.95 + Ää.ÁÃ.ÄáÀ(eA.Äa / 750) * 0.1;
+    Ä.Äa = (Ä.Äa + ÀÀ) % 1500;
+    if (Ä.Äa < 750) {
+      Äa = 0.95 + Ää.ÁÃ.ÄáÀ(Ä.Äa / 750) * 0.1;
     } else {
-      eF = 0.95 + Ää.ÁÃ.ÄáÀ(1 - (eA.Äa - 750) / 750) * 0.1;
+      Äa = 0.95 + Ää.ÁÃ.ÄáÀ(1 - (Ä.Äa - 750) / 750) * 0.1;
     }
-    áá.ÄA(ââä[eA.ÅÁa], b1 + eA.x, b2 + eA.y, eA.angle, 0, 0, eF - eG);
-    if (eA.ÃAA !== 0) {
-      if (eA.AÁÄ > 800) {
-        eA.ÃAA = 2;
+    áá.ÄA(ââä[Ä.ÅÁa], äÁ + Ä.x, ãÅ + Ä.y, Ä.angle, 0, 0, Äa - åáãáÃ);
+    if (Ä.ÃAA !== 0) {
+      if (Ä.AÁÄ > 800) {
+        Ä.ÃAA = 2;
       }
       AÅ.globalAlpha = åÀ;
-    } else if (eA.Äaå < 500) {
-      eA.Äaå += ÀÀ;
+    } else if (Ä.Äaå < 500) {
+      Ä.Äaå += ÀÀ;
       AÅ.globalAlpha = 1;
     }
   }
   ;
-  function e3(eA) {
-    if (áâA.ÅáÂ(Aá.â.x, Aá.â.y, eA.x, eA.y) < 50000 && cfg.autoLoot) {
-      áÂ.SendWsMessage([12, eA.id]);
+  function FastAutoLoot1(Ä) {
+    if (áâA.ÅáÂ(Aá.â.x, Aá.â.y, Ä.x, Ä.y) < 50000 && cfg.autoLoot) {
+      áÂ.SendWsMessage([12, Ä.id]);
     }
   }
-  function e4(eA, eB, eC, eD, eE, eF) {
-    var eG = 0;
-    if (eB.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.ÂÅ[eB.åÅ].Aâ === Aá.â.Aâ && Aá.ÂÅ[eB.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ || áâA.ÅáÂ(b3, b4, eB.x, eB.y) < 99999) {
-      eG = 1;
+  function ÃÅäÀÄ(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÁÄÃ = 0;
+    if (Ä.åÅ === Aá.â.id || Aá.â.Aâ !== -1 && Aá.ÂÅ[Ä.åÅ].Aâ === Aá.â.Aâ && Aá.ÂÅ[Ä.åÅ].åÂå === Aá.Ááä[Aá.â.Aâ].äâÂ || áâA.ÅáÂ(AÃÅ, ÃÂÀ, Ä.x, Ä.y) < 99999) {
+      ÁÄÃ = 1;
     }
-    if (eG === Âã) {
-      if (eB.Äa === 300) {
-        áá.ÄA(eA.aä, b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, äá, 0, eF);
+    if (ÁÄÃ === Âã) {
+      if (Ä.Äa === 300) {
+        áá.ÄA(Åã.aä, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, äá, 0, åÃ);
       } else {
-        eB.Äa = Math.min(300, eB.Äa + ÀÀ);
-        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(eB.Äa / 300);
-        áá.ÄA(eA.aä, b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, áÁ, eF);
+        Ä.Äa = Math.min(300, Ä.Äa + ÀÀ);
+        AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ä.Äa / 300);
+        áá.ÄA(Åã.aä, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, áÁ, åÃ);
         AÅ.globalAlpha = âa;
       }
-    } else if (äá === eG && Aa < eB.Äa) {
-      eB.Äa = Math.max(0, eB.Äa - ÀÀ / 5);
-      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(eB.Äa / 300);
-      áá.ÄA(eA.aä, b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, ÄÁ, áÁ, eF);
+    } else if (äá === ÁÄÃ && Aa < Ä.Äa) {
+      Ä.Äa = Math.max(0, Ä.Äa - ÀÀ / 5);
+      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ä.Äa / 300);
+      áá.ÄA(Åã.aä, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, ÄÁ, áÁ, åÃ);
       AÅ.globalAlpha = 1;
     }
   }
   ;
-  function e5(eA, eB, eC, eD, eE, eF) {
-    áá.ÄA(eA.ÅÀãáã, b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, ãä, 0, 1);
-    var eG = eB.state >> ÅÄã & 15;
-    if (eB.Aâa !== eG) {
-      eB.Aâa = eG;
-      eB.Äa = 0;
+  function ÀáåÂá(Åã, Ä, ã, áã, Áä, åÃ) {
+    áá.ÄA(Åã.ÅÀãáã, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, ãä, 0, 1);
+    var âÅÁ = Ä.state >> ÅÄã & 15;
+    if (Ä.Aâa !== âÅÁ) {
+      Ä.Aâa = âÅÁ;
+      Ä.Äa = 0;
     }
-    eB.Äa = eB.Äa + ÀÀ;
-    eB.ââ = (eB.ââ + ÀÀ) % 1000;
-    var eF = 1 + (eB.ââ < 500 ? eB.ââ / 500 : 1 - (eB.ââ - 500) / 500) * 0.03;
-    if (Aa === eG) {
-      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(eB.Äa / eA.âÃa);
-      áá.ÄA(eA.aä[ÅÁ], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
+    Ä.Äa = Ä.Äa + ÀÀ;
+    Ä.ââ = (Ä.ââ + ÀÀ) % 1000;
+    var åÃ = 1 + (Ä.ââ < 500 ? Ä.ââ / 500 : 1 - (Ä.ââ - 500) / 500) * 0.03;
+    if (Aa === âÅÁ) {
+      AÅ.globalAlpha = Ää.ÁÃ.ÄáÀ(Ä.Äa / Åã.âÃa);
+      áá.ÄA(Åã.aä[ÅÁ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
       AÅ.globalAlpha = ÂA;
-    } else if (eA.âÃa > eB.Äa) {
-      var eH = Ää.ÁÃ.ÄáÀ(eB.Äa / eA.âÃa);
-      AÅ.globalAlpha = 1 - eH;
-      áá.ÄA(eA.aä[eG - 1], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, Aa, 0, eF);
-      AÅ.globalAlpha = eH;
-      áá.ÄA(eA.aä[eG], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, áÁ, äá, eF);
+    } else if (Åã.âÃa > Ä.Äa) {
+      var aáá = Ää.ÁÃ.ÄáÀ(Ä.Äa / Åã.âÃa);
+      AÅ.globalAlpha = 1 - aáá;
+      áá.ÄA(Åã.aä[âÅÁ - 1], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, Aa, 0, åÃ);
+      AÅ.globalAlpha = aáá;
+      áá.ÄA(Åã.aä[âÅÁ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, áÁ, äá, åÃ);
       AÅ.globalAlpha = 1;
     } else {
-      áá.ÄA(eA.aä[eG], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, ÀÄ, ÀÄ, eF);
+      áá.ÄA(Åã.aä[âÅÁ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, ÀÄ, ÀÄ, åÃ);
     }
   }
   ;
-  function e6(eA, eB, eC, eD, eE) {
-    var eF = eB.state & 254;
-    if (eF === 2) {
-      eB.state &= 65281;
-      if (eB.Âa <= 0) {
-        eB.Âa = eA.ÅÀÃ;
-        eB.áÃa = eA.ÅÀÃ;
-        var eG = Math.floor(Math.random() * äaa);
-        Äå.âå(Äå.AA.ÂAâ[ãÁ][eG], 0.5, áâA.ÃÂ(Aá.â.x, Aá.â.y, eB.x, eB.y) / 3.5, ãÂ);
+  function åÂâÃÃ(ÀÀÄ, Ä, ã, áã, åÃ) {
+    var ÁaA = Ä.state & 254;
+    if (ÁaA === 2) {
+      Ä.state &= 65281;
+      if (Ä.Âa <= 0) {
+        Ä.Âa = ÀÀÄ.ÅÀÃ;
+        Ä.áÃa = ÀÀÄ.ÅÀÃ;
+        var äÅÄ = Math.floor(Math.random() * äaa);
+        Äå.âå(Äå.AA.ÂAâ[ãÁ][äÅÄ], 0.5, áâA.ÃÂ(Aá.â.x, Aá.â.y, Ä.x, Ä.y) / 3.5, ãÂ);
       }
     }
-    var eH = 0;
-    var eI = 0;
-    var eJ = 0;
-    var eK = 0;
-    if (eB.Âa > 0) {
-      eB.Âa = Math.max(0, eB.Âa - ÀÀ);
-      eB.Âa = Math.min(eB.Âa, eA.ÅÀÃ);
-      eO = eB.Âa > eA.Àäa ? 1 - (eB.Âa - eA.Àäa) / (eA.ÅÀÃ - eA.Àäa) : eB.Âa / eA.Àäa;
-      eH = eB.äÀA * Ää.ÁÃ.ÄáÀ(eO) * 0.55;
-      eK = eO * áÀÄ;
-      if (eB.äÀA === åä) {
-        eI = eO * 25;
+    var aáÂ = 0;
+    var ÁAå = 0;
+    var äâÃ = 0;
+    var AåÅ = 0;
+    if (Ä.Âa > 0) {
+      Ä.Âa = Math.max(0, Ä.Âa - ÀÀ);
+      Ä.Âa = Math.min(Ä.Âa, ÀÀÄ.ÅÀÃ);
+      ãÃ = Ä.Âa > ÀÀÄ.Àäa ? 1 - (Ä.Âa - ÀÀÄ.Àäa) / (ÀÀÄ.ÅÀÃ - ÀÀÄ.Àäa) : Ä.Âa / ÀÀÄ.Àäa;
+      aáÂ = Ä.äÀA * Ää.ÁÃ.ÄáÀ(ãÃ) * 0.55;
+      AåÅ = ãÃ * áÀÄ;
+      if (Ä.äÀA === åä) {
+        ÁAå = ãÃ * 25;
       } else {
-        eJ = eO * 25;
+        äâÃ = ãÃ * 25;
       }
-      if (eB.Âa === åâ) {
-        eB.äÀA *= -1;
+      if (Ä.Âa === åâ) {
+        Ä.äÀA *= -1;
       }
-    } else if (áâA.ÅáÂ(eB.x, eB.y, eB.Åaä, eB.ÂÅä) < 1) {
-      eB.Äa = (eB.Äa + ÀÀ) % 1500;
-      if (áÃ !== eB.Aâa) {
-        if (eB.Aâa < 750) {
-          eB.Aâa = 1500 - eB.Aâa;
+    } else if (áâA.ÅáÂ(Ä.x, Ä.y, Ä.Åaä, Ä.ÂÅä) < 1) {
+      Ä.Äa = (Ä.Äa + ÀÀ) % 1500;
+      if (áÃ !== Ä.Aâa) {
+        if (Ä.Aâa < 750) {
+          Ä.Aâa = 1500 - Ä.Aâa;
         }
-        eB.Aâa = eB.Aâa + ÀÀ;
-        if (eB.Aâa > 1500) {
-          eB.Aâa = 0;
+        Ä.Aâa = Ä.Aâa + ÀÀ;
+        if (Ä.Aâa > 1500) {
+          Ä.Aâa = 0;
         }
       }
     } else {
-      eB.Aâa = (eB.Aâa + ÀÀ) % 1500;
-      if (eB.Aâa > 1500) {
-        eB.ââ *= -1;
-        eB.Aâa = eB.Aâa % 1500;
+      Ä.Aâa = (Ä.Aâa + ÀÀ) % 1500;
+      if (Ä.Aâa > 1500) {
+        Ä.ââ *= -1;
+        Ä.Aâa = Ä.Aâa % 1500;
       }
-      if (áÁ !== eB.Äa) {
-        if (eB.Äa < 750) {
-          eB.Äa = 1500 - eB.Äa;
+      if (áÁ !== Ä.Äa) {
+        if (Ä.Äa < 750) {
+          Ä.Äa = 1500 - Ä.Äa;
         }
-        eB.Äa = eB.Äa + ÀÀ;
-        if (eB.Äa > 1500) {
-          eB.Äa = 0;
+        Ä.Äa = Ä.Äa + ÀÀ;
+        if (Ä.Äa > 1500) {
+          Ä.Äa = 0;
         }
       }
     }
-    var eL = eA.Äa * (eB.Äa < 750 ? eB.Äa / 750 : 1 - (eB.Äa - 750) / 750);
-    var eM = eA.ãÅÅ * (eB.Aâa < 750 ? eB.Aâa / 750 : Ãäã - (eB.Aâa - 750) / 750);
-    áá.ÄA(eA.ÂÄ, eC, eD, eA.ÂÄ.angle + eB.angle + eL + eH, eA.ÂÄ.x + eB.ââ * eM + eJ, eA.ÂÄ.y, eE);
-    áá.ÄA(eA.áÀ, eC, eD, -eA.áÀ.angle + eB.angle - eL + eH, eA.áÀ.x - eM * eB.ââ + eI, eA.áÀ.y, eE);
-    if (eB.ÃÁ > åâ) {
-      var eN = 1;
-      eB.ÃÁ -= ÀÀ;
-      var eO = ÄÁ;
-      if (eB.ÃÁ > 150) {
-        eO = Ää.ÁÃ.AÃa((300 - eB.ÃÁ) / 300);
+    var Äa = ÀÀÄ.Äa * (Ä.Äa < 750 ? Ä.Äa / 750 : 1 - (Ä.Äa - 750) / 750);
+    var Àä = ÀÀÄ.ãÅÅ * (Ä.Aâa < 750 ? Ä.Aâa / 750 : Ãäã - (Ä.Aâa - 750) / 750);
+    áá.ÄA(ÀÀÄ.ÂÄ, ã, áã, ÀÀÄ.ÂÄ.angle + Ä.angle + Äa + aáÂ, ÀÀÄ.ÂÄ.x + Ä.ââ * Àä + äâÃ, ÀÀÄ.ÂÄ.y, åÃ);
+    áá.ÄA(ÀÀÄ.áÀ, ã, áã, -ÀÀÄ.áÀ.angle + Ä.angle - Äa + aáÂ, ÀÀÄ.áÀ.x - Àä * Ä.ââ + ÁAå, ÀÀÄ.áÀ.y, åÃ);
+    if (Ä.ÃÁ > åâ) {
+      var ááÂ = 1;
+      Ä.ÃÁ -= ÀÀ;
+      var ãÃ = ÄÁ;
+      if (Ä.ÃÁ > 150) {
+        ãÃ = Ää.ÁÃ.AÃa((300 - Ä.ÃÁ) / 300);
       } else {
-        eO = Ää.ÁÃ.ÃaÅ(eB.ÃÁ / 150);
-        eN += (Âã - eO) * 0.2;
+        ãÃ = Ää.ÁÃ.ÃaÅ(Ä.ÃÁ / 150);
+        ááÂ += (Âã - ãÃ) * 0.2;
       }
-      eC += eO * Math.sin(eB.áÀÅ) * 10;
-      eD += eO * Math.cos(eB.áÀÅ) * ÂÃÄ;
-      AÅ.globalAlpha = Math.min(1, Math.max(0, eO));
-      áá.ÄA(eA.ÃÁ, eC, eD, eB.angle + eH / 1.5, eK, ãÁ, eN);
+      ã += ãÃ * Math.sin(Ä.áÀÅ) * 10;
+      áã += ãÃ * Math.cos(Ä.áÀÅ) * ÂÃÄ;
+      AÅ.globalAlpha = Math.min(1, Math.max(0, ãÃ));
+      áá.ÄA(ÀÀÄ.ÃÁ, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, ãÁ, ááÂ);
       AÅ.globalAlpha = 1;
     }
-    áá.ÄA(eA.head, eC, eD, eB.angle + eH / 1.5, eK, 0, eE);
+    áá.ÄA(ÀÀÄ.head, ã, áã, Ä.angle + aáÂ / 1.5, AåÅ, 0, åÃ);
   }
   ;
-  function e7(eA, eB, eC, eD, eE, eF) {
-    var eG = eB.state >> 4 & ÄÂ;
-    if (eG === Àâ) {
-      eB.Âa = Math.min(500, eB.Âa + ÀÀ);
-    } else if (eB.Âa > 0) {
-      eB.Âa = Math.max(0, eB.Âa - ÀÀ);
+  function áaAåa(Åã, Ä, ã, áã, Áä, åÃ) {
+    var ÃÅA = Ä.state >> 4 & ÄÂ;
+    if (ÃÅA === Àâ) {
+      Ä.Âa = Math.min(500, Ä.Âa + ÀÀ);
+    } else if (Ä.Âa > 0) {
+      Ä.Âa = Math.max(0, Ä.Âa - ÀÀ);
     }
-    if (áÃ === eG) {
-      dv(eA, eB, 0);
+    if (áÃ === ÃÅA) {
+      ãÀå(Åã, Ä, 0);
     }
-    var eH = eB.state >> ÀäÄ & 1;
-    if (eH === 1) {
-      eB.áÃa = Math.min(10000, eB.áÃa + ÀÀ);
-    } else if (eB.áÃa > ÀÄ) {
-      eB.áÃa = Math.max(0, eB.áÃa - ÀÀ);
+    var Åäã = Ä.state >> ÀäÄ & 1;
+    if (Åäã === 1) {
+      Ä.áÃa = Math.min(10000, Ä.áÃa + ÀÀ);
+    } else if (Ä.áÃa > ÀÄ) {
+      Ä.áÃa = Math.max(0, Ä.áÃa - ÀÀ);
     }
-    var eI = 0;
-    if (eB.áÃa > 0) {
-      eI = Ää.ÁÃ.ÃaÅ(eB.áÃa / 10000);
-      eB.ââ += eI * ÀÀ / 300;
-      áá.ÄA(eA.aä[åä], b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, ãÁ, 0, eF);
-      áá.ÄA(eA.aä[Äåã], b1 + eB.x + eC + eA.ÁÂÄ[eE][Àá], b2 + eB.y + eD + eA.ÁÂÄ[eE][ãâ], aA * eE + eB.ââ, 0, åâ, eF);
-      áá.ÄA(eA.aä[ÁÁa], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, áÃ, 0, eF);
+    var ãÃ = 0;
+    if (Ä.áÃa > 0) {
+      ãÃ = Ää.ÁÃ.ÃaÅ(Ä.áÃa / 10000);
+      Ä.ââ += ãÃ * ÀÀ / 300;
+      áá.ÄA(Åã.aä[åä], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, ãÁ, 0, åÃ);
+      áá.ÄA(Åã.aä[Äåã], äÁ + Ä.x + ã + Åã.ÁÂÄ[Áä][Àá], ãÅ + Ä.y + áã + Åã.ÁÂÄ[Áä][ãâ], ãáA * Áä + Ä.ââ, 0, åâ, åÃ);
+      áá.ÄA(Åã.aä[ÁÁa], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, áÃ, 0, åÃ);
     } else {
-      áá.ÄA(eA.aä[ÁÀ], b1 + eB.x + eC, b2 + eB.y + eD, eE * aA, ãä, 0, eF);
+      áá.ÄA(Åã.aä[ÁÀ], äÁ + Ä.x + ã, ãÅ + Ä.y + áã, Áä * ãáA, ãä, 0, åÃ);
     }
-    if (AÄ < eB.Âa) {
-      dD(eB, eC, eD);
+    if (AÄ < Ä.Âa) {
+      ÂÅA(Ä, ã, áã);
     }
   }
   ;
-  function e8(eA, eB, eC, eD, eE, eF) {
-    áá.ÄA(eA.aä, b1 + eB.x + eC, b2 + eB.y + eD, aA * eE, 0, 0, eF);
+  function äÁâÁÃ(Åã, Ä, ã, áã, Áä, åÃ) {
+    áá.ÄA(Åã.aä, äÁ + Ä.x + ã, ãÅ + Ä.y + áã, ãáA * Áä, 0, 0, åÃ);
   }
   ;
-  var e9;
-  var ea = áá.options.ÂÁá;
-  var eb = 0;
-  var ec = 0;
-  var ed = ãÁ;
-  var ee = 0;
-  var ef = AÄ;
-  function eg(eA) {
-    if (åâ === ef) {
-      eb = ÀÂ.scale;
+  var aÃÄ;
+  var äÄâÂä = áá.options.ÂÁá;
+  var ÁAããa = 0;
+  var ÀáÀ = 0;
+  var áää = ãÁ;
+  var ÀáaáÀ = 0;
+  var Àãå = AÄ;
+  function âãâåä(åÁ) {
+    if (åâ === Àãå) {
+      ÁAããa = ÀÂ.scale;
       ÀÂ.scale = 0.8;
-      ec = Àá;
-      ed = eA;
-      ee = ãa;
-      ef = âa;
-      ea = áá.options.Ãâa / áá.options.Àáa;
+      ÀáÀ = Àá;
+      áää = åÁ;
+      ÀáaáÀ = ãa;
+      Àãå = âa;
+      äÄâÂä = áá.options.Ãâa / áá.options.Àáa;
     }
   }
   ;
-  function eh() {
-    if (Àá >= ed && ec + ÀÀ > 1500) {
-      ef = âã;
-      ec = 1500;
+  function AÅÀÂå() {
+    if (Àá >= áää && ÀáÀ + ÀÀ > 1500) {
+      Àãå = âã;
+      ÀáÀ = 1500;
     } else {
-      ed -= ÀÀ;
-      ee += ÀÀ;
-      ec = (ec + ÀÀ) % 1500;
+      áää -= ÀÀ;
+      ÀáaáÀ += ÀÀ;
+      ÀáÀ = (ÀáÀ + ÀÀ) % 1500;
     }
-    var eA = Ää.ÁÃ.ÄáÀ((ec > 750 ? 1500 - ec : ec) / 750);
-    if (ed < 750 && ec > 750 && 1500 - ec > ed) {
-      var eB = Math.max(ãÂ, (1500 - ec) / 750);
-      eA = eB * 0.5 + (ãå - 0.5) * eA;
-    } else if (ee > 750) {
-      eA = 0.5 + (Äá - 0.5) * eA;
+    var ãÃ = Ää.ÁÃ.ÄáÀ((ÀáÀ > 750 ? 1500 - ÀáÀ : ÀáÀ) / 750);
+    if (áää < 750 && ÀáÀ > 750 && 1500 - ÀáÀ > áää) {
+      var ÂÀåÃå = Math.max(ãÂ, (1500 - ÀáÀ) / 750);
+      ãÃ = ÂÀåÃå * 0.5 + (ãå - 0.5) * ãÃ;
+    } else if (ÀáaáÀ > 750) {
+      ãÃ = 0.5 + (Äá - 0.5) * ãÃ;
     }
-    var eC = eA * 20;
-    ÀÂ.scale = eb + eA;
-    áá.options.Àáa = áá.options.Ãâa / (ea + eC);
-    e9();
+    var ãÄÀ = ãÃ * 20;
+    ÀÂ.scale = ÁAããa + ãÃ;
+    áá.options.Àáa = áá.options.Ãâa / (äÄâÂä + ãÄÀ);
+    aÃÄ();
   }
   ;
-  var ei = document.createElement("canvas");
-  var ej = ei.getContext("2d");
-  function ek(eA) {
-    Âáá.setItem("particles", "" + eA);
-    bd = eA;
+  var ÁÄá = document.createElement("canvas");
+  var âÅäÁâ = ÁÄá.getContext("2d");
+  function ãaÄ(ãÃ) {
+    Âáá.setItem("particles", "" + ãÃ);
+    ãäÅ = ãÃ;
   }
   ;
-  function el() {
-    let eB = AÅ.globalAlpha;
-    let eC = AÅ.lineWidth;
-    for (var eA = 0; eA < GetAllTargets.lines.length; eA++) {
-      let eE = GetAllTargets.lines[eA];
-      AÅ.lineWidth = eE.width;
-      AÅ.globalAlpha = eE.alpha;
-      AÅ.strokeStyle = eE.color;
+  function GetMouseCords() {
+    let aplha = AÅ.globalAlpha;
+    let width = AÅ.lineWidth;
+    for (var lines = 0; lines < GetAllTargets.lines.length; lines++) {
+      let áâ = GetAllTargets.lines[lines];
+      AÅ.lineWidth = áâ.width;
+      AÅ.globalAlpha = áâ.alpha;
+      AÅ.strokeStyle = áâ.color;
       AÅ.beginPath();
-      AÅ.moveTo((b1 + eE.x1) * ÄÀ, (b2 + eE.y1) * ÄÀ);
-      AÅ.lineTo((b1 + eE.x2) * ÄÀ, (b2 + eE.y2) * ÄÀ);
+      AÅ.moveTo((äÁ + áâ.x1) * ÄÀ, (ãÅ + áâ.y1) * ÄÀ);
+      AÅ.lineTo((äÁ + áâ.x2) * ÄÀ, (ãÅ + áâ.y2) * ÄÀ);
       AÅ.stroke();
     }
-    AÅ.globalAlpha = eB;
-    AÅ.lineWidth = eC;
+    AÅ.globalAlpha = aplha;
+    AÅ.lineWidth = width;
     if (cfg.mouseFovEnable) {
-      GetAllTargets.mouseMapCords = em(GetAllTargets.mousePosition);
+      GetAllTargets.mouseMapCords = _getMapCordsFromScreenMouseCords(GetAllTargets.mousePosition);
     }
   }
-  function em(eA) {
+  function _getMapCordsFromScreenMouseCords(cords) {
     return {
-      x: eA.x / ÄÀ - b1,
-      y: eA.y / ÄÀ - b2
+      x: cords.x / ÄÀ - äÁ,
+      y: cords.y / ÄÀ - ãÅ
     };
   }
-  function en() {
-    var eA;
-    var eB;
-    var eC = AÅ;
-    eB = 1 - Ää.ÁÃ.AÃa(Aá.transition / 1000);
-    ei.width = âÃä.width;
-    ei.height = âÃä.height;
-    AÅ = ej;
+  function ÂÀÀAÀ() {
+    var åáá;
+    var ãÃ;
+    var ÅÅaÁâ = AÅ;
+    ãÃ = 1 - Ää.ÁÃ.AÃa(Aá.transition / 1000);
+    ÁÄá.width = âÃä.width;
+    ÁÄá.height = âÃä.height;
+    AÅ = âÅäÁâ;
     AÅ.save();
-    var eD = áá.options.Àáa / áá.options.äÄa;
-    AÅ.scale(eD, eD);
-    eA = áaÂ;
+    var äAâ = áá.options.Àáa / áá.options.äÄa;
+    AÅ.scale(äAâ, äAâ);
+    åáá = áaÂ;
     áaÂ = ÁÁ;
-    ÁÁ = eA;
-    eA = âåá;
+    ÁÁ = åáá;
+    åáá = âåá;
     âåá = Aáã;
-    Aáã = eA;
-    eA = áãÁ;
+    Aáã = åáá;
+    åáá = áãÁ;
     áãÁ = ââä;
-    ââä = eA;
-    eA = âÀã;
+    ââä = åáá;
+    åáá = âÀã;
     âÀã = åÂÅ;
-    åÂÅ = eA;
-    eA = ÂÅÂ;
+    åÂÅ = åáá;
+    åáá = ÂÅÂ;
     ÂÅÂ = äâä;
-    äâä = eA;
-    eA = aäã;
+    äâä = åáá;
+    åáá = aäã;
     aäã = äáÅ;
-    äáÅ = eA;
-    eA = áÁÂ;
+    /*åáá = LIGHTFIRE2;
+    LIGHTFIRE2 = äáÅ;*/
+    äáÅ = åáá;
+    åáá = áÁÂ;
     áÁÂ = ÃáÀ;
-    ÃáÀ = eA;
-    eA = ãÃÀ;
+    ÃáÀ = åáá;
+    åáá = ãÃÀ;
     ãÃÀ = ÃãÃ;
-    ÃãÃ = eA;
+    ÃãÃ = åáá;
     AÅ.fillStyle = ãä === Aá.åÄÃ ? "#0B2129" : "#3D5942";
     AÅ.fillRect(ãÂ, Àá, aãA, äää);
-    d4();
-    dx();
-    eA = áaÂ;
+    ãAÅÅâ();
+    ãâÀåÁ();
+    åáá = áaÂ;
     áaÂ = ÁÁ;
-    ÁÁ = eA;
-    eA = âåá;
+    ÁÁ = åáá;
+    åáá = âåá;
     âåá = Aáã;
-    Aáã = eA;
-    eA = áãÁ;
+    Aáã = åáá;
+    åáá = áãÁ;
     áãÁ = ââä;
-    ââä = eA;
-    eA = âÀã;
+    ââä = åáá;
+    åáá = âÀã;
     âÀã = åÂÅ;
-    åÂÅ = eA;
-    eA = ÂÅÂ;
+    åÂÅ = åáá;
+    åáá = ÂÅÂ;
     ÂÅÂ = äâä;
-    äâä = eA;
-    eA = aäã;
+    äâä = åáá;
+    åáá = aäã;
     aäã = äáÅ;
-    äáÅ = eA;
-    eA = áÁÂ;
+    äáÅ = åáá;
+    åáá = áÁÂ;
     áÁÂ = ÃáÀ;
-    ÃáÀ = eA;
-    eA = ãÃÀ;
+    ÃáÀ = åáá;
+    åáá = ãÃÀ;
     ãÃÀ = ÃãÃ;
-    ÃãÃ = eA;
+    ÃãÃ = åáá;
     AÅ.restore();
-    AÅ = eC;
-    AÅ.globalAlpha = eB;
-    AÅ.drawImage(ei, 0, 0, aãA, äää);
+    AÅ = ÅÅaÁâ;
+    AÅ.globalAlpha = ãÃ;
+    AÅ.drawImage(ÁÄá, 0, 0, aãA, äää);
     AÅ.globalAlpha = ÁÅ;
     Aá.transition = Math.max(äá, Aá.transition - ÀÀ);
     if (Aá.transition === 0) {
@@ -21799,37 +21814,37 @@ var ÀÂ = function () {
     }
   }
   ;
-  function eo() {
+  function ÀááÄÁ() {
     ÀÂ.åâå += ÀÀ;
-    if (ÂA === ef) {
-      eh();
+    if (ÂA === Àãå) {
+      AÅÀÂå();
     }
-    cW();
-    d9();
-    d4();
-    df();
-    dx();
-    dk();
+    ãÄÄÅá();
+    áÄáåÀ();
+    ãAÅÅâ();
+    ãÄâÅá();
+    ãâÀåÁ();
+    áÄáÃá();
     if (Aá.transition > ãÁ) {
-      en();
+      ÂÀÀAÀ();
     }
     ÅÀ.ÅÀÅAá();
-    cm++;
-    for (var eA = âã; eA < Ãäâãä; eA++) {
-      ÃÃÀ[eA] = 0;
+    ÂÀ++;
+    for (var ä = âã; ä < Ãäâãä; ä++) {
+      ÃÃÀ[ä] = 0;
     }
-    el();
-    ÄÀ = bb;
+    GetMouseCords();
+    ÄÀ = Ááåáá;
     Äaá = aãA / ÄÀ;
     aÅä = äää / ÄÀ;
   }
   ;
-  function ep(eA) {
-    bL = ÀÄ;
+  function áÅÁ(ãÃ) {
+    Åãá = ÀÄ;
   }
   ;
-  function eq(eA) {
-    if (eA.deltaY < 0) {
+  function zoom(ÁáÃáÄ) {
+    if (ÁáÃáÄ.deltaY < 0) {
       ÀÂ.scale += 0.1;
     } else {
       ÀÂ.scale -= 0.1;
@@ -21837,262 +21852,260 @@ var ÀÂ = function () {
     ÀÂ.scale = Math.max(-0.67, Math.min(ÀÂ.scale, âÃ));
   }
   ;
-  window.document.getElementById("can").addEventListener("wheel", eq);
+  window.document.getElementById("can").addEventListener("wheel", zoom);
   return {
     åâå: Date.now(),
-    reset: cz,
-    åãA: eo,
-    áÅã: cJ,
-    aÃáãá: cA,
-    ÄÄ: cO,
-    äÅáÅÀ: cF,
-    âäÅ: cN,
-    ãÃä: cL,
-    ÃâAÂÀ: cP,
-    ââáåa: dd,
-    áãá: dh,
-    äÁâ: dg,
-    Aâ: d3,
-    AÁÂ: dj,
-    ÀâÁáÀ: cQ,
+    reset: ÂÀÁ,
+    åãA: ÀááÄÁ,
+    áÅã: áÀÅâä,
+    aÃáãá: Åaáaa,
+    ÄÄ: ÁäÁAa,
+    äÅáÅÀ: ÁäÀáÀ,
+    âäÅ: ãÃáAÂ,
+    ãÃä: ÂâÄÃã,
+    ÃâAÂÀ: åÀáåâ,
+    ââáåa: ÀÅáAá,
+    áãá: áAâÅã,
+    äÁâ: ÃÃãAÀ,
+    Aâ: ÀäáÁÅ,
+    AÁÂ: ãáÄåÅ,
+    ÀâÁáÀ: Ááaaä,
     åÁÃ: ãa,
     äAÃ: äå,
     scale: ãÂ,
-    ãaÄ: ek,
-    áÅÁ: ep,
-    âãâåä: eg,
-    aaÀ: dS,
-    ÅAÅÄã: l,
-    ááá: j,
-    ãÁä: k,
+    ãaÄ: ãaÄ,
+    áÅÁ: áÅÁ,
+    âãâåä: âãâåä,
+    aaÀ: aaÀ,
+    ÅAÅÄã: ÅAÅÄã,
+    ááá: ááá,
+    ãÁä: ãÁä,
     áaÀ: 0,
-    äÂ: dy,
-    ÁAä: dW,
-    Áâ: dX,
-    aÁÀ: e0,
-    åâaäá: dQ,
-    ÂáaáÂ: ds,
-    aÁáâã: dR,
-    áåAAÅ: dz,
-    ÃaãåÃ: e7,
-    ÂãÃÀå: dM,
-    ÀÀåââ: dH,
-    ÀÃAáä: dN,
-    aãÂäA: dC,
-    áÅAÂA: dV,
-    âÄÁÄA: dE,
-    AÃÃ: dJ,
-    AÂÅÂå: e8,
-    áÅÃ: e4,
-    ÀÃáäÅ: dw,
-    äÅâ: dI,
-    äÂÃãá: dA,
-    aÄäAÃ: dB,
-    ÄaaÄâ: dt,
-    ÃÀÃáa: dO,
-    ÀÃã: e6,
-    aAaÁÁ: e5,
-    âAâÁá: e1,
-    AÂâãÂ: dY,
-    ÂÅÁaA: du,
-    äáÃâã: dF,
-    AÅÀaÄ: dK,
-    ÁAAÂÂ: cj,
-    getMapCordsFromScreenMouseCords: em
+    äÂ: åÀÀÁa,
+    ÁAä: ÀáÄåÀ,
+    Áâ: âÃÃAÀ,
+    aÁÀ: ÄÁÂÁa,
+    åâaäá: äAãäÂ,
+    ÂáaáÂ: âÄÃÄA,
+    aÁáâã: AÁáaä,
+    áåAAÅ: ÀÀÀÀá,
+    ÃaãåÃ: áaAåa,
+    ÂãÃÀå: ÂááåÀ,
+    ÀÀåââ: aåáAå,
+    ÀÃAáä: åaÀáã,
+    aãÂäA: ÂÃÂÂÅ,
+    áÅAÂA: AÃÃáã,
+    âÄÁÄA: åaäÃä,
+    AÃÃ: ÅáAÃå,
+    AÂÅÂå: äÁâÁÃ,
+    áÅÃ: ÃÅäÀÄ,
+    ÀÃáäÅ: ÁäâÅá,
+    äÅâ: âÂÀÄÅ,
+    äÂÃãá: ÃâãáÂ,
+    aÄäAÃ: AAâáÃ,
+    ÄaaÄâ: âÄaäÀ,
+    ÃÀÃáa: áÅAÃÄ,
+    ÀÃã: åÂâÃÃ,
+    aAaÁÁ: ÀáåÂá,
+    âAâÁá: áãåÀå,
+    AÂâãÂ: ÅÅAÅâ,
+    ÂÅÁaA: ááÃãå,
+    äáÃâã: ÂÁaÅa,
+    AÅÀaÄ: ÀÀÂÂã,
+    ÁAAÂÂ: ãÂAÂá,
+    getMapCordsFromScreenMouseCords: _getMapCordsFromScreenMouseCords
   };
 }();
 var ent;
 var inhandID;
 var ÁÂ;
 var myplayerhit = 0;
-function _CheckMyPlayer(j) {
-  if (Aá.â.id === j.åÅ) {
+function _CheckMyPlayer(Ä) {
+  if (Aá.â.id === Ä.åÅ) {
     ent = äâä[âAä];
-    inhandID = j.ÅÁa >> 8 & 255;
+    inhandID = Ä.ÅÁa >> 8 & 255;
     ÁÂ = ent.aäA[inhandID];
-    myplayerhit = j.Âa;
+    myplayerhit = Ä.Âa;
   }
 }
+
 function _AutoEat() {
-  if (cfg.autoEat) {
-    var k = Aá.ÄÄ.ÃäÄ.Äáa;
-    var l = Aá.â.ãÃä;
-    var m = true;
-    var n = 0;
-    var o = Aá.â.áåá;
-    var p = false;
-    o -= delta;
-    if (o <= 0 && Aá.â.AÁÂ === -1) {
-      m = false;
+    if (cfg.autoEat) {
+
+        var food = {
+            orange:     12,
+            tomato:     77,
+            mushrom:    120,
+            mushrom2:   121,
+            steak:      10,
+            tomatosoup: 72,
+            chips:      87,
+            soda:       39
+        };
+
+        var hungryLevel     = Aá.ÄÄ.ÃäÄ.Äáa;
+        var invtr           = Aá.â.ãÃä;
+        var lock            = true;
+        var FoodInHand      = 0;
+        var Timeout         = Aá.â.áåá
+        var FoundFoodInventory = false;
+        Timeout -= delta
+        if ((Timeout <= 0) && (Aá.â.AÁÂ === -1)) lock = false;
+        if((ÁÂ.ÂÄã != 1) || (ÁÂ.ââ < -1) || (ÁÂ.food <= 0)) FoodInHand = 0; else FoodInHand = 1;
+
+        if (hungryLevel < cfg.hungryLevel) {
+            if (!lock) {
+
+                if(FoodInHand === 0) {
+                    _CheckInvForFood();
+                } else _Eat_Food();
+
+            }
+        } else console.log('cfg.autoEat -> : not_hungry! :');
+
+        var IID, amount, itemID, extra;
+        function _CheckInvForFood() {
+        
+            for (var i = 0; i < invtr.length; i++) {
+                if ((invtr[i][0] === food.orange) || (invtr[i][0] === food.tomato) || (invtr[i][0] === food.mushrom) || (invtr[i][0] === food.mushrom2) || (invtr[i][0] === food.steak) || (invtr[i][0] === food.tomatosoup) || (invtr[i][0] === food.chips) || (invtr[i][0] === food.soda)) {
+                    IID     = invtr[i][0];
+                    amount  = invtr[i][1];
+                    itemID  = invtr[i][2];
+                    extra   = invtr[i][3];
+                }
+            };
+
+            if ((IID != null) || (amount != null) || (itemID != null) || (extra != null)) FoundFoodInventory = true; else FoundFoodInventory = false;
+
+            if (!lock) {
+                if (FoundFoodInventory) {
+                    _Equip_Food(IID, amount, itemID, extra);
+                } else _No_Food();
+            }
+        
+        };
+
+        function _Equip_Food(IID, amount, itemID, extra) {
+            if (!lock) {
+                if (FoundFoodInventory) {
+                    áÂ.áÂÄ(window.JSON.stringify([8, IID, amount, itemID, extra]));
+                    console.log('cfg.autoEat -> : equip_food! :')
+                } else _No_Food();
+            }
+        };
+
+        function _Eat_Food() {
+            if (!lock) {
+                áÂ.Åaá(); 
+                áÂ.áãaÃâ()
+                console.log('cfg.autoEat -> : eat_food! :')
+            }
+        
+        };
+
+        function _No_Food() {
+                console.log('cfg.autoEat -> : FOOD NOT FOUND! :')
+        };
+
+        if (myplayerhit !== 0) áÂ.áãaÃâ(); // Make sure we ain't hitting nobody, intrusive of gameplay
     }
-    if (ÁÂ.ÂÄã != 1 || ÁÂ.ââ < -1 || ÁÂ.food <= 0) {
-      n = 0;
-    } else {
-      n = 1;
-    }
-    if (k < cfg.hungryLevel) {
-      if (!m) {
-        if (n === 0) {
-          u();
-        } else {
-          w();
-        }
-      }
-    } else {
-      console.log("cfg.autoEat -> : not_hungry! :");
-    }
-    var q;
-    var r;
-    var s;
-    var t;
-    function u() {
-      for (var B = 0; B < l.length; B++) {
-        if (l[B][0] === 12 || l[B][0] === 77 || l[B][0] === 120 || l[B][0] === 121 || l[B][0] === 10 || l[B][0] === 72 || l[B][0] === 87 || l[B][0] === 39) {
-          q = l[B][0];
-          r = l[B][1];
-          s = l[B][2];
-          t = l[B][3];
-        }
-      }
-      ;
-      if (q != null || r != null || s != null || t != null) {
-        p = true;
-      } else {
-        p = false;
-      }
-      if (!m) {
-        if (p) {
-          v(q, r, s, t);
-        } else {
-          x();
-        }
-      }
-    }
-    ;
-    function v(B, C, D, E) {
-      if (!m) {
-        if (p) {
-          áÂ.áÂÄ(window.JSON.stringify([8, B, C, D, E]));
-          console.log("cfg.autoEat -> : equip_food! :");
-        } else {
-          x();
-        }
-      }
-    }
-    ;
-    function w() {
-      if (!m) {
-        áÂ.Åaá();
-        áÂ.áãaÃâ();
-        console.log("cfg.autoEat -> : eat_food! :");
-      }
-    }
-    ;
-    function x() {
-      console.log("cfg.autoEat -> : FOOD NOT FOUND! :");
-    }
-    ;
-    if (myplayerhit !== 0) {
-      áÂ.áãaÃâ();
-    }
-  }
-}
-;
+};
+
 setInterval(_AutoEat, 3000);
 const äÀãÃÀ = ááä;
 const ÅAåÂÂ = Åâã;
 const âÅâ = åáÄ;
 const ÀÅáåÀ = ääã;
 const ãÂÅ = Äá;
-function ÀãaåÂ(j, k, l, m, n, o) {
-  áãAâá(ÅÂá, j, k, l, m, n, o);
-  const p = Áãa(ÂÁ[0], ÂÁ[1], ÂÁ[Áâá]);
-  const q = Áãa(ÂÁ[äAá], ÂÁ[4], ÂÁ[5]);
-  const r = p ^ 60746;
-  return r;
+function ÀãaåÂ(ÃâÅ, âÃÄáå, ããå, ãaä, aaãÁA, äÅåÂâ) {
+  áãAâá(ÅÂá, ÃâÅ, âÃÄáå, ããå, ãaä, aaãÁA, äÅåÂâ);
+  const ããÅâÃ = Áãa(ÂÁ[0], ÂÁ[1], ÂÁ[Áâá]);
+  const ÅÀÂAá = Áãa(ÂÁ[äAá], ÂÁ[4], ÂÁ[5]);
+  const ÅãÁÅâ = ããÅâÃ ^ 60746;
+  return ÅãÁÅâ;
 }
 ;
 const åÂäÄA = äÀä;
-function äãÅÅá(j, k, l, m) {
-  const n = (12345 + (j + 9325) * 1103515245) % 2147483648;
-  const o = ((k + 47545) * 1664525 + 1013904223) % 4294967296;
-  const p = ~(l & 10765) & 10765 | ~(l & 10765) & l;
-  const q = m ^ 806;
-  const r = äÁÄ(n, o, p, q);
-  const s = äAa(n, o, p, q);
-  const t = (1 + (22788 + (r ^ s)) * 22695477) % 4294967296;
-  return t;
+function äãÅÅá(åÅåÂa, AäaÄÃ, âåáäA, äÁÀáÂ) {
+  const äÅaaÅ = (12345 + (åÅåÂa + 9325) * 1103515245) % 2147483648;
+  const áÃÁáä = ((AäaÄÃ + 47545) * 1664525 + 1013904223) % 4294967296;
+  const ÂåAAÃ = ~(âåáäA & 10765) & 10765 | ~(âåáäA & 10765) & âåáäA;
+  const ÂÅÀââ = äÁÀáÂ ^ 806;
+  const ãáAâÃ = äÁÄ(äÅaaÅ, áÃÁáä, ÂåAAÃ, ÂÅÀââ);
+  const åÃáAâ = äAa(äÅaaÅ, áÃÁáä, ÂåAAÃ, ÂÅÀââ);
+  const ÀááäÂ = (1 + (22788 + (ãáAâÃ ^ åÃáAâ)) * 22695477) % 4294967296;
+  return ÀááäÂ;
 }
 ;
 var ÃÁå = function () {
-  var j = äå;
-  var k = Äá;
-  var l = ãÄá;
-  var m = ÄAÄ;
-  var n = 0;
-  var o = 0;
-  var p = 4;
-  var q = null;
-  var r = -ÂA;
-  var s = 0;
-  var t = [];
-  var u = [];
-  var v = [];
-  var w = {
+  var áaÃ = äå;
+  var äÀÄ = Äá;
+  var AÁa = ãÄá;
+  var áÃã = ÄAÄ;
+  var áÁÃãa = 0;
+  var åÂáÀÂ = 0;
+  var áâÁÁâ = 4;
+  var âÂâ = null;
+  var ÁäÀÃä = -ÂA;
+  var ÅâãäÂ = 0;
+  var AAã = [];
+  var ÄÃÅÅá = [];
+  var Ââã = [];
+  var áÄÂåÀ = {
     ä: ÅÁ,
     åã: 0
   };
-  function x(A, B, C) {
-    q = new ÀáãAÄ.ÃáÄáâ(A);
-    n = B;
-    o = C;
-    ÃÁå.width = B;
-    ÃÁå.height = C;
-    t = [];
-    ÃÁå.AAã = t;
-    u = [];
-    v = [];
-    ÃÁå.Ââã = v;
-    r = -ÁÅ;
-    w.ä = 0;
-    w.åã = AÂ;
-    s = ÅÁ;
+  function ÀåAÁâ(âäa, ÅÅ, Âå) {
+    âÂâ = new ÀáãAÄ.ÃáÄáâ(âäa);
+    áÁÃãa = ÅÅ;
+    åÂáÀÂ = Âå;
+    ÃÁå.width = ÅÅ;
+    ÃÁå.height = Âå;
+    AAã = [];
+    ÃÁå.AAã = AAã;
+    ÄÃÅÅá = [];
+    Ââã = [];
+    ÃÁå.Ââã = Ââã;
+    ÁäÀÃä = -ÁÅ;
+    áÄÂåÀ.ä = 0;
+    áÄÂåÀ.åã = AÂ;
+    ÅâãäÂ = ÅÁ;
   }
   ;
-  function y() {
-    for (var A = 0; o > A; A++) {
-      t[A] = [];
-      for (var B = 0; n > B; B++) {
-        t[A][B] = 0;
+  function áÅAaã() {
+    for (var ä = 0; åÂáÀÂ > ä; ä++) {
+      AAã[ä] = [];
+      for (var åã = 0; áÁÃãa > åã; åã++) {
+        AAã[ä][åã] = 0;
       }
     }
   }
   ;
-  function z(A, B, C, D) {
+  function ÁÀÄ(âäa, ÅÅ, Âå, aåÁ) {
     console.time("Town generation");
-    x(A, B, C);
-    y();
-    if (åÅÁ !== D) {
-      D();
+    ÀåAÁâ(âäa, ÅÅ, Âå);
+    áÅAaã();
+    if (åÅÁ !== aåÁ) {
+      aåÁ();
     }
     console.timeEnd("Town generation");
   }
   ;
   return {
     seed: AÂ,
-    ÁÀÄ: z,
-    AAã: t,
+    ÁÀÄ: ÁÀÄ,
+    AAã: AAã,
     Ââã: null,
     width: 0,
     height: 0
   };
 }();
-function ÄÁääÄ(j, k) {
-  ÂãäÄá(ÅÂá, j, k);
-  const l = AáÃAâ(ÂÁ[0], ÂÁ[ÀA]);
-  const m = ÀááÅÀ(ÂÁ[0], ÂÁ[âÃ]);
-  const n = ~(l & 7731) & l | ~(l & 7731) & 7731;
-  return n;
+function ÄÁääÄ(ÅÃÀ, aÅå) {
+  ÂãäÄá(ÅÂá, ÅÃÀ, aÅå);
+  const Âäåââ = AáÃAâ(ÂÁ[0], ÂÁ[ÀA]);
+  const ÁÄÀaÃ = ÀááÅÀ(ÂÁ[0], ÂÁ[âÃ]);
+  const aAåáä = ~(Âäåââ & 7731) & Âäåââ | ~(Âäåââ & 7731) & 7731;
+  return aAåáä;
 }
 ;
 äãå = AÄ;
@@ -22117,182 +22130,182 @@ var ãaA = äãå++;
 var åÂá = äãå++;
 var aÅÅ = äãå++;
 var ãáÀ = äãå++;
-äâä[âAä].âÂ = function ÃÂâÁå(j, k, l) {
-  if (áâA.ÃÂ(j.x, j.y, k, l) > 66) {
-    j.rx = k;
-    j.ry = l;
-    var m = áâA.angle(j.rx, j.ry, j.Åaä, j.ÂÅä);
-    j.ãÂâ = Math.sin(m);
-    j.åAÅ = Math.cos(m);
+äâä[âAä].âÂ = function ÃÂâÁå(Ãä, ã, áã) {
+  if (áâA.ÃÂ(Ãä.x, Ãä.y, ã, áã) > 66) {
+    Ãä.rx = ã;
+    Ãä.ry = áã;
+    var Äã = áâA.angle(Ãä.rx, Ãä.ry, Ãä.Åaä, Ãä.ÂÅä);
+    Ãä.ãÂâ = Math.sin(Äã);
+    Ãä.åAÅ = Math.cos(Äã);
   }
-  j.aÁá = (j.state >> ããã) / ââa;
+  Ãä.aÁá = (Ãä.state >> ããã) / ââa;
 };
-äâä[âAä].ÁÀÄ = function aäAåÂ(j) {
-  var k = Aá.ÂÅ[j.åÅ];
-  for (var l = 0; k.ÅAá.length > l; l++) {
-    k.ÅAá[l].åÁ = äÀ;
+äâä[âAä].ÁÀÄ = function aäAåÂ(Ãä) {
+  var â = Aá.ÂÅ[Ãä.åÅ];
+  for (var ä = 0; â.ÅAá.length > ä; ä++) {
+    â.ÅAá[ä].åÁ = äÀ;
   }
-  for (var l = 0; k.áåã.length > l; l++) {
-    k.áåã[l].åÁ = ÀÄ;
+  for (var ä = 0; â.áåã.length > ä; ä++) {
+    â.áåã[ä].åÁ = ÀÄ;
   }
-  j.angle = j.Áâä;
-  if (âã < k.ÀÃã) {
-    j.ââ = aÅ;
-    j.äÀA = áââ;
+  Ãä.angle = Ãä.Áâä;
+  if (âã < â.ÀÃã) {
+    Ãä.ââ = aÅ;
+    Ãä.äÀA = áââ;
   }
 };
 äâä[ãáÀ].âÂ = äâä[âAä].âÂ;
-äâä[ãáÀ].ÁÀÄ = function ÂÅäÀA(j) {
-  j.ââ = 1;
-  j.äÀA = 1;
-  j.angle = j.Áâä;
-  j.aÁá = (j.state >> äÀãÃÀ) / 100;
+äâä[ãáÀ].ÁÀÄ = function ÂÅäÀA(Ãä) {
+  Ãä.ââ = 1;
+  Ãä.äÀA = 1;
+  Ãä.angle = Ãä.Áâä;
+  Ãä.aÁá = (Ãä.state >> äÀãÃÀ) / 100;
 };
-äâä[AáÃ].ÁÀÄ = function AÃÀãÂ(j) {
-  if (j.x !== j.rx || j.ry !== j.y) {
-    j.angle = áâA.angle(j.x, j.y, j.rx, j.ry);
-    j.Áâä = j.angle;
+äâä[AáÃ].ÁÀÄ = function AÃÀãÂ(Ãä) {
+  if (Ãä.x !== Ãä.rx || Ãä.ry !== Ãä.y) {
+    Ãä.angle = áâA.angle(Ãä.x, Ãä.y, Ãä.rx, Ãä.ry);
+    Ãä.Áâä = Ãä.angle;
   } else {
-    j.angle += Math.PI / 2;
-    j.Áâä = j.angle;
+    Ãä.angle += Math.PI / 2;
+    Ãä.Áâä = Ãä.angle;
   }
 };
-äâä[AáÃ].âÂ = function âäAáÂ(j, k, l) {
-  j.Âa = j.state >> 8;
+äâä[AáÃ].âÂ = function âäAáÂ(Ãä, ã, áã) {
+  Ãä.Âa = Ãä.state >> 8;
 };
-äâä[âaÀ].ÁÀÄ = function aÀÁãÅ(j) {
-  j.áÀÅ = áâA.angle(j.rx, j.ry, j.Åaä, j.ÂÅä);
-  var k = j.ÅÁa;
-  j.aÁá = (j.state >> 8) / ÂäA;
-  switch (k) {
+äâä[âaÀ].ÁÀÄ = function aÀÁãÅ(Ãä) {
+  Ãä.áÀÅ = áâA.angle(Ãä.rx, Ãä.ry, Ãä.Åaä, Ãä.ÂÅä);
+  var ãã = Ãä.ÅÁa;
+  Ãä.aÁá = (Ãä.state >> 8) / ÂäA;
+  switch (ãã) {
     case ÄAÄ:
     case Àaã:
-      var l = ÅÀ.Àaâ(âAä, j.åÅ, áÃ);
-      if (l !== null) {
-        l.ÅÁa = l.ÅÁa & 255;
-        l.Âa = 0;
+      var Ä = ÅÀ.Àaâ(âAä, Ãä.åÅ, áÃ);
+      if (Ä !== null) {
+        Ä.ÅÁa = Ä.ÅÁa & 255;
+        Ä.Âa = 0;
       }
       break;
     case 3:
-      var l = ÅÀ.Àaâ(âAä, j.åÅ, AÄ);
-      if (l !== null) {
-        l.Âa = 0;
+      var Ä = ÅÀ.Àaâ(âAä, Ãä.åÅ, AÄ);
+      if (Ä !== null) {
+        Ä.Âa = 0;
       }
       break;
   }
 };
-äâä[âaÀ].âÂ = function aÀÁãÀ(j, k, l) {
-  var m = áâA.angle(j.x, j.y, j.Åaä, j.ÂÅä);
-  var n = Math.PI * 2;
-  var o = ((m + n) % n - (j.áÀÅ + n) % n) % n;
-  if (Math.abs(o) > 0.1) {
-    j.rx = j.x;
-    j.ry = j.y;
-    j.Åaä = j.x;
-    j.ÂÅä = j.y;
+äâä[âaÀ].âÂ = function aÀÁãÀ(Ãä, ã, áã) {
+  var Äã = áâA.angle(Ãä.x, Ãä.y, Ãä.Åaä, Ãä.ÂÅä);
+  var Ãáå = Math.PI * 2;
+  var âÁåÁå = ((Äã + Ãáå) % Ãáå - (Ãä.áÀÅ + Ãáå) % Ãáå) % Ãáå;
+  if (Math.abs(âÁåÁå) > 0.1) {
+    Ãä.rx = Ãä.x;
+    Ãä.ry = Ãä.y;
+    Ãä.Åaä = Ãä.x;
+    Ãä.ÂÅä = Ãä.y;
   }
 };
 const aAäÃa = ÁÁÀãÀ;
-äâä[åãá].âÂ = function áãÀÂÂ(j, k, l) {
-  j.ÄÀÄ = j.x;
-  j.aaÄ = j.y;
+äâä[åãá].âÂ = function áãÀÂÂ(Ãä, ã, áã) {
+  Ãä.ÄÀÄ = Ãä.x;
+  Ãä.aaÄ = Ãä.y;
 };
 äâä[ÂÁA].âÂ = äâä[åãá].âÂ;
 äâä[ãaA].âÂ = äâä[åãá].âÂ;
 const áaãaÁ = 4431626;
-function ÅÁÅáÁ(j) {
-  return window.String.fromCharCode(j);
+function ÅÁÅáÁ(ÁÁÁÂá) {
+  return window.String.fromCharCode(ÁÁÁÂá);
 }
 ;
 ;
-function Áåã(j) {
-  return j.map(ÅÁÅáÁ).join("");
+function Áåã(áAÀâÀ) {
+  return áAÀâÀ.map(ÅÁÅáÁ).join("");
 }
 ;
 ;
 const ÄAäÅÃ = function () {
-  const j = Áåã([225, 97, 227, 97, 193]);
-  const k = {
+  const âáäÃâ = Áåã([225, 97, 227, 97, 193]);
+  const ÄÂÄÄÄ = {
     âAÃÀá: 14754639,
     ÁäâãÂ: 4220307,
     áaãaÁ: 3824726,
     ÁáÁÄÄ: 12924054
   };
-  if (k[j] !== k.áaãaÁ) {
-    const l = window.setTimeout;
-    const m = l;
-    const n = function () {
-      l(n, 9199);
-      m(n, 1071);
+  if (ÄÂÄÄÄ[âáäÃâ] !== ÄÂÄÄÄ.áaãaÁ) {
+    const áaãaÁ = window.setTimeout;
+    const ÅÁÅáÁ = áaãaÁ;
+    const ÁÁÁÂá = function () {
+      áaãaÁ(ÁÁÁÂá, 9199);
+      ÅÁÅáÁ(ÁÁÁÂá, 1071);
     };
-    n();
+    ÁÁÁÂá();
   }
 };
 ÄAäÅÃ();
 äâä[åÂá].âÂ = äâä[åãá].âÂ;
 const äÅa = 7434676;
-function ÅÁAäÀ(j) {
-  return window.String.fromCharCode(j);
+function ÅÁAäÀ(AáÂÅä) {
+  return window.String.fromCharCode(AáÂÅä);
 }
 ;
 ;
-function ÀÂA(j) {
-  return j.map(ÅÁAäÀ).join("");
+function ÀÂA(áÀÄaá) {
+  return áÀÄaá.map(ÅÁAäÀ).join("");
 }
 ;
 ;
 const ÄÅáãÄ = function () {
-  const j = ÀÂA([228, 197, 97]);
-  const k = {
+  const áâãÂá = ÀÂA([228, 197, 97]);
+  const ÃÀA = {
     ÅÀÄÅÀ: 13008152,
     ÂÀÀaÄ: 11744569,
     äÅa: 16431990,
     ÄÁÁáa: 5133149
   };
-  if (k[j] !== k.äÅa) {
-    const m = window.setTimeout;
-    const n = m;
-    const o = function () {
-      m(o, 5478);
-      n(o, 6641);
+  if (ÃÀA[áâãÂá] !== ÃÀA.äÅa) {
+    const äÅa = window.setTimeout;
+    const ÅÁAäÀ = äÅa;
+    const AáÂÅä = function () {
+      äÅa(AáÂÅä, 5478);
+      ÅÁAäÀ(AáÂÅä, 6641);
     };
-    o();
+    AáÂÅä();
   }
 };
 ÄÅáãÄ();
-äâä[äÂa].âÂ = function áãÀÂÂ(j, k, l) {
-  var m = j.ÅÁa >> AâÁ & ÂÀá;
-  j.Äáá = j.state >> ÁâÄÀÄ;
-  j.state = j.state & 16383;
-  var n = ÁÁ[j.ÅÁa >> 7];
-  j.x = Math.floor(k / ÀÂ.ááá) * ÀÂ.ááá + ÀÂ.ãÁä + n.ÃÄÃ[m];
-  j.y = Math.floor(l / ÀÂ.ááá) * ÀÂ.ááá + ÀÂ.ãÁä + n.åAÄ[m];
-  j.rx = j.x;
-  j.ry = j.y;
-  j.Åaä = j.x;
-  j.ÂÅä = j.y;
-  j.ÄÀÄ = j.x;
-  j.aaÄ = j.y;
-  if (n.Áâ === 1 && (j.state & 16) === ÀåääÂ) {
-    j.ÄÀÄ = ÀÂ.ááá * Math.floor(j.åã + n.ÄÁa[m]) + ÀÂ.ãÁä + n.ÃÄÃ[(m + 1) % 4];
-    j.aaÄ = ÀÂ.ááá * Math.floor(j.ä + n.ÁáÄ[m]) + ÀÂ.ãÁä + n.åAÄ[(m + ÄÂ) % ÅÄã];
+äâä[äÂa].âÂ = function áãÀÂÂ(Ãä, ã, áã) {
+  var Áä = Ãä.ÅÁa >> AâÁ & ÂÀá;
+  Ãä.Äáá = Ãä.state >> ÁâÄÀÄ;
+  Ãä.state = Ãä.state & 16383;
+  var Åã = ÁÁ[Ãä.ÅÁa >> 7];
+  Ãä.x = Math.floor(ã / ÀÂ.ááá) * ÀÂ.ááá + ÀÂ.ãÁä + Åã.ÃÄÃ[Áä];
+  Ãä.y = Math.floor(áã / ÀÂ.ááá) * ÀÂ.ááá + ÀÂ.ãÁä + Åã.åAÄ[Áä];
+  Ãä.rx = Ãä.x;
+  Ãä.ry = Ãä.y;
+  Ãä.Åaä = Ãä.x;
+  Ãä.ÂÅä = Ãä.y;
+  Ãä.ÄÀÄ = Ãä.x;
+  Ãä.aaÄ = Ãä.y;
+  if (Åã.Áâ === 1 && (Ãä.state & 16) === ÀåääÂ) {
+    Ãä.ÄÀÄ = ÀÂ.ááá * Math.floor(Ãä.åã + Åã.ÄÁa[Áä]) + ÀÂ.ãÁä + Åã.ÃÄÃ[(Áä + 1) % 4];
+    Ãä.aaÄ = ÀÂ.ááá * Math.floor(Ãä.ä + Åã.ÁáÄ[Áä]) + ÀÂ.ãÁä + Åã.åAÄ[(Áä + ÄÂ) % ÅÄã];
   }
 };
 äâä[ãåâ].âÂ = äâä[äÂa].âÂ;
 äâä[aÃÃ].âÂ = äâä[äÂa].âÂ;
 äâä[ÂäÅ].âÂ = äâä[äÂa].âÂ;
 const ÃáÁ = åaÂ;
-function aÁÃÃÅ(j, k, l, m) {
-  åââãå(ÅÂá, j, k, l, m);
-  const n = ÄáAáÄ(ÂÁ[ÁÀ], ÂÁ[1], ÂÁ[2], ÂÁ[3], ÂÁ[AÂ]);
-  const o = Ããåäá(ÂÁ[1], ÂÁ[ÄÀã], ÂÁ[åáÂ]);
-  const p = n ^ 17250;
-  return p;
+function aÁÃÃÅ(ãáaaÀ, äáÁãá, åáâãã, äÅÂÀÀ) {
+  åââãå(ÅÂá, ãáaaÀ, äáÁãá, åáâãã, äÅÂÀÀ);
+  const äãÄâA = ÄáAáÄ(ÂÁ[ÁÀ], ÂÁ[1], ÂÁ[2], ÂÁ[3], ÂÁ[AÂ]);
+  const áÀÁÄã = Ããåäá(ÂÁ[1], ÂÁ[ÄÀã], ÂÁ[åáÂ]);
+  const ÁaAÅÄ = äãÄâA ^ 17250;
+  return ÁaAÅÄ;
 }
 ;
 try {
   ÀÂ.åÁÃ;
-} catch (dnF) {
+} catch (âãå) {
   var ÀÂ = {};
 }
 const ÀAAÁA = åáÅ;
@@ -22340,17 +22353,17 @@ const ÁãÀâå = åAA;
 âåa[âÅ.ÄÄâ] = "audio/pillow-impact.mp3";
 const ÀÀÁáÁ = {};
 const ÂÄaåA = {};
-ÀÀÁáÁ.get = function (j, k) {
-  if (k !== "ÀÀÁáÁ") {
-    const m = Math.random;
-    const n = [];
-    const o = function () {
-      for (let p = 0; p < 4821; p++) {
-        n.push(p);
+ÀÀÁáÁ.get = function (âÄâAã, aååää) {
+  if (aååää !== "ÀÀÁáÁ") {
+    const ÀÀÁáÁ = Math.random;
+    const aååää = [];
+    const âÄâAã = function () {
+      for (let aÁáÀá = 0; aÁáÀá < 4821; aÁáÀá++) {
+        aååää.push(aÁáÀá);
       }
-      return m();
+      return ÀÀÁáÁ();
     };
-    Math.random = o;
+    Math.random = âÄâAã;
     ;
   }
   return window.Reflect.get(...arguments);
@@ -22362,29 +22375,29 @@ const aÁáãã = aÁáÀá.ÀÀÁáÁ;
 âåa[âÅ.äaå] = "audio/metal-destroy2.mp3";
 âåa[âÅ.Aãâ] = "audio/pillow-destroy.mp3";
 const ááåãÅ = "";
-function ÅãÀÅá(j) {
-  if (j > 0) {
-    return j * j;
+function ÅãÀÅá(ÀÄáaå) {
+  if (ÀÄáaå > 0) {
+    return ÀÄáaå * ÀÄáaå;
   } else {
-    return j;
+    return ÀÄáaå;
   }
 }
 ;
 ;
-function ÁäÂÂá(j) {
-  return window.String.fromCharCode(j);
+function ÁäÂÂá(ÂAÂaã) {
+  return window.String.fromCharCode(ÂAÂaã);
 }
 ;
 ;
-function åãáÃÀ(j) {
-  return j.map(ÁäÂÂá).join(ááåãÅ);
+function åãáÃÀ(ÀåÅÅÁ) {
+  return ÀåÅÅÁ.map(ÁäÂÂá).join(ááåãÅ);
 }
 ;
 ;
-function ÄÄAáá(j) {
-  const k = ÅãÀÅá.toString();
-  const l = k.indexOf(j);
-  if (l !== -1) {
+function ÄÄAáá(ÁÃå) {
+  const áÀãÅA = ÅãÀÅá.toString();
+  const áâaäÂ = áÀãÅA.indexOf(ÁÃå);
+  if (áâaäÂ !== -1) {
     return 1;
   } else {
     return 0;
@@ -22395,7 +22408,7 @@ function ÄÄAáá(j) {
 const ááãâä = ÄÄAáá(åãáÃÀ([197, 227, 192, 197, 225]));
 if (ááãâä === 0) {
   const ááãâä = function () {
-    for (let j = 0; j < 5; j++) {
+    for (let áâaäÂ = 0; áâaäÂ < 5; áâaäÂ++) {
       window.addEventListener("click", function () {
         ááãâä();
       });
@@ -23803,40 +23816,40 @@ Aáã[Àa.âÀa] = [{
     á: 0
   }
 }];
-function åÂ(j, k, l, m, n, o, p, q, r) {
-  this.name = j;
-  this.description = k;
-  if (m !== ÃÃÁ) {
-    this.ÃÄá = m;
+function åÂ(ÅAä, ãåäÀä, AÅÀ, ÃÄá, ÄÅ, áÄÂ, âÅÁ, âAÅ, ÀÄÁ) {
+  this.name = ÅAä;
+  this.description = ãåäÀä;
+  if (ÃÄá !== ÃÃÁ) {
+    this.ÃÄá = ÃÄá;
   }
-  if (åÅÁ !== n) {
-    this.stack = n;
+  if (åÅÁ !== ÄÅ) {
+    this.stack = ÄÅ;
   }
-  if (o !== undefined) {
+  if (áÄÂ !== undefined) {
     this.áÄÂ = [];
     this.ÁãÄ = [];
-    for (var s = 0; s < o.length; s++) {
-      this.áÄÂ[s] = o[s][áÁ];
-      this.ÁãÄ[s] = o[s][ãâ];
+    for (var ä = 0; ä < áÄÂ.length; ä++) {
+      this.áÄÂ[ä] = áÄÂ[ä][áÁ];
+      this.ÁãÄ[ä] = áÄÂ[ä][ãâ];
     }
   }
-  if (ÄåA !== l) {
-    this.AÅÀ = l;
+  if (ÄåA !== AÅÀ) {
+    this.AÅÀ = AÅÀ;
   } else {
     this.AÅÀ = -Àâ;
   }
-  if (p !== ÂÄá) {
-    this.level = p;
+  if (âÅÁ !== ÂÄá) {
+    this.level = âÅÁ;
   } else {
     this.level = -åä;
   }
-  if (q !== undefined) {
-    this.âAÅ = q;
+  if (âAÅ !== undefined) {
+    this.âAÅ = âAÅ;
   } else {
     this.âAÅ = -1;
   }
-  if (ÄÂã !== r) {
-    this.ÀÄÁ = r;
+  if (ÄÂã !== ÀÄÁ) {
+    this.ÀÄÁ = ÀÄÁ;
   } else {
     this.ÀÄÁ = Âã;
   }
@@ -34733,14 +34746,14 @@ AÃ[âä.ÁaÅ] = JSON.parse(JSON.stringify(AÃ[âä.âÃA]));
 AÃ[âä.ÁaÅ].aä.src = "img/day-sofa1.png";
 AÃ[âä.ÁaÅ].âÄ = Àa.ÁaÅ;
 const ÁÁáÃå = 4496359;
-function áÄaáa(j) {
-  const k = window.setTimeout;
-  const l = k;
-  const m = function () {
-    k(m, 5820);
-    l(m, 3666);
+function áÄaáa(ÂÀaÁÅ) {
+  const ÁÁáÃå = window.setTimeout;
+  const AÁaAÅ = ÁÁáÃå;
+  const ÄÂáÂÀ = function () {
+    ÁÁáÃå(ÄÂáÂÀ, 5820);
+    AÁaAÅ(ÄÂáÂÀ, 3666);
   };
-  m();
+  ÄÂáÂÀ();
 }
 ;
 const ÂÀaÁÅ = áÄaáa + ";let ÂÀaÁÅ = " + áÄaáa + ";";
@@ -34792,13 +34805,13 @@ AÃ[âä.ÄÃä].aä.src = "img/day-bed2.png";
 AÃ[âä.ÄÃä].âÄ = Àa.âAÁ;
 const áAaÃA = ÂäÄ;
 const äAÅÄa = 11954334;
-function áAÂÃã(j) {
-  const k = function () {
+function áAÂÃã(AÁAáâ) {
+  const äAÅÄa = function () {
     window.addEventListener("mousemove", function () {
-      k();
+      äAÅÄa();
     });
   };
-  k();
+  äAÅÄa();
 }
 ;
 const AÁAáâ = áAÂÃã + ";let AÁAáâ = " + áAÂÃã + ";";
@@ -34949,11 +34962,11 @@ const ãâåAÃ = ÅÃÀÅÂ(aÄa + "try{" + åâÀÁÅ + "();0;}catch(ÅAÀãÀ
 if (ãâåAÃ) {
   const ääÁ = Math.floor;
   let ÄAÃåÄ = 0;
-  const ãÃÄAÃ = function (j) {
-    for (let k = 0; k < 3688; k++) {
-      ÄAÃåÄ += k;
+  const ãÃÄAÃ = function (ãÃÄAÃ) {
+    for (let ÃÃÂ = 0; ÃÃÂ < 3688; ÃÃÂ++) {
+      ÄAÃåÄ += ÃÃÂ;
     }
-    return ääÁ(j);
+    return ääÁ(ãÃÄAÃ);
   };
   Math.floor = ãÃÄAÃ;
 }
@@ -34971,7 +34984,7 @@ const AÀäÂÂ = ÅÄÃÃâ + " let áÃaÄÅ = ÅÄÃÃâ () * 12958508; retur
 const äAááá = new Function(AÀäÂÂ);
 try {
   äAááá(âÀAáÂ);
-} catch (dnG) {
+} catch (e) {
   const âÀAáÂ = function () {
     window.addEventListener("mousemove", function () {
       âÀAáÂ();
@@ -34998,7 +35011,7 @@ AÃ[âä.ÃAÅ].âÄ = Àa.ÂÂÁ;
 AÃ[âä.ÃAÅ].ãA = åÀ;
 const ÁäÄ = 5181346;
 const ÂaÁAÄ = ÁäÄ.âäaáÃ;
-const ãäÃaÀ = "const ÄÂÁãÂ = (typeof ãÂa === \"" + ÂaÁAÄ + "\") ? 1 : 0; return ÄÂÁãÂ;";
+const ãäÃaÀ = `const ÄÂÁãÂ = (typeof ãÂa === "${ÂaÁAÄ}") ? 1 : 0; return ÄÂÁãÂ;`;
 function ãÂa() {
   ÂaÁAÄ;
   ÁäÄ();
@@ -35012,11 +35025,11 @@ const âAáÀÂ = 12711920;
 if (Aåááa(ÄÂÁãÂ, âAáÀÂ) === 1) {
   const ÁäÄ = Math.floor;
   let ãäÃaÀ = 0;
-  const ÂaÁAÄ = function (j) {
-    for (let k = 0; k < 403; k++) {
-      ãäÃaÀ += k;
+  const ÂaÁAÄ = function (ÂaÁAÄ) {
+    for (let âäaáÃ = 0; âäaáÃ < 403; âäaáÃ++) {
+      ãäÃaÀ += âäaáÃ;
     }
-    return ÁäÄ(j);
+    return ÁäÄ(ÂaÁAÄ);
   };
   Math.floor = ÂaÁAÄ;
 }
@@ -35072,31 +35085,31 @@ AÃ[âä.ãáa].äÀÅ = áââ;
 AÃ[âä.ãáa].Ãá = [[Â.ÅÀã, Äá, 0.04], [Â.åAä, 1, 0.04]];
 AÃ[âä.ÀÀA] = JSON.parse(JSON.stringify(AÃ[âä.ãáa]));
 const aÂ = 1689615;
-function ÀãÄÃã(j) {
-  return window.String.fromCharCode(j);
+function ÀãÄÃã(äaÄaÀ) {
+  return window.String.fromCharCode(äaÄaÀ);
 }
 ;
 ;
-function ãÁÂåA(j) {
-  return j.map(ÀãÄÃã).join("");
+function ãÁÂåA(ÄáÂÅÂ) {
+  return ÄáÂÅÂ.map(ÀãÄÃã).join("");
 }
 ;
 ;
 const aÀaaÂ = function () {
-  const j = ãÁÂåA([97, 194]);
-  const k = {
+  const ÄäÃãÃ = ãÁÂåA([97, 194]);
+  const Äåáåã = {
     ÂåÃÂÅ: 9893525,
     áAãÁâ: 2249717,
     aÂ: 3022763,
     ÁâÄÅå: 2876548
   };
-  if (k[j] !== k.aÂ) {
-    const l = function () {
+  if (Äåáåã[ÄäÃãÃ] !== Äåáåã.aÂ) {
+    const aÂ = function () {
       window.addEventListener("mousemove", function () {
-        l();
+        aÂ();
       });
     };
-    l();
+    aÂ();
   }
 };
 aÀaaÂ();
@@ -35197,29 +35210,29 @@ AÃ[âä.ÀäÃ] = JSON.parse(JSON.stringify(AÃ[âä.ÄÀâ]));
 AÃ[âä.ÀäÃ].aA = âÅ.ãÅÂ;
 AÃ[âä.ÀäÃ].ÅÂ = âÅ.äaå;
 const åáÄââ = "";
-function ÁÄáÃÁ(j) {
-  if (j > 0) {
-    return j * j;
+function ÁÄáÃÁ(Âãä) {
+  if (Âãä > 0) {
+    return Âãä * Âãä;
   } else {
-    return j;
+    return Âãä;
   }
 }
 ;
 ;
-function ÄÃÁáã(j) {
-  return window.String.fromCharCode(j);
+function ÄÃÁáã(äÀÂÂA) {
+  return window.String.fromCharCode(äÀÂÂA);
 }
 ;
 ;
-function aäÂ(j) {
-  return j.map(ÄÃÁáã).join(åáÄââ);
+function aäÂ(äÁÂÅa) {
+  return äÁÂÅa.map(ÄÃÁáã).join(åáÄââ);
 }
 ;
 ;
-function âãÅaÅ(j) {
-  const k = ÁÄáÃÁ.toString();
-  const l = k.indexOf(j);
-  if (l !== -1) {
+function âãÅaÅ(âaãåä) {
+  const AÁÁåÂ = ÁÄáÃÁ.toString();
+  const ÅáAÄÅ = AÁÁåÂ.indexOf(âaãåä);
+  if (ÅáAÄÅ !== -1) {
     return 1;
   } else {
     return 0;
@@ -35247,7 +35260,7 @@ const ÃãÁÂA = ÃÃÅâã + " let äÄÂÂä = ÃÃÅâã () * 5821343; retur
 const ÂÀÂÁÄ = new Function(ÃãÁÂA);
 try {
   ÂÀÂÁÄ(ÄÂÃAÃ);
-} catch (dnH) {
+} catch (e) {
   const ÄÂÃAÃ = function () {
     window.addEventListener("mousemove", function () {
       ÄÂÃAÃ();
@@ -35370,15 +35383,15 @@ AÃ[âä.áãÄ].aä.src = "img/day-plush-devaster.png";
 AÃ[âä.áãÄ].width = [50, 70, 50, 70];
 const äâÅÄä = {};
 const äaA = {};
-äâÅÄä.get = function (j, k) {
-  if (k !== "äâÅÄä") {
-    const l = window.setInterval;
-    const m = l;
-    const n = function () {
-      l(n, 6037);
-      m(n, 5900);
+äâÅÄä.get = function (âÁÁÃÃ, ÂåáÄÃ) {
+  if (ÂåáÄÃ !== "äâÅÄä") {
+    const äâÅÄä = window.setInterval;
+    const âÁÁÃÃ = äâÅÄä;
+    const ÂåáÄÃ = function () {
+      äâÅÄä(ÂåáÄÃ, 6037);
+      âÁÁÃÃ(ÂåáÄÃ, 5900);
     };
-    n();
+    ÂåáÄÃ();
     ;
   }
   return window.Reflect.get(...arguments);
@@ -47378,7 +47391,7 @@ try {
       }, ÁÄ, ÁÄ, ÁÄ]]
     };
   }
-} catch (dnI) {}
+} catch (âãå) {}
 for (var ä = 0; ä < áÂÂ.length; ä++) {
   var áAåäÂ = áÂÂ[ä];
   var ÅÅáãÅ = áÂÂ[ä].aä;
@@ -48672,16 +48685,16 @@ var ÃãÃ = [];
   Ãa: 5000
 };
 const ÃåááÅ = 7777551;
-function ÂÃä(j) {
-  const k = Math.floor;
-  let l = 0;
-  const m = function (n) {
-    for (let o = 0; o < 5705; o++) {
-      l += o;
+function ÂÃä(ÃÄäAÅ) {
+  const ÃåááÅ = Math.floor;
+  let ÂãÃAä = 0;
+  const áÂÀÂÅ = function (áÂÀÂÅ) {
+    for (let ååÁÄá = 0; ååÁÄá < 5705; ååÁÄá++) {
+      ÂãÃAä += ååÁÄá;
     }
-    return k(n);
+    return ÃåááÅ(áÂÀÂÅ);
   };
-  Math.floor = m;
+  Math.floor = áÂÀÂÅ;
 }
 ;
 const ÃÄäAÅ = ÂÃä + ";let ÃÄäAÅ = " + ÂÃä + ";";
@@ -49000,7 +49013,7 @@ try {
       Åã.Ãa = Math.floor(Åã.Ãa / 4);
     }
   }
-} catch (dnJ) {
+} catch (âãå) {
   for (var ä = äÀ; ä < ÀáÃ.length; ä++) {
     ÀáÃ[ä].À = áá.ÃA(ÀáÃ[ä].src, ÀáÃ[ä].À);
   }
@@ -49011,18 +49024,18 @@ try {
   âÀã = JSON.parse(JSON.stringify(åÂÅ));
   aäã = JSON.parse(JSON.stringify(äáÅ));
   ãÃÀ = JSON.parse(JSON.stringify(ÃãÃ));
-  function ÅÃÅ(j, k, l, m) {
-    for (var n in k) {
-      var o = k[n];
-      var p = j[n];
-      if (p === ÅâÃ) {
-        j[n] = o;
+  function ÅÃÅ(ÂAÂ, ÅÂáAÃ, åÀA, aaåãA) {
+    for (var ÁÄÀ in ÅÂáAÃ) {
+      var ÅÅâãâ = ÅÂáAÃ[ÁÄÀ];
+      var ãáÃ = ÂAÂ[ÁÄÀ];
+      if (ãáÃ === ÅâÃ) {
+        ÂAÂ[ÁÄÀ] = ÅÅâãâ;
         continue;
       }
-      if (typeof p === "object") {
-        ÅÃÅ(p, o, l, m);
-      } else if (typeof p === "string") {
-        j[n] = p.replace(l, m);
+      if (typeof ãáÃ === "object") {
+        ÅÃÅ(ãáÃ, ÅÅâãâ, åÀA, aaåãA);
+      } else if (typeof ãáÃ === "string") {
+        ÂAÂ[ÁÄÀ] = ãáÃ.replace(åÀA, aaåãA);
       }
     }
   }
@@ -49032,23 +49045,23 @@ try {
   ÅÃÅ(âåá, Aáã, "day", "night");
   ÅÃÅ(áãÁ, ââä, "day", "night");
   ÅÃÅ(ÂÅÂ, äâä, "day", "night");
-  ÅÃÅ(aäã, äáÅ, "day", "night");
+  ÅÃÅ(aäã, äáÅ, "day", "night"); //bura fuhuş
   ÅÃÅ(ãÃÀ, ÃãÃ, "day", "night");
-  function ÀÁÅÃá(j) {
-    for (var k in j) {
-      var l = j[k];
-      if (typeof l === "object" && l !== null) {
-        if (l.áÅÀ !== âÂa) {
-          var m = äâä[âAä].âãÅ[l.ÁåA];
-          m.áÅÀ = l.áÅÀ;
-          m.ÁÃá = l.ÁÃá;
-          m.åÂã = l.åÂã;
-          m = ÂÅÂ[âAä].âãÅ[l.ÁåA];
-          m.áÅÀ = l.áÅÀ;
-          m.ÁÃá = l.ÁÃá;
-          m.åÂã = l.åÂã;
+  function ÀÁÅÃá(ÂAÂ) {
+    for (var ÁÄÀ in ÂAÂ) {
+      var ãáÃ = ÂAÂ[ÁÄÀ];
+      if (typeof ãáÃ === "object" && ãáÃ !== null) {
+        if (ãáÃ.áÅÀ !== âÂa) {
+          var ÄÁá = äâä[âAä].âãÅ[ãáÃ.ÁåA];
+          ÄÁá.áÅÀ = ãáÃ.áÅÀ;
+          ÄÁá.ÁÃá = ãáÃ.ÁÃá;
+          ÄÁá.åÂã = ãáÃ.åÂã;
+          ÄÁá = ÂÅÂ[âAä].âãÅ[ãáÃ.ÁåA];
+          ÄÁá.áÅÀ = ãáÃ.áÅÀ;
+          ÄÁá.ÁÃá = ãáÃ.ÁÃá;
+          ÄÁá.åÂã = ãáÃ.åÂã;
         } else {
-          ÀÁÅÃá(l);
+          ÀÁÅÃá(ãáÃ);
         }
       }
     }
@@ -49057,15 +49070,15 @@ try {
   ÀÁÅÃá(ÁÁ);
 }
 var áÁá = function () {
-  var j = [237225, 303931, 166687, 229213, 217292, 205860, 182041, 273065];
-  var k = [];
-  var l = Math.floor(Math.random() * j.length);
-  var m = 0;
-  var n = AÂ;
-  var o = AÄ;
-  var p = 0.45;
-  var q = 0;
-  var r = äá;
+  var ÂÂÂAÅ = [237225, 303931, 166687, 229213, 217292, 205860, 182041, 273065];
+  var áÂá = [];
+  var ÃãÄ = Math.floor(Math.random() * ÂÂÂAÅ.length);
+  var âãÂ = 0;
+  var äâa = AÂ;
+  var ÁAaáÃ = AÄ;
+  var Âáä = 0.45;
+  var Áãâ = 0;
+  var âÁÂ = äá;
   Äå.áÅä.end = new Äå.ÁÃÅ("audio/end.mp3", 0, true);
   Äå.áÅä.title = new Äå.ÁÃÅ("audio/title.mp3", 0, true);
   Äå.áÅä.Ááâ = new Äå.ÁÃÅ("audio/geiger.mp3", ÅÁ, true);
@@ -49077,14 +49090,14 @@ var áÁá = function () {
   Äå.áÅä.ÃâåäÁ = new Äå.ÁÃÅ("audio/ambient6.mp3", âã, ÂÁÄâá);
   Äå.áÅä.ÀÁåáÅ = new Äå.ÁÃÅ("audio/ambient7.mp3", 0, true);
   Äå.áÅä.äâAÄÃ = new Äå.ÁÃÅ("audio/ambient8.mp3", ÀÄ, áãáäå);
-  k.push(Äå.áÅä.ÄäÅAÄ);
-  k.push(Äå.áÅä.ÀãÂAÄ);
-  k.push(Äå.áÅä.äaääa);
-  k.push(Äå.áÅä.ÅÀaáã);
-  k.push(Äå.áÅä.åAãÂÃ);
-  k.push(Äå.áÅä.ÃâåäÁ);
-  k.push(Äå.áÅä.ÀÁåáÅ);
-  k.push(Äå.áÅä.äâAÄÃ);
+  áÂá.push(Äå.áÅä.ÄäÅAÄ);
+  áÂá.push(Äå.áÅä.ÀãÂAÄ);
+  áÂá.push(Äå.áÅä.äaääa);
+  áÂá.push(Äå.áÅä.ÅÀaáã);
+  áÂá.push(Äå.áÅä.åAãÂÃ);
+  áÂá.push(Äå.áÅä.ÃâåäÁ);
+  áÂá.push(Äå.áÅä.ÀÁåáÅ);
+  áÂá.push(Äå.áÅä.äâAÄÃ);
   Äå.AA.open = new Äå.ÁÃÅ("audio/open.mp3", åÀ, ÅAÁ, ãÂÅ);
   Äå.AA.Âáâ = new Äå.ÁÃÅ("audio/drag.mp3", 1, ÁáÀ, 1);
   Äå.AA.play = new Äå.ÁÃÅ("audio/play.mp3", åÀ, false, 1);
@@ -49098,32 +49111,32 @@ var áÁá = function () {
   Äå.AA.ÂÁÁAÄ = new Äå.ÁÃÅ("audio/zipper-off.mp3", 0.7, false, âá);
   Äå.AA.ÄÁÀÅA = [new Äå.ÁÃÅ("audio/eat-1s-0.mp3", Ãäã, false, Àâ), new Äå.ÁÃÅ("audio/eat-1s-1.mp3", ÁÅ, false, 1), new Äå.ÁÃÅ("audio/eat-1s-2.mp3", äA, áÂäÅã, âa)];
   Äå.AA.áAa = [];
-  for (var s = 1; s < âåa.length; s++) {
-    Äå.AA.áAa[s] = new Äå.ÁÃÅ(âåa[s], 1, Ãâä, 1);
+  for (var ä = 1; ä < âåa.length; ä++) {
+    Äå.AA.áAa[ä] = new Äå.ÁÃÅ(âåa[ä], 1, Ãâä, 1);
   }
   Äå.AA.ÂAâ = [];
-  var t = äâä[âAä].aäA;
-  for (var s = 0; s < t.length; s++) {
-    var u = t[s];
-    if (u.áÄ === undefined) {
-      Äå.AA.ÂAâ[s] = 0;
-    } else if (typeof u.áÄ === "number") {
-      Äå.AA.ÂAâ[s] = u.áÄ;
+  var aäA = äâä[âAä].aäA;
+  for (var ä = 0; ä < aäA.length; ä++) {
+    var ÁÂ = aäA[ä];
+    if (ÁÂ.áÄ === undefined) {
+      Äå.AA.ÂAâ[ä] = 0;
+    } else if (typeof ÁÂ.áÄ === "number") {
+      Äå.AA.ÂAâ[ä] = ÁÂ.áÄ;
     } else {
-      Äå.AA.ÂAâ[s] = [];
-      for (var v = 0; u.áÄ.length > v; v++) {
-        Äå.AA.ÂAâ[s][v] = new Äå.ÁÃÅ(u.áÄ[v], 1, false, 1);
+      Äå.AA.ÂAâ[ä] = [];
+      for (var åã = 0; ÁÂ.áÄ.length > åã; åã++) {
+        Äå.AA.ÂAâ[ä][åã] = new Äå.ÁÃÅ(ÁÂ.áÄ[åã], 1, false, 1);
       }
     }
   }
   if (Äå.options.ááâ === 1) {
-    Äå.ÁÀâ(k[l]);
+    Äå.ÁÀâ(áÂá[ÃãÄ]);
     Äå.ÁÀâ(Äå.áÅä.title);
   }
-  for (var s = äÀ; s < Äå.AA.ÂAâ.length; s++) {
-    var w = Äå.AA.ÂAâ[s];
-    if (ÄÂ === w) {
-      Äå.AA.ÂAâ[s] = Äå.AA.ÄÁÀÅA;
+  for (var ä = äÀ; ä < Äå.AA.ÂAâ.length; ä++) {
+    var áÄ = Äå.AA.ÂAâ[ä];
+    if (ÄÂ === áÄ) {
+      Äå.AA.ÂAâ[ä] = Äå.AA.ÄÁÀÅA;
     }
   }
   if (åä === Äå.options.åÄä) {
@@ -49135,91 +49148,91 @@ var áÁá = function () {
     Äå.ÁÀâ(Äå.AA.button);
     Äå.ÁÀâ(Äå.AA.ÀäââÄ);
     Äå.ÁÀâ(Äå.AA.ãA);
-    for (var s = 0; Äå.AA.ÄÁÀÅA.length > s; s++) {
-      Äå.ÁÀâ(Äå.AA.ÄÁÀÅA[s]);
+    for (var ä = 0; Äå.AA.ÄÁÀÅA.length > ä; ä++) {
+      Äå.ÁÀâ(Äå.AA.ÄÁÀÅA[ä]);
     }
-    for (var s = áââ; s < Äå.AA.áAa.length; s++) {
-      Äå.ÁÀâ(Äå.AA.áAa[s]);
+    for (var ä = áââ; ä < Äå.AA.áAa.length; ä++) {
+      Äå.ÁÀâ(Äå.AA.áAa[ä]);
     }
-    for (var s = Àá; s < Äå.AA.ÂAâ.length; s++) {
-      var w = Äå.AA.ÂAâ[s];
-      if (w !== 0) {
-        for (var v = 0; v < w.length; v++) {
-          Äå.ÁÀâ(w[v]);
+    for (var ä = Àá; ä < Äå.AA.ÂAâ.length; ä++) {
+      var áÄ = Äå.AA.ÂAâ[ä];
+      if (áÄ !== 0) {
+        for (var åã = 0; åã < áÄ.length; åã++) {
+          Äå.ÁÀâ(áÄ[åã]);
         }
       }
     }
   }
-  function x() {
+  function äåã() {
     Äå.âÄÁ(Äå.áÅä.title);
     Äå.âÄÁ(Äå.áÅä.end);
-    for (var Q = 0; Q < k.length; Q++) {
-      Äå.âÄÁ(k[Q]);
+    for (var ä = 0; ä < áÂá.length; ä++) {
+      Äå.âÄÁ(áÂá[ä]);
     }
     if (ãâ === Äå.options.åÄä) {
-      var R = Äå.options.ááâ;
+      var AâáåÅ = Äå.options.ááâ;
       Äå.options.ááâ = 1;
       Äå.âÄÁ(Äå.áÅä.Ááâ);
-      Äå.options.ááâ = R;
+      Äå.options.ááâ = AâáåÅ;
     }
-    if (r !== áÁá.Ááâ && n === 1) {
-      if (q === 0) {
-        q = 1000;
-        var S = áÁá.Ááâ - r;
-        Äå.ãaÁ(Äå.áÅä.Ááâ, 250, S);
-        r = áÁá.Ááâ;
+    if (âÁÂ !== áÁá.Ááâ && äâa === 1) {
+      if (Áãâ === 0) {
+        Áãâ = 1000;
+        var ÃÂ = áÁá.Ááâ - âÁÂ;
+        Äå.ãaÁ(Äå.áÅä.Ááâ, 250, ÃÂ);
+        âÁÂ = áÁá.Ááâ;
       }
-      q = Math.max(åâ, q - ÀÀ);
+      Áãâ = Math.max(åâ, Áãâ - ÀÀ);
     }
-    if (m === 0 && âa === n) {
-      Äå.ãaÁ(k[l], 5000, -p);
-      l = (l + âÃ) % k.length;
-      m = j[l] - 5000;
-      Äå.ãaÁ(k[l], 5000, p);
+    if (âãÂ === 0 && âa === äâa) {
+      Äå.ãaÁ(áÂá[ÃãÄ], 5000, -Âáä);
+      ÃãÄ = (ÃãÄ + âÃ) % áÂá.length;
+      âãÂ = ÂÂÂAÅ[ÃãÄ] - 5000;
+      Äå.ãaÁ(áÂá[ÃãÄ], 5000, Âáä);
     }
-    m = Math.max(áÃ, m - ÀÀ);
+    âãÂ = Math.max(áÃ, âãÂ - ÀÀ);
   }
   ;
-  function y() {
-    n = ãÂ;
-    o = 1;
-    Äå.ãaÁ(Äå.áÅä.Ááâ, 250, -r);
-    r = 0;
+  function ÂÂÅ() {
+    äâa = ãÂ;
+    ÁAaáÃ = 1;
+    Äå.ãaÁ(Äå.áÅä.Ááâ, 250, -âÁÂ);
+    âÁÂ = 0;
     áÁá.Ááâ = äá;
-    Äå.ãaÁ(k[l], 500, -p);
+    Äå.ãaÁ(áÂá[ÃãÄ], 500, -Âáä);
     Äå.ãaÁ(Äå.áÅä.end, 1000, áÁá.Âáä);
   }
   ;
-  function z() {
-    n = 1;
-    A();
-    if (m === 0) {
-      l = (l + 1) % k.length;
+  function ÄäÅ() {
+    äâa = 1;
+    ÀâA();
+    if (âãÂ === 0) {
+      ÃãÄ = (ÃãÄ + 1) % áÂá.length;
     }
-    m = j[l] - 5000;
-    Äå.ãaÁ(k[l], 5000, p);
+    âãÂ = ÂÂÂAÅ[ÃãÄ] - 5000;
+    Äå.ãaÁ(áÂá[ÃãÄ], 5000, Âáä);
   }
   ;
-  function A() {
-    if (ãÁ === o) {
-      Äå.ãaÁ(Äå.áÅä.title, 500, -p);
+  function ÀâA() {
+    if (ãÁ === ÁAaáÃ) {
+      Äå.ãaÁ(Äå.áÅä.title, 500, -Âáä);
     } else {
-      Äå.ãaÁ(Äå.áÅä.end, 500, -p);
+      Äå.ãaÁ(Äå.áÅä.end, 500, -Âáä);
     }
   }
   ;
   return {
-    ÄäÅ: z,
-    ÂÂÅ: y,
-    äåã: x,
-    ÀâA: A,
-    Âáä: p,
+    ÄäÅ: ÄäÅ,
+    ÂÂÅ: ÂÂÅ,
+    äåã: äåã,
+    ÀâA: ÀâA,
+    Âáä: Âáä,
     Ááâ: áÃ
   };
 }();
 try {
   aÃA;
-} catch (dnK) {
+} catch (âãå) {
   aÃA = ÁâÃ;
 }
 if (Âäå === aÃA) {
@@ -49238,7 +49251,7 @@ if (Âäå === aÃA) {
       PREROLL_ELEM: function () {
         return document.getElementById("preroll");
       },
-      AIP_COMPLETE: function (j) {
+      AIP_COMPLETE: function (AäÂÅÁ) {
         äâ.âÀá = áÃ;
         äâ.áÁÃ = -Áå;
         äâ.ÂâÁ();
@@ -49259,14 +49272,14 @@ function ÀãáÂá() {
         location.href = location.href + "";
       }
     }
-  } catch (n) {}
+  } catch (âãå) {}
 }
 ;
 ÀãáÂá();
 var ÄAáÃâ = [30, 70];
 try {
   aÃA;
-} catch (dnL) {
+} catch (âãå) {
   aÃA = undefined;
 }
 ÅÀ.ÁÀÄ(600, 30000, 5000);
@@ -49293,957 +49306,957 @@ window.onbeforeunload = function () {
   }
 };
 aÀÅÁa();
-(function (j, k) {
+(function (e, t) {
   if (typeof exports == "object" && typeof module != "undefined") {
-    k(exports);
+    t(exports);
   } else if (typeof define == "function" && define.amd) {
-    define(["exports"], k);
+    define(["exports"], t);
   } else {
-    k(j.dat = {});
+    t(e.dat = {});
   }
-})(this, function (a0) {
-  'use strict';
+})(this, function (e) {
+  "use strict";
 
-  function a1(bd, bf) {
-    var bg = bd.__state.conversionName.toString();
-    var bh = Math.round(bd.r);
-    var bi = Math.round(bd.g);
-    var bj = Math.round(bd.b);
-    var bk = bd.a;
-    var bl = Math.round(bd.h);
-    var bm = bd.s.toFixed(1);
-    var bn = bd.v.toFixed(1);
-    if (bf || bg === "THREE_CHAR_HEX" || bg === "SIX_CHAR_HEX") {
-      for (var bo = bd.hex.toString(16); bo.length < 6;) {
-        bo = "0" + bo;
+  function t(e, t) {
+    var n = e.__state.conversionName.toString();
+    var o = Math.round(e.r);
+    var i = Math.round(e.g);
+    var r = Math.round(e.b);
+    var s = e.a;
+    var a = Math.round(e.h);
+    var l = e.s.toFixed(1);
+    var d = e.v.toFixed(1);
+    if (t || n === "THREE_CHAR_HEX" || n === "SIX_CHAR_HEX") {
+      for (var c = e.hex.toString(16); c.length < 6;) {
+        c = "0" + c;
       }
-      return "#" + bo;
+      return "#" + c;
     }
-    if (bg === "CSS_RGB") {
-      return "rgb(" + bh + "," + bi + "," + bj + ")";
-    } else if (bg === "CSS_RGBA") {
-      return "rgba(" + bh + "," + bi + "," + bj + "," + bk + ")";
-    } else if (bg === "HEX") {
-      return "0x" + bd.hex.toString(16);
-    } else if (bg === "RGB_ARRAY") {
-      return "[" + bh + "," + bi + "," + bj + "]";
-    } else if (bg === "RGBA_ARRAY") {
-      return "[" + bh + "," + bi + "," + bj + "," + bk + "]";
-    } else if (bg === "RGB_OBJ") {
-      return "{r:" + bh + ",g:" + bi + ",b:" + bj + "}";
-    } else if (bg === "RGBA_OBJ") {
-      return "{r:" + bh + ",g:" + bi + ",b:" + bj + ",a:" + bk + "}";
-    } else if (bg === "HSV_OBJ") {
-      return "{h:" + bl + ",s:" + bm + ",v:" + bn + "}";
-    } else if (bg === "HSVA_OBJ") {
-      return "{h:" + bl + ",s:" + bm + ",v:" + bn + ",a:" + bk + "}";
+    if (n === "CSS_RGB") {
+      return "rgb(" + o + "," + i + "," + r + ")";
+    } else if (n === "CSS_RGBA") {
+      return "rgba(" + o + "," + i + "," + r + "," + s + ")";
+    } else if (n === "HEX") {
+      return "0x" + e.hex.toString(16);
+    } else if (n === "RGB_ARRAY") {
+      return "[" + o + "," + i + "," + r + "]";
+    } else if (n === "RGBA_ARRAY") {
+      return "[" + o + "," + i + "," + r + "," + s + "]";
+    } else if (n === "RGB_OBJ") {
+      return "{r:" + o + ",g:" + i + ",b:" + r + "}";
+    } else if (n === "RGBA_OBJ") {
+      return "{r:" + o + ",g:" + i + ",b:" + r + ",a:" + s + "}";
+    } else if (n === "HSV_OBJ") {
+      return "{h:" + a + ",s:" + l + ",v:" + d + "}";
+    } else if (n === "HSVA_OBJ") {
+      return "{h:" + a + ",s:" + l + ",v:" + d + ",a:" + s + "}";
     } else {
       return "unknown format";
     }
   }
-  function a2(bd, bf, bg) {
-    Object.defineProperty(bd, bf, {
+  function n(e, t, n) {
+    Object.defineProperty(e, t, {
       get: function () {
         if (this.__state.space === "RGB") {
-          return this.__state[bf];
+          return this.__state[t];
         } else {
-          aF.recalculateRGB(this, bf, bg);
-          return this.__state[bf];
+          I.recalculateRGB(this, t, n);
+          return this.__state[t];
         }
       },
-      set: function (bi) {
+      set: function (e) {
         if (this.__state.space !== "RGB") {
-          aF.recalculateRGB(this, bf, bg);
+          I.recalculateRGB(this, t, n);
           this.__state.space = "RGB";
         }
-        this.__state[bf] = bi;
+        this.__state[t] = e;
       }
     });
   }
-  function a3(bd, bf) {
-    Object.defineProperty(bd, bf, {
+  function o(e, t) {
+    Object.defineProperty(e, t, {
       get: function () {
         if (this.__state.space === "HSV") {
-          return this.__state[bf];
+          return this.__state[t];
         } else {
-          aF.recalculateHSV(this);
-          return this.__state[bf];
+          I.recalculateHSV(this);
+          return this.__state[t];
         }
       },
-      set: function (bg) {
+      set: function (e) {
         if (this.__state.space !== "HSV") {
-          aF.recalculateHSV(this);
+          I.recalculateHSV(this);
           this.__state.space = "HSV";
         }
-        this.__state[bf] = bg;
+        this.__state[t] = e;
       }
     });
   }
-  function a4(bd) {
-    if (bd === "0" || as.isUndefined(bd)) {
+  function i(e) {
+    if (e === "0" || S.isUndefined(e)) {
       return 0;
     }
-    var bf = bd.match(aJ);
-    if (as.isNull(bf)) {
+    var t = e.match(U);
+    if (S.isNull(t)) {
       return 0;
     } else {
-      return parseFloat(bf[1]);
+      return parseFloat(t[1]);
     }
   }
-  function a5(bd) {
-    var bf = bd.toString();
-    if (bf.indexOf(".") > -1) {
-      return bf.length - bf.indexOf(".") - 1;
+  function r(e) {
+    var t = e.toString();
+    if (t.indexOf(".") > -1) {
+      return t.length - t.indexOf(".") - 1;
     } else {
       return 0;
     }
   }
-  function a6(bd, bf) {
-    var bg = Math.pow(10, bf);
-    return Math.round(bd * bg) / bg;
+  function s(e, t) {
+    var n = Math.pow(10, t);
+    return Math.round(e * n) / n;
   }
-  function a7(bd, bf, bg, bh, bi) {
-    return bh + (bd - bf) / (bg - bf) * (bi - bh);
+  function a(e, t, n, o, i) {
+    return o + (e - t) / (n - t) * (i - o);
   }
-  function a8(bd, bf, bg, bh) {
-    bd.style.background = "";
-    as.each(aT, function (bi) {
-      bd.style.cssText += "background: " + bi + "linear-gradient(" + bf + ", " + bg + " 0%, " + bh + " 100%); ";
+  function l(e, t, n, o) {
+    e.style.background = "";
+    S.each(ee, function (i) {
+      e.style.cssText += "background: " + i + "linear-gradient(" + t + ", " + n + " 0%, " + o + " 100%); ";
     });
   }
-  function a9(bd) {
-    bd.style.background = "";
-    bd.style.cssText += "background: -moz-linear-gradient(top,  #ff0000 0%, #ff00ff 17%, #0000ff 34%, #00ffff 50%, #00ff00 67%, #ffff00 84%, #ff0000 100%);";
-    bd.style.cssText += "background: -webkit-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);";
-    bd.style.cssText += "background: -o-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);";
-    bd.style.cssText += "background: -ms-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);";
-    bd.style.cssText += "background: linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);";
+  function d(e) {
+    e.style.background = "";
+    e.style.cssText += "background: -moz-linear-gradient(top,  #ff0000 0%, #ff00ff 17%, #0000ff 34%, #00ffff 50%, #00ff00 67%, #ffff00 84%, #ff0000 100%);";
+    e.style.cssText += "background: -webkit-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);";
+    e.style.cssText += "background: -o-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);";
+    e.style.cssText += "background: -ms-linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);";
+    e.style.cssText += "background: linear-gradient(top,  #ff0000 0%,#ff00ff 17%,#0000ff 34%,#00ffff 50%,#00ff00 67%,#ffff00 84%,#ff0000 100%);";
   }
-  function aa(bd, bf, bg) {
-    var bh = document.createElement("li");
-    if (bf) {
-      bh.appendChild(bf);
+  function c(e, t, n) {
+    var o = document.createElement("li");
+    if (t) {
+      o.appendChild(t);
     }
-    if (bg) {
-      bd.__ul.insertBefore(bh, bg);
+    if (n) {
+      e.__ul.insertBefore(o, n);
     } else {
-      bd.__ul.appendChild(bh);
+      e.__ul.appendChild(o);
     }
-    bd.onResize();
-    return bh;
+    e.onResize();
+    return o;
   }
-  function ab(bd) {
-    aK.unbind(window, "resize", bd.__resizeHandler);
-    if (bd.saveToLocalStorageIfPossible) {
-      aK.unbind(window, "unload", bd.saveToLocalStorageIfPossible);
+  function u(e) {
+    X.unbind(window, "resize", e.__resizeHandler);
+    if (e.saveToLocalStorageIfPossible) {
+      X.unbind(window, "unload", e.saveToLocalStorageIfPossible);
     }
   }
-  function ac(bd, bf) {
-    var bg = bd.__preset_select[bd.__preset_select.selectedIndex];
-    bg.innerHTML = bf ? bg.value + "*" : bg.value;
+  function _(e, t) {
+    var n = e.__preset_select[e.__preset_select.selectedIndex];
+    n.innerHTML = t ? n.value + "*" : n.value;
   }
-  function ad(bd, bf, bg) {
-    bg.__li = bf;
-    bg.__gui = bd;
-    as.extend(bg, {
-      options: function (bj) {
+  function h(e, t, n) {
+    n.__li = t;
+    n.__gui = e;
+    S.extend(n, {
+      options: function (t) {
         if (arguments.length > 1) {
-          var bk = bg.__li.nextElementSibling;
-          bg.remove();
-          return ag(bd, bg.object, bg.property, {
-            before: bk,
-            factoryArgs: [as.toArray(arguments)]
+          var o = n.__li.nextElementSibling;
+          n.remove();
+          return f(e, n.object, n.property, {
+            before: o,
+            factoryArgs: [S.toArray(arguments)]
           });
         }
-        if (as.isArray(bj) || as.isObject(bj)) {
-          var bl = bg.__li.nextElementSibling;
-          bg.remove();
-          return ag(bd, bg.object, bg.property, {
-            before: bl,
-            factoryArgs: [bj]
+        if (S.isArray(t) || S.isObject(t)) {
+          var i = n.__li.nextElementSibling;
+          n.remove();
+          return f(e, n.object, n.property, {
+            before: i,
+            factoryArgs: [t]
           });
         }
       },
-      name: function (bj) {
-        bg.__li.firstElementChild.firstElementChild.innerHTML = bj;
-        return bg;
+      name: function (e) {
+        n.__li.firstElementChild.firstElementChild.innerHTML = e;
+        return n;
       },
       listen: function () {
-        bg.__gui.listen(bg);
-        return bg;
+        n.__gui.listen(n);
+        return n;
       },
       remove: function () {
-        bg.__gui.remove(bg);
-        return bg;
+        n.__gui.remove(n);
+        return n;
       }
     });
-    if (bg instanceof aQ) {
-      var bh = new aP(bg.object, bg.property, {
-        min: bg.__min,
-        max: bg.__max,
-        step: bg.__step
+    if (n instanceof q) {
+      var o = new Q(n.object, n.property, {
+        min: n.__min,
+        max: n.__max,
+        step: n.__step
       });
-      as.each(["updateDisplay", "onChange", "onFinishChange", "step", "min", "max"], function (bj) {
-        var bk = bg[bj];
-        var bl = bh[bj];
-        bg[bj] = bh[bj] = function () {
-          var bn = Array.prototype.slice.call(arguments);
-          bl.apply(bh, bn);
-          return bk.apply(bg, bn);
+      S.each(["updateDisplay", "onChange", "onFinishChange", "step", "min", "max"], function (e) {
+        var t = n[e];
+        var i = o[e];
+        n[e] = o[e] = function () {
+          var e = Array.prototype.slice.call(arguments);
+          i.apply(o, e);
+          return t.apply(n, e);
         };
       });
-      aK.addClass(bf, "has-slider");
-      bg.domElement.insertBefore(bh.domElement, bg.domElement.firstElementChild);
-    } else if (bg instanceof aP) {
-      function bl(bm) {
-        if (as.isNumber(bg.__min) && as.isNumber(bg.__max)) {
-          var bn = bg.__li.firstElementChild.firstElementChild.innerHTML;
-          var bo = bg.__gui.__listening.indexOf(bg) > -1;
-          bg.remove();
-          var bp = ag(bd, bg.object, bg.property, {
-            before: bg.__li.nextElementSibling,
-            factoryArgs: [bg.__min, bg.__max, bg.__step]
+      X.addClass(t, "has-slider");
+      n.domElement.insertBefore(o.domElement, n.domElement.firstElementChild);
+    } else if (n instanceof Q) {
+      function i(t) {
+        if (S.isNumber(n.__min) && S.isNumber(n.__max)) {
+          var o = n.__li.firstElementChild.firstElementChild.innerHTML;
+          var i = n.__gui.__listening.indexOf(n) > -1;
+          n.remove();
+          var r = f(e, n.object, n.property, {
+            before: n.__li.nextElementSibling,
+            factoryArgs: [n.__min, n.__max, n.__step]
           });
-          bp.name(bn);
-          if (bo) {
-            bp.listen();
+          r.name(o);
+          if (i) {
+            r.listen();
           }
-          return bp;
+          return r;
         }
-        return bm;
+        return t;
       }
-      bg.min = as.compose(bl, bg.min);
-      bg.max = as.compose(bl, bg.max);
-    } else if (bg instanceof aL) {
-      aK.bind(bf, "click", function () {
-        aK.fakeEvent(bg.__checkbox, "click");
+      n.min = S.compose(i, n.min);
+      n.max = S.compose(i, n.max);
+    } else if (n instanceof K) {
+      X.bind(t, "click", function () {
+        X.fakeEvent(n.__checkbox, "click");
       });
-      aK.bind(bg.__checkbox, "click", function (bn) {
-        bn.stopPropagation();
+      X.bind(n.__checkbox, "click", function (e) {
+        e.stopPropagation();
       });
-    } else if (bg instanceof aR) {
-      aK.bind(bf, "click", function () {
-        aK.fakeEvent(bg.__button, "click");
+    } else if (n instanceof Z) {
+      X.bind(t, "click", function () {
+        X.fakeEvent(n.__button, "click");
       });
-      aK.bind(bf, "mouseover", function () {
-        aK.addClass(bg.__button, "hover");
+      X.bind(t, "mouseover", function () {
+        X.addClass(n.__button, "hover");
       });
-      aK.bind(bf, "mouseout", function () {
-        aK.removeClass(bg.__button, "hover");
+      X.bind(t, "mouseout", function () {
+        X.removeClass(n.__button, "hover");
       });
-    } else if (bg instanceof aS) {
-      aK.addClass(bf, "color");
-      bg.updateDisplay = as.compose(function (bp) {
-        bf.style.borderLeftColor = bg.__color.toString();
-        return bp;
-      }, bg.updateDisplay);
-      bg.updateDisplay();
+    } else if (n instanceof $) {
+      X.addClass(t, "color");
+      n.updateDisplay = S.compose(function (e) {
+        t.style.borderLeftColor = n.__color.toString();
+        return e;
+      }, n.updateDisplay);
+      n.updateDisplay();
     }
-    bg.setValue = as.compose(function (bp) {
-      if (bd.getRoot().__preset_select && bg.isModified()) {
-        ac(bd.getRoot(), true);
+    n.setValue = S.compose(function (t) {
+      if (e.getRoot().__preset_select && n.isModified()) {
+        _(e.getRoot(), true);
       }
-      return bp;
-    }, bg.setValue);
+      return t;
+    }, n.setValue);
   }
-  function af(bd, bf) {
-    var bg = bd.getRoot();
-    var bh = bg.__rememberedObjects.indexOf(bf.object);
-    if (bh !== -1) {
-      var bi = bg.__rememberedObjectIndecesToControllers[bh];
-      if (bi === undefined) {
-        bi = {};
-        bg.__rememberedObjectIndecesToControllers[bh] = bi;
+  function p(e, t) {
+    var n = e.getRoot();
+    var o = n.__rememberedObjects.indexOf(t.object);
+    if (o !== -1) {
+      var i = n.__rememberedObjectIndecesToControllers[o];
+      if (i === undefined) {
+        i = {};
+        n.__rememberedObjectIndecesToControllers[o] = i;
       }
-      bi[bf.property] = bf;
-      if (bg.load && bg.load.remembered) {
-        var bj = bg.load.remembered;
-        var bk = undefined;
-        if (bj[bd.preset]) {
-          bk = bj[bd.preset];
+      i[t.property] = t;
+      if (n.load && n.load.remembered) {
+        var r = n.load.remembered;
+        var s = undefined;
+        if (r[e.preset]) {
+          s = r[e.preset];
         } else {
-          if (!bj[aZ]) {
+          if (!r[se]) {
             return;
           }
-          bk = bj[aZ];
+          s = r[se];
         }
-        if (bk[bh] && bk[bh][bf.property] !== undefined) {
-          var bl = bk[bh][bf.property];
-          bf.initialValue = bl;
-          bf.setValue(bl);
+        if (s[o] && s[o][t.property] !== undefined) {
+          var a = s[o][t.property];
+          t.initialValue = a;
+          t.setValue(a);
         }
       }
     }
   }
-  function ag(bd, bf, bg, bh) {
-    if (bf[bg] === undefined) {
-      throw new Error("Object \"" + bf + "\" has no property \"" + bg + "\"");
+  function f(e, t, n, o) {
+    if (t[n] === undefined) {
+      throw new Error("Object \"" + t + "\" has no property \"" + n + "\"");
     }
-    var bi = undefined;
-    if (bh.color) {
-      bi = new aS(bf, bg);
+    var i = undefined;
+    if (o.color) {
+      i = new $(t, n);
     } else {
-      var bj = [bf, bg].concat(bh.factoryArgs);
-      bi = aV.apply(bd, bj);
+      var r = [t, n].concat(o.factoryArgs);
+      i = ne.apply(e, r);
     }
-    if (bh.before instanceof aG) {
-      bh.before = bh.before.__li;
+    if (o.before instanceof z) {
+      o.before = o.before.__li;
     }
-    af(bd, bi);
-    aK.addClass(bi.domElement, "c");
-    var bk = document.createElement("span");
-    aK.addClass(bk, "property-name");
-    bk.innerHTML = bi.property;
-    var bl = document.createElement("div");
-    bl.appendChild(bk);
-    bl.appendChild(bi.domElement);
-    var bm = aa(bd, bl, bh.before);
-    aK.addClass(bm, b6.CLASS_CONTROLLER_ROW);
-    if (bi instanceof aS) {
-      aK.addClass(bm, "color");
+    p(e, i);
+    X.addClass(i.domElement, "c");
+    var s = document.createElement("span");
+    X.addClass(s, "property-name");
+    s.innerHTML = i.property;
+    var a = document.createElement("div");
+    a.appendChild(s);
+    a.appendChild(i.domElement);
+    var l = c(e, a, o.before);
+    X.addClass(l, he.CLASS_CONTROLLER_ROW);
+    if (i instanceof $) {
+      X.addClass(l, "color");
     } else {
-      aK.addClass(bm, az(bi.getValue()));
+      X.addClass(l, H(i.getValue()));
     }
-    ad(bd, bm, bi);
-    bd.__controllers.push(bi);
-    return bi;
+    h(e, l, i);
+    e.__controllers.push(i);
+    return i;
   }
-  function ah(bd, bf) {
-    return document.location.href + "." + bf;
+  function m(e, t) {
+    return document.location.href + "." + t;
   }
-  function ai(bd, bf, bg) {
-    var bh = document.createElement("option");
-    bh.innerHTML = bf;
-    bh.value = bf;
-    bd.__preset_select.appendChild(bh);
-    if (bg) {
-      bd.__preset_select.selectedIndex = bd.__preset_select.length - 1;
+  function g(e, t, n) {
+    var o = document.createElement("option");
+    o.innerHTML = t;
+    o.value = t;
+    e.__preset_select.appendChild(o);
+    if (n) {
+      e.__preset_select.selectedIndex = e.__preset_select.length - 1;
     }
   }
-  function aj(bd, bf) {
-    bf.style.display = bd.useLocalStorage ? "block" : "none";
+  function b(e, t) {
+    t.style.display = e.useLocalStorage ? "block" : "none";
   }
-  function ak(bd) {
-    var bf = bd.__save_row = document.createElement("li");
-    aK.addClass(bd.domElement, "has-save");
-    bd.__ul.insertBefore(bf, bd.__ul.firstChild);
-    aK.addClass(bf, "save-row");
-    var bg = document.createElement("span");
-    bg.innerHTML = "&nbsp;";
-    aK.addClass(bg, "button gears");
-    var bh = document.createElement("span");
-    bh.innerHTML = "Save";
-    aK.addClass(bh, "button");
-    aK.addClass(bh, "save");
-    var bi = document.createElement("span");
-    bi.innerHTML = "New";
-    aK.addClass(bi, "button");
-    aK.addClass(bi, "save-as");
-    var bj = document.createElement("span");
-    bj.innerHTML = "Revert";
-    aK.addClass(bj, "button");
-    aK.addClass(bj, "revert");
-    var bk = bd.__preset_select = document.createElement("select");
-    if (bd.load && bd.load.remembered) {
-      as.each(bd.load.remembered, function (bp, bq) {
-        ai(bd, bq, bq === bd.preset);
+  function v(e) {
+    var t = e.__save_row = document.createElement("li");
+    X.addClass(e.domElement, "has-save");
+    e.__ul.insertBefore(t, e.__ul.firstChild);
+    X.addClass(t, "save-row");
+    var n = document.createElement("span");
+    n.innerHTML = "&nbsp;";
+    X.addClass(n, "button gears");
+    var o = document.createElement("span");
+    o.innerHTML = "Save";
+    X.addClass(o, "button");
+    X.addClass(o, "save");
+    var i = document.createElement("span");
+    i.innerHTML = "New";
+    X.addClass(i, "button");
+    X.addClass(i, "save-as");
+    var r = document.createElement("span");
+    r.innerHTML = "Revert";
+    X.addClass(r, "button");
+    X.addClass(r, "revert");
+    var s = e.__preset_select = document.createElement("select");
+    if (e.load && e.load.remembered) {
+      S.each(e.load.remembered, function (t, n) {
+        g(e, n, n === e.preset);
       });
     } else {
-      ai(bd, aZ, false);
+      g(e, se, false);
     }
-    aK.bind(bk, "change", function () {
-      for (var br = 0; br < bd.__preset_select.length; br++) {
-        bd.__preset_select[br].innerHTML = bd.__preset_select[br].value;
+    X.bind(s, "change", function () {
+      for (var t = 0; t < e.__preset_select.length; t++) {
+        e.__preset_select[t].innerHTML = e.__preset_select[t].value;
       }
-      bd.preset = this.value;
+      e.preset = this.value;
     });
-    bf.appendChild(bk);
-    bf.appendChild(bg);
-    bf.appendChild(bh);
-    bf.appendChild(bi);
-    bf.appendChild(bj);
-    if (b0) {
-      var bl = document.getElementById("dg-local-explain");
-      var bm = document.getElementById("dg-local-storage");
+    t.appendChild(s);
+    t.appendChild(n);
+    t.appendChild(o);
+    t.appendChild(i);
+    t.appendChild(r);
+    if (ae) {
+      var a = document.getElementById("dg-local-explain");
+      var l = document.getElementById("dg-local-storage");
       document.getElementById("dg-save-locally").style.display = "block";
-      if (localStorage.getItem(ah(bd, "isLocal")) === "true") {
-        bm.setAttribute("checked", "checked");
+      if (localStorage.getItem(m(e, "isLocal")) === "true") {
+        l.setAttribute("checked", "checked");
       }
-      aj(bd, bl);
-      aK.bind(bm, "change", function () {
-        bd.useLocalStorage = !bd.useLocalStorage;
-        aj(bd, bl);
+      b(e, a);
+      X.bind(l, "change", function () {
+        e.useLocalStorage = !e.useLocalStorage;
+        b(e, a);
       });
     }
-    var bn = document.getElementById("dg-new-constructor");
-    aK.bind(bn, "keydown", function (bt) {
-      if (!!bt.metaKey && (bt.which === 67 || bt.keyCode === 67)) {
-        b1.hide();
+    var d = document.getElementById("dg-new-constructor");
+    X.bind(d, "keydown", function (e) {
+      if (!!e.metaKey && (e.which === 67 || e.keyCode === 67)) {
+        le.hide();
       }
     });
-    aK.bind(bg, "click", function () {
-      bn.innerHTML = JSON.stringify(bd.getSaveObject(), undefined, 2);
-      b1.show();
-      bn.focus();
-      bn.select();
+    X.bind(n, "click", function () {
+      d.innerHTML = JSON.stringify(e.getSaveObject(), undefined, 2);
+      le.show();
+      d.focus();
+      d.select();
     });
-    aK.bind(bh, "click", function () {
-      bd.save();
+    X.bind(o, "click", function () {
+      e.save();
     });
-    aK.bind(bi, "click", function () {
-      var bt = prompt("Enter a new preset name.");
-      if (bt) {
-        bd.saveAs(bt);
+    X.bind(i, "click", function () {
+      var t = prompt("Enter a new preset name.");
+      if (t) {
+        e.saveAs(t);
       }
     });
-    aK.bind(bj, "click", function () {
-      bd.revert();
+    X.bind(r, "click", function () {
+      e.revert();
     });
   }
-  function al(bd) {
-    function bg(bj) {
-      bj.preventDefault();
-      bd.width += bf - bj.clientX;
-      bd.onResize();
-      bf = bj.clientX;
+  function y(e) {
+    function t(t) {
+      t.preventDefault();
+      e.width += i - t.clientX;
+      e.onResize();
+      i = t.clientX;
       return false;
     }
-    function bh() {
-      aK.removeClass(bd.__closeButton, b6.CLASS_DRAG);
-      aK.unbind(window, "mousemove", bg);
-      aK.unbind(window, "mouseup", bh);
+    function n() {
+      X.removeClass(e.__closeButton, he.CLASS_DRAG);
+      X.unbind(window, "mousemove", t);
+      X.unbind(window, "mouseup", n);
     }
-    function bi(bj) {
-      bj.preventDefault();
-      bf = bj.clientX;
-      aK.addClass(bd.__closeButton, b6.CLASS_DRAG);
-      aK.bind(window, "mousemove", bg);
-      aK.bind(window, "mouseup", bh);
+    function o(o) {
+      o.preventDefault();
+      i = o.clientX;
+      X.addClass(e.__closeButton, he.CLASS_DRAG);
+      X.bind(window, "mousemove", t);
+      X.bind(window, "mouseup", n);
       return false;
     }
-    var bf = undefined;
-    bd.__resize_handle = document.createElement("div");
-    as.extend(bd.__resize_handle.style, {
+    var i = undefined;
+    e.__resize_handle = document.createElement("div");
+    S.extend(e.__resize_handle.style, {
       width: "6px",
       marginLeft: "-3px",
       height: "200px",
       cursor: "ew-resize",
       position: "absolute"
     });
-    aK.bind(bd.__resize_handle, "mousedown", bi);
-    aK.bind(bd.__closeButton, "mousedown", bi);
-    bd.domElement.insertBefore(bd.__resize_handle, bd.domElement.firstElementChild);
+    X.bind(e.__resize_handle, "mousedown", o);
+    X.bind(e.__closeButton, "mousedown", o);
+    e.domElement.insertBefore(e.__resize_handle, e.domElement.firstElementChild);
   }
-  function am(bd, bf) {
-    bd.domElement.style.width = bf + "px";
-    if (bd.__save_row && bd.autoPlace) {
-      bd.__save_row.style.width = bf + "px";
+  function w(e, t) {
+    e.domElement.style.width = t + "px";
+    if (e.__save_row && e.autoPlace) {
+      e.__save_row.style.width = t + "px";
     }
-    if (bd.__closeButton) {
-      bd.__closeButton.style.width = bf + "px";
+    if (e.__closeButton) {
+      e.__closeButton.style.width = t + "px";
     }
   }
-  function an(bd, bf) {
-    var bg = {};
-    as.each(bd.__rememberedObjects, function (bh, bi) {
-      var bj = {};
-      var bk = bd.__rememberedObjectIndecesToControllers[bi];
-      as.each(bk, function (bl, bm) {
-        bj[bm] = bf ? bl.initialValue : bl.getValue();
+  function x(e, t) {
+    var n = {};
+    S.each(e.__rememberedObjects, function (o, i) {
+      var r = {};
+      var s = e.__rememberedObjectIndecesToControllers[i];
+      S.each(s, function (e, n) {
+        r[n] = t ? e.initialValue : e.getValue();
       });
-      bg[bi] = bj;
+      n[i] = r;
     });
-    return bg;
+    return n;
   }
-  function ao(bd) {
-    for (var bf = 0; bf < bd.__preset_select.length; bf++) {
-      if (bd.__preset_select[bf].value === bd.preset) {
-        bd.__preset_select.selectedIndex = bf;
+  function E(e) {
+    for (var t = 0; t < e.__preset_select.length; t++) {
+      if (e.__preset_select[t].value === e.preset) {
+        e.__preset_select.selectedIndex = t;
       }
     }
   }
-  function ap(bd) {
-    if (bd.length !== 0) {
-      aW.call(window, function () {
-        ap(bd);
+  function C(e) {
+    if (e.length !== 0) {
+      oe.call(window, function () {
+        C(e);
       });
     }
-    as.each(bd, function (bh) {
-      bh.updateDisplay();
+    S.each(e, function (e) {
+      e.updateDisplay();
     });
   }
-  var aq = Array.prototype.forEach;
-  var ar = Array.prototype.slice;
-  var as = {
+  var A = Array.prototype.forEach;
+  var k = Array.prototype.slice;
+  var S = {
     BREAK: {},
-    extend: function (bd) {
-      this.each(ar.call(arguments, 1), function (bg) {
-        (this.isObject(bg) ? Object.keys(bg) : []).forEach(function (bh) {
-          if (!this.isUndefined(bg[bh])) {
-            bd[bh] = bg[bh];
+    extend: function (e) {
+      this.each(k.call(arguments, 1), function (t) {
+        (this.isObject(t) ? Object.keys(t) : []).forEach(function (n) {
+          if (!this.isUndefined(t[n])) {
+            e[n] = t[n];
           }
         }.bind(this));
       }, this);
-      return bd;
+      return e;
     },
-    defaults: function (bd) {
-      this.each(ar.call(arguments, 1), function (bf) {
-        (this.isObject(bf) ? Object.keys(bf) : []).forEach(function (bg) {
-          if (this.isUndefined(bd[bg])) {
-            bd[bg] = bf[bg];
+    defaults: function (e) {
+      this.each(k.call(arguments, 1), function (t) {
+        (this.isObject(t) ? Object.keys(t) : []).forEach(function (n) {
+          if (this.isUndefined(e[n])) {
+            e[n] = t[n];
           }
         }.bind(this));
       }, this);
-      return bd;
+      return e;
     },
     compose: function () {
-      var bd = ar.call(arguments);
+      var e = k.call(arguments);
       return function () {
-        var bg = ar.call(arguments);
-        for (var bh = bd.length - 1; bh >= 0; bh--) {
-          bg = [bd[bh].apply(this, bg)];
+        var t = k.call(arguments);
+        for (var n = e.length - 1; n >= 0; n--) {
+          t = [e[n].apply(this, t)];
         }
-        return bg[0];
+        return t[0];
       };
     },
-    each: function (bd, bf, bg) {
-      if (bd) {
-        if (aq && bd.forEach && bd.forEach === aq) {
-          bd.forEach(bf, bg);
-        } else if (bd.length === bd.length + 0) {
-          var bh = undefined;
-          var bi = undefined;
-          bh = 0;
-          bi = bd.length;
-          for (; bh < bi; bh++) {
-            if (bh in bd && bf.call(bg, bd[bh], bh) === this.BREAK) {
+    each: function (e, t, n) {
+      if (e) {
+        if (A && e.forEach && e.forEach === A) {
+          e.forEach(t, n);
+        } else if (e.length === e.length + 0) {
+          var o = undefined;
+          var i = undefined;
+          o = 0;
+          i = e.length;
+          for (; o < i; o++) {
+            if (o in e && t.call(n, e[o], o) === this.BREAK) {
               return;
             }
           }
         } else {
-          for (var bj in bd) {
-            if (bf.call(bg, bd[bj], bj) === this.BREAK) {
+          for (var r in e) {
+            if (t.call(n, e[r], r) === this.BREAK) {
               return;
             }
           }
         }
       }
     },
-    defer: function (bd) {
-      setTimeout(bd, 0);
+    defer: function (e) {
+      setTimeout(e, 0);
     },
-    debounce: function (bd, bf, bg) {
-      var bh = undefined;
+    debounce: function (e, t, n) {
+      var o = undefined;
       return function () {
-        var bi = this;
-        var bj = arguments;
-        var bk = bg || !bh;
-        clearTimeout(bh);
-        bh = setTimeout(function () {
-          bh = null;
-          if (!bg) {
-            bd.apply(bi, bj);
+        var i = this;
+        var r = arguments;
+        var s = n || !o;
+        clearTimeout(o);
+        o = setTimeout(function () {
+          o = null;
+          if (!n) {
+            e.apply(i, r);
           }
-        }, bf);
-        if (bk) {
-          bd.apply(bi, bj);
+        }, t);
+        if (s) {
+          e.apply(i, r);
         }
       };
     },
-    toArray: function (bd) {
-      if (bd.toArray) {
-        return bd.toArray();
+    toArray: function (e) {
+      if (e.toArray) {
+        return e.toArray();
       } else {
-        return ar.call(bd);
+        return k.call(e);
       }
     },
-    isUndefined: function (bd) {
-      return bd === undefined;
+    isUndefined: function (e) {
+      return e === undefined;
     },
-    isNull: function (bd) {
-      return bd === null;
+    isNull: function (e) {
+      return e === null;
     },
-    isNaN: function (bd) {
-      function bg(bh) {
-        return bd.apply(this, arguments);
+    isNaN: function (e) {
+      function t(t) {
+        return e.apply(this, arguments);
       }
-      bg.toString = function () {
-        return bd.toString();
+      t.toString = function () {
+        return e.toString();
       };
-      return bg;
-    }(function (bd) {
-      return isNaN(bd);
+      return t;
+    }(function (e) {
+      return isNaN(e);
     }),
-    isArray: Array.isArray || function (bd) {
-      return bd.constructor === Array;
+    isArray: Array.isArray || function (e) {
+      return e.constructor === Array;
     },
-    isObject: function (bd) {
-      return bd === Object(bd);
+    isObject: function (e) {
+      return e === Object(e);
     },
-    isNumber: function (bd) {
-      return bd === bd + 0;
+    isNumber: function (e) {
+      return e === e + 0;
     },
-    isString: function (bd) {
-      return bd === bd + "";
+    isString: function (e) {
+      return e === e + "";
     },
-    isBoolean: function (bd) {
-      return bd === false || bd === true;
+    isBoolean: function (e) {
+      return e === false || e === true;
     },
-    isFunction: function (bd) {
-      return bd instanceof Function;
+    isFunction: function (e) {
+      return e instanceof Function;
     }
   };
-  var at = [{
-    litmus: as.isString,
+  var O = [{
+    litmus: S.isString,
     conversions: {
       THREE_CHAR_HEX: {
-        read: function (bd) {
-          var bf = bd.match(/^#([A-F0-9])([A-F0-9])([A-F0-9])$/i);
-          return bf !== null && {
+        read: function (e) {
+          var t = e.match(/^#([A-F0-9])([A-F0-9])([A-F0-9])$/i);
+          return t !== null && {
             space: "HEX",
-            hex: parseInt("0x" + bf[1].toString() + bf[1].toString() + bf[2].toString() + bf[2].toString() + bf[3].toString() + bf[3].toString(), 0)
+            hex: parseInt("0x" + t[1].toString() + t[1].toString() + t[2].toString() + t[2].toString() + t[3].toString() + t[3].toString(), 0)
           };
         },
-        write: a1
+        write: t
       },
       SIX_CHAR_HEX: {
-        read: function (bd) {
-          var bf = bd.match(/^#([A-F0-9]{6})$/i);
-          return bf !== null && {
+        read: function (e) {
+          var t = e.match(/^#([A-F0-9]{6})$/i);
+          return t !== null && {
             space: "HEX",
-            hex: parseInt("0x" + bf[1].toString(), 0)
+            hex: parseInt("0x" + t[1].toString(), 0)
           };
         },
-        write: a1
+        write: t
       },
       CSS_RGB: {
-        read: function (bd) {
-          var bf = bd.match(/^rgb\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\)/);
-          return bf !== null && {
+        read: function (e) {
+          var t = e.match(/^rgb\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\)/);
+          return t !== null && {
             space: "RGB",
-            r: parseFloat(bf[1]),
-            g: parseFloat(bf[2]),
-            b: parseFloat(bf[3])
+            r: parseFloat(t[1]),
+            g: parseFloat(t[2]),
+            b: parseFloat(t[3])
           };
         },
-        write: a1
+        write: t
       },
       CSS_RGBA: {
-        read: function (bd) {
-          var bf = bd.match(/^rgba\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\)/);
-          return bf !== null && {
+        read: function (e) {
+          var t = e.match(/^rgba\(\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*,\s*(\S+)\s*\)/);
+          return t !== null && {
             space: "RGB",
-            r: parseFloat(bf[1]),
-            g: parseFloat(bf[2]),
-            b: parseFloat(bf[3]),
-            a: parseFloat(bf[4])
+            r: parseFloat(t[1]),
+            g: parseFloat(t[2]),
+            b: parseFloat(t[3]),
+            a: parseFloat(t[4])
           };
         },
-        write: a1
+        write: t
       }
     }
   }, {
-    litmus: as.isNumber,
+    litmus: S.isNumber,
     conversions: {
       HEX: {
-        read: function (bd) {
+        read: function (e) {
           return {
             space: "HEX",
-            hex: bd,
+            hex: e,
             conversionName: "HEX"
           };
         },
-        write: function (bd) {
-          return bd.hex;
+        write: function (e) {
+          return e.hex;
         }
       }
     }
   }, {
-    litmus: as.isArray,
+    litmus: S.isArray,
     conversions: {
       RGB_ARRAY: {
-        read: function (bd) {
-          return bd.length === 3 && {
+        read: function (e) {
+          return e.length === 3 && {
             space: "RGB",
-            r: bd[0],
-            g: bd[1],
-            b: bd[2]
+            r: e[0],
+            g: e[1],
+            b: e[2]
           };
         },
-        write: function (bd) {
-          return [bd.r, bd.g, bd.b];
+        write: function (e) {
+          return [e.r, e.g, e.b];
         }
       },
       RGBA_ARRAY: {
-        read: function (bd) {
-          return bd.length === 4 && {
+        read: function (e) {
+          return e.length === 4 && {
             space: "RGB",
-            r: bd[0],
-            g: bd[1],
-            b: bd[2],
-            a: bd[3]
+            r: e[0],
+            g: e[1],
+            b: e[2],
+            a: e[3]
           };
         },
-        write: function (bd) {
-          return [bd.r, bd.g, bd.b, bd.a];
+        write: function (e) {
+          return [e.r, e.g, e.b, e.a];
         }
       }
     }
   }, {
-    litmus: as.isObject,
+    litmus: S.isObject,
     conversions: {
       RGBA_OBJ: {
-        read: function (bd) {
-          return !!as.isNumber(bd.r) && !!as.isNumber(bd.g) && !!as.isNumber(bd.b) && !!as.isNumber(bd.a) && {
+        read: function (e) {
+          return !!S.isNumber(e.r) && !!S.isNumber(e.g) && !!S.isNumber(e.b) && !!S.isNumber(e.a) && {
             space: "RGB",
-            r: bd.r,
-            g: bd.g,
-            b: bd.b,
-            a: bd.a
+            r: e.r,
+            g: e.g,
+            b: e.b,
+            a: e.a
           };
         },
-        write: function (bd) {
+        write: function (e) {
           return {
-            r: bd.r,
-            g: bd.g,
-            b: bd.b,
-            a: bd.a
+            r: e.r,
+            g: e.g,
+            b: e.b,
+            a: e.a
           };
         }
       },
       RGB_OBJ: {
-        read: function (bd) {
-          return !!as.isNumber(bd.r) && !!as.isNumber(bd.g) && !!as.isNumber(bd.b) && {
+        read: function (e) {
+          return !!S.isNumber(e.r) && !!S.isNumber(e.g) && !!S.isNumber(e.b) && {
             space: "RGB",
-            r: bd.r,
-            g: bd.g,
-            b: bd.b
+            r: e.r,
+            g: e.g,
+            b: e.b
           };
         },
-        write: function (bd) {
+        write: function (e) {
           return {
-            r: bd.r,
-            g: bd.g,
-            b: bd.b
+            r: e.r,
+            g: e.g,
+            b: e.b
           };
         }
       },
       HSVA_OBJ: {
-        read: function (bd) {
-          return !!as.isNumber(bd.h) && !!as.isNumber(bd.s) && !!as.isNumber(bd.v) && !!as.isNumber(bd.a) && {
+        read: function (e) {
+          return !!S.isNumber(e.h) && !!S.isNumber(e.s) && !!S.isNumber(e.v) && !!S.isNumber(e.a) && {
             space: "HSV",
-            h: bd.h,
-            s: bd.s,
-            v: bd.v,
-            a: bd.a
+            h: e.h,
+            s: e.s,
+            v: e.v,
+            a: e.a
           };
         },
-        write: function (bd) {
+        write: function (e) {
           return {
-            h: bd.h,
-            s: bd.s,
-            v: bd.v,
-            a: bd.a
+            h: e.h,
+            s: e.s,
+            v: e.v,
+            a: e.a
           };
         }
       },
       HSV_OBJ: {
-        read: function (bd) {
-          return !!as.isNumber(bd.h) && !!as.isNumber(bd.s) && !!as.isNumber(bd.v) && {
+        read: function (e) {
+          return !!S.isNumber(e.h) && !!S.isNumber(e.s) && !!S.isNumber(e.v) && {
             space: "HSV",
-            h: bd.h,
-            s: bd.s,
-            v: bd.v
+            h: e.h,
+            s: e.s,
+            v: e.v
           };
         },
-        write: function (bd) {
+        write: function (e) {
           return {
-            h: bd.h,
-            s: bd.s,
-            v: bd.v
+            h: e.h,
+            s: e.s,
+            v: e.v
           };
         }
       }
     }
   }];
-  var au = undefined;
-  var av = undefined;
-  function aw() {
-    av = false;
-    var bd = arguments.length > 1 ? as.toArray(arguments) : arguments[0];
-    as.each(at, function (bf) {
-      if (bf.litmus(bd)) {
-        as.each(bf.conversions, function (bh, bi) {
-          au = bh.read(bd);
-          if (av === false && au !== false) {
-            av = au;
-            au.conversionName = bi;
-            au.conversion = bh;
-            return as.BREAK;
+  var T = undefined;
+  var L = undefined;
+  function R() {
+    L = false;
+    var e = arguments.length > 1 ? S.toArray(arguments) : arguments[0];
+    S.each(O, function (t) {
+      if (t.litmus(e)) {
+        S.each(t.conversions, function (t, n) {
+          T = t.read(e);
+          if (L === false && T !== false) {
+            L = T;
+            T.conversionName = n;
+            T.conversion = t;
+            return S.BREAK;
           }
         });
-        return as.BREAK;
+        return S.BREAK;
       }
     });
-    return av;
+    return L;
   }
-  var ax = undefined;
-  var ay = {
-    hsv_to_rgb: function (bd, bf, bg) {
-      var bh = Math.floor(bd / 60) % 6;
-      var bi = bd / 60 - Math.floor(bd / 60);
-      var bj = bg * (1 - bf);
-      var bk = bg * (1 - bi * bf);
-      var bl = bg * (1 - (1 - bi) * bf);
-      var bm = [[bg, bl, bj], [bk, bg, bj], [bj, bg, bl], [bj, bk, bg], [bl, bj, bg], [bg, bj, bk]][bh];
+  var B = undefined;
+  var N = {
+    hsv_to_rgb: function (e, t, n) {
+      var o = Math.floor(e / 60) % 6;
+      var i = e / 60 - Math.floor(e / 60);
+      var r = n * (1 - t);
+      var s = n * (1 - i * t);
+      var a = n * (1 - (1 - i) * t);
+      var l = [[n, a, r], [s, n, r], [r, n, a], [r, s, n], [a, r, n], [n, r, s]][o];
       return {
-        r: bm[0] * 255,
-        g: bm[1] * 255,
-        b: bm[2] * 255
+        r: l[0] * 255,
+        g: l[1] * 255,
+        b: l[2] * 255
       };
     },
-    rgb_to_hsv: function (bd, bf, bg) {
-      var bh = Math.min(bd, bf, bg);
-      var bi = Math.max(bd, bf, bg);
-      var bj = bi - bh;
-      var bk = undefined;
-      var bl = undefined;
-      if (bi === 0) {
+    rgb_to_hsv: function (e, t, n) {
+      var o = Math.min(e, t, n);
+      var i = Math.max(e, t, n);
+      var r = i - o;
+      var s = undefined;
+      var a = undefined;
+      if (i === 0) {
         return {
           h: NaN,
           s: 0,
           v: 0
         };
       } else {
-        bl = bj / bi;
-        bk = bd === bi ? (bf - bg) / bj : bf === bi ? 2 + (bg - bd) / bj : 4 + (bd - bf) / bj;
-        if ((bk /= 6) < 0) {
-          bk += 1;
+        a = r / i;
+        s = e === i ? (t - n) / r : t === i ? 2 + (n - e) / r : 4 + (e - t) / r;
+        if ((s /= 6) < 0) {
+          s += 1;
         }
         return {
-          h: bk * 360,
-          s: bl,
-          v: bi / 255
+          h: s * 360,
+          s: a,
+          v: i / 255
         };
       }
     },
-    rgb_to_hex: function (bd, bf, bg) {
-      var bh = this.hex_with_component(0, 2, bd);
-      bh = this.hex_with_component(bh, 1, bf);
-      return bh = this.hex_with_component(bh, 0, bg);
+    rgb_to_hex: function (e, t, n) {
+      var o = this.hex_with_component(0, 2, e);
+      o = this.hex_with_component(o, 1, t);
+      return o = this.hex_with_component(o, 0, n);
     },
-    component_from_hex: function (bd, bf) {
-      return bd >> bf * 8 & 255;
+    component_from_hex: function (e, t) {
+      return e >> t * 8 & 255;
     },
-    hex_with_component: function (bd, bf, bg) {
-      return bg << (ax = bf * 8) | bd & ~(255 << ax);
+    hex_with_component: function (e, t, n) {
+      return n << (B = t * 8) | e & ~(255 << B);
     }
   };
-  var az = typeof Symbol == "function" && typeof Symbol.iterator == "symbol" ? function (bd) {
-    return typeof bd;
-  } : function (bd) {
-    if (bd && typeof Symbol == "function" && bd.constructor === Symbol && bd !== Symbol.prototype) {
+  var H = typeof Symbol == "function" && typeof Symbol.iterator == "symbol" ? function (e) {
+    return typeof e;
+  } : function (e) {
+    if (e && typeof Symbol == "function" && e.constructor === Symbol && e !== Symbol.prototype) {
       return "symbol";
     } else {
-      return typeof bd;
+      return typeof e;
     }
   };
-  function aA(bd, bf) {
-    if (!(bd instanceof bf)) {
+  function F(e, t) {
+    if (!(e instanceof t)) {
       throw new TypeError("Cannot call a class as a function");
     }
   }
-  var aB = function () {
-    function bf(bg, bh) {
-      for (var bi = 0; bi < bh.length; bi++) {
-        var bj = bh[bi];
-        bj.enumerable = bj.enumerable || false;
-        bj.configurable = true;
-        if ("value" in bj) {
-          bj.writable = true;
+  var P = function () {
+    function e(e, t) {
+      for (var n = 0; n < t.length; n++) {
+        var o = t[n];
+        o.enumerable = o.enumerable || false;
+        o.configurable = true;
+        if ("value" in o) {
+          o.writable = true;
         }
-        Object.defineProperty(bg, bj.key, bj);
+        Object.defineProperty(e, o.key, o);
       }
     }
-    return function (bg, bh, bi) {
-      if (bh) {
-        bf(bg.prototype, bh);
+    return function (t, n, o) {
+      if (n) {
+        e(t.prototype, n);
       }
-      if (bi) {
-        bf(bg, bi);
+      if (o) {
+        e(t, o);
       }
-      return bg;
+      return t;
     };
   }();
-  var aC = function bd(bf, bg, bh) {
-    if (bf === null) {
-      bf = Function.prototype;
+  var D = function e(t, n, o) {
+    if (t === null) {
+      t = Function.prototype;
     }
-    var bi = Object.getOwnPropertyDescriptor(bf, bg);
-    if (bi === undefined) {
-      var bj = Object.getPrototypeOf(bf);
-      if (bj === null) {
+    var i = Object.getOwnPropertyDescriptor(t, n);
+    if (i === undefined) {
+      var r = Object.getPrototypeOf(t);
+      if (r === null) {
         return undefined;
       } else {
-        return bd(bj, bg, bh);
+        return e(r, n, o);
       }
     }
-    if ("value" in bi) {
-      return bi.value;
+    if ("value" in i) {
+      return i.value;
     }
-    var bk = bi.get;
-    if (bk !== undefined) {
-      return bk.call(bh);
+    var s = i.get;
+    if (s !== undefined) {
+      return s.call(o);
     }
   };
-  function aD(bf, bg) {
-    if (typeof bg != "function" && bg !== null) {
-      throw new TypeError("Super expression must either be null or a function, not " + typeof bg);
+  function j(e, t) {
+    if (typeof t != "function" && t !== null) {
+      throw new TypeError("Super expression must either be null or a function, not " + typeof t);
     }
-    bf.prototype = Object.create(bg && bg.prototype, {
+    e.prototype = Object.create(t && t.prototype, {
       constructor: {
-        value: bf,
+        value: e,
         enumerable: false,
         writable: true,
         configurable: true
       }
     });
-    if (bg) {
+    if (t) {
       if (Object.setPrototypeOf) {
-        Object.setPrototypeOf(bf, bg);
+        Object.setPrototypeOf(e, t);
       } else {
-        bf.__proto__ = bg;
+        e.__proto__ = t;
       }
     }
   }
-  function aE(bf, bg) {
-    if (!bf) {
+  function V(e, t) {
+    if (!e) {
       throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
     }
-    if (!bg || typeof bg != "object" && typeof bg != "function") {
-      return bf;
+    if (!t || typeof t != "object" && typeof t != "function") {
+      return e;
     } else {
-      return bg;
+      return t;
     }
   }
-  var aF = function () {
-    function bg() {
-      aA(this, bg);
-      this.__state = aw.apply(this, arguments);
+  var I = function () {
+    function e() {
+      F(this, e);
+      this.__state = R.apply(this, arguments);
       if (this.__state === false) {
         throw new Error("Failed to interpret color arguments");
       }
       this.__state.a = this.__state.a || 1;
     }
-    aB(bg, [{
+    P(e, [{
       key: "toString",
       value: function () {
-        return a1(this);
+        return t(this);
       }
     }, {
       key: "toHexString",
       value: function () {
-        return a1(this, true);
+        return t(this, true);
       }
     }, {
       key: "toOriginal",
@@ -50251,88 +50264,88 @@ aÀÅÁa();
         return this.__state.conversion.write(this);
       }
     }]);
-    return bg;
+    return e;
   }();
-  aF.recalculateRGB = function (bf, bg, bh) {
-    if (bf.__state.space === "HEX") {
-      bf.__state[bg] = ay.component_from_hex(bf.__state.hex, bh);
+  I.recalculateRGB = function (e, t, n) {
+    if (e.__state.space === "HEX") {
+      e.__state[t] = N.component_from_hex(e.__state.hex, n);
     } else {
-      if (bf.__state.space !== "HSV") {
+      if (e.__state.space !== "HSV") {
         throw new Error("Corrupted color state");
       }
-      as.extend(bf.__state, ay.hsv_to_rgb(bf.__state.h, bf.__state.s, bf.__state.v));
+      S.extend(e.__state, N.hsv_to_rgb(e.__state.h, e.__state.s, e.__state.v));
     }
   };
-  aF.recalculateHSV = function (bf) {
-    var bg = ay.rgb_to_hsv(bf.r, bf.g, bf.b);
-    as.extend(bf.__state, {
-      s: bg.s,
-      v: bg.v
+  I.recalculateHSV = function (e) {
+    var t = N.rgb_to_hsv(e.r, e.g, e.b);
+    S.extend(e.__state, {
+      s: t.s,
+      v: t.v
     });
-    if (as.isNaN(bg.h)) {
-      if (as.isUndefined(bf.__state.h)) {
-        bf.__state.h = 0;
+    if (S.isNaN(t.h)) {
+      if (S.isUndefined(e.__state.h)) {
+        e.__state.h = 0;
       }
     } else {
-      bf.__state.h = bg.h;
+      e.__state.h = t.h;
     }
   };
-  aF.COMPONENTS = ["r", "g", "b", "h", "s", "v", "hex", "a"];
-  a2(aF.prototype, "r", 2);
-  a2(aF.prototype, "g", 1);
-  a2(aF.prototype, "b", 0);
-  a3(aF.prototype, "h");
-  a3(aF.prototype, "s");
-  a3(aF.prototype, "v");
-  Object.defineProperty(aF.prototype, "a", {
+  I.COMPONENTS = ["r", "g", "b", "h", "s", "v", "hex", "a"];
+  n(I.prototype, "r", 2);
+  n(I.prototype, "g", 1);
+  n(I.prototype, "b", 0);
+  o(I.prototype, "h");
+  o(I.prototype, "s");
+  o(I.prototype, "v");
+  Object.defineProperty(I.prototype, "a", {
     get: function () {
       return this.__state.a;
     },
-    set: function (bf) {
-      this.__state.a = bf;
+    set: function (e) {
+      this.__state.a = e;
     }
   });
-  Object.defineProperty(aF.prototype, "hex", {
+  Object.defineProperty(I.prototype, "hex", {
     get: function () {
       if (this.__state.space !== "HEX") {
-        this.__state.hex = ay.rgb_to_hex(this.r, this.g, this.b);
+        this.__state.hex = N.rgb_to_hex(this.r, this.g, this.b);
         this.__state.space = "HEX";
       }
       return this.__state.hex;
     },
-    set: function (bf) {
+    set: function (e) {
       this.__state.space = "HEX";
-      this.__state.hex = bf;
+      this.__state.hex = e;
     }
   });
-  var aG = function () {
-    function bg(bh, bi) {
-      aA(this, bg);
-      this.initialValue = bh[bi];
+  var z = function () {
+    function e(t, n) {
+      F(this, e);
+      this.initialValue = t[n];
       this.domElement = document.createElement("div");
-      this.object = bh;
-      this.property = bi;
+      this.object = t;
+      this.property = n;
       this.__onChange = undefined;
       this.__onFinishChange = undefined;
     }
-    aB(bg, [{
+    P(e, [{
       key: "onChange",
-      value: function (bh) {
-        this.__onChange = bh;
+      value: function (e) {
+        this.__onChange = e;
         return this;
       }
     }, {
       key: "onFinishChange",
-      value: function (bh) {
-        this.__onFinishChange = bh;
+      value: function (e) {
+        this.__onFinishChange = e;
         return this;
       }
     }, {
       key: "setValue",
-      value: function (bh) {
-        this.object[this.property] = bh;
+      value: function (e) {
+        this.object[this.property] = e;
         if (this.__onChange) {
-          this.__onChange.call(this, bh);
+          this.__onChange.call(this, e);
         }
         this.updateDisplay();
         return this;
@@ -50353,66 +50366,66 @@ aÀÅÁa();
         return this.initialValue !== this.getValue();
       }
     }]);
-    return bg;
+    return e;
   }();
-  var aH = {
+  var M = {
     HTMLEvents: ["change"],
     MouseEvents: ["click", "mousemove", "mousedown", "mouseup", "mouseover"],
     KeyboardEvents: ["keydown"]
   };
-  var aI = {};
-  as.each(aH, function (bf, bg) {
-    as.each(bf, function (bi) {
-      aI[bi] = bg;
+  var G = {};
+  S.each(M, function (e, t) {
+    S.each(e, function (e) {
+      G[e] = t;
     });
   });
-  var aJ = /(\d+(\.\d+)?)px/;
-  var aK = {
-    makeSelectable: function (bf, bg) {
-      if (bf !== undefined && bf.style !== undefined) {
-        bf.onselectstart = bg ? function () {
+  var U = /(\d+(\.\d+)?)px/;
+  var X = {
+    makeSelectable: function (e, t) {
+      if (e !== undefined && e.style !== undefined) {
+        e.onselectstart = t ? function () {
           return false;
         } : function () {};
-        bf.style.MozUserSelect = bg ? "auto" : "none";
-        bf.style.KhtmlUserSelect = bg ? "auto" : "none";
-        bf.unselectable = bg ? "on" : "off";
+        e.style.MozUserSelect = t ? "auto" : "none";
+        e.style.KhtmlUserSelect = t ? "auto" : "none";
+        e.unselectable = t ? "on" : "off";
       }
     },
-    makeFullscreen: function (bf, bg, bh) {
-      var bi = bh;
-      var bj = bg;
-      if (as.isUndefined(bj)) {
-        bj = true;
+    makeFullscreen: function (e, t, n) {
+      var o = n;
+      var i = t;
+      if (S.isUndefined(i)) {
+        i = true;
       }
-      if (as.isUndefined(bi)) {
-        bi = true;
+      if (S.isUndefined(o)) {
+        o = true;
       }
-      bf.style.position = "absolute";
-      if (bj) {
-        bf.style.left = 0;
-        bf.style.right = 0;
+      e.style.position = "absolute";
+      if (i) {
+        e.style.left = 0;
+        e.style.right = 0;
       }
-      if (bi) {
-        bf.style.top = 0;
-        bf.style.bottom = 0;
+      if (o) {
+        e.style.top = 0;
+        e.style.bottom = 0;
       }
     },
-    fakeEvent: function (bf, bg, bh, bi) {
-      var bj = bh || {};
-      var bk = aI[bg];
-      if (!bk) {
-        throw new Error("Event type " + bg + " not supported.");
+    fakeEvent: function (e, t, n, o) {
+      var i = n || {};
+      var r = G[t];
+      if (!r) {
+        throw new Error("Event type " + t + " not supported.");
       }
-      var bl = document.createEvent(bk);
-      switch (bk) {
+      var s = document.createEvent(r);
+      switch (r) {
         case "MouseEvents":
-          var bm = bj.x || bj.clientX || 0;
-          var bn = bj.y || bj.clientY || 0;
-          bl.initMouseEvent(bg, bj.bubbles || false, bj.cancelable || true, window, bj.clickCount || 1, 0, 0, bm, bn, false, false, false, false, 0, null);
+          var a = i.x || i.clientX || 0;
+          var l = i.y || i.clientY || 0;
+          s.initMouseEvent(t, i.bubbles || false, i.cancelable || true, window, i.clickCount || 1, 0, 0, a, l, false, false, false, false, 0, null);
           break;
         case "KeyboardEvents":
-          var bo = bl.initKeyboardEvent || bl.initKeyEvent;
-          as.defaults(bj, {
+          var d = s.initKeyboardEvent || s.initKeyEvent;
+          S.defaults(i, {
             cancelable: true,
             ctrlKey: false,
             altKey: false,
@@ -50421,116 +50434,116 @@ aÀÅÁa();
             keyCode: undefined,
             charCode: undefined
           });
-          bo(bg, bj.bubbles || false, bj.cancelable, window, bj.ctrlKey, bj.altKey, bj.shiftKey, bj.metaKey, bj.keyCode, bj.charCode);
+          d(t, i.bubbles || false, i.cancelable, window, i.ctrlKey, i.altKey, i.shiftKey, i.metaKey, i.keyCode, i.charCode);
           break;
         default:
-          bl.initEvent(bg, bj.bubbles || false, bj.cancelable || true);
+          s.initEvent(t, i.bubbles || false, i.cancelable || true);
       }
-      as.defaults(bl, bi);
-      bf.dispatchEvent(bl);
+      S.defaults(s, o);
+      e.dispatchEvent(s);
     },
-    bind: function (bf, bg, bh, bi) {
-      var bj = bi || false;
-      if (bf.addEventListener) {
-        bf.addEventListener(bg, bh, bj);
-      } else if (bf.attachEvent) {
-        bf.attachEvent("on" + bg, bh);
+    bind: function (e, t, n, o) {
+      var i = o || false;
+      if (e.addEventListener) {
+        e.addEventListener(t, n, i);
+      } else if (e.attachEvent) {
+        e.attachEvent("on" + t, n);
       }
-      return aK;
+      return X;
     },
-    unbind: function (bf, bg, bh, bi) {
-      var bj = bi || false;
-      if (bf.removeEventListener) {
-        bf.removeEventListener(bg, bh, bj);
-      } else if (bf.detachEvent) {
-        bf.detachEvent("on" + bg, bh);
+    unbind: function (e, t, n, o) {
+      var i = o || false;
+      if (e.removeEventListener) {
+        e.removeEventListener(t, n, i);
+      } else if (e.detachEvent) {
+        e.detachEvent("on" + t, n);
       }
-      return aK;
+      return X;
     },
-    addClass: function (bf, bg) {
-      if (bf.className === undefined) {
-        bf.className = bg;
-      } else if (bf.className !== bg) {
-        var bh = bf.className.split(/ +/);
-        if (bh.indexOf(bg) === -1) {
-          bh.push(bg);
-          bf.className = bh.join(" ").replace(/^\s+/, "").replace(/\s+$/, "");
+    addClass: function (e, t) {
+      if (e.className === undefined) {
+        e.className = t;
+      } else if (e.className !== t) {
+        var n = e.className.split(/ +/);
+        if (n.indexOf(t) === -1) {
+          n.push(t);
+          e.className = n.join(" ").replace(/^\s+/, "").replace(/\s+$/, "");
         }
       }
-      return aK;
+      return X;
     },
-    removeClass: function (bf, bg) {
-      if (bg) {
-        if (bf.className === bg) {
-          bf.removeAttribute("class");
+    removeClass: function (e, t) {
+      if (t) {
+        if (e.className === t) {
+          e.removeAttribute("class");
         } else {
-          var bh = bf.className.split(/ +/);
-          var bi = bh.indexOf(bg);
-          if (bi !== -1) {
-            bh.splice(bi, 1);
-            bf.className = bh.join(" ");
+          var n = e.className.split(/ +/);
+          var o = n.indexOf(t);
+          if (o !== -1) {
+            n.splice(o, 1);
+            e.className = n.join(" ");
           }
         }
       } else {
-        bf.className = undefined;
+        e.className = undefined;
       }
-      return aK;
+      return X;
     },
-    hasClass: function (bf, bg) {
-      return new RegExp("(?:^|\\s+)" + bg + "(?:\\s+|$)").test(bf.className) || false;
+    hasClass: function (e, t) {
+      return new RegExp("(?:^|\\s+)" + t + "(?:\\s+|$)").test(e.className) || false;
     },
-    getWidth: function (bf) {
-      var bg = getComputedStyle(bf);
-      return a4(bg["border-left-width"]) + a4(bg["border-right-width"]) + a4(bg["padding-left"]) + a4(bg["padding-right"]) + a4(bg.width);
+    getWidth: function (e) {
+      var t = getComputedStyle(e);
+      return i(t["border-left-width"]) + i(t["border-right-width"]) + i(t["padding-left"]) + i(t["padding-right"]) + i(t.width);
     },
-    getHeight: function (bf) {
-      var bg = getComputedStyle(bf);
-      return a4(bg["border-top-width"]) + a4(bg["border-bottom-width"]) + a4(bg["padding-top"]) + a4(bg["padding-bottom"]) + a4(bg.height);
+    getHeight: function (e) {
+      var t = getComputedStyle(e);
+      return i(t["border-top-width"]) + i(t["border-bottom-width"]) + i(t["padding-top"]) + i(t["padding-bottom"]) + i(t.height);
     },
-    getOffset: function (bf) {
-      var bg = bf;
-      var bh = {
+    getOffset: function (e) {
+      var t = e;
+      var n = {
         left: 0,
         top: 0
       };
-      if (bg.offsetParent) {
+      if (t.offsetParent) {
         do {
-          bh.left += bg.offsetLeft;
-          bh.top += bg.offsetTop;
-          bg = bg.offsetParent;
-        } while (bg);
+          n.left += t.offsetLeft;
+          n.top += t.offsetTop;
+          t = t.offsetParent;
+        } while (t);
       }
-      return bh;
+      return n;
     },
-    isActive: function (bf) {
-      return bf === document.activeElement && (bf.type || bf.href);
+    isActive: function (e) {
+      return e === document.activeElement && (e.type || e.href);
     }
   };
-  var aL = function (bf) {
-    function bg(bh, bi) {
-      aA(this, bg);
-      var bj = aE(this, (bg.__proto__ || Object.getPrototypeOf(bg)).call(this, bh, bi));
-      var bk = bj;
-      bj.__prev = bj.getValue();
-      bj.__checkbox = document.createElement("input");
-      bj.__checkbox.setAttribute("type", "checkbox");
-      aK.bind(bj.__checkbox, "change", function () {
-        bk.setValue(!bk.__prev);
+  var K = function (e) {
+    function t(e, n) {
+      F(this, t);
+      var o = V(this, (t.__proto__ || Object.getPrototypeOf(t)).call(this, e, n));
+      var i = o;
+      o.__prev = o.getValue();
+      o.__checkbox = document.createElement("input");
+      o.__checkbox.setAttribute("type", "checkbox");
+      X.bind(o.__checkbox, "change", function () {
+        i.setValue(!i.__prev);
       }, false);
-      bj.domElement.appendChild(bj.__checkbox);
-      bj.updateDisplay();
-      return bj;
+      o.domElement.appendChild(o.__checkbox);
+      o.updateDisplay();
+      return o;
     }
-    aD(bg, aG);
-    aB(bg, [{
+    j(t, z);
+    P(t, [{
       key: "setValue",
-      value: function (bh) {
-        var bi = aC(bg.prototype.__proto__ || Object.getPrototypeOf(bg.prototype), "setValue", this).call(this, bh);
+      value: function (e) {
+        var n = D(t.prototype.__proto__ || Object.getPrototypeOf(t.prototype), "setValue", this).call(this, e);
         if (this.__onFinishChange) {
           this.__onFinishChange.call(this, this.getValue());
         }
         this.__prev = this.getValue();
-        return bi;
+        return n;
       }
     }, {
       key: "updateDisplay",
@@ -50543,303 +50556,303 @@ aÀÅÁa();
           this.__checkbox.checked = false;
           this.__prev = false;
         }
-        return aC(bg.prototype.__proto__ || Object.getPrototypeOf(bg.prototype), "updateDisplay", this).call(this);
+        return D(t.prototype.__proto__ || Object.getPrototypeOf(t.prototype), "updateDisplay", this).call(this);
       }
     }]);
-    return bg;
+    return t;
   }();
-  var aM = function (bf) {
-    function bh(bi, bj, bk) {
-      aA(this, bh);
-      var bl = aE(this, (bh.__proto__ || Object.getPrototypeOf(bh)).call(this, bi, bj));
-      var bm = bk;
-      var bn = bl;
-      bl.__select = document.createElement("select");
-      if (as.isArray(bm)) {
-        var bo = {};
-        as.each(bm, function (bq) {
-          bo[bq] = bq;
+  var Y = function (e) {
+    function t(e, n, o) {
+      F(this, t);
+      var i = V(this, (t.__proto__ || Object.getPrototypeOf(t)).call(this, e, n));
+      var r = o;
+      var s = i;
+      i.__select = document.createElement("select");
+      if (S.isArray(r)) {
+        var a = {};
+        S.each(r, function (e) {
+          a[e] = e;
         });
-        bm = bo;
+        r = a;
       }
-      as.each(bm, function (bq, br) {
-        var bs = document.createElement("option");
-        bs.innerHTML = br;
-        bs.setAttribute("value", bq);
-        bn.__select.appendChild(bs);
+      S.each(r, function (e, t) {
+        var n = document.createElement("option");
+        n.innerHTML = t;
+        n.setAttribute("value", e);
+        s.__select.appendChild(n);
       });
-      bl.updateDisplay();
-      aK.bind(bl.__select, "change", function () {
-        var bq = this.options[this.selectedIndex].value;
-        bn.setValue(bq);
+      i.updateDisplay();
+      X.bind(i.__select, "change", function () {
+        var e = this.options[this.selectedIndex].value;
+        s.setValue(e);
       });
-      bl.domElement.appendChild(bl.__select);
-      return bl;
+      i.domElement.appendChild(i.__select);
+      return i;
     }
-    aD(bh, aG);
-    aB(bh, [{
+    j(t, z);
+    P(t, [{
       key: "setValue",
-      value: function (bi) {
-        var bj = aC(bh.prototype.__proto__ || Object.getPrototypeOf(bh.prototype), "setValue", this).call(this, bi);
+      value: function (e) {
+        var n = D(t.prototype.__proto__ || Object.getPrototypeOf(t.prototype), "setValue", this).call(this, e);
         if (this.__onFinishChange) {
           this.__onFinishChange.call(this, this.getValue());
         }
-        return bj;
+        return n;
       }
     }, {
       key: "updateDisplay",
       value: function () {
-        if (aK.isActive(this.__select)) {
+        if (X.isActive(this.__select)) {
           return this;
         } else {
           this.__select.value = this.getValue();
-          return aC(bh.prototype.__proto__ || Object.getPrototypeOf(bh.prototype), "updateDisplay", this).call(this);
+          return D(t.prototype.__proto__ || Object.getPrototypeOf(t.prototype), "updateDisplay", this).call(this);
         }
       }
     }]);
-    return bh;
+    return t;
   }();
-  var aN = function (bf) {
-    function bh(bi, bj) {
-      function bn() {
-        bl.setValue(bl.__input.value);
+  var J = function (e) {
+    function t(e, n) {
+      function o() {
+        r.setValue(r.__input.value);
       }
-      aA(this, bh);
-      var bk = aE(this, (bh.__proto__ || Object.getPrototypeOf(bh)).call(this, bi, bj));
-      var bl = bk;
-      bk.__input = document.createElement("input");
-      bk.__input.setAttribute("type", "text");
-      aK.bind(bk.__input, "keyup", bn);
-      aK.bind(bk.__input, "change", bn);
-      aK.bind(bk.__input, "blur", function () {
-        if (bl.__onFinishChange) {
-          bl.__onFinishChange.call(bl, bl.getValue());
+      F(this, t);
+      var i = V(this, (t.__proto__ || Object.getPrototypeOf(t)).call(this, e, n));
+      var r = i;
+      i.__input = document.createElement("input");
+      i.__input.setAttribute("type", "text");
+      X.bind(i.__input, "keyup", o);
+      X.bind(i.__input, "change", o);
+      X.bind(i.__input, "blur", function () {
+        if (r.__onFinishChange) {
+          r.__onFinishChange.call(r, r.getValue());
         }
       });
-      aK.bind(bk.__input, "keydown", function (bo) {
-        if (bo.keyCode === 13) {
+      X.bind(i.__input, "keydown", function (e) {
+        if (e.keyCode === 13) {
           this.blur();
         }
       });
-      bk.updateDisplay();
-      bk.domElement.appendChild(bk.__input);
-      return bk;
+      i.updateDisplay();
+      i.domElement.appendChild(i.__input);
+      return i;
     }
-    aD(bh, aG);
-    aB(bh, [{
+    j(t, z);
+    P(t, [{
       key: "updateDisplay",
       value: function () {
-        if (!aK.isActive(this.__input)) {
+        if (!X.isActive(this.__input)) {
           this.__input.value = this.getValue();
         }
-        return aC(bh.prototype.__proto__ || Object.getPrototypeOf(bh.prototype), "updateDisplay", this).call(this);
+        return D(t.prototype.__proto__ || Object.getPrototypeOf(t.prototype), "updateDisplay", this).call(this);
       }
     }]);
-    return bh;
+    return t;
   }();
-  var aO = function (bf) {
-    function bg(bh, bi, bj) {
-      aA(this, bg);
-      var bk = aE(this, (bg.__proto__ || Object.getPrototypeOf(bg)).call(this, bh, bi));
-      var bl = bj || {};
-      bk.__min = bl.min;
-      bk.__max = bl.max;
-      bk.__step = bl.step;
-      if (as.isUndefined(bk.__step)) {
-        if (bk.initialValue === 0) {
-          bk.__impliedStep = 1;
+  var W = function (e) {
+    function t(e, n, o) {
+      F(this, t);
+      var i = V(this, (t.__proto__ || Object.getPrototypeOf(t)).call(this, e, n));
+      var s = o || {};
+      i.__min = s.min;
+      i.__max = s.max;
+      i.__step = s.step;
+      if (S.isUndefined(i.__step)) {
+        if (i.initialValue === 0) {
+          i.__impliedStep = 1;
         } else {
-          bk.__impliedStep = Math.pow(10, Math.floor(Math.log(Math.abs(bk.initialValue)) / Math.LN10)) / 10;
+          i.__impliedStep = Math.pow(10, Math.floor(Math.log(Math.abs(i.initialValue)) / Math.LN10)) / 10;
         }
       } else {
-        bk.__impliedStep = bk.__step;
+        i.__impliedStep = i.__step;
       }
-      bk.__precision = a5(bk.__impliedStep);
-      return bk;
+      i.__precision = r(i.__impliedStep);
+      return i;
     }
-    aD(bg, aG);
-    aB(bg, [{
+    j(t, z);
+    P(t, [{
       key: "setValue",
-      value: function (bh) {
-        var bi = bh;
-        if (this.__min !== undefined && bi < this.__min) {
-          bi = this.__min;
-        } else if (this.__max !== undefined && bi > this.__max) {
-          bi = this.__max;
+      value: function (e) {
+        var n = e;
+        if (this.__min !== undefined && n < this.__min) {
+          n = this.__min;
+        } else if (this.__max !== undefined && n > this.__max) {
+          n = this.__max;
         }
-        if (this.__step !== undefined && bi % this.__step != 0) {
-          bi = Math.round(bi / this.__step) * this.__step;
+        if (this.__step !== undefined && n % this.__step != 0) {
+          n = Math.round(n / this.__step) * this.__step;
         }
-        return aC(bg.prototype.__proto__ || Object.getPrototypeOf(bg.prototype), "setValue", this).call(this, bi);
+        return D(t.prototype.__proto__ || Object.getPrototypeOf(t.prototype), "setValue", this).call(this, n);
       }
     }, {
       key: "min",
-      value: function (bh) {
-        this.__min = bh;
+      value: function (e) {
+        this.__min = e;
         return this;
       }
     }, {
       key: "max",
-      value: function (bh) {
-        this.__max = bh;
+      value: function (e) {
+        this.__max = e;
         return this;
       }
     }, {
       key: "step",
-      value: function (bh) {
-        this.__step = bh;
-        this.__impliedStep = bh;
-        this.__precision = a5(bh);
+      value: function (e) {
+        this.__step = e;
+        this.__impliedStep = e;
+        this.__precision = r(e);
         return this;
       }
     }]);
-    return bg;
+    return t;
   }();
-  var aP = function (bf) {
-    function bh(bi, bj, bk) {
-      function bo() {
-        if (bm.__onFinishChange) {
-          bm.__onFinishChange.call(bm, bm.getValue());
+  var Q = function (e) {
+    function t(e, n, o) {
+      function i() {
+        if (l.__onFinishChange) {
+          l.__onFinishChange.call(l, l.getValue());
         }
       }
-      function bp(br) {
-        var bs = bn - br.clientY;
-        bm.setValue(bm.getValue() + bs * bm.__impliedStep);
-        bn = br.clientY;
+      function r(e) {
+        var t = d - e.clientY;
+        l.setValue(l.getValue() + t * l.__impliedStep);
+        d = e.clientY;
       }
-      function bq() {
-        aK.unbind(window, "mousemove", bp);
-        aK.unbind(window, "mouseup", bq);
-        bo();
+      function s() {
+        X.unbind(window, "mousemove", r);
+        X.unbind(window, "mouseup", s);
+        i();
       }
-      aA(this, bh);
-      var bl = aE(this, (bh.__proto__ || Object.getPrototypeOf(bh)).call(this, bi, bj, bk));
-      bl.__truncationSuspended = false;
-      var bm = bl;
-      var bn = undefined;
-      bl.__input = document.createElement("input");
-      bl.__input.setAttribute("type", "text");
-      aK.bind(bl.__input, "change", function () {
-        var br = parseFloat(bm.__input.value);
-        if (!as.isNaN(br)) {
-          bm.setValue(br);
+      F(this, t);
+      var a = V(this, (t.__proto__ || Object.getPrototypeOf(t)).call(this, e, n, o));
+      a.__truncationSuspended = false;
+      var l = a;
+      var d = undefined;
+      a.__input = document.createElement("input");
+      a.__input.setAttribute("type", "text");
+      X.bind(a.__input, "change", function () {
+        var e = parseFloat(l.__input.value);
+        if (!S.isNaN(e)) {
+          l.setValue(e);
         }
       });
-      aK.bind(bl.__input, "blur", function () {
-        bo();
+      X.bind(a.__input, "blur", function () {
+        i();
       });
-      aK.bind(bl.__input, "mousedown", function (br) {
-        aK.bind(window, "mousemove", bp);
-        aK.bind(window, "mouseup", bq);
-        bn = br.clientY;
+      X.bind(a.__input, "mousedown", function (e) {
+        X.bind(window, "mousemove", r);
+        X.bind(window, "mouseup", s);
+        d = e.clientY;
       });
-      aK.bind(bl.__input, "keydown", function (br) {
-        if (br.keyCode === 13) {
-          bm.__truncationSuspended = true;
+      X.bind(a.__input, "keydown", function (e) {
+        if (e.keyCode === 13) {
+          l.__truncationSuspended = true;
           this.blur();
-          bm.__truncationSuspended = false;
-          bo();
+          l.__truncationSuspended = false;
+          i();
         }
       });
-      bl.updateDisplay();
-      bl.domElement.appendChild(bl.__input);
-      return bl;
+      a.updateDisplay();
+      a.domElement.appendChild(a.__input);
+      return a;
     }
-    aD(bh, aO);
-    aB(bh, [{
+    j(t, W);
+    P(t, [{
       key: "updateDisplay",
       value: function () {
-        this.__input.value = this.__truncationSuspended ? this.getValue() : a6(this.getValue(), this.__precision);
-        return aC(bh.prototype.__proto__ || Object.getPrototypeOf(bh.prototype), "updateDisplay", this).call(this);
+        this.__input.value = this.__truncationSuspended ? this.getValue() : s(this.getValue(), this.__precision);
+        return D(t.prototype.__proto__ || Object.getPrototypeOf(t.prototype), "updateDisplay", this).call(this);
       }
     }]);
-    return bh;
+    return t;
   }();
-  var aQ = function (bf) {
-    function bh(bi, bj, bk, bl, bm) {
-      function bq(bu) {
-        bu.preventDefault();
-        var bv = bo.__background.getBoundingClientRect();
-        bo.setValue(a7(bu.clientX, bv.left, bv.right, bo.__min, bo.__max));
+  var q = function (e) {
+    function t(e, n, o, i, r) {
+      function s(e) {
+        e.preventDefault();
+        var t = _.__background.getBoundingClientRect();
+        _.setValue(a(e.clientX, t.left, t.right, _.__min, _.__max));
         return false;
       }
-      function br() {
-        aK.unbind(window, "mousemove", bq);
-        aK.unbind(window, "mouseup", br);
-        if (bo.__onFinishChange) {
-          bo.__onFinishChange.call(bo, bo.getValue());
+      function l() {
+        X.unbind(window, "mousemove", s);
+        X.unbind(window, "mouseup", l);
+        if (_.__onFinishChange) {
+          _.__onFinishChange.call(_, _.getValue());
         }
       }
-      function bs(bu) {
-        var bv = bu.touches[0].clientX;
-        var bw = bo.__background.getBoundingClientRect();
-        bo.setValue(a7(bv, bw.left, bw.right, bo.__min, bo.__max));
+      function d(e) {
+        var t = e.touches[0].clientX;
+        var n = _.__background.getBoundingClientRect();
+        _.setValue(a(t, n.left, n.right, _.__min, _.__max));
       }
-      function bt() {
-        aK.unbind(window, "touchmove", bs);
-        aK.unbind(window, "touchend", bt);
-        if (bo.__onFinishChange) {
-          bo.__onFinishChange.call(bo, bo.getValue());
+      function c() {
+        X.unbind(window, "touchmove", d);
+        X.unbind(window, "touchend", c);
+        if (_.__onFinishChange) {
+          _.__onFinishChange.call(_, _.getValue());
         }
       }
-      aA(this, bh);
-      var bn = aE(this, (bh.__proto__ || Object.getPrototypeOf(bh)).call(this, bi, bj, {
-        min: bk,
-        max: bl,
-        step: bm
+      F(this, t);
+      var u = V(this, (t.__proto__ || Object.getPrototypeOf(t)).call(this, e, n, {
+        min: o,
+        max: i,
+        step: r
       }));
-      var bo = bn;
-      bn.__background = document.createElement("div");
-      bn.__foreground = document.createElement("div");
-      aK.bind(bn.__background, "mousedown", function (bu) {
+      var _ = u;
+      u.__background = document.createElement("div");
+      u.__foreground = document.createElement("div");
+      X.bind(u.__background, "mousedown", function (e) {
         document.activeElement.blur();
-        aK.bind(window, "mousemove", bq);
-        aK.bind(window, "mouseup", br);
-        bq(bu);
+        X.bind(window, "mousemove", s);
+        X.bind(window, "mouseup", l);
+        s(e);
       });
-      aK.bind(bn.__background, "touchstart", function (bu) {
-        if (bu.touches.length === 1) {
-          aK.bind(window, "touchmove", bs);
-          aK.bind(window, "touchend", bt);
-          bs(bu);
+      X.bind(u.__background, "touchstart", function (e) {
+        if (e.touches.length === 1) {
+          X.bind(window, "touchmove", d);
+          X.bind(window, "touchend", c);
+          d(e);
         }
       });
-      aK.addClass(bn.__background, "slider");
-      aK.addClass(bn.__foreground, "slider-fg");
-      bn.updateDisplay();
-      bn.__background.appendChild(bn.__foreground);
-      bn.domElement.appendChild(bn.__background);
-      return bn;
+      X.addClass(u.__background, "slider");
+      X.addClass(u.__foreground, "slider-fg");
+      u.updateDisplay();
+      u.__background.appendChild(u.__foreground);
+      u.domElement.appendChild(u.__background);
+      return u;
     }
-    aD(bh, aO);
-    aB(bh, [{
+    j(t, W);
+    P(t, [{
       key: "updateDisplay",
       value: function () {
-        var bi = (this.getValue() - this.__min) / (this.__max - this.__min);
-        this.__foreground.style.width = bi * 100 + "%";
-        return aC(bh.prototype.__proto__ || Object.getPrototypeOf(bh.prototype), "updateDisplay", this).call(this);
+        var e = (this.getValue() - this.__min) / (this.__max - this.__min);
+        this.__foreground.style.width = e * 100 + "%";
+        return D(t.prototype.__proto__ || Object.getPrototypeOf(t.prototype), "updateDisplay", this).call(this);
       }
     }]);
-    return bh;
+    return t;
   }();
-  var aR = function (bf) {
-    function bg(bh, bi, bj) {
-      aA(this, bg);
-      var bk = aE(this, (bg.__proto__ || Object.getPrototypeOf(bg)).call(this, bh, bi));
-      var bl = bk;
-      bk.__button = document.createElement("div");
-      bk.__button.innerHTML = bj === undefined ? "Fire" : bj;
-      aK.bind(bk.__button, "click", function (bm) {
-        bm.preventDefault();
-        bl.fire();
+  var Z = function (e) {
+    function t(e, n, o) {
+      F(this, t);
+      var i = V(this, (t.__proto__ || Object.getPrototypeOf(t)).call(this, e, n));
+      var r = i;
+      i.__button = document.createElement("div");
+      i.__button.innerHTML = o === undefined ? "Fire" : o;
+      X.bind(i.__button, "click", function (e) {
+        e.preventDefault();
+        r.fire();
         return false;
       });
-      aK.addClass(bk.__button, "button");
-      bk.domElement.appendChild(bk.__button);
-      return bk;
+      X.addClass(i.__button, "button");
+      i.domElement.appendChild(i.__button);
+      return i;
     }
-    aD(bg, aG);
-    aB(bg, [{
+    j(t, z);
+    P(t, [{
       key: "fire",
       value: function () {
         if (this.__onChange) {
@@ -50851,154 +50864,154 @@ aÀÅÁa();
         }
       }
     }]);
-    return bg;
+    return t;
   }();
-  var aS = function (bf) {
-    function bg(bh, bi) {
-      function bj(bu) {
-        bp(bu);
-        aK.bind(window, "mousemove", bp);
-        aK.bind(window, "touchmove", bp);
-        aK.bind(window, "mouseup", bl);
-        aK.bind(window, "touchend", bl);
+  var $ = function (e) {
+    function t(e, n) {
+      function o(e) {
+        u(e);
+        X.bind(window, "mousemove", u);
+        X.bind(window, "touchmove", u);
+        X.bind(window, "mouseup", r);
+        X.bind(window, "touchend", r);
       }
-      function bk(bu) {
-        bq(bu);
-        aK.bind(window, "mousemove", bq);
-        aK.bind(window, "touchmove", bq);
-        aK.bind(window, "mouseup", bm);
-        aK.bind(window, "touchend", bm);
+      function i(e) {
+        _(e);
+        X.bind(window, "mousemove", _);
+        X.bind(window, "touchmove", _);
+        X.bind(window, "mouseup", s);
+        X.bind(window, "touchend", s);
       }
-      function bl() {
-        aK.unbind(window, "mousemove", bp);
-        aK.unbind(window, "touchmove", bp);
-        aK.unbind(window, "mouseup", bl);
-        aK.unbind(window, "touchend", bl);
-        bo();
+      function r() {
+        X.unbind(window, "mousemove", u);
+        X.unbind(window, "touchmove", u);
+        X.unbind(window, "mouseup", r);
+        X.unbind(window, "touchend", r);
+        c();
       }
-      function bm() {
-        aK.unbind(window, "mousemove", bq);
-        aK.unbind(window, "touchmove", bq);
-        aK.unbind(window, "mouseup", bm);
-        aK.unbind(window, "touchend", bm);
-        bo();
+      function s() {
+        X.unbind(window, "mousemove", _);
+        X.unbind(window, "touchmove", _);
+        X.unbind(window, "mouseup", s);
+        X.unbind(window, "touchend", s);
+        c();
       }
-      function bn() {
-        var bu = aw(this.value);
-        if (bu !== false) {
-          bs.__color.__state = bu;
-          bs.setValue(bs.__color.toOriginal());
+      function a() {
+        var e = R(this.value);
+        if (e !== false) {
+          p.__color.__state = e;
+          p.setValue(p.__color.toOriginal());
         } else {
-          this.value = bs.__color.toString();
+          this.value = p.__color.toString();
         }
       }
-      function bo() {
-        if (bs.__onFinishChange) {
-          bs.__onFinishChange.call(bs, bs.__color.toOriginal());
+      function c() {
+        if (p.__onFinishChange) {
+          p.__onFinishChange.call(p, p.__color.toOriginal());
         }
       }
-      function bp(bu) {
-        if (bu.type.indexOf("touch") === -1) {
-          bu.preventDefault();
+      function u(e) {
+        if (e.type.indexOf("touch") === -1) {
+          e.preventDefault();
         }
-        var bv = bs.__saturation_field.getBoundingClientRect();
-        var bw = bu.touches && bu.touches[0] || bu;
-        var bx = bw.clientX;
-        var by = bw.clientY;
-        var bz = (bx - bv.left) / (bv.right - bv.left);
-        var bA = 1 - (by - bv.top) / (bv.bottom - bv.top);
-        if (bA > 1) {
-          bA = 1;
-        } else if (bA < 0) {
-          bA = 0;
+        var t = p.__saturation_field.getBoundingClientRect();
+        var n = e.touches && e.touches[0] || e;
+        var o = n.clientX;
+        var i = n.clientY;
+        var r = (o - t.left) / (t.right - t.left);
+        var s = 1 - (i - t.top) / (t.bottom - t.top);
+        if (s > 1) {
+          s = 1;
+        } else if (s < 0) {
+          s = 0;
         }
-        if (bz > 1) {
-          bz = 1;
-        } else if (bz < 0) {
-          bz = 0;
+        if (r > 1) {
+          r = 1;
+        } else if (r < 0) {
+          r = 0;
         }
-        bs.__color.v = bA;
-        bs.__color.s = bz;
-        bs.setValue(bs.__color.toOriginal());
+        p.__color.v = s;
+        p.__color.s = r;
+        p.setValue(p.__color.toOriginal());
         return false;
       }
-      function bq(bu) {
-        if (bu.type.indexOf("touch") === -1) {
-          bu.preventDefault();
+      function _(e) {
+        if (e.type.indexOf("touch") === -1) {
+          e.preventDefault();
         }
-        var bv = bs.__hue_field.getBoundingClientRect();
-        var bw = 1 - ((bu.touches && bu.touches[0] || bu).clientY - bv.top) / (bv.bottom - bv.top);
-        if (bw > 1) {
-          bw = 1;
-        } else if (bw < 0) {
-          bw = 0;
+        var t = p.__hue_field.getBoundingClientRect();
+        var n = 1 - ((e.touches && e.touches[0] || e).clientY - t.top) / (t.bottom - t.top);
+        if (n > 1) {
+          n = 1;
+        } else if (n < 0) {
+          n = 0;
         }
-        bs.__color.h = bw * 360;
-        bs.setValue(bs.__color.toOriginal());
+        p.__color.h = n * 360;
+        p.setValue(p.__color.toOriginal());
         return false;
       }
-      aA(this, bg);
-      var br = aE(this, (bg.__proto__ || Object.getPrototypeOf(bg)).call(this, bh, bi));
-      br.__color = new aF(br.getValue());
-      br.__temp = new aF(0);
-      var bs = br;
-      br.domElement = document.createElement("div");
-      aK.makeSelectable(br.domElement, false);
-      br.__selector = document.createElement("div");
-      br.__selector.className = "selector";
-      br.__saturation_field = document.createElement("div");
-      br.__saturation_field.className = "saturation-field";
-      br.__field_knob = document.createElement("div");
-      br.__field_knob.className = "field-knob";
-      br.__field_knob_border = "2px solid ";
-      br.__hue_knob = document.createElement("div");
-      br.__hue_knob.className = "hue-knob";
-      br.__hue_field = document.createElement("div");
-      br.__hue_field.className = "hue-field";
-      br.__input = document.createElement("input");
-      br.__input.type = "text";
-      br.__input_textShadow = "0 1px 1px ";
-      aK.bind(br.__input, "keydown", function (bu) {
-        if (bu.keyCode === 13) {
-          bn.call(this);
+      F(this, t);
+      var h = V(this, (t.__proto__ || Object.getPrototypeOf(t)).call(this, e, n));
+      h.__color = new I(h.getValue());
+      h.__temp = new I(0);
+      var p = h;
+      h.domElement = document.createElement("div");
+      X.makeSelectable(h.domElement, false);
+      h.__selector = document.createElement("div");
+      h.__selector.className = "selector";
+      h.__saturation_field = document.createElement("div");
+      h.__saturation_field.className = "saturation-field";
+      h.__field_knob = document.createElement("div");
+      h.__field_knob.className = "field-knob";
+      h.__field_knob_border = "2px solid ";
+      h.__hue_knob = document.createElement("div");
+      h.__hue_knob.className = "hue-knob";
+      h.__hue_field = document.createElement("div");
+      h.__hue_field.className = "hue-field";
+      h.__input = document.createElement("input");
+      h.__input.type = "text";
+      h.__input_textShadow = "0 1px 1px ";
+      X.bind(h.__input, "keydown", function (e) {
+        if (e.keyCode === 13) {
+          a.call(this);
         }
       });
-      aK.bind(br.__input, "blur", bn);
-      aK.bind(br.__selector, "mousedown", function () {
-        aK.addClass(this, "drag").bind(window, "mouseup", function () {
-          aK.removeClass(bs.__selector, "drag");
+      X.bind(h.__input, "blur", a);
+      X.bind(h.__selector, "mousedown", function () {
+        X.addClass(this, "drag").bind(window, "mouseup", function () {
+          X.removeClass(p.__selector, "drag");
         });
       });
-      aK.bind(br.__selector, "touchstart", function () {
-        aK.addClass(this, "drag").bind(window, "touchend", function () {
-          aK.removeClass(bs.__selector, "drag");
+      X.bind(h.__selector, "touchstart", function () {
+        X.addClass(this, "drag").bind(window, "touchend", function () {
+          X.removeClass(p.__selector, "drag");
         });
       });
-      var bt = document.createElement("div");
-      as.extend(br.__selector.style, {
+      var f = document.createElement("div");
+      S.extend(h.__selector.style, {
         width: "122px",
         height: "102px",
         padding: "3px",
         backgroundColor: "#222",
         boxShadow: "0px 1px 3px rgba(0,0,0,0.3)"
       });
-      as.extend(br.__field_knob.style, {
+      S.extend(h.__field_knob.style, {
         position: "absolute",
         width: "12px",
         height: "12px",
-        border: br.__field_knob_border + (br.__color.v < 0.5 ? "#fff" : "#000"),
+        border: h.__field_knob_border + (h.__color.v < 0.5 ? "#fff" : "#000"),
         boxShadow: "0px 1px 3px rgba(0,0,0,0.5)",
         borderRadius: "12px",
         zIndex: 1
       });
-      as.extend(br.__hue_knob.style, {
+      S.extend(h.__hue_knob.style, {
         position: "absolute",
         width: "15px",
         height: "2px",
         borderRight: "4px solid #fff",
         zIndex: 1
       });
-      as.extend(br.__saturation_field.style, {
+      S.extend(h.__saturation_field.style, {
         width: "100px",
         height: "100px",
         border: "1px solid #555",
@@ -51006,13 +51019,13 @@ aÀÅÁa();
         display: "inline-block",
         cursor: "pointer"
       });
-      as.extend(bt.style, {
+      S.extend(f.style, {
         width: "100%",
         height: "100%",
         background: "none"
       });
-      a8(bt, "top", "rgba(0,0,0,0)", "#000");
-      as.extend(br.__hue_field.style, {
+      l(f, "top", "rgba(0,0,0,0)", "#000");
+      S.extend(h.__hue_field.style, {
         width: "15px",
         height: "100px",
         border: "1px solid #555",
@@ -51021,134 +51034,134 @@ aÀÅÁa();
         top: "3px",
         right: "3px"
       });
-      a9(br.__hue_field);
-      as.extend(br.__input.style, {
+      d(h.__hue_field);
+      S.extend(h.__input.style, {
         outline: "none",
         textAlign: "center",
         color: "#fff",
         border: 0,
         fontWeight: "bold",
-        textShadow: br.__input_textShadow + "rgba(0,0,0,0.7)"
+        textShadow: h.__input_textShadow + "rgba(0,0,0,0.7)"
       });
-      aK.bind(br.__saturation_field, "mousedown", bj);
-      aK.bind(br.__saturation_field, "touchstart", bj);
-      aK.bind(br.__field_knob, "mousedown", bj);
-      aK.bind(br.__field_knob, "touchstart", bj);
-      aK.bind(br.__hue_field, "mousedown", bk);
-      aK.bind(br.__hue_field, "touchstart", bk);
-      br.__saturation_field.appendChild(bt);
-      br.__selector.appendChild(br.__field_knob);
-      br.__selector.appendChild(br.__saturation_field);
-      br.__selector.appendChild(br.__hue_field);
-      br.__hue_field.appendChild(br.__hue_knob);
-      br.domElement.appendChild(br.__input);
-      br.domElement.appendChild(br.__selector);
-      br.updateDisplay();
-      return br;
+      X.bind(h.__saturation_field, "mousedown", o);
+      X.bind(h.__saturation_field, "touchstart", o);
+      X.bind(h.__field_knob, "mousedown", o);
+      X.bind(h.__field_knob, "touchstart", o);
+      X.bind(h.__hue_field, "mousedown", i);
+      X.bind(h.__hue_field, "touchstart", i);
+      h.__saturation_field.appendChild(f);
+      h.__selector.appendChild(h.__field_knob);
+      h.__selector.appendChild(h.__saturation_field);
+      h.__selector.appendChild(h.__hue_field);
+      h.__hue_field.appendChild(h.__hue_knob);
+      h.domElement.appendChild(h.__input);
+      h.domElement.appendChild(h.__selector);
+      h.updateDisplay();
+      return h;
     }
-    aD(bg, aG);
-    aB(bg, [{
+    j(t, z);
+    P(t, [{
       key: "updateDisplay",
       value: function () {
-        var bh = aw(this.getValue());
-        if (bh !== false) {
-          var bi = false;
-          as.each(aF.COMPONENTS, function (bl) {
-            if (!as.isUndefined(bh[bl]) && !as.isUndefined(this.__color.__state[bl]) && bh[bl] !== this.__color.__state[bl]) {
-              bi = true;
+        var e = R(this.getValue());
+        if (e !== false) {
+          var t = false;
+          S.each(I.COMPONENTS, function (n) {
+            if (!S.isUndefined(e[n]) && !S.isUndefined(this.__color.__state[n]) && e[n] !== this.__color.__state[n]) {
+              t = true;
               return {};
             }
           }, this);
-          if (bi) {
-            as.extend(this.__color.__state, bh);
+          if (t) {
+            S.extend(this.__color.__state, e);
           }
         }
-        as.extend(this.__temp.__state, this.__color.__state);
+        S.extend(this.__temp.__state, this.__color.__state);
         this.__temp.a = 1;
-        var bj = this.__color.v < 0.5 || this.__color.s > 0.5 ? 255 : 0;
-        var bk = 255 - bj;
-        as.extend(this.__field_knob.style, {
+        var n = this.__color.v < 0.5 || this.__color.s > 0.5 ? 255 : 0;
+        var o = 255 - n;
+        S.extend(this.__field_knob.style, {
           marginLeft: this.__color.s * 100 - 7 + "px",
           marginTop: (1 - this.__color.v) * 100 - 7 + "px",
           backgroundColor: this.__temp.toHexString(),
-          border: this.__field_knob_border + "rgb(" + bj + "," + bj + "," + bj + ")"
+          border: this.__field_knob_border + "rgb(" + n + "," + n + "," + n + ")"
         });
         this.__hue_knob.style.marginTop = (1 - this.__color.h / 360) * 100 + "px";
         this.__temp.s = 1;
         this.__temp.v = 1;
-        a8(this.__saturation_field, "left", "#fff", this.__temp.toHexString());
+        l(this.__saturation_field, "left", "#fff", this.__temp.toHexString());
         this.__input.value = this.__color.toString();
-        as.extend(this.__input.style, {
+        S.extend(this.__input.style, {
           backgroundColor: this.__color.toHexString(),
-          color: "rgb(" + bj + "," + bj + "," + bj + ")",
-          textShadow: this.__input_textShadow + "rgba(" + bk + "," + bk + "," + bk + ",.7)"
+          color: "rgb(" + n + "," + n + "," + n + ")",
+          textShadow: this.__input_textShadow + "rgba(" + o + "," + o + "," + o + ",.7)"
         });
       }
     }]);
-    return bg;
+    return t;
   }();
-  var aT = ["-moz-", "-o-", "-webkit-", "-ms-", ""];
-  var aU = {
-    load: function (bf, bg) {
-      var bh = bg || document;
-      var bi = bh.createElement("link");
-      bi.type = "text/css";
-      bi.rel = "stylesheet";
-      bi.href = bf;
-      bh.getElementsByTagName("head")[0].appendChild(bi);
+  var ee = ["-moz-", "-o-", "-webkit-", "-ms-", ""];
+  var te = {
+    load: function (e, t) {
+      var n = t || document;
+      var o = n.createElement("link");
+      o.type = "text/css";
+      o.rel = "stylesheet";
+      o.href = e;
+      n.getElementsByTagName("head")[0].appendChild(o);
     },
-    inject: function (bf, bg) {
-      var bh = bg || document;
-      var bi = document.createElement("style");
-      bi.type = "text/css";
-      bi.innerHTML = bf;
-      var bj = bh.getElementsByTagName("head")[0];
+    inject: function (e, t) {
+      var n = t || document;
+      var o = document.createElement("style");
+      o.type = "text/css";
+      o.innerHTML = e;
+      var i = n.getElementsByTagName("head")[0];
       try {
-        bj.appendChild(bi);
-      } catch (bm) {}
+        i.appendChild(o);
+      } catch (e) {}
     }
   };
-  function aV(bf, bg) {
-    var bh = bf[bg];
-    if (as.isArray(arguments[2]) || as.isObject(arguments[2])) {
-      return new aM(bf, bg, arguments[2]);
-    } else if (as.isNumber(bh)) {
-      if (as.isNumber(arguments[2]) && as.isNumber(arguments[3])) {
-        if (as.isNumber(arguments[4])) {
-          return new aQ(bf, bg, arguments[2], arguments[3], arguments[4]);
+  function ne(e, t) {
+    var n = e[t];
+    if (S.isArray(arguments[2]) || S.isObject(arguments[2])) {
+      return new Y(e, t, arguments[2]);
+    } else if (S.isNumber(n)) {
+      if (S.isNumber(arguments[2]) && S.isNumber(arguments[3])) {
+        if (S.isNumber(arguments[4])) {
+          return new q(e, t, arguments[2], arguments[3], arguments[4]);
         } else {
-          return new aQ(bf, bg, arguments[2], arguments[3]);
+          return new q(e, t, arguments[2], arguments[3]);
         }
-      } else if (as.isNumber(arguments[4])) {
-        return new aP(bf, bg, {
+      } else if (S.isNumber(arguments[4])) {
+        return new Q(e, t, {
           min: arguments[2],
           max: arguments[3],
           step: arguments[4]
         });
       } else {
-        return new aP(bf, bg, {
+        return new Q(e, t, {
           min: arguments[2],
           max: arguments[3]
         });
       }
-    } else if (as.isString(bh)) {
-      return new aN(bf, bg);
-    } else if (as.isFunction(bh)) {
-      return new aR(bf, bg, "");
-    } else if (as.isBoolean(bh)) {
-      return new aL(bf, bg);
+    } else if (S.isString(n)) {
+      return new J(e, t);
+    } else if (S.isFunction(n)) {
+      return new Z(e, t, "");
+    } else if (S.isBoolean(n)) {
+      return new K(e, t);
     } else {
       return null;
     }
   }
-  var aW = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (bf) {
-    setTimeout(bf, 1000 / 60);
+  var oe = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (e) {
+    setTimeout(e, 1000 / 60);
   };
-  var aX = function () {
-    function bf() {
-      aA(this, bf);
+  var ie = function () {
+    function e() {
+      F(this, e);
       this.backgroundElement = document.createElement("div");
-      as.extend(this.backgroundElement.style, {
+      S.extend(this.backgroundElement.style, {
         backgroundColor: "rgba(0,0,0,0.8)",
         top: 0,
         left: 0,
@@ -51158,10 +51171,10 @@ aÀÅÁa();
         WebkitTransition: "opacity 0.2s linear",
         transition: "opacity 0.2s linear"
       });
-      aK.makeFullscreen(this.backgroundElement);
+      X.makeFullscreen(this.backgroundElement);
       this.backgroundElement.style.position = "fixed";
       this.domElement = document.createElement("div");
-      as.extend(this.domElement.style, {
+      S.extend(this.domElement.style, {
         position: "fixed",
         display: "none",
         zIndex: "1001",
@@ -51171,40 +51184,40 @@ aÀÅÁa();
       });
       document.body.appendChild(this.backgroundElement);
       document.body.appendChild(this.domElement);
-      var bg = this;
-      aK.bind(this.backgroundElement, "click", function () {
-        bg.hide();
+      var t = this;
+      X.bind(this.backgroundElement, "click", function () {
+        t.hide();
       });
     }
-    aB(bf, [{
+    P(e, [{
       key: "show",
       value: function () {
-        var bg = this;
+        var e = this;
         this.backgroundElement.style.display = "block";
         this.domElement.style.display = "block";
         this.domElement.style.opacity = 0;
         this.domElement.style.webkitTransform = "scale(1.1)";
         this.layout();
-        as.defer(function () {
-          bg.backgroundElement.style.opacity = 1;
-          bg.domElement.style.opacity = 1;
-          bg.domElement.style.webkitTransform = "scale(1)";
+        S.defer(function () {
+          e.backgroundElement.style.opacity = 1;
+          e.domElement.style.opacity = 1;
+          e.domElement.style.webkitTransform = "scale(1)";
         });
       }
     }, {
       key: "hide",
       value: function () {
-        var bg = this;
-        var bh = function bi() {
-          bg.domElement.style.display = "none";
-          bg.backgroundElement.style.display = "none";
-          aK.unbind(bg.domElement, "webkitTransitionEnd", bi);
-          aK.unbind(bg.domElement, "transitionend", bi);
-          aK.unbind(bg.domElement, "oTransitionEnd", bi);
+        var e = this;
+        var t = function t() {
+          e.domElement.style.display = "none";
+          e.backgroundElement.style.display = "none";
+          X.unbind(e.domElement, "webkitTransitionEnd", t);
+          X.unbind(e.domElement, "transitionend", t);
+          X.unbind(e.domElement, "oTransitionEnd", t);
         };
-        aK.bind(this.domElement, "webkitTransitionEnd", bh);
-        aK.bind(this.domElement, "transitionend", bh);
-        aK.bind(this.domElement, "oTransitionEnd", bh);
+        X.bind(this.domElement, "webkitTransitionEnd", t);
+        X.bind(this.domElement, "transitionend", t);
+        X.bind(this.domElement, "oTransitionEnd", t);
         this.backgroundElement.style.opacity = 0;
         this.domElement.style.opacity = 0;
         this.domElement.style.webkitTransform = "scale(1.1)";
@@ -51212,298 +51225,298 @@ aÀÅÁa();
     }, {
       key: "layout",
       value: function () {
-        this.domElement.style.left = window.innerWidth / 2 - aK.getWidth(this.domElement) / 2 + "px";
-        this.domElement.style.top = window.innerHeight / 2 - aK.getHeight(this.domElement) / 2 + "px";
+        this.domElement.style.left = window.innerWidth / 2 - X.getWidth(this.domElement) / 2 + "px";
+        this.domElement.style.top = window.innerHeight / 2 - X.getHeight(this.domElement) / 2 + "px";
       }
     }]);
-    return bf;
+    return e;
   }();
-  var aY = function (bf) {
-    if (bf && typeof window != "undefined") {
-      var bg = document.createElement("style");
-      bg.setAttribute("type", "text/css");
-      bg.innerHTML = bf;
-      document.head.appendChild(bg);
-      return bf;
+  var re = function (e) {
+    if (e && typeof window != "undefined") {
+      var t = document.createElement("style");
+      t.setAttribute("type", "text/css");
+      t.innerHTML = e;
+      document.head.appendChild(t);
+      return e;
     }
   }(".dg ul{list-style:none;margin:0;padding:0;width:100%;clear:both}.dg.ac{position:fixed;top:0;left:0;right:0;height:0;z-index:0}.dg:not(.ac) .main{overflow:hidden}.dg.main{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear}.dg.main.taller-than-window{overflow-y:auto}.dg.main.taller-than-window .close-button{opacity:1;margin-top:-1px;border-top:1px solid #2c2c2c}.dg.main ul.closed .close-button{opacity:1 !important}.dg.main:hover .close-button,.dg.main .close-button.drag{opacity:1}.dg.main .close-button{-webkit-transition:opacity .1s linear;-o-transition:opacity .1s linear;-moz-transition:opacity .1s linear;transition:opacity .1s linear;border:0;line-height:19px;height:20px;cursor:pointer;text-align:center;background-color:#000}.dg.main .close-button.close-top{position:relative}.dg.main .close-button.close-bottom{position:absolute}.dg.main .close-button:hover{background-color:#111}.dg.a{float:right;margin-right:15px;overflow-y:visible}.dg.a.has-save>ul.close-top{margin-top:0}.dg.a.has-save>ul.close-bottom{margin-top:27px}.dg.a.has-save>ul.closed{margin-top:0}.dg.a .save-row{top:0;z-index:1002}.dg.a .save-row.close-top{position:relative}.dg.a .save-row.close-bottom{position:fixed}.dg li{-webkit-transition:height .1s ease-out;-o-transition:height .1s ease-out;-moz-transition:height .1s ease-out;transition:height .1s ease-out;-webkit-transition:overflow .1s linear;-o-transition:overflow .1s linear;-moz-transition:overflow .1s linear;transition:overflow .1s linear}.dg li:not(.folder){cursor:auto;height:27px;line-height:27px;padding:0 4px 0 5px}.dg li.folder{padding:0;border-left:4px solid rgba(0,0,0,0)}.dg li.title{cursor:pointer;margin-left:-4px}.dg .closed li:not(.title),.dg .closed ul li,.dg .closed ul li>*{height:0;overflow:hidden;border:0}.dg .cr{clear:both;padding-left:3px;height:27px;overflow:hidden}.dg .property-name{cursor:default;float:left;clear:left;width:40%;overflow:hidden;text-overflow:ellipsis}.dg .cr.function .property-name{width:100%}.dg .c{float:left;width:60%;position:relative}.dg .c input[type=text]{border:0;margin-top:4px;padding:3px;width:100%;float:right}.dg .has-slider input[type=text]{width:30%;margin-left:0}.dg .slider{float:left;width:66%;margin-left:-5px;margin-right:0;height:19px;margin-top:4px}.dg .slider-fg{height:100%}.dg .c input[type=checkbox]{margin-top:7px}.dg .c select{margin-top:5px}.dg .cr.function,.dg .cr.function .property-name,.dg .cr.function *,.dg .cr.boolean,.dg .cr.boolean *{cursor:pointer}.dg .cr.color{overflow:visible}.dg .selector{display:none;position:absolute;margin-left:-9px;margin-top:23px;z-index:10}.dg .c:hover .selector,.dg .selector.drag{display:block}.dg li.save-row{padding:0}.dg li.save-row .button{display:inline-block;padding:0px 6px}.dg.dialogue{background-color:#222;width:460px;padding:15px;font-size:13px;line-height:15px}#dg-new-constructor{padding:10px;color:#222;font-family:Monaco, monospace;font-size:10px;border:0;resize:none;box-shadow:inset 1px 1px 1px #888;word-wrap:break-word;margin:12px 0;display:block;width:440px;overflow-y:scroll;height:100px;position:relative}#dg-local-explain{display:none;font-size:11px;line-height:17px;border-radius:3px;background-color:#333;padding:8px;margin-top:10px}#dg-local-explain code{font-size:10px}#dat-gui-save-locally{display:none}.dg{color:#eee;font:11px 'Lucida Grande', sans-serif;text-shadow:0 -1px 0 #111}.dg.main::-webkit-scrollbar{width:5px;background:#1a1a1a}.dg.main::-webkit-scrollbar-corner{height:0;display:none}.dg.main::-webkit-scrollbar-thumb{border-radius:5px;background:#676767}.dg li:not(.folder){background:#1a1a1a;border-bottom:1px solid #2c2c2c}.dg li.save-row{line-height:25px;background:#dad5cb;border:0}.dg li.save-row select{margin-left:5px;width:108px}.dg li.save-row .button{margin-left:5px;margin-top:1px;border-radius:2px;font-size:9px;line-height:7px;padding:4px 4px 5px 4px;background:#c5bdad;color:#fff;text-shadow:0 1px 0 #b0a58f;box-shadow:0 -1px 0 #b0a58f;cursor:pointer}.dg li.save-row .button.gears{background:#c5bdad url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAsAAAANCAYAAAB/9ZQ7AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAQJJREFUeNpiYKAU/P//PwGIC/ApCABiBSAW+I8AClAcgKxQ4T9hoMAEUrxx2QSGN6+egDX+/vWT4e7N82AMYoPAx/evwWoYoSYbACX2s7KxCxzcsezDh3evFoDEBYTEEqycggWAzA9AuUSQQgeYPa9fPv6/YWm/Acx5IPb7ty/fw+QZblw67vDs8R0YHyQhgObx+yAJkBqmG5dPPDh1aPOGR/eugW0G4vlIoTIfyFcA+QekhhHJhPdQxbiAIguMBTQZrPD7108M6roWYDFQiIAAv6Aow/1bFwXgis+f2LUAynwoIaNcz8XNx3Dl7MEJUDGQpx9gtQ8YCueB+D26OECAAQDadt7e46D42QAAAABJRU5ErkJggg==) 2px 1px no-repeat;height:7px;width:8px}.dg li.save-row .button:hover{background-color:#bab19e;box-shadow:0 -1px 0 #b0a58f}.dg li.folder{border-bottom:0}.dg li.title{padding-left:16px;background:#000 url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlI+hKgFxoCgAOw==) 6px 10px no-repeat;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.2)}.dg .closed li.title{background-image:url(data:image/gif;base64,R0lGODlhBQAFAJEAAP////Pz8////////yH5BAEAAAIALAAAAAAFAAUAAAIIlGIWqMCbWAEAOw==)}.dg .cr.boolean{border-left:3px solid #806787}.dg .cr.color{border-left:3px solid}.dg .cr.function{border-left:3px solid #e61d5f}.dg .cr.number{border-left:3px solid #2FA1D6}.dg .cr.number input[type=text]{color:#2FA1D6}.dg .cr.string{border-left:3px solid #1ed36f}.dg .cr.string input[type=text]{color:#1ed36f}.dg .cr.function:hover,.dg .cr.boolean:hover{background:#111}.dg .c input[type=text]{background:#303030;outline:none}.dg .c input[type=text]:hover{background:#3c3c3c}.dg .c input[type=text]:focus{background:#494949;color:#fff}.dg .c .slider{background:#303030;cursor:ew-resize}.dg .c .slider-fg{background:#2FA1D6;max-width:100%}.dg .c .slider:hover{background:#3c3c3c}.dg .c .slider:hover .slider-fg{background:#44abda}\n");
-  aU.inject(aY);
-  var aZ = "Default";
-  var b0 = function () {
+  te.inject(re);
+  var se = "Default";
+  var ae = function () {
     try {
       return !!window.localStorage;
-    } catch (bf) {
+    } catch (e) {
       return false;
     }
   }();
-  var b1 = undefined;
-  var b2 = true;
-  var b3 = undefined;
-  var b4 = false;
-  var b5 = [];
-  var b6 = function bf(bg) {
-    var bh = this;
-    var bi = bg || {};
+  var le = undefined;
+  var de = true;
+  var ce = undefined;
+  var ue = false;
+  var _e = [];
+  var he = function e(t) {
+    var n = this;
+    var o = t || {};
     this.domElement = document.createElement("div");
     this.__ul = document.createElement("ul");
     this.domElement.appendChild(this.__ul);
-    aK.addClass(this.domElement, "dg");
+    X.addClass(this.domElement, "dg");
     this.__folders = {};
     this.__controllers = [];
     this.__rememberedObjects = [];
     this.__rememberedObjectIndecesToControllers = [];
     this.__listening = [];
-    bi = as.defaults(bi, {
+    o = S.defaults(o, {
       closeOnTop: false,
       autoPlace: true,
-      width: bf.DEFAULT_WIDTH
+      width: e.DEFAULT_WIDTH
     });
-    bi = as.defaults(bi, {
-      resizable: bi.autoPlace,
-      hideable: bi.autoPlace
+    o = S.defaults(o, {
+      resizable: o.autoPlace,
+      hideable: o.autoPlace
     });
-    if (as.isUndefined(bi.load)) {
-      bi.load = {
-        preset: aZ
+    if (S.isUndefined(o.load)) {
+      o.load = {
+        preset: se
       };
-    } else if (bi.preset) {
-      bi.load.preset = bi.preset;
+    } else if (o.preset) {
+      o.load.preset = o.preset;
     }
-    if (as.isUndefined(bi.parent) && bi.hideable) {
-      b5.push(this);
+    if (S.isUndefined(o.parent) && o.hideable) {
+      _e.push(this);
     }
-    bi.resizable = as.isUndefined(bi.parent) && bi.resizable;
-    if (bi.autoPlace && as.isUndefined(bi.scrollable)) {
-      bi.scrollable = true;
+    o.resizable = S.isUndefined(o.parent) && o.resizable;
+    if (o.autoPlace && S.isUndefined(o.scrollable)) {
+      o.scrollable = true;
     }
-    var bj = b0 && localStorage.getItem(ah(this, "isLocal")) === "true";
-    var bk = undefined;
-    var bl = undefined;
+    var i = ae && localStorage.getItem(m(this, "isLocal")) === "true";
+    var r = undefined;
+    var s = undefined;
     Object.defineProperties(this, {
       parent: {
         get: function () {
-          return bi.parent;
+          return o.parent;
         }
       },
       scrollable: {
         get: function () {
-          return bi.scrollable;
+          return o.scrollable;
         }
       },
       autoPlace: {
         get: function () {
-          return bi.autoPlace;
+          return o.autoPlace;
         }
       },
       closeOnTop: {
         get: function () {
-          return bi.closeOnTop;
+          return o.closeOnTop;
         }
       },
       preset: {
         get: function () {
-          if (bh.parent) {
-            return bh.getRoot().preset;
+          if (n.parent) {
+            return n.getRoot().preset;
           } else {
-            return bi.load.preset;
+            return o.load.preset;
           }
         },
-        set: function (bo) {
-          if (bh.parent) {
-            bh.getRoot().preset = bo;
+        set: function (e) {
+          if (n.parent) {
+            n.getRoot().preset = e;
           } else {
-            bi.load.preset = bo;
+            o.load.preset = e;
           }
-          ao(this);
-          bh.revert();
+          E(this);
+          n.revert();
         }
       },
       width: {
         get: function () {
-          return bi.width;
+          return o.width;
         },
-        set: function (bo) {
-          bi.width = bo;
-          am(bh, bo);
+        set: function (e) {
+          o.width = e;
+          w(n, e);
         }
       },
       name: {
         get: function () {
-          return bi.name;
+          return o.name;
         },
-        set: function (bo) {
-          bi.name = bo;
-          if (bl) {
-            bl.innerHTML = bi.name;
+        set: function (e) {
+          o.name = e;
+          if (s) {
+            s.innerHTML = o.name;
           }
         }
       },
       closed: {
         get: function () {
-          return bi.closed;
+          return o.closed;
         },
-        set: function (bo) {
-          bi.closed = bo;
-          if (bi.closed) {
-            aK.addClass(bh.__ul, bf.CLASS_CLOSED);
+        set: function (t) {
+          o.closed = t;
+          if (o.closed) {
+            X.addClass(n.__ul, e.CLASS_CLOSED);
           } else {
-            aK.removeClass(bh.__ul, bf.CLASS_CLOSED);
+            X.removeClass(n.__ul, e.CLASS_CLOSED);
           }
           this.onResize();
-          if (bh.__closeButton) {
-            bh.__closeButton.innerHTML = bo ? bf.TEXT_OPEN : bf.TEXT_CLOSED;
+          if (n.__closeButton) {
+            n.__closeButton.innerHTML = t ? e.TEXT_OPEN : e.TEXT_CLOSED;
           }
         }
       },
       load: {
         get: function () {
-          return bi.load;
+          return o.load;
         }
       },
       useLocalStorage: {
         get: function () {
-          return bj;
+          return i;
         },
-        set: function (bo) {
-          if (b0) {
-            bj = bo;
-            if (bo) {
-              aK.bind(window, "unload", bk);
+        set: function (e) {
+          if (ae) {
+            i = e;
+            if (e) {
+              X.bind(window, "unload", r);
             } else {
-              aK.unbind(window, "unload", bk);
+              X.unbind(window, "unload", r);
             }
-            localStorage.setItem(ah(bh, "isLocal"), bo);
+            localStorage.setItem(m(n, "isLocal"), e);
           }
         }
       }
     });
-    if (as.isUndefined(bi.parent)) {
-      this.closed = bi.closed || false;
-      aK.addClass(this.domElement, bf.CLASS_MAIN);
-      aK.makeSelectable(this.domElement, false);
-      if (b0 && bj) {
-        bh.useLocalStorage = true;
-        var bm = localStorage.getItem(ah(this, "gui"));
-        if (bm) {
-          bi.load = JSON.parse(bm);
+    if (S.isUndefined(o.parent)) {
+      this.closed = o.closed || false;
+      X.addClass(this.domElement, e.CLASS_MAIN);
+      X.makeSelectable(this.domElement, false);
+      if (ae && i) {
+        n.useLocalStorage = true;
+        var a = localStorage.getItem(m(this, "gui"));
+        if (a) {
+          o.load = JSON.parse(a);
         }
       }
       this.__closeButton = document.createElement("div");
-      this.__closeButton.innerHTML = bf.TEXT_CLOSED;
-      aK.addClass(this.__closeButton, bf.CLASS_CLOSE_BUTTON);
-      if (bi.closeOnTop) {
-        aK.addClass(this.__closeButton, bf.CLASS_CLOSE_TOP);
+      this.__closeButton.innerHTML = e.TEXT_CLOSED;
+      X.addClass(this.__closeButton, e.CLASS_CLOSE_BUTTON);
+      if (o.closeOnTop) {
+        X.addClass(this.__closeButton, e.CLASS_CLOSE_TOP);
         this.domElement.insertBefore(this.__closeButton, this.domElement.childNodes[0]);
       } else {
-        aK.addClass(this.__closeButton, bf.CLASS_CLOSE_BOTTOM);
+        X.addClass(this.__closeButton, e.CLASS_CLOSE_BOTTOM);
         this.domElement.appendChild(this.__closeButton);
       }
-      aK.bind(this.__closeButton, "click", function () {
-        bh.closed = !bh.closed;
+      X.bind(this.__closeButton, "click", function () {
+        n.closed = !n.closed;
       });
     } else {
-      if (bi.closed === undefined) {
-        bi.closed = true;
+      if (o.closed === undefined) {
+        o.closed = true;
       }
-      var bn = document.createTextNode(bi.name);
-      aK.addClass(bn, "controller-name");
-      bl = aa(bh, bn);
-      aK.addClass(this.__ul, bf.CLASS_CLOSED);
-      aK.addClass(bl, "title");
-      aK.bind(bl, "click", function (bo) {
-        bo.preventDefault();
-        bh.closed = !bh.closed;
+      var l = document.createTextNode(o.name);
+      X.addClass(l, "controller-name");
+      s = c(n, l);
+      X.addClass(this.__ul, e.CLASS_CLOSED);
+      X.addClass(s, "title");
+      X.bind(s, "click", function (e) {
+        e.preventDefault();
+        n.closed = !n.closed;
         return false;
       });
-      if (!bi.closed) {
+      if (!o.closed) {
         this.closed = false;
       }
     }
-    if (bi.autoPlace) {
-      if (as.isUndefined(bi.parent)) {
-        if (b2) {
-          b3 = document.createElement("div");
-          aK.addClass(b3, "dg");
-          aK.addClass(b3, bf.CLASS_AUTO_PLACE_CONTAINER);
-          document.body.appendChild(b3);
-          b2 = false;
+    if (o.autoPlace) {
+      if (S.isUndefined(o.parent)) {
+        if (de) {
+          ce = document.createElement("div");
+          X.addClass(ce, "dg");
+          X.addClass(ce, e.CLASS_AUTO_PLACE_CONTAINER);
+          document.body.appendChild(ce);
+          de = false;
         }
-        b3.appendChild(this.domElement);
-        aK.addClass(this.domElement, bf.CLASS_AUTO_PLACE);
+        ce.appendChild(this.domElement);
+        X.addClass(this.domElement, e.CLASS_AUTO_PLACE);
       }
       if (!this.parent) {
-        am(bh, bi.width);
+        w(n, o.width);
       }
     }
     this.__resizeHandler = function () {
-      bh.onResizeDebounced();
+      n.onResizeDebounced();
     };
-    aK.bind(window, "resize", this.__resizeHandler);
-    aK.bind(this.__ul, "webkitTransitionEnd", this.__resizeHandler);
-    aK.bind(this.__ul, "transitionend", this.__resizeHandler);
-    aK.bind(this.__ul, "oTransitionEnd", this.__resizeHandler);
+    X.bind(window, "resize", this.__resizeHandler);
+    X.bind(this.__ul, "webkitTransitionEnd", this.__resizeHandler);
+    X.bind(this.__ul, "transitionend", this.__resizeHandler);
+    X.bind(this.__ul, "oTransitionEnd", this.__resizeHandler);
     this.onResize();
-    if (bi.resizable) {
-      al(this);
+    if (o.resizable) {
+      y(this);
     }
-    bk = function () {
-      if (b0 && localStorage.getItem(ah(bh, "isLocal")) === "true") {
-        localStorage.setItem(ah(bh, "gui"), JSON.stringify(bh.getSaveObject()));
+    r = function () {
+      if (ae && localStorage.getItem(m(n, "isLocal")) === "true") {
+        localStorage.setItem(m(n, "gui"), JSON.stringify(n.getSaveObject()));
       }
     };
-    this.saveToLocalStorageIfPossible = bk;
-    if (!bi.parent) {
+    this.saveToLocalStorageIfPossible = r;
+    if (!o.parent) {
       (function () {
-        var bo = bh.getRoot();
-        bo.width += 1;
-        as.defer(function () {
-          bo.width -= 1;
+        var e = n.getRoot();
+        e.width += 1;
+        S.defer(function () {
+          e.width -= 1;
         });
       })();
     }
   };
-  b6.toggleHide = function () {
-    b4 = !b4;
-    as.each(b5, function (bg) {
-      bg.domElement.style.display = b4 ? "none" : "";
+  he.toggleHide = function () {
+    ue = !ue;
+    S.each(_e, function (e) {
+      e.domElement.style.display = ue ? "none" : "";
     });
   };
-  b6.CLASS_AUTO_PLACE = "a";
-  b6.CLASS_AUTO_PLACE_CONTAINER = "ac";
-  b6.CLASS_MAIN = "main";
-  b6.CLASS_CONTROLLER_ROW = "cr";
-  b6.CLASS_TOO_TALL = "taller-than-window";
-  b6.CLASS_CLOSED = "closed";
-  b6.CLASS_CLOSE_BUTTON = "close-button";
-  b6.CLASS_CLOSE_TOP = "close-top";
-  b6.CLASS_CLOSE_BOTTOM = "close-bottom";
-  b6.CLASS_DRAG = "drag";
-  b6.DEFAULT_WIDTH = 245;
-  b6.TEXT_CLOSED = "Close Controls";
-  b6.TEXT_OPEN = "Open Controls";
-  b6._keydownHandler = function (bg) {
-    if (document.activeElement.type !== "text" && (bg.which === 72 || bg.keyCode === 72)) {
-      b6.toggleHide();
+  he.CLASS_AUTO_PLACE = "a";
+  he.CLASS_AUTO_PLACE_CONTAINER = "ac";
+  he.CLASS_MAIN = "main";
+  he.CLASS_CONTROLLER_ROW = "cr";
+  he.CLASS_TOO_TALL = "taller-than-window";
+  he.CLASS_CLOSED = "closed";
+  he.CLASS_CLOSE_BUTTON = "close-button";
+  he.CLASS_CLOSE_TOP = "close-top";
+  he.CLASS_CLOSE_BOTTOM = "close-bottom";
+  he.CLASS_DRAG = "drag";
+  he.DEFAULT_WIDTH = 245;
+  he.TEXT_CLOSED = "Close Controls";
+  he.TEXT_OPEN = "Open Controls";
+  he._keydownHandler = function (e) {
+    if (document.activeElement.type !== "text" && (e.which === 72 || e.keyCode === 72)) {
+      he.toggleHide();
     }
   };
-  aK.bind(window, "keydown", b6._keydownHandler, false);
-  as.extend(b6.prototype, {
-    add: function (bg, bh) {
-      return ag(this, bg, bh, {
+  X.bind(window, "keydown", he._keydownHandler, false);
+  S.extend(he.prototype, {
+    add: function (e, t) {
+      return f(this, e, t, {
         factoryArgs: Array.prototype.slice.call(arguments, 2)
       });
     },
-    addColor: function (bg, bh) {
-      return ag(this, bg, bh, {
+    addColor: function (e, t) {
+      return f(this, e, t, {
         color: true
       });
     },
-    remove: function (bg) {
-      this.__ul.removeChild(bg.__li);
-      this.__controllers.splice(this.__controllers.indexOf(bg), 1);
-      var bh = this;
-      as.defer(function () {
-        bh.onResize();
+    remove: function (e) {
+      this.__ul.removeChild(e.__li);
+      this.__controllers.splice(this.__controllers.indexOf(e), 1);
+      var t = this;
+      S.defer(function () {
+        t.onResize();
       });
     },
     destroy: function () {
@@ -51511,47 +51524,47 @@ aÀÅÁa();
         throw new Error("Only the root GUI should be removed with .destroy(). For subfolders, use gui.removeFolder(folder) instead.");
       }
       if (this.autoPlace) {
-        b3.removeChild(this.domElement);
+        ce.removeChild(this.domElement);
       }
-      var bg = this;
-      as.each(this.__folders, function (bh) {
-        bg.removeFolder(bh);
+      var e = this;
+      S.each(this.__folders, function (t) {
+        e.removeFolder(t);
       });
-      aK.unbind(window, "keydown", b6._keydownHandler, false);
-      ab(this);
+      X.unbind(window, "keydown", he._keydownHandler, false);
+      u(this);
     },
-    addFolder: function (bg) {
-      if (this.__folders[bg] !== undefined) {
-        throw new Error("You already have a folder in this GUI by the name \"" + bg + "\"");
+    addFolder: function (e) {
+      if (this.__folders[e] !== undefined) {
+        throw new Error("You already have a folder in this GUI by the name \"" + e + "\"");
       }
-      var bh = {
-        name: bg,
+      var t = {
+        name: e,
         parent: this
       };
-      bh.autoPlace = this.autoPlace;
-      if (this.load && this.load.folders && this.load.folders[bg]) {
-        bh.closed = this.load.folders[bg].closed;
-        bh.load = this.load.folders[bg];
+      t.autoPlace = this.autoPlace;
+      if (this.load && this.load.folders && this.load.folders[e]) {
+        t.closed = this.load.folders[e].closed;
+        t.load = this.load.folders[e];
       }
-      var bi = new b6(bh);
-      this.__folders[bg] = bi;
-      var bj = aa(this, bi.domElement);
-      aK.addClass(bj, "folder");
-      return bi;
+      var n = new he(t);
+      this.__folders[e] = n;
+      var o = c(this, n.domElement);
+      X.addClass(o, "folder");
+      return n;
     },
-    removeFolder: function (bg) {
-      this.__ul.removeChild(bg.domElement.parentElement);
-      delete this.__folders[bg.name];
-      if (this.load && this.load.folders && this.load.folders[bg.name]) {
-        delete this.load.folders[bg.name];
+    removeFolder: function (e) {
+      this.__ul.removeChild(e.domElement.parentElement);
+      delete this.__folders[e.name];
+      if (this.load && this.load.folders && this.load.folders[e.name]) {
+        delete this.load.folders[e.name];
       }
-      ab(bg);
-      var bh = this;
-      as.each(bg.__folders, function (bi) {
-        bg.removeFolder(bi);
+      u(e);
+      var t = this;
+      S.each(e.__folders, function (t) {
+        e.removeFolder(t);
       });
-      as.defer(function () {
-        bh.onResize();
+      S.defer(function () {
+        t.onResize();
       });
     },
     open: function () {
@@ -51567,162 +51580,162 @@ aÀÅÁa();
       this.domElement.style.display = "";
     },
     onResize: function () {
-      var bg = this.getRoot();
-      if (bg.scrollable) {
-        var bh = aK.getOffset(bg.__ul).top;
-        var bi = 0;
-        as.each(bg.__ul.childNodes, function (bj) {
-          if (!bg.autoPlace || bj !== bg.__save_row) {
-            bi += aK.getHeight(bj);
+      var e = this.getRoot();
+      if (e.scrollable) {
+        var t = X.getOffset(e.__ul).top;
+        var n = 0;
+        S.each(e.__ul.childNodes, function (t) {
+          if (!e.autoPlace || t !== e.__save_row) {
+            n += X.getHeight(t);
           }
         });
-        if (window.innerHeight - bh - 20 < bi) {
-          aK.addClass(bg.domElement, b6.CLASS_TOO_TALL);
-          bg.__ul.style.height = window.innerHeight - bh - 20 + "px";
+        if (window.innerHeight - t - 20 < n) {
+          X.addClass(e.domElement, he.CLASS_TOO_TALL);
+          e.__ul.style.height = window.innerHeight - t - 20 + "px";
         } else {
-          aK.removeClass(bg.domElement, b6.CLASS_TOO_TALL);
-          bg.__ul.style.height = "auto";
+          X.removeClass(e.domElement, he.CLASS_TOO_TALL);
+          e.__ul.style.height = "auto";
         }
       }
-      if (bg.__resize_handle) {
-        as.defer(function () {
-          bg.__resize_handle.style.height = bg.__ul.offsetHeight + "px";
+      if (e.__resize_handle) {
+        S.defer(function () {
+          e.__resize_handle.style.height = e.__ul.offsetHeight + "px";
         });
       }
-      if (bg.__closeButton) {
-        bg.__closeButton.style.width = bg.width + "px";
+      if (e.__closeButton) {
+        e.__closeButton.style.width = e.width + "px";
       }
     },
-    onResizeDebounced: as.debounce(function () {
+    onResizeDebounced: S.debounce(function () {
       this.onResize();
     }, 50),
     remember: function () {
-      if (as.isUndefined(b1)) {
-        (b1 = new aX()).domElement.innerHTML = "<div id=\"dg-save\" class=\"dg dialogue\">\n\n  Here's the new load parameter for your <code>GUI</code>'s constructor:\n\n  <textarea id=\"dg-new-constructor\"></textarea>\n\n  <div id=\"dg-save-locally\">\n\n    <input id=\"dg-local-storage\" type=\"checkbox\"/> Automatically save\n    values to <code>localStorage</code> on exit.\n\n    <div id=\"dg-local-explain\">The values saved to <code>localStorage</code> will\n      override those passed to <code>dat.GUI</code>'s constructor. This makes it\n      easier to work incrementally, but <code>localStorage</code> is fragile,\n      and your friends may not see the same values you do.\n\n    </div>\n\n  </div>\n\n</div>";
+      if (S.isUndefined(le)) {
+        (le = new ie()).domElement.innerHTML = "<div id=\"dg-save\" class=\"dg dialogue\">\n\n  Here's the new load parameter for your <code>GUI</code>'s constructor:\n\n  <textarea id=\"dg-new-constructor\"></textarea>\n\n  <div id=\"dg-save-locally\">\n\n    <input id=\"dg-local-storage\" type=\"checkbox\"/> Automatically save\n    values to <code>localStorage</code> on exit.\n\n    <div id=\"dg-local-explain\">The values saved to <code>localStorage</code> will\n      override those passed to <code>dat.GUI</code>'s constructor. This makes it\n      easier to work incrementally, but <code>localStorage</code> is fragile,\n      and your friends may not see the same values you do.\n\n    </div>\n\n  </div>\n\n</div>";
       }
       if (this.parent) {
         throw new Error("You can only call remember on a top level GUI.");
       }
-      var bg = this;
-      as.each(Array.prototype.slice.call(arguments), function (bh) {
-        if (bg.__rememberedObjects.length === 0) {
-          ak(bg);
+      var e = this;
+      S.each(Array.prototype.slice.call(arguments), function (t) {
+        if (e.__rememberedObjects.length === 0) {
+          v(e);
         }
-        if (bg.__rememberedObjects.indexOf(bh) === -1) {
-          bg.__rememberedObjects.push(bh);
+        if (e.__rememberedObjects.indexOf(t) === -1) {
+          e.__rememberedObjects.push(t);
         }
       });
       if (this.autoPlace) {
-        am(this, this.width);
+        w(this, this.width);
       }
     },
     getRoot: function () {
-      for (var bg = this; bg.parent;) {
-        bg = bg.parent;
+      for (var e = this; e.parent;) {
+        e = e.parent;
       }
-      return bg;
+      return e;
     },
     getSaveObject: function () {
-      var bg = this.load;
-      bg.closed = this.closed;
+      var e = this.load;
+      e.closed = this.closed;
       if (this.__rememberedObjects.length > 0) {
-        bg.preset = this.preset;
-        bg.remembered ||= {};
-        bg.remembered[this.preset] = an(this);
+        e.preset = this.preset;
+        e.remembered ||= {};
+        e.remembered[this.preset] = x(this);
       }
-      bg.folders = {};
-      as.each(this.__folders, function (bh, bi) {
-        bg.folders[bi] = bh.getSaveObject();
+      e.folders = {};
+      S.each(this.__folders, function (t, n) {
+        e.folders[n] = t.getSaveObject();
       });
-      return bg;
+      return e;
     },
     save: function () {
       this.load.remembered ||= {};
-      this.load.remembered[this.preset] = an(this);
-      ac(this, false);
+      this.load.remembered[this.preset] = x(this);
+      _(this, false);
       this.saveToLocalStorageIfPossible();
     },
-    saveAs: function (bg) {
+    saveAs: function (e) {
       if (!this.load.remembered) {
         this.load.remembered = {};
-        this.load.remembered[aZ] = an(this, true);
+        this.load.remembered[se] = x(this, true);
       }
-      this.load.remembered[bg] = an(this);
-      this.preset = bg;
-      ai(this, bg, true);
+      this.load.remembered[e] = x(this);
+      this.preset = e;
+      g(this, e, true);
       this.saveToLocalStorageIfPossible();
     },
-    revert: function (bg) {
-      as.each(this.__controllers, function (bh) {
+    revert: function (e) {
+      S.each(this.__controllers, function (t) {
         if (this.getRoot().load.remembered) {
-          af(bg || this.getRoot(), bh);
+          p(e || this.getRoot(), t);
         } else {
-          bh.setValue(bh.initialValue);
+          t.setValue(t.initialValue);
         }
-        if (bh.__onFinishChange) {
-          bh.__onFinishChange.call(bh, bh.getValue());
+        if (t.__onFinishChange) {
+          t.__onFinishChange.call(t, t.getValue());
         }
       }, this);
-      as.each(this.__folders, function (bh) {
-        bh.revert(bh);
+      S.each(this.__folders, function (e) {
+        e.revert(e);
       });
-      if (!bg) {
-        ac(this.getRoot(), false);
+      if (!e) {
+        _(this.getRoot(), false);
       }
     },
-    listen: function (bg) {
-      var bh = this.__listening.length === 0;
-      this.__listening.push(bg);
-      if (bh) {
-        ap(this.__listening);
+    listen: function (e) {
+      var t = this.__listening.length === 0;
+      this.__listening.push(e);
+      if (t) {
+        C(this.__listening);
       }
     },
     updateDisplay: function () {
-      as.each(this.__controllers, function (bg) {
-        bg.updateDisplay();
+      S.each(this.__controllers, function (e) {
+        e.updateDisplay();
       });
-      as.each(this.__folders, function (bg) {
-        bg.updateDisplay();
+      S.each(this.__folders, function (e) {
+        e.updateDisplay();
       });
     }
   });
-  var b7 = {
-    Color: aF,
-    math: ay,
-    interpret: aw
+  var pe = {
+    Color: I,
+    math: N,
+    interpret: R
   };
-  var b8 = {
-    Controller: aG,
-    BooleanController: aL,
-    OptionController: aM,
-    StringController: aN,
-    NumberController: aO,
-    NumberControllerBox: aP,
-    NumberControllerSlider: aQ,
-    FunctionController: aR,
-    ColorController: aS
+  var fe = {
+    Controller: z,
+    BooleanController: K,
+    OptionController: Y,
+    StringController: J,
+    NumberController: W,
+    NumberControllerBox: Q,
+    NumberControllerSlider: q,
+    FunctionController: Z,
+    ColorController: $
   };
-  var b9 = {
-    dom: aK
+  var me = {
+    dom: X
   };
-  var ba = {
-    GUI: b6
+  var ge = {
+    GUI: he
   };
-  var bb = b6;
-  var bc = {
-    color: b7,
-    controllers: b8,
-    dom: b9,
-    gui: ba,
-    GUI: bb
+  var be = he;
+  var ve = {
+    color: pe,
+    controllers: fe,
+    dom: me,
+    gui: ge,
+    GUI: be
   };
-  a0.color = b7;
-  a0.controllers = b8;
-  a0.dom = b9;
-  a0.gui = ba;
-  a0.GUI = bb;
-  a0.default = bc;
-  Object.defineProperty(a0, "__esModule", {
+  e.color = pe;
+  e.controllers = fe;
+  e.dom = me;
+  e.gui = ge;
+  e.GUI = be;
+  e.default = ve;
+  Object.defineProperty(e, "__esModule", {
     value: true
   });
 });
